@@ -48,6 +48,36 @@ public sealed class TimelineProjectPersistenceTests
     }
 
     [Xunit.Fact]
+    public void TimelineStateRoundTripPreservesKineticCaptionWords()
+    {
+        var mediaId = MediaId.Parse(new string('d', 64));
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(new MediaSourceMetadata(
+            mediaId,
+            new Uri(Path.GetFullPath("caption.mp4")),
+            MediaKind.Video,
+            16,
+            9,
+            new RationalFrameRate(30, 1),
+            30,
+            TimeSpan.FromSeconds(1)));
+        editor.ImportTranscript(new TranscriptResult(
+            new Uri("file:///spoken.wav"),
+            "sha256:spoken",
+            [
+                new TranscriptWord("one", TimeSpan.Zero, TimeSpan.FromMilliseconds(250)),
+                new TranscriptWord("two", TimeSpan.FromMilliseconds(300), TimeSpan.FromMilliseconds(600))
+            ]));
+        editor.KineticCaptions = true;
+
+        var restored = new TimelineEditorViewModel();
+        restored.RestoreProjectState(TimelineProjectStateJson.Deserialize(TimelineProjectStateJson.Serialize(editor.CaptureProjectState())));
+
+        Xunit.Assert.True(restored.KineticCaptions);
+        Xunit.Assert.Equal(["one", "two"], restored.Captions.Single().Words.Select(word => word.Text));
+    }
+
+    [Xunit.Fact]
     public async Task DesktopProjectSaveAndOpenReimportsRelativeMediaAndRestoresTimeline()
     {
         var directory = Path.Combine(Path.GetTempPath(), $"frame-theory-project-{Guid.NewGuid():N}");

@@ -28,6 +28,8 @@ public sealed class TimelineProjectState
 
     public List<TimelineCaptionProjectState> Captions { get; set; } = [];
 
+    public bool KineticCaptions { get; set; }
+
     public TimelineRevealStyle? BeforeAfterStyle { get; set; }
 
     public TimelineWatermarkProjectState? Watermark { get; set; }
@@ -178,6 +180,17 @@ public sealed class TimelineCaptionProjectState
     public string Text { get; set; } = string.Empty;
 
     public CaptionProvenance Provenance { get; set; }
+
+    public List<TimelineCaptionWordProjectState> Words { get; set; } = [];
+}
+
+public sealed class TimelineCaptionWordProjectState
+{
+    public long StartTicks { get; set; }
+
+    public long EndTicks { get; set; }
+
+    public string Text { get; set; } = string.Empty;
 }
 
 public sealed class TimelineWatermarkProjectState
@@ -235,7 +248,7 @@ public static class TimelineProjectStateJson
             state.VideoSettings.Any(settings => settings is null || settings.Clip is null) ||
             state.AudioSettings.Any(settings => settings is null || settings.Clip is null) ||
             state.ColorGrades.Any(grade => grade is null) || state.Titles.Any(title => title is null) ||
-            state.Captions.Any(caption => caption is null))
+            state.Captions.Any(caption => caption is null || caption.Words is null || caption.Words.Any(word => word is null)))
         {
             throw new InvalidDataException("The timeline state contains null collections or entries.");
         }

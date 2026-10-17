@@ -156,6 +156,22 @@ public sealed class TimelineFilterGraphBuilder
             for (var index = 0; index < plan.Captions.Count; index++)
             {
                 var caption = plan.Captions[index];
+                if (plan.CaptionStyle.KineticWords && caption.Words.Count > 0)
+                {
+                    for (var wordIndex = 0; wordIndex < caption.Words.Count; wordIndex++)
+                    {
+                        var word = caption.Words[wordIndex];
+                        var nextWord = $"caption{index}word{wordIndex}";
+                        var wordStart = word.Start.TotalSeconds.ToString("0.######", CultureInfo.InvariantCulture);
+                        var wordEnd = word.End.TotalSeconds.ToString("0.######", CultureInfo.InvariantCulture);
+                        var wordText = EscapeDrawText(WrapCaptionText(word.Text, plan.CaptionStyle.MaximumCharactersPerLine));
+                        filters.Add($"[{currentBase}]drawtext=fontfile='{EscapeDrawText(captionFontPath)}':text='{wordText}':fontsize={plan.CaptionStyle.FontSize}:fontcolor=0x{plan.CaptionStyle.ColorRgb:X6}:x=(w-text_w)/2:y=h-text_h-{plan.CaptionStyle.MarginBottom}:enable='between(t,{wordStart},{wordEnd})'[{nextWord}]");
+                        currentBase = nextWord;
+                    }
+
+                    continue;
+                }
+
                 var nextBase = $"caption{index}";
                 var end = caption.End.TotalSeconds.ToString("0.######", CultureInfo.InvariantCulture);
                 var start = caption.Start.TotalSeconds.ToString("0.######", CultureInfo.InvariantCulture);

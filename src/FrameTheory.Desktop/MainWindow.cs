@@ -828,6 +828,12 @@ public sealed class MainWindow : Window
                 await viewModel.ExportCaptionsAsync(path, CancellationToken.None);
             }
         };
+        var kineticCaptions = new CheckBox { Content = "Kinetic word captions" };
+        AutomationProperties.SetName(kineticCaptions, "Kinetic word captions");
+        kineticCaptions.Bind(ToggleButton.IsCheckedProperty, new Binding(nameof(TimelineEditorViewModel.KineticCaptions))
+        {
+            Mode = BindingMode.TwoWay
+        });
         var captionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         captionStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CaptionStatusText)));
         var transcriptionConsent = new CheckBox { Content = "I approve uploading this exact local audio file or extracted video audio track to Gemini" };
@@ -1002,6 +1008,7 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { titleText, addTitle, fadeTitle, pushTitle } },
                     titleAnimationStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { importCaptions, exportCaptions } },
+                    kineticCaptions,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { transcribeAudio, transcriptionConsent } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { captionFont } },
                     captionStatus,

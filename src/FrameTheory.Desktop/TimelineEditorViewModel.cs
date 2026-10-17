@@ -66,6 +66,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private MediaId? _beatMarkerMediaId;
     private IReadOnlyList<float> _beatMarkerWaveform = [];
     private BeatDetectionMode _beatDetectionMode;
+    private bool _kineticCaptions;
     private readonly Stack<TimelineEditorState> _aiUndo = [];
     private TimelineWatermark? _watermark;
 
@@ -158,6 +159,21 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     public string BeatMarkersText => _beatMarkers.Count == 0
         ? "No beat markers detected. Import audio or video with audio."
         : $"Beat markers: {string.Join(", ", _beatMarkers)} frames";
+
+    public bool KineticCaptions
+    {
+        get => _kineticCaptions;
+        set
+        {
+            if (value == _kineticCaptions)
+            {
+                return;
+            }
+
+            _kineticCaptions = value;
+            OnPropertyChanged();
+        }
+    }
 
     public TimelineWatermark? Watermark => _watermark;
 
@@ -291,7 +307,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             audioLayers,
             _titles,
             _captions,
-            _captionFontPath is null ? null : new TimelineCaptionStyle(_captionFontPath),
+            _captionFontPath is null ? null : new TimelineCaptionStyle(_captionFontPath, kineticWords: KineticCaptions),
             _colorGrades,
             _beforeAfterStyle,
             TotalFrames / 2,
@@ -342,8 +358,15 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             StartTicks = caption.Start.Ticks,
             EndTicks = caption.End.Ticks,
             Text = caption.Text,
-            Provenance = caption.Provenance
+            Provenance = caption.Provenance,
+            Words = caption.Words.Select(word => new TimelineCaptionWordProjectState
+            {
+                StartTicks = word.Start.Ticks,
+                EndTicks = word.End.Ticks,
+                Text = word.Text
+            }).ToList()
         }).ToList(),
+        KineticCaptions = KineticCaptions,
         BeforeAfterStyle = _beforeAfterStyle,
         Watermark = _watermark is null ? null : new TimelineWatermarkProjectState
         {
@@ -415,7 +438,11 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             TimeSpan.FromTicks(caption.StartTicks),
             TimeSpan.FromTicks(caption.EndTicks),
             caption.Text,
-            caption.Provenance)).ToArray();
+            caption.Provenance,
+            caption.Words.Select(word => new TimedCaptionWord(
+                word.Text,
+                TimeSpan.FromTicks(word.StartTicks),
+                TimeSpan.FromTicks(word.EndTicks))))).ToArray();
         var watermark = state.Watermark is null
             ? null
             : new TimelineWatermark(state.Watermark.SourcePath, state.Watermark.Opacity, state.Watermark.Margin);
@@ -520,6 +547,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _titles.Clear();
         _titles.AddRange(titles);
         _captions = captions;
+        _kineticCaptions = state.KineticCaptions;
         _beforeAfterStyle = state.BeforeAfterStyle;
         _watermark = watermark;
         _transcriptSourceFingerprint = state.TranscriptSourceFingerprint;
@@ -545,6 +573,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(WatermarkStatusText));
         OnPropertyChanged(nameof(Captions));
         OnPropertyChanged(nameof(TranscriptSourceFingerprint));
+        OnPropertyChanged(nameof(KineticCaptions));
     }
 
     public void ApplyBeforeAfterStyle(TimelineRevealStyle style)
@@ -851,6 +880,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     {
         _captions = SrtCaptionFile.Import(content);
         _transcriptSourceFingerprint = null;
+        KineticCaptions = false;
         OnPropertyChanged(nameof(Captions));
         OnPropertyChanged(nameof(TranscriptSourceFingerprint));
     }
@@ -865,7 +895,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
                 words[0].Start,
                 words[^1].End,
                 string.Join(' ', words.Select(word => word.Text)),
-                CaptionProvenance.VerifiedTranscript))
+                CaptionProvenance.VerifiedTranscript,
+                words.Select(word => new TimedCaptionWord(word.Text, word.Start, word.End))))
             .ToArray();
         _transcriptSourceFingerprint = transcript.SourceFingerprint;
         OnPropertyChanged(nameof(Captions));

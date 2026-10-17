@@ -88,10 +88,24 @@ var titles = args.Length == 4
     }
     : Array.Empty<TimelineTitle>();
 var captions = args.Length == 4
-    ? new[] { new TimedCaption(1, TimeSpan.FromSeconds(0.2), TimeSpan.FromSeconds(0.8), "caption smoke test words") }
+    ? new[]
+    {
+        new TimedCaption(
+            1,
+            TimeSpan.FromSeconds(0.2),
+            TimeSpan.FromSeconds(0.8),
+            "caption smoke test words",
+            CaptionProvenance.VerifiedTranscript,
+            [
+                new TimedCaptionWord("caption", TimeSpan.FromSeconds(0.2), TimeSpan.FromSeconds(0.35)),
+                new TimedCaptionWord("smoke", TimeSpan.FromSeconds(0.4), TimeSpan.FromSeconds(0.55)),
+                new TimedCaptionWord("test", TimeSpan.FromSeconds(0.6), TimeSpan.FromSeconds(0.7)),
+                new TimedCaptionWord("words", TimeSpan.FromSeconds(0.7), TimeSpan.FromSeconds(0.8))
+            ])
+    }
     : Array.Empty<TimedCaption>();
 var captionStyle = args.Length == 4
-    ? new TimelineCaptionStyle(Path.GetFullPath(args[3]), maximumCharactersPerLine: 12)
+    ? new TimelineCaptionStyle(Path.GetFullPath(args[3]), maximumCharactersPerLine: 12, kineticWords: true)
     : null;
 var plan = new TimelineVideoRenderPlan(
     frameRate,

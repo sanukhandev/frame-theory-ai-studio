@@ -11,9 +11,36 @@ public enum CaptionProvenance
     AuthoredCaption
 }
 
+public sealed record TimedCaptionWord
+{
+    public TimedCaptionWord(string text, TimeSpan start, TimeSpan end)
+    {
+        if (string.IsNullOrWhiteSpace(text) || start < TimeSpan.Zero || end <= start)
+        {
+            throw new ArgumentException("Caption words require non-empty text and positive timing.", nameof(text));
+        }
+
+        Text = text.Trim();
+        Start = start;
+        End = end;
+    }
+
+    public string Text { get; }
+
+    public TimeSpan Start { get; }
+
+    public TimeSpan End { get; }
+}
+
 public sealed record TimedCaption
 {
-    public TimedCaption(int sequence, TimeSpan start, TimeSpan end, string text, CaptionProvenance provenance = CaptionProvenance.ImportedSubtitle)
+    public TimedCaption(
+        int sequence,
+        TimeSpan start,
+        TimeSpan end,
+        string text,
+        CaptionProvenance provenance = CaptionProvenance.ImportedSubtitle,
+        IEnumerable<TimedCaptionWord>? words = null)
     {
         if (sequence <= 0 || start < TimeSpan.Zero || end <= start)
         {
@@ -30,6 +57,14 @@ public sealed record TimedCaption
         End = end;
         Text = text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
         Provenance = provenance;
+        Words = (words ?? [])
+            .OrderBy(word => word.Start)
+            .ToArray();
+        if (Words.Any(word => word.Start < start || word.End > end) ||
+            Words.Zip(Words.Skip(1), (previous, current) => previous.End <= current.Start).Any(isValid => !isValid))
+        {
+            throw new ArgumentException("Caption word timings must fit within the caption and must not overlap.", nameof(words));
+        }
     }
 
     public int Sequence { get; }
@@ -41,6 +76,8 @@ public sealed record TimedCaption
     public string Text { get; }
 
     public CaptionProvenance Provenance { get; }
+
+    public IReadOnlyList<TimedCaptionWord> Words { get; }
 }
 
 public static partial class SrtCaptionFile

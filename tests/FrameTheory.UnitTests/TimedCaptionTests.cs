@@ -27,4 +27,28 @@ public sealed class TimedCaptionTests
         Xunit.Assert.Throws<InvalidDataException>(() => SrtCaptionFile.Import("1\n00:00:00,000 --> 00:00:01,000\nOne\n\n2\n00:00:00,500 --> 00:00:02,000\nTwo"));
         Xunit.Assert.Throws<InvalidDataException>(() => SrtCaptionFile.Import(string.Concat(Enumerable.Repeat("x", 10 * 1024 * 1024 + 1))));
     }
+
+    [Xunit.Fact]
+    public void TimedCaptionRetainsBoundedWordTimingsAndRejectsOverlaps()
+    {
+        var words = new[]
+        {
+            new TimedCaptionWord("one", TimeSpan.Zero, TimeSpan.FromMilliseconds(400)),
+            new TimedCaptionWord("two", TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(1))
+        };
+
+        var caption = new TimedCaption(1, TimeSpan.Zero, TimeSpan.FromSeconds(1), "one two", CaptionProvenance.VerifiedTranscript, words);
+
+        Xunit.Assert.Equal(words, caption.Words);
+        Xunit.Assert.Throws<ArgumentException>(() => new TimedCaption(
+            1,
+            TimeSpan.Zero,
+            TimeSpan.FromSeconds(1),
+            "one two",
+            CaptionProvenance.VerifiedTranscript,
+            [
+                new TimedCaptionWord("one", TimeSpan.Zero, TimeSpan.FromMilliseconds(600)),
+                new TimedCaptionWord("two", TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(1))
+            ]));
+    }
 }

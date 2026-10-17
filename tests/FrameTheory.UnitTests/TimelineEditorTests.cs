@@ -165,6 +165,7 @@ public sealed class TimelineEditorTests
 
         Xunit.Assert.Equal(2, editor.Captions.Count);
         Xunit.Assert.Equal("word-0 word-1 word-2 word-3 word-4 word-5 word-6", editor.Captions[0].Text);
+        Xunit.Assert.Equal(7, editor.Captions[0].Words.Count);
         Xunit.Assert.Equal(CaptionProvenance.VerifiedTranscript, editor.Captions[0].Provenance);
         Xunit.Assert.Equal("sha256:spoken", editor.TranscriptSourceFingerprint);
     }
@@ -197,6 +198,26 @@ public sealed class TimelineEditorTests
         var plan = editor.BuildRenderPlan(1920, 1080, new Dictionary<MediaId, Uri> { [metadata.Id] = source });
         Xunit.Assert.Single(plan.Captions);
         Xunit.Assert.NotNull(plan.CaptionStyle);
+    }
+
+    [Xunit.Fact]
+    public void TimelineEditorCarriesKineticCaptionSettingIntoRenderPlan()
+    {
+        var source = new Uri("file:///kinetic-caption.mp4");
+        var metadata = Metadata(source, "kinetic-caption", 90, hasAudio: false);
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(metadata);
+        editor.ImportTranscript(new TranscriptResult(
+            new Uri("file:///spoken.wav"),
+            "sha256:spoken",
+            [new TranscriptWord("word", TimeSpan.Zero, TimeSpan.FromMilliseconds(250))]));
+        editor.SetCaptionFontPath("C:\\Fonts\\licensed.ttf");
+        editor.KineticCaptions = true;
+
+        var plan = editor.BuildRenderPlan(1920, 1080, new Dictionary<MediaId, Uri> { [metadata.Id] = source });
+
+        Xunit.Assert.True(plan.CaptionStyle!.KineticWords);
+        Xunit.Assert.Single(plan.Captions.Single().Words);
     }
 
     [Xunit.Fact]

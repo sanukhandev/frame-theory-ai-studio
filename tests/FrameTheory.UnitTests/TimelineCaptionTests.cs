@@ -57,4 +57,49 @@ public sealed class TimelineCaptionTests
 
         Xunit.Assert.Throws<MediaExportException>(() => new TimelineFilterGraphBuilder().Build(plan));
     }
+
+    [Xunit.Fact]
+    public void KineticCaptionGraphUsesSourceWordTimings()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-kinetic-caption-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            var fontPath = Path.Combine(directory.FullName, "caption.ttf");
+            File.WriteAllText(sourcePath, "source");
+            File.WriteAllText(fontPath, "font");
+            var mediaId = MediaId.Create(new Uri(sourcePath), "kinetic-caption-test");
+            var clip = TimelineClip.Video(mediaId, 0, 90, 0, 90, new RationalFrameRate(30, 1));
+            var caption = new TimedCaption(
+                1,
+                TimeSpan.Zero,
+                TimeSpan.FromSeconds(1),
+                "one two",
+                CaptionProvenance.VerifiedTranscript,
+                [
+                    new TimedCaptionWord("one", TimeSpan.Zero, TimeSpan.FromMilliseconds(300)),
+                    new TimedCaptionWord("two", TimeSpan.FromMilliseconds(400), TimeSpan.FromMilliseconds(700))
+                ]);
+            var plan = new TimelineVideoRenderPlan(
+                new RationalFrameRate(30, 1),
+                16,
+                8,
+                90,
+                new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
+                [new TimelineVideoLayer("video", 0, [new TimelineVideoSegment(clip)])],
+                captions: [caption],
+                captionStyle: new TimelineCaptionStyle(fontPath, kineticWords: true));
+
+            var graph = new TimelineFilterGraphBuilder().Build(plan);
+
+            Xunit.Assert.Contains("text='one'", graph.FilterComplex);
+            Xunit.Assert.Contains("text='two'", graph.FilterComplex);
+            Xunit.Assert.Contains("enable='between(t,0,0.3)'", graph.FilterComplex);
+            Xunit.Assert.Contains("enable='between(t,0.4,0.7)'", graph.FilterComplex);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
 }
