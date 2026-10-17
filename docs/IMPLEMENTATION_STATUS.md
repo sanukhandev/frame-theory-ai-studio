@@ -46,7 +46,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-306 / E03
-Git SHA: pending commit
+Git SHA: db20faf
 Files changed: src/FrameTheory.Media/MediaExport.cs, src/FrameTheory.Photo/PhotoExport.cs, tests/FrameTheory.UnitTests/MediaExportTests.cs, tests/FrameTheory.UnitTests/PhotoExportTests.cs, tools/FrameTheory.MediaExportSmoke/Program.cs, tools/FrameTheory.PhotoExportSmoke/Program.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: Video export applies `setparams` and verifies `bt709/bt709/bt709/tv` with ffprobe. Photo export applies explicit sRGB transfer/Rec.709 primaries/range parameters, preserves RGBA PNG pixels, maps source metadata and rejects outputs without a detected profile. JPEG uses FFmpeg’s standard JFIF/BT.470BG stream tag while the input grade remains sRGB-converted.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
