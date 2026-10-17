@@ -186,6 +186,36 @@ public sealed class TranscriptionTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task GeminiProviderRejectsReparsePointSource()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-transcript-link-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "spoken.wav");
+            var linkPath = Path.Combine(directory.FullName, "linked.wav");
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+            try
+            {
+                File.CreateSymbolicLink(linkPath, sourcePath);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or PlatformNotSupportedException)
+            {
+                return;
+            }
+
+            using var client = new HttpClient();
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => new GeminiTranscriptionProvider(
+                client,
+                new GeminiTranscriptionOptions("test-secret", uploadConsent: true))
+                .TranscribeAsync(new Uri(linkPath), CancellationToken.None));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private sealed class InlineProgress(Action<TranscriptionProgress> callback) : IProgress<TranscriptionProgress>
     {
         public void Report(TranscriptionProgress value) => callback(value);
