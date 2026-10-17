@@ -20,6 +20,9 @@
 ## Required SBOM process
 Lock application packages; track exact native codec builds; record upstream URLs and versions; create SBOM for each release; scan CVEs/license notices; verify third-party attribution and model weights independently.
 
+## Implemented dependency baseline
+FT-002 uses `Avalonia`, `Avalonia.Desktop` and `Avalonia.Themes.Fluent` version `12.1.2` from NuGet. The package metadata identifies Avalonia as MIT-licensed; transitive packages and native assets remain part of the release SBOM and must be rechecked before packaging.
+
 ## Packaging choices
 Separate per-OS native dependencies, with architecture-specific smoke checks. Some codec usage may carry patent/licensing obligations even if FFmpeg itself is open source. Signing/notarization/Apple accounts can cost money, although development stack itself may be free.
 

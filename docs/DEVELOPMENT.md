@@ -18,7 +18,7 @@ dotnet build --configuration Release
 dotnet test --configuration Release
 dotnet run --project src/FrameTheory.Desktop
 ```
-The solution targets .NET 10 and the desktop shell is currently a managed foundation entry point; Avalonia is introduced in FT-002 after the foundation build gate. FFmpeg/ffprobe remain required for media tasks beginning with FT-003/FT-006.
+The solution targets .NET 10. The desktop shell uses Avalonia 12.1.2 with code-only controls and the Fluent theme; media tasks beginning with FT-003/FT-006 still require FFmpeg/ffprobe.
 
 ## Repository target layout
 ```text

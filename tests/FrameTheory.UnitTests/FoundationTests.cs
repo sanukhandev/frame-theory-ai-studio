@@ -24,4 +24,22 @@ public sealed class FoundationTests
 
         Xunit.Assert.Equal(expected, loaded);
     }
+
+    [Xunit.Fact]
+    public void DesktopShellProvidesAllRequiredWorkspaces()
+    {
+        var viewModel = new FrameTheory.Desktop.MainWindowViewModel(new FrameTheory.Desktop.WorkspaceCatalog());
+
+        Xunit.Assert.Equal(new[] { "Video", "Photo", "Color", "AI" }, viewModel.Workspaces.Select(workspace => workspace.Name));
+        Xunit.Assert.Equal("Video", viewModel.SelectedWorkspace.Name);
+
+        viewModel.SelectedWorkspaceIndex = 3;
+
+        Xunit.Assert.Equal("AI", viewModel.SelectedWorkspace.Name);
+
+        viewModel.SelectedWorkspaceIndex = -1;
+        viewModel.SelectedWorkspaceIndex = viewModel.Workspaces.Count;
+
+        Xunit.Assert.Equal("AI", viewModel.SelectedWorkspace.Name);
+    }
 }

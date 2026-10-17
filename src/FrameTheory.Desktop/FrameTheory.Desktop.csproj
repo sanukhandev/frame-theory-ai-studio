@@ -5,6 +5,11 @@
     <RootNamespace>FrameTheory.Desktop</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.2" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\FrameTheory.Application\FrameTheory.Application.csproj" />
     <ProjectReference Include="..\FrameTheory.Platform\FrameTheory.Platform.csproj" />
   </ItemGroup>

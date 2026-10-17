@@ -4,7 +4,7 @@
 
 An open-development, offline-first **desktop creative studio** for **video editing, image editing, and universal cinematic color grading**. A user-supplied **Google Gemini API key** enables an AI Creative Director that proposes *structured, reversible edits* and, when authorized, applies them to the real timeline and image layers.
 
-> **Status: foundation scaffold.** FT-001 is implemented and tested on Windows x64; the repository is not yet a finished application. Follow [AGENTS.md](AGENTS.md), [the roadmap](docs/ROADMAP.md), and [the acceptance plan](docs/TEST_STRATEGY.md) to implement and verify milestones. Do not present planned features as shipped.
+> **Status: foundation scaffold and Avalonia shell.** FT-001 and FT-002 are implemented and tested on Windows x64; the repository is not yet a finished application. Follow [AGENTS.md](AGENTS.md), [the roadmap](docs/ROADMAP.md), and [the acceptance plan](docs/TEST_STRATEGY.md) to implement and verify milestones. Do not present planned features as shipped.
 
 ## Product differentiation
 

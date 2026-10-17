@@ -18,6 +18,7 @@
     <ProjectReference Include="..\..\src\FrameTheory.AI\FrameTheory.AI.csproj" />
     <ProjectReference Include="..\..\src\FrameTheory.Captions\FrameTheory.Captions.csproj" />
     <ProjectReference Include="..\..\src\FrameTheory.Color\FrameTheory.Color.csproj" />
+    <ProjectReference Include="..\..\src\FrameTheory.Desktop\FrameTheory.Desktop.csproj" />
     <ProjectReference Include="..\..\src\FrameTheory.Domain\FrameTheory.Domain.csproj" />
     <ProjectReference Include="..\..\src\FrameTheory.Media\FrameTheory.Media.csproj" />
     <ProjectReference Include="..\..\src\FrameTheory.Photo\FrameTheory.Photo.csproj" />
