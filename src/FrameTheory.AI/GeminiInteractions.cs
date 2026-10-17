@@ -98,6 +98,22 @@ public sealed record GeminiInteractionResult(
     GeminiUsage? Usage,
     int Attempts);
 
+public sealed record GeminiInteractionInput(
+    [property: JsonPropertyName("type")] string Type,
+    [property: JsonPropertyName("text")]
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Text,
+    [property: JsonPropertyName("data")]
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Data,
+    [property: JsonPropertyName("uri")]
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Uri,
+    [property: JsonPropertyName("mime_type")]
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? MimeType)
+{
+    public static GeminiInteractionInput CreateText(string text) => new("text", text, null, null, null);
+
+    public static GeminiInteractionInput CreateImage(byte[] png) => new("image", null, Convert.ToBase64String(png), null, "image/png");
+}
+
 public sealed record GeminiInteractionRecord(
     DateTimeOffset Timestamp,
     string ModelId,
@@ -158,6 +174,11 @@ public interface IGeminiClient
         string prompt,
         string? previousInteractionId,
         CancellationToken cancellationToken);
+
+    Task<GeminiInteractionResult> CreatePlanAsync(
+        IReadOnlyList<GeminiInteractionInput> inputs,
+        JsonElement responseSchema,
+        CancellationToken cancellationToken);
 }
 
 public sealed class GeminiInteractionsClient : IGeminiClient
@@ -195,6 +216,51 @@ public sealed class GeminiInteractionsClient : IGeminiClient
             throw new ArgumentException("The previous Gemini interaction ID is invalid.", nameof(previousInteractionId));
         }
 
+        return await CreateInteractionAsync(
+            [GeminiInteractionInput.CreateText(prompt)],
+            previousInteractionId,
+            responseSchema: null,
+            "follow-up",
+            cancellationToken);
+    }
+
+    public async Task<GeminiInteractionResult> CreatePlanAsync(
+        IReadOnlyList<GeminiInteractionInput> inputs,
+        JsonElement responseSchema,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(inputs);
+        if (inputs.Count is < 2 or > 64 || inputs[0].Type != "text" || string.IsNullOrWhiteSpace(inputs[0].Text))
+        {
+            throw new ArgumentException("A Gemini plan requires one prompt and one to sixty-three bounded media inputs.", nameof(inputs));
+        }
+
+        if (inputs.Skip(1).Any(input =>
+            input.Type == "image"
+                ? string.IsNullOrWhiteSpace(input.Data) || input.MimeType != "image/png" || input.Uri is not null
+                : input.Type != "text" || string.IsNullOrWhiteSpace(input.Text) || input.Data is not null || input.Uri is not null))
+        {
+            throw new ArgumentException("A Gemini plan accepts only inline PNG samples and bounded text metadata.", nameof(inputs));
+        }
+
+        if (responseSchema.ValueKind != JsonValueKind.Object)
+        {
+            throw new ArgumentException("The Gemini plan response schema must be a JSON object.", nameof(responseSchema));
+        }
+
+        return await CreateInteractionAsync(inputs, null, responseSchema, "plan", cancellationToken);
+    }
+
+    private async Task<GeminiInteractionResult> CreateInteractionAsync(
+        IReadOnlyList<GeminiInteractionInput> inputs,
+        string? previousInteractionId,
+        JsonElement? responseSchema,
+        string operationName,
+        CancellationToken cancellationToken)
+    {
+        var promptCharacterCount = inputs
+            .Where(input => input.Text is not null)
+            .Sum(input => input.Text!.Length);
         var attempts = 0;
         try
         {
@@ -209,15 +275,18 @@ public sealed class GeminiInteractionsClient : IGeminiClient
                     {
                         Content = JsonContent.Create(new GeminiInteractionRequest(
                             _options.ModelId,
-                            [new GeminiTextInput("text", prompt)],
-                            previousInteractionId))
+                            inputs,
+                            previousInteractionId,
+                            responseSchema is { } schema
+                                ? new GeminiResponseFormat("text", "application/json", schema)
+                                : null))
                     };
                     request.Headers.TryAddWithoutValidation("x-goog-api-key", _options.ApiKey);
 
                     using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
                     if (IsRetryable(response.StatusCode) && attempts < _options.MaximumAttempts)
                     {
-                        _diagnostics?.Record("gemini.follow-up.retry");
+                        _diagnostics?.Record($"gemini.{operationName}.retry");
                         await Task.Delay(TimeSpan.FromTicks(_options.RetryDelay.Ticks * attempts), cancellationToken);
                         continue;
                     }
@@ -255,52 +324,52 @@ public sealed class GeminiInteractionsClient : IGeminiClient
                         FailureKind: null,
                         StatusCode: response.StatusCode,
                         attempts,
-                        prompt.Length,
+                        promptCharacterCount,
                         result.Usage));
                     return result;
                 }
                 catch (HttpRequestException exception) when (attempts < _options.MaximumAttempts)
                 {
-                    _diagnostics?.Record("gemini.follow-up.retry", exception);
+                    _diagnostics?.Record($"gemini.{operationName}.retry", exception);
                     await Task.Delay(TimeSpan.FromTicks(_options.RetryDelay.Ticks * attempts), cancellationToken);
                 }
                 catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && attempts < _options.MaximumAttempts)
                 {
-                    _diagnostics?.Record("gemini.follow-up.retry");
+                    _diagnostics?.Record($"gemini.{operationName}.retry");
                     await Task.Delay(TimeSpan.FromTicks(_options.RetryDelay.Ticks * attempts), cancellationToken);
                 }
                 catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
                 {
-                    throw new GeminiProviderException("Gemini follow-up timed out.", GeminiProviderFailureKind.Timeout);
+                    throw new GeminiProviderException($"Gemini {operationName} timed out.", GeminiProviderFailureKind.Timeout);
                 }
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            var exception = new GeminiProviderException("Gemini follow-up was canceled.", GeminiProviderFailureKind.Cancellation);
-            RecordFailure(exception, attempts, prompt.Length);
+            var exception = new GeminiProviderException($"Gemini {operationName} was canceled.", GeminiProviderFailureKind.Cancellation);
+            RecordFailure(operationName, exception, attempts, promptCharacterCount);
             throw exception;
         }
         catch (GeminiProviderException exception)
         {
-            RecordFailure(exception, attempts, prompt.Length);
+            RecordFailure(operationName, exception, attempts, promptCharacterCount);
             throw;
         }
         catch (HttpRequestException exception)
         {
-            var wrapped = new GeminiProviderException("Gemini follow-up could not reach the provider.", GeminiProviderFailureKind.Transport, innerException: exception);
-            RecordFailure(wrapped, attempts, prompt.Length);
+            var wrapped = new GeminiProviderException($"Gemini {operationName} could not reach the provider.", GeminiProviderFailureKind.Transport, innerException: exception);
+            RecordFailure(operationName, wrapped, attempts, promptCharacterCount);
             throw wrapped;
         }
 
-        var exhausted = new GeminiProviderException("Gemini follow-up exhausted its retry budget.", GeminiProviderFailureKind.Transport);
-        RecordFailure(exhausted, attempts, prompt.Length);
+        var exhausted = new GeminiProviderException($"Gemini {operationName} exhausted its retry budget.", GeminiProviderFailureKind.Transport);
+        RecordFailure(operationName, exhausted, attempts, promptCharacterCount);
         throw exhausted;
     }
 
-    private void RecordFailure(GeminiProviderException exception, int attempts, int promptCharacterCount)
+    private void RecordFailure(string operationName, GeminiProviderException exception, int attempts, int promptCharacterCount)
     {
-        _diagnostics?.Record("gemini.follow-up.failed", exception);
+        _diagnostics?.Record($"gemini.{operationName}.failed", exception);
         _history?.Record(new GeminiInteractionRecord(
             DateTimeOffset.UtcNow,
             _options.ModelId,
@@ -328,12 +397,16 @@ public sealed class GeminiInteractionsClient : IGeminiClient
 
     private sealed record GeminiInteractionRequest(
         [property: JsonPropertyName("model")] string Model,
-        [property: JsonPropertyName("input")] IReadOnlyList<GeminiTextInput> Input,
-        [property: JsonPropertyName("previous_interaction_id")] string? PreviousInteractionId);
+        [property: JsonPropertyName("input")] IReadOnlyList<GeminiInteractionInput> Input,
+        [property: JsonPropertyName("previous_interaction_id")]
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? PreviousInteractionId,
+        [property: JsonPropertyName("response_format")]
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] GeminiResponseFormat? ResponseFormat);
 
-    private sealed record GeminiTextInput(
+    private sealed record GeminiResponseFormat(
         [property: JsonPropertyName("type")] string Type,
-        [property: JsonPropertyName("text")] string Text);
+        [property: JsonPropertyName("mime_type")] string MimeType,
+        [property: JsonPropertyName("schema")] JsonElement Schema);
 
     private sealed class GeminiInteractionResponse
     {

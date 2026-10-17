@@ -455,6 +455,9 @@ public sealed class MainWindow : Window
 
             await viewModel.PrepareLocalAnalysisAsync(scopes, uploadConsent.IsChecked == true, CancellationToken.None);
         };
+        var analyzeApprovedSamples = new Button { Content = "Analyze approved samples with Gemini" };
+        AutomationProperties.SetName(analyzeApprovedSamples, "Analyze approved samples with Gemini");
+        analyzeApprovedSamples.Click += async (_, _) => await viewModel.RequestAiAnalysisAsync(CancellationToken.None);
         var analysisStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         analysisStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AnalysisStatusText)));
         _ = settings.LoadAsync(CancellationToken.None);
@@ -477,7 +480,7 @@ public sealed class MainWindow : Window
                     new TextBlock { Text = "Analysis scope (prepared locally; no upload occurs here):", FontWeight = FontWeight.SemiBold },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { videoFrames, audioWaveform, photoPreview } },
                     uploadConsent,
-                    prepareAnalysis,
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { prepareAnalysis, analyzeApprovedSamples } },
                     analysisStatus
                 }
             }

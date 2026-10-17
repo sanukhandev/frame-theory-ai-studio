@@ -349,9 +349,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public void ValidateAiPlan(string json)
     {
-        var targetIds = _analysisAssets.Keys.Select(mediaId => mediaId.Value).ToHashSet(StringComparer.Ordinal);
-        targetIds.UnionWith(["Video 1", "Audio 1", "title-track", "caption-track", "active-project"]);
-        AiProposal.Validate(json, new AiPlanValidationContext("active-project", targetIds, Math.Max(1, TimelineEditor.TotalFrames)));
+        AiProposal.Validate(json, new AiPlanValidationContext("active-project", BuildAiTargetIds(), Math.Max(1, TimelineEditor.TotalFrames)));
     }
 
     public void ApplyApprovedAiPlan()
@@ -459,6 +457,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         SelectedWorkspaceIndex = index;
         return true;
+    }
+
+    private HashSet<string> BuildAiTargetIds()
+    {
+        var targetIds = _analysisAssets.Keys.Select(mediaId => mediaId.Value).ToHashSet(StringComparer.Ordinal);
+        targetIds.UnionWith(["Video 1", "Audio 1", "title-track", "caption-track", "active-project"]);
+        return targetIds;
     }
 
     private bool MoveTimelineFrame(int delta)
@@ -931,6 +936,64 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         {
             _diagnosticsLog.Record("local-analysis-failed", exception);
             AnalysisStatusText = $"Local AI analysis preparation failed: {exception.Message}";
+            return false;
+        }
+    }
+
+    public async Task<bool> RequestAiAnalysisAsync(CancellationToken cancellationToken)
+    {
+        if (LastLocalAnalysisReport is null)
+        {
+            AnalysisStatusText = "Prepare local analysis samples before sending anything to Gemini.";
+            return false;
+        }
+
+        if (!LastLocalAnalysisReport.UploadConsent)
+        {
+            AnalysisStatusText = "Gemini analysis stopped: explicitly approve this exact sample scope first.";
+            return false;
+        }
+
+        try
+        {
+            var apiKey = await GeminiSettings.ReadApiKeyAsync(cancellationToken);
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                AnalysisStatusText = "Gemini analysis requires a stored key; manual editing remains available offline.";
+                return false;
+            }
+
+            var client = new GeminiCreativeDirectorClient(new GeminiInteractionsClient(
+                _transcriptionHttpClient,
+                new GeminiClientOptions(apiKey, GeminiSettings.SelectedModelId, TimeSpan.FromMinutes(2), 3, TimeSpan.FromSeconds(1)),
+                _geminiInteractionHistory,
+                _diagnosticsLog));
+            AnalysisStatusText = "Uploading the approved visual sample scope to Gemini...";
+            var result = await client.CreatePlanAsync(
+                LastLocalAnalysisReport,
+                BuildAiTargetIds(),
+                Math.Max(1, TimelineEditor.TotalFrames),
+                cancellationToken);
+            ValidateAiPlan(result.PlanJson);
+            if (AiProposal.ValidatedJson is null)
+            {
+                AnalysisStatusText = "Gemini returned a plan rejected by local validation; no mutation occurred.";
+                return false;
+            }
+
+            _lastGeminiInteractionId = result.InteractionId;
+            AnalysisStatusText = $"Gemini analyzed {result.UploadedSampleCount} approved visual sample(s); review {AiProposal.Actions.Count} editable action(s) before applying.";
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            AnalysisStatusText = "Gemini analysis canceled; no project mutation occurred.";
+            return false;
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidDataException or InvalidOperationException or HttpRequestException)
+        {
+            _diagnosticsLog.Record("gemini-analysis-failed", exception);
+            AnalysisStatusText = $"Gemini analysis failed: {exception.Message}";
             return false;
         }
     }
