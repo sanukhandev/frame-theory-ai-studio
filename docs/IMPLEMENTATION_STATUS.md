@@ -10,6 +10,8 @@
 
 **Timeline playback checkpoint (2026-10-17):** The Video workspace now exposes cancellable frame-accurate Play/Stop controls. Playback temporarily disables timeline snapping so boundary clamping cannot stall frame advancement, decodes every frame through the shared preview path, restores the prior snapping setting and reports cancellation or completion. Focused playback coverage passes 4/4.
 
+**FT-903 preview proxy checkpoint (2026-10-17):** The Video workspace now exposes an opt-in bounded preview-proxy toggle. When enabled, current-frame preview and playback create or reuse an atomic FFmpeg proxy in the local cache, decode from that proxy, propagate cancellation and report cache usage without replacing the original media. Focused proxy/UI wiring coverage passes 5/5.
+
 **FT-801 checkpoint:** Before/after now composes an editable multi-clip base layer twice—unaltered and graded—and the split/wipe/timed-reveal output is covered by graph tests plus a real two-clip FFmpeg smoke.
 
 **FT-802 checkpoint:** Video and Photo workspaces expose the same 16:9, 1:1 and 9:16 presets. Photo exports cover-crop to exact dimensions, preserve metadata/source bytes, and use the shared cancellable export queue when hosted by the desktop view model.
@@ -85,7 +87,7 @@
 - [~] FT-706 AI transaction undo control, bounded Gemini follow-up transport, typed retry/timeout/cancellation failures, usage accounting, prompt/secret-redacted local history and desktop revision-to-validator wiring are implemented; live provider-to-plan verification remains open
 - [~] FT-901 keyboard workspace/frame shortcuts, scroll-safe layout and automation labels are implemented; interactive 1280x800/HiDPI acceptance remains unverified
 - [~] FT-902 synchronized selected-clip/playhead context, real current-frame FFmpeg preview, cancellable frame-accurate Play/Stop playback and AI approval summary are implemented; full manual workspace acceptance remains open
-- [~] FT-903 bounded preview cache, cancellable rendering and an optional content-fingerprint-keyed disk proxy are implemented; hosted native-media smoke now validates proxy creation, dimensions and reuse on Windows, macOS and Linux, while interactive GUI acceptance remains open
+- [~] FT-903 bounded preview cache, cancellable rendering, an optional content-fingerprint-keyed disk proxy and a Video workspace proxy toggle are implemented; hosted native-media smoke validates proxy creation, dimensions and reuse on Windows, macOS and Linux, while interactive GUI acceptance remains open
 - [~] FT-904 local redacted diagnostics, unhandled-failure capture, stdout/stderr dependency probing, nonzero-exit unknown-state reporting and actionable dependency guidance are implemented; cross-platform interactive failure UX acceptance remains open
 - [x] FT-1001 core unit/golden/adversarial suite, caption provenance coverage and source SHA-256 preservation assertion pass on the hosted Windows/macOS/Linux matrix; broader manual/media journeys remain tracked by FT-1002
 - [~] FT-1002 UC-01..UC-06 executable smoke/test matrix is documented with Windows evidence and hosted photo/video/native-media evidence; interactive and macOS/Linux acceptance remains open
@@ -107,6 +109,20 @@
 5. Keep MLT deferred unless interactive playback parity or a release licensing decision requires a new native engine spike.
 
 ## Latest execution record
+```text
+Date/time: 2026-10-17
+Task / Epic: FT-903 / Video workspace preview proxy wiring
+Git SHA: 389e504
+Files changed: src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, tests/FrameTheory.UnitTests/DesktopImportTests.cs
+Actual behavior and UI path: The Video workspace exposes Use bounded preview proxy. When enabled, current-frame preview and playback use the existing bounded FFmpeg proxy service, reuse a cache entry on subsequent frames, preserve the original source and report unavailable or canceled proxy work without pretending preview succeeded.
+Commands executed + OS: Focused DesktopImportTests on Windows 11 x64 after the clip-dimension edge-case correction.
+Test outputs / exit codes: Focused desktop tests passed 5/5; proxy creation ran once for two previews and the decoder received the same cached proxy URI.
+Media fixtures and verification: The test uses a temporary local media file, a deterministic process runner and a bounded temporary cache; no user media, API key, generated fixture or binary entered Git.
+Known limitations / blockers: Hosted three-OS validation and interactive Avalonia acceptance are pending; the proxy remains opt-in and does not replace the source media.
+Next unblocked task: Push and verify the proxy UI wiring on Windows, macOS and Linux through the hosted quality matrix.
+```
+
+## Previous execution record
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-902 / cancellable timeline playback
