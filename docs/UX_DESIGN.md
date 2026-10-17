@@ -9,6 +9,7 @@ Top chrome: project title, save state, undo/redo, workspace selector `Video | Ph
 ### Video workspace
 - File/media explorer, preview with overlays/safe zones, timecode transport, frame-step, multi-track timeline with clear track headers.
 - Context inspector for transform, timing, transitions, effect stack, keyframes, audio, typography.
+- Keep selected clip, frame range, playhead and inspector context visible together; selection changes must update the track rows and context text from the same timeline model.
 - Accessible drag/drop and keyboard alternatives; snap indicators and waveform placeholders must be backed by real data.
 
 ### Photo workspace
@@ -24,6 +25,7 @@ Top chrome: project title, save state, undo/redo, workspace selector `Video | Ph
 - Conversational input, analyze selection/project toggle, media-scope preview with opt-in consent.
 - Planning view: action list with type, target, exact parameters, timing, rationale, individual accept toggles.
 - Apply button only after validation; show progress and partial failures; one-click undo AI group.
+- Show the approved-action count and the latest validation/apply/undo status beside the proposal actions.
 - Follow-up chat targets current selection; clarify only genuinely ambiguous targets; preview and manual overrides remain possible.
 
 ## Accessibility and resilience

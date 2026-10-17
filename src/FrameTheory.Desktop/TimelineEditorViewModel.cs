@@ -127,6 +127,17 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         ? "No beat markers detected. Import audio or video with audio."
         : $"Beat markers: {string.Join(", ", _beatMarkers)} frames";
 
+    public string SelectionContextText
+    {
+        get
+        {
+            var selected = FindSelected();
+            return selected is null
+                ? $"No timeline clip selected; playhead frame {CurrentFrame}."
+                : $"Selected {selected.Value.Kind} clip {selected.Value.Clip.MediaId.Value[..Math.Min(8, selected.Value.Clip.MediaId.Value.Length)]}; frames {selected.Value.Clip.TimelineRange.StartFrame}–{selected.Value.Clip.TimelineRange.EndFrameExclusive - 1}; playhead {CurrentFrame}.";
+        }
+    }
+
     public string RulerText => string.Join("  |  ", BuildRulerTicks(640).Select(tick => tick.ToString()));
 
     public void AddMedia(MediaSourceMetadata metadata)
@@ -850,6 +861,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
                 string.Equals(_selectedTrackId, track.Id, StringComparison.OrdinalIgnoreCase) &&
                 _selectedClipStart == clip.TimelineRange.StartFrame)).ToArray())).ToArray();
         OnPropertyChanged(nameof(TrackRows));
+        OnPropertyChanged(nameof(SelectionContextText));
         OnPropertyChanged(nameof(RulerText));
     }
 

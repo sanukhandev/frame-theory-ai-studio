@@ -452,6 +452,8 @@ public sealed class MainWindow : Window
 
         var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
         status.Bind(TextBlock.TextProperty, new Binding("AiProposal.StatusText"));
+        var approvalSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        approvalSummary.Bind(TextBlock.TextProperty, new Binding("AiProposal.ApprovalSummary"));
         viewModel.AiProposal.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName == nameof(AiProposalViewModel.Actions))
@@ -481,6 +483,7 @@ public sealed class MainWindow : Window
                     new TextBlock { Text = "Plans are untrusted data. Only checked actions are applied, atomically, through editable timeline operations; failures roll back the whole group.", TextWrapping = TextWrapping.Wrap },
                     planJson,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { validate, approve, undo, clear } },
+                    approvalSummary,
                     actions,
                     status
                 }
@@ -564,6 +567,8 @@ public sealed class MainWindow : Window
         positionStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentPosition"));
         var ruler = new TextBlock { TextWrapping = TextWrapping.Wrap };
         ruler.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.RulerText"));
+        var selectionContext = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        selectionContext.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.SelectionContextText"));
         var tracks = new ListBox { Height = 100 };
         AutomationProperties.SetName(tracks, "Timeline tracks");
         tracks.Bind(ItemsControl.ItemsSourceProperty, new Binding("TimelineEditor.TrackRows"));
@@ -792,6 +797,7 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { new TextBlock { Text = "Frame" }, frameStatus, new TextBlock { Text = "Position" }, positionStatus } },
                     playhead,
                     ruler,
+                    selectionContext,
                     tracks,
                     beatMarkers,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { back, forward, select, selectAudio, scrollBack, scrollForward } },
