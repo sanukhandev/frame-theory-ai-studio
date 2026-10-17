@@ -61,6 +61,10 @@ jobs:
         if: steps.detect.outputs.has_solution == 'true'
         shell: pwsh
         run: ./scripts/check_nuget_vulnerabilities.ps1 -OutputPath artifacts/nuget-vulnerabilities.json
+      - name: Generate NuGet dependency inventory
+        if: steps.detect.outputs.has_solution == 'true'
+        shell: pwsh
+        run: ./scripts/generate_sbom.ps1 -OutputPath artifacts/sbom/nuget-packages.json
       - name: Build
         if: steps.detect.outputs.has_solution == 'true'
         run: dotnet build --no-restore -c Release
@@ -84,6 +88,10 @@ jobs:
           esac
           ffmpeg -version
           ffprobe -version
+          mkdir -p artifacts/sbom
+          ffmpeg -version | tee artifacts/sbom/ffmpeg-version.txt
+          ffmpeg -buildconf | tee artifacts/sbom/ffmpeg-buildconf.txt
+          ffprobe -version | tee artifacts/sbom/ffprobe-version.txt
       - name: Run native media smoke
         if: steps.detect.outputs.has_solution == 'true'
         shell: bash
