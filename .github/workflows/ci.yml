@@ -51,6 +51,9 @@ jobs:
       - name: Build
         if: steps.detect.outputs.has_solution == 'true'
         run: dotnet build --no-restore -c Release
+      - name: Verify formatting
+        if: steps.detect.outputs.has_solution == 'true'
+        run: dotnet format --no-restore --verify-no-changes --verbosity minimal
       - name: Test
         if: steps.detect.outputs.has_solution == 'true'
         run: dotnet test --no-build -c Release
