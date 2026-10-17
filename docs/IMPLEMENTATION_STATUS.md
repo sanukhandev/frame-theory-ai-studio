@@ -25,7 +25,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-006 / E00 (partial; not complete)
-Git SHA: pending commit
+Git SHA: 22b12c7
 Files changed: src/FrameTheory.Media/MediaProcessRunner.cs, tests/FrameTheory.UnitTests/FoundationTests.cs, docs/adr/0004-ffmpeg-spike.md, docs/DECISIONS.md, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: Media subprocesses use `ArgumentList`, cancellation kills the process tree, and nonzero startup errors become typed `InvalidOperationException`s. A Windows FFmpeg smoke encoded/probed/seeked a real synthetic MP4 and composed two video inputs with audio.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet test FrameTheory.sln --no-build --configuration Release; FFmpeg 9.0.2 encode, ffprobe, seek and two-input graph commands; git diff --check
