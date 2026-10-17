@@ -14,8 +14,10 @@ The optional sample count is bounded to 120. The output records cold and warm ex
 
 - Preview frames use an LRU cache of eight entries by default; callers can lower the entry limit for constrained hosts.
 - A decoded frame is rejected above 20 MiB and all decoder/export work accepts cancellation.
-- No disk proxy is created implicitly. If proxy mode is added, its files must be keyed by source fingerprint plus decode profile, stored under the user cache root, evicted by the existing cache budget, and deleted when the source fingerprint changes.
-- The optional proxy design is intentionally deferred until measured cold seeks show a need; the current smoke evidence is the baseline for that decision.
+- Optional disk proxies are created only through `FfmpegPreviewProxyService`; the UI does not create them implicitly. Each cache key includes the canonical source URI, caller-provided content SHA-256, maximum dimensions and proxy schema version.
+- Proxy files are stored under the caller-selected cache root, generated to a unique temporary file, atomically moved into place, capped at 512 MiB by default, and evicted oldest-first. A changed source fingerprint selects a new entry and cannot reuse the old proxy.
+- Proxies are video-only preview artifacts, not final exports; FFmpeg work is cancellable and the service rejects remote or reparse-point paths. Hosted native-media smoke validates creation, ffprobe dimensions and second-request reuse on Windows, macOS and Linux.
+- Interactive UI proxy wiring and manual cold-seek acceptance remain open; the existing in-memory decoder remains the default path.
 
 ## Windows reference capture
 
