@@ -331,7 +331,7 @@ public sealed class GeminiInteractionsClient : IGeminiClient
                 ? !IsValidImageInput(input)
                 : input.Type != "text" || string.IsNullOrWhiteSpace(input.Text) || input.Data is not null || input.Uri is not null))
         {
-            throw new ArgumentException("A Gemini plan accepts only inline PNG samples and bounded text metadata.", nameof(inputs));
+            throw new ArgumentException("A Gemini plan accepts only inline PNGs, validated Gemini-hosted PNG URIs and bounded text metadata.", nameof(inputs));
         }
 
         if (responseSchema.ValueKind != JsonValueKind.Object)
