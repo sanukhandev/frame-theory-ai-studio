@@ -1,0 +1,61 @@
+# Editor/build output
+**/bin/
+**/obj/
+.vs/
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.user
+*.suo
+*.DotSettings.user
+TestResults/
+coverage/
+**/Generated/
+# Native media caches and render products
+.cache/
+.cache/**
+media-cache/
+proxies/
+autosaves/
+renders/
+exports/
+temp/
+tmp/
+*.ftstudio.autosave
+# Secrets / local-only settings
+.env
+.env.*
+!.env.example
+**/secrets.json
+**/appsettings.Local.json
+*.p12
+*.pfx
+*.pem
+*.key
+*credential*
+# User media / large binaries (approved sample assets belong in fixtures)
+*.mp4
+*.mov
+*.mkv
+*.avi
+*.wav
+*.mp3
+*.aiff
+*.psd
+*.raw
+*.dng
+*.cr2
+*.nef
+# Native binary distribution requires explicit documented approval
+*.dll
+*.dylib
+*.so
+*.so.*
+*.exe
+*.app/
+*.dmg
+*.msi
+*.AppImage
+# Allow approved source logo only via deliberate tracked force-add
+assets/brand/*
+!assets/brand/README.md

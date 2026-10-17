@@ -1,0 +1,33 @@
+name: Implementation task
+description: Track a concrete Frame Theory Studio AI task
+title: "[FT-xxx] "
+labels: ["type:task"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Scope
+      description: Exact behavior and module boundaries; link docs/EPICS_AND_TASKS.md
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance tests
+      description: Executable tests, media fixtures and UI path
+    validations:
+      required: true
+  - type: textarea
+    id: deps
+    attributes:
+      label: Dependencies and risks
+      description: Required preceding tasks, native dependencies and licensing
+  - type: checkboxes
+    id: done
+    attributes:
+      label: Definition of Done
+      options:
+        - label: Real behavior implemented, not a mock
+        - label: Build/tests and fixture verification run with evidence
+        - label: Project persistence / preview-export parity reviewed
+        - label: Security, licensing and documentation updated

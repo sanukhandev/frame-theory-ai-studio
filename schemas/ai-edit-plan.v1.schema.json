@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sanukhandev/frame-theory-ai-studio/blob/main/schemas/ai-edit-plan.v1.schema.json",
+  "title": "Frame Theory AI Edit Plan v1",
+  "description": "Syntactic contract only. Semantic validation against operation-specific typed schemas, project state and registered capabilities is mandatory before application.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "planId",
+    "projectId",
+    "intent",
+    "actions"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "planId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-zA-Z0-9._-]+$"
+    },
+    "projectId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-zA-Z0-9._-]+$"
+    },
+    "intent": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "actions": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "$ref": "#/$defs/action"
+      }
+    }
+  },
+  "$defs": {
+    "action": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "targetId",
+        "startFrame",
+        "durationFrames",
+        "params"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9._-]+$"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "color.adjust",
+            "clip.trim",
+            "clip.split",
+            "clip.move",
+            "clip.transform",
+            "transition.add",
+            "title.add",
+            "caption.add",
+            "animation.keyframes",
+            "audio.gain",
+            "preset.apply",
+            "reel.before_after"
+          ]
+        },
+        "targetId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9._-]+$"
+        },
+        "startFrame": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100000000
+        },
+        "durationFrames": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000000
+        },
+        "params": {
+          "type": "object",
+          "maxProperties": 32,
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "integer",
+              "boolean",
+              "array",
+              "object",
+              "null"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
