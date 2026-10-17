@@ -33,6 +33,8 @@ public sealed class GeminiConfigurationService
         return new GeminiConfiguration(GeminiModelCatalog.Supported[0].Id, !string.IsNullOrEmpty(apiKey));
     }
 
+    public Task<string?> ReadApiKeyAsync(CancellationToken cancellationToken) => _secretStore.ReadAsync(ApiKeyName, cancellationToken);
+
     public async Task<GeminiConfiguration> SaveAsync(string modelId, string apiKey, CancellationToken cancellationToken)
     {
         if (!GeminiModelCatalog.Contains(modelId))

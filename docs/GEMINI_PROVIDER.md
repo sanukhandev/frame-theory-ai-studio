@@ -23,5 +23,8 @@ Use a dedicated timestamped transcription capability with source provenance. Do 
 
 The current adapter intentionally limits inline audio to 20 MiB and does not infer an audio track from a video container. Longer recordings require the Files API or a local ASR adapter; video callers must provide an extracted audio source. These limits prevent hidden media conversion or an unbounded upload while the desktop transcription workflow is wired to the provider.
 
+## FT-706 follow-up transport
+`FrameTheory.AI.GeminiInteractionsClient` provides text-only follow-up requests against the fixed Interactions endpoint. It sends the previous interaction ID as provider conversation state, applies a per-attempt timeout, retries only bounded 408/429/5xx failures, classifies invalid-key/quota/rate-limit/timeout/cancellation/transport failures, and returns provider usage without applying output. `FileGeminiInteractionHistory` stores timestamp, model, interaction ID, outcome, attempt count, prompt length and token usage as local JSONL; it never stores the prompt, API key or raw provider response. Callers must pass returned text through the existing local parser and validator before any edit can be approved.
+
 ## Version compatibility
 If Google API request fields change, adapt only in provider module; preserve project and AI plan schema. Add contract tests with redacted recorded fixtures and negative responses.
