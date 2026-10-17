@@ -66,4 +66,35 @@ public sealed class ColorGraphTests
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ColorGrade(exposureEV: 9));
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ColorGrade(temperature: -2));
     }
+
+    [Xunit.Fact]
+    public void ReferenceMatcherReturnsNeutralGradeForMatchingSamples()
+    {
+        var grade = ColorReferenceMatcher.Match([64, 96, 128, 192, 160, 128], [64, 96, 128, 192, 160, 128]);
+
+        Xunit.Assert.InRange(grade.ExposureEV, -0.001f, 0.001f);
+        Xunit.Assert.InRange(grade.Saturation, -0.001f, 0.001f);
+        Xunit.Assert.InRange(grade.Temperature, -0.001f, 0.001f);
+        Xunit.Assert.InRange(grade.Tint, -0.001f, 0.001f);
+    }
+
+    [Xunit.Fact]
+    public void ReferenceMatcherDetectsBoundedBrightnessAndWhiteBalanceDifferences()
+    {
+        var grade = ColorReferenceMatcher.Match([32, 32, 32, 48, 48, 48], [160, 120, 80, 160, 120, 80]);
+
+        Xunit.Assert.True(grade.ExposureEV > 0);
+        Xunit.Assert.True(grade.Temperature > 0);
+        Xunit.Assert.InRange(grade.ExposureEV, -4, 4);
+        Xunit.Assert.InRange(grade.Saturation, -1, 1);
+        Xunit.Assert.InRange(grade.Temperature, -1, 1);
+        Xunit.Assert.InRange(grade.Tint, -1, 1);
+    }
+
+    [Xunit.Fact]
+    public void ReferenceMatcherRejectsIncompleteRgbData()
+    {
+        Xunit.Assert.Throws<ArgumentException>(() => ColorReferenceMatcher.Match([1, 2], [1, 2, 3]));
+        Xunit.Assert.Throws<ArgumentException>(() => ColorReferenceMatcher.Match([1, 2, 3], []));
+    }
 }
