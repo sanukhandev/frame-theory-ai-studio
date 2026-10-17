@@ -123,13 +123,17 @@ jobs:
           ffmpeg -hide_banner -loglevel error -y \
             -i artifacts/media-smoke/fixtures/test_chart.ppm \
             -frames:v 1 artifacts/media-smoke/photo-source.png
+          ffmpeg -hide_banner -loglevel error -y \
+            -f lavfi -i color=c=yellow:s=16x8:d=1 \
+            -frames:v 1 artifacts/media-smoke/photo-overlay.png
           dotnet tools/FrameTheory.PhotoImportSmoke/bin/Release/net10.0/FrameTheory.PhotoImportSmoke.dll \
             artifacts/media-smoke/photo-source.png | tee artifacts/media-smoke/photo-import.txt
           grep -F 'kind=Image' artifacts/media-smoke/photo-import.txt
           dotnet tools/FrameTheory.PhotoExportSmoke/bin/Release/net10.0/FrameTheory.PhotoExportSmoke.dll \
             artifacts/media-smoke/photo-source.png \
-            artifacts/media-smoke/photo-export.png png | tee artifacts/media-smoke/photo-export.txt
+            artifacts/media-smoke/photo-export.png png artifacts/media-smoke/photo-overlay.png | tee artifacts/media-smoke/photo-export.txt
           grep -F 'format=Png' artifacts/media-smoke/photo-export.txt
+          grep -F 'overlays=1' artifacts/media-smoke/photo-export.txt
           grep -F 'photo-project-roundtrip=' artifacts/media-smoke/photo-export.txt
       - name: Verify formatting
         if: steps.detect.outputs.has_solution == 'true'

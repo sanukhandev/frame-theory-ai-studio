@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FrameTheory.Color;
+using FrameTheory.Domain;
 using FrameTheory.Photo;
 
 namespace FrameTheory.Desktop;
@@ -39,11 +40,22 @@ public static class PhotoProjectStateJson
                 Saturation = layer.Grade.Saturation,
                 Temperature = layer.Grade.Temperature,
                 Tint = layer.Grade.Tint
+            }).ToList(),
+            CompositeLayers = state.CompositeLayers.Select(layer => new PhotoCompositeLayerProjectState
+            {
+                SourceMediaId = layer.SourceMediaId.Value,
+                OffsetX = layer.OffsetX,
+                OffsetY = layer.OffsetY,
+                Opacity = layer.Opacity,
+                BlendMode = layer.BlendMode
             }).ToList()
         }, Options);
     }
 
-    public static PhotoEditState Deserialize(string json, PhotoDocument source)
+    public static PhotoEditState Deserialize(
+        string json,
+        PhotoDocument source,
+        IReadOnlyDictionary<MediaId, PhotoDocument>? compositeSources = null)
     {
         ArgumentNullException.ThrowIfNull(json);
         ArgumentNullException.ThrowIfNull(source);
@@ -56,8 +68,8 @@ public static class PhotoProjectStateJson
         {
             var state = JsonSerializer.Deserialize<PhotoProjectState>(json, Options)
                 ?? throw new InvalidDataException("The photo edit state is empty.");
-            if (state.SchemaVersion != 1 || state.Operations is null || state.Layers is null ||
-                state.Operations.Count > MaximumEntries || state.Layers.Count > MaximumEntries)
+            if (state.SchemaVersion != 1 || state.Operations is null || state.Layers is null || state.CompositeLayers is null ||
+                state.Operations.Count > MaximumEntries || state.Layers.Count > MaximumEntries || state.CompositeLayers.Count > MaximumEntries)
             {
                 throw new InvalidDataException("The photo edit state schema or bounds are invalid.");
             }
@@ -71,7 +83,22 @@ public static class PhotoProjectStateJson
                     layer.Name ?? throw new InvalidDataException("A photo layer name is required."),
                     new ColorGrade(layer.ExposureEV, layer.Contrast, layer.Saturation, layer.Temperature, layer.Tint),
                     layer.IsEnabled));
-            return new PhotoEditState(source, operations, new PhotoLayerStack(layers));
+            var compositeLayers = state.CompositeLayers.Select(layer =>
+            {
+                if (layer is null || string.IsNullOrWhiteSpace(layer.SourceMediaId))
+                {
+                    throw new InvalidDataException("The photo state contains an invalid composite layer.");
+                }
+
+                var mediaId = MediaId.Parse(layer.SourceMediaId);
+                if (compositeSources is null || !compositeSources.TryGetValue(mediaId, out var compositeSource))
+                {
+                    throw new InvalidDataException($"The composite layer source '{mediaId.Value}' is missing from the project.");
+                }
+
+                return new PhotoCompositeLayer(compositeSource, layer.OffsetX, layer.OffsetY, layer.Opacity, layer.BlendMode);
+            });
+            return new PhotoEditState(source, operations, new PhotoLayerStack(layers), compositeLayers);
         }
         catch (JsonException exception)
         {
@@ -96,6 +123,8 @@ public static class PhotoProjectStateJson
         public List<PhotoOperationProjectState>? Operations { get; set; } = [];
 
         public List<PhotoAdjustmentLayerProjectState>? Layers { get; set; } = [];
+
+        public List<PhotoCompositeLayerProjectState>? CompositeLayers { get; set; } = [];
     }
 
     private sealed class PhotoOperationProjectState
@@ -126,5 +155,18 @@ public static class PhotoProjectStateJson
         public float Temperature { get; set; }
 
         public float Tint { get; set; }
+    }
+
+    private sealed class PhotoCompositeLayerProjectState
+    {
+        public string? SourceMediaId { get; set; }
+
+        public int OffsetX { get; set; }
+
+        public int OffsetY { get; set; }
+
+        public float Opacity { get; set; }
+
+        public PhotoBlendMode BlendMode { get; set; }
     }
 }

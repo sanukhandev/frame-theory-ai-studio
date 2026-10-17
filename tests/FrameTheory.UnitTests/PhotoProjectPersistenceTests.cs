@@ -80,6 +80,38 @@ public sealed class PhotoProjectPersistenceTests
     }
 
     [Xunit.Fact]
+    public async Task PhotoProjectSaveAndOpenRestoresImportedCompositeLayer()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-photo-composite-project-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "photo.png");
+            var overlayPath = Path.Combine(directory.FullName, "overlay.png");
+            var projectPath = Path.Combine(directory.FullName, "photo.ftstudio");
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+            await File.WriteAllBytesAsync(overlayPath, [4, 5, 6]);
+            var repository = new JsonProjectRepository();
+            var first = CreateEditor(repository);
+
+            await first.OpenAsync(sourcePath, CancellationToken.None);
+            await first.ImportOverlayAsync(overlayPath, 0, 0, 0.5f, PhotoBlendMode.Screen, CancellationToken.None);
+            Xunit.Assert.Single(first.Current!.CompositeLayers);
+            var expected = first.Current.RenderExportImage();
+            Xunit.Assert.True(await first.SaveProjectAsync(projectPath, CancellationToken.None));
+
+            var second = CreateEditor(repository);
+            Xunit.Assert.True(await second.OpenProjectAsync(projectPath, CancellationToken.None));
+            Xunit.Assert.Single(second.Current!.CompositeLayers);
+            Xunit.Assert.Equal(PhotoBlendMode.Screen, second.Current.CompositeLayers[0].BlendMode);
+            Xunit.Assert.Equal(expected, second.Current.RenderExportImage());
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task PhotoProjectOpenRejectsChangedSourceBeforeImport()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-photo-project-");
@@ -124,7 +156,9 @@ public sealed class PhotoProjectPersistenceTests
     private sealed class StubDecoder : IPreviewFrameDecoder
     {
         public Task<byte[]> DecodeFrameAsync(Uri file, RationalFrameRate frameRate, long frameIndex, CancellationToken cancellationToken) =>
-            Task.FromResult(Ppm());
+            Task.FromResult(file.LocalPath.Contains("overlay", StringComparison.OrdinalIgnoreCase)
+                ? Ppm(0, 255, 0, 0, 255, 0)
+                : Ppm());
     }
 
     private sealed class StubProcessRunner : IMediaProcessRunner
@@ -133,5 +167,7 @@ public sealed class PhotoProjectPersistenceTests
             Task.FromResult(new MediaProcessResult(0, string.Empty, string.Empty));
     }
 
-    private static byte[] Ppm() => [.. "P6\n2 1\n255\n"u8, 255, 0, 0, 0, 0, 255];
+    private static byte[] Ppm() => Ppm(255, 0, 0, 0, 0, 255);
+
+    private static byte[] Ppm(params byte[] pixels) => [.. "P6\n2 1\n255\n"u8, .. pixels];
 }

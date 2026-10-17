@@ -133,6 +133,7 @@
 - [~] FT-1005 framework-dependent Windows/macOS/Linux publish scripts and release matrix are documented; installers, native media bundling and signing remain open
 - [~] FT-1006 V1 acceptance audit is recorded with 47 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
 - [x] FT-1103 audio beat detection, source-timed kinetic word captions, proxy pipeline and editable speed-ramp curves are implemented with persistence, UI and native-export smoke evidence; hosted run `39069354787` passed on Windows, macOS and Linux
+- [~] FT-1101 imported photo overlay composition with normal/multiply/screen blending, opacity, clipping, non-destructive undo, project persistence and export smoke is implemented; brush masking and retouch tools remain open
 - [~] FT-1104 offline reference matching, reusable style-library UI, consented visual Gemini analyzer with bounded inline/Files API inputs and waveform-grounded reviewed rough-cut apply/export are implemented with local and hosted evidence; live-provider and reference-grade semantic acceptance remain open
 - [x] FT-401 FFmpeg-backed PNG/JPEG photo import, PPM preview and bounded canvas fit/100%/zoom/pan state
 - [x] FT-402 non-destructive PPM crop, 90° rotation, nearest-neighbor resize and undo-last operation stack
@@ -151,16 +152,18 @@
 ## Latest execution record
 ```text
 Date/time: 2026-10-18
-Task / Epic: FT-003 / E00 capability detection
-Git SHA: bb65ae3
-Files changed: src/FrameTheory.Platform/SystemCapabilityDetector.cs, tests/FrameTheory.UnitTests/FoundationTests.cs, docs/IMPLEMENTATION_STATUS.md
-Actual behavior and UI path: The startup capability report now executes fixed Windows, macOS or Linux GPU adapter probes and reports a bounded adapter description when one is found. Missing probes, nonzero exits and no-adapter output are visible as non-fatal unknown capability states; CPU fallback remains available.
-Commands executed + OS: Windows 11 x64 with .NET SDK 10.0.402; focused foundation tests, full Release build/tests and formatting/diff verification.
-Test outputs / exit codes: Focused foundation suite passed 13/13; full solution passed 169 unit and 2 golden tests; Release build passed with 0 warnings/errors; format verification and diff check passed. Hosted quality gate run `39075442170` passed documentation/schema validation, advisory scan, restore/build, native media smoke, formatting, tests, publish and checksum verification on Windows, macOS and Linux.
-Media fixtures and verification: Deterministic `dotnet` probe fixtures exercised successful no-adapter, nonzero and injected-probe paths; no user media, API key or binary entered Git.
-Known limitations / blockers: GPU availability is informational only; real hardware-specific acceleration remains outside this CPU-first capability probe. Manual Avalonia UI, branding, licensing and installer evidence remain open.
+Task / Epic: FT-1101 / E11 multilayer photo composition
+Git SHA: pending commit
+Files changed: src/FrameTheory.Photo/PhotoCanvas.cs, src/FrameTheory.Desktop/PhotoEditorViewModel.cs, src/FrameTheory.Desktop/PhotoProjectStateJson.cs, src/FrameTheory.Desktop/MainWindow.cs, tests/FrameTheory.UnitTests/PhotoLayerTests.cs, tests/FrameTheory.UnitTests/PhotoProjectPersistenceTests.cs, tools/FrameTheory.PhotoExportSmoke/Program.cs, .github/workflows/ci.yml, docs/IMPLEMENTATION_STATUS.md
+Actual behavior and UI path: Photo workspace now imports a second local image as a non-destructive overlay, applies Normal/Multiply/Screen blending with bounded opacity and canvas clipping, supports clear/undo through the existing history, and persists relative overlay media references plus fingerprints in `.ftstudio` projects. The native PhotoExportSmoke accepts an optional overlay fixture, exports the composed image through FFmpeg and verifies overlay state after project reopen.
+Commands executed + OS: Windows 11 x64 with .NET SDK 10.0.402; focused Photo layer/persistence tests, full Release build/tests and formatting/diff verification.
+Test outputs / exit codes: Focused Photo suite passed 8/8; full solution passed 172 unit and 2 golden tests; Release build passed with 0 warnings/errors; format verification and diff check passed. Hosted validation is pending for this increment.
+Media fixtures and verification: Deterministic two-pixel raster fixtures verify opacity, clipping and both non-normal blend modes; the PhotoExportSmoke/CI path now generates a real overlay image and validates composed export/reopen on hosted FFmpeg runners. Local FFmpeg was unavailable on this Windows host, so the native smoke is intentionally unrun locally.
+Known limitations / blockers: Brush masking and retouch tools remain open under FT-1101; manual Avalonia UI, hosted native overlay smoke, branding, licensing and installer evidence remain open.
 Next unblocked task: Continue remaining manual/platform and external-input gates; live provider, approved branding, licensing/native redistribution, installers/signing and native UI evidence remain open.
 ```
+
+**FT-1101 composition checkpoint (2026-10-18):** The Photo workspace now exposes Import overlay and Clear overlays controls with blend-mode and opacity selection. Overlay source files remain local, are never mutated, render through the same `PpmRaster` export path as the base photo, and are saved/reopened as bounded relative project media references with SHA-256 fingerprints. Focused composition/persistence coverage passes 8/8; native FFmpeg overlay export is added to the hosted smoke and FT-1101 remains partial until masking/retouch acceptance is implemented.
 
 ## Previous execution record
 ```text

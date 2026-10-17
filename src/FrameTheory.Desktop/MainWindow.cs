@@ -359,6 +359,38 @@ public sealed class MainWindow : Window
         rotate.Click += (_, _) => editor.RotateRight();
         var undo = new Button { Content = "Undo photo edit" };
         undo.Click += (_, _) => editor.Undo();
+        var overlayOpacity = new Slider { Minimum = 0, Maximum = 1, Value = 1, Width = 120 };
+        AutomationProperties.SetName(overlayOpacity, "Photo overlay opacity");
+        var overlayBlend = new ComboBox { ItemsSource = new[] { "Normal", "Multiply", "Screen" }, SelectedIndex = 0, Width = 110 };
+        AutomationProperties.SetName(overlayBlend, "Photo overlay blend mode");
+        var importOverlay = new Button { Content = "Import overlay" };
+        importOverlay.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(importOverlay);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Overlay images") { Patterns = ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp", "*.tif", "*.tiff"] }]
+            });
+            var path = files.SingleOrDefault()?.TryGetLocalPath();
+            if (path is not null)
+            {
+                var blendMode = overlayBlend.SelectedIndex switch
+                {
+                    1 => PhotoBlendMode.Multiply,
+                    2 => PhotoBlendMode.Screen,
+                    _ => PhotoBlendMode.Normal
+                };
+                await editor.ImportOverlayAsync(path, 0, 0, (float)overlayOpacity.Value, blendMode, CancellationToken.None);
+            }
+        };
+        var clearOverlays = new Button { Content = "Clear overlays" };
+        clearOverlays.Click += (_, _) => editor.ClearOverlays();
         var format = new ComboBox { ItemsSource = new[] { "PNG", "JPEG" }, SelectedIndex = 0, Width = 90 };
         var quality = new Slider { Minimum = 1, Maximum = 100, Value = 95, Width = 140 };
         var socialPreset = new ComboBox { ItemsSource = new[] { "Original", "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
@@ -404,6 +436,7 @@ public sealed class MainWindow : Window
                     new TextBlock { Text = "Non-destructive photo editor", FontWeight = FontWeight.SemiBold },
                     preview,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { open, openProject, saveProject, rotate, undo } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { importOverlay, clearOverlays, overlayBlend, overlayOpacity } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { format, quality, socialPreset, export } },
                     status
                 }

@@ -152,6 +152,47 @@ public sealed record PhotoEditOperation(PhotoEditOperationKind Kind, int First, 
     public static PhotoEditOperation Resize(int width, int height) => new(PhotoEditOperationKind.Resize, width, height, 0, 0);
 }
 
+public enum PhotoBlendMode
+{
+    Normal,
+    Multiply,
+    Screen
+}
+
+public sealed class PhotoCompositeLayer
+{
+    public PhotoCompositeLayer(
+        PhotoDocument source,
+        int offsetX = 0,
+        int offsetY = 0,
+        float opacity = 1,
+        PhotoBlendMode blendMode = PhotoBlendMode.Normal)
+    {
+        Source = source ?? throw new ArgumentNullException(nameof(source));
+        if (float.IsNaN(opacity) || float.IsInfinity(opacity) || opacity is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(opacity));
+        }
+
+        OffsetX = offsetX;
+        OffsetY = offsetY;
+        Opacity = opacity;
+        BlendMode = blendMode;
+    }
+
+    public PhotoDocument Source { get; }
+
+    public MediaId SourceMediaId => Source.Metadata.Id;
+
+    public int OffsetX { get; }
+
+    public int OffsetY { get; }
+
+    public float Opacity { get; }
+
+    public PhotoBlendMode BlendMode { get; }
+}
+
 public sealed class PhotoEditState
 {
     private readonly IReadOnlyList<PhotoEditOperation> _operations;
@@ -159,11 +200,18 @@ public sealed class PhotoEditState
     public PhotoEditState(
         PhotoDocument source,
         IEnumerable<PhotoEditOperation>? operations = null,
-        PhotoLayerStack? layers = null)
+        PhotoLayerStack? layers = null,
+        IEnumerable<PhotoCompositeLayer>? compositeLayers = null)
     {
         Source = source ?? throw new ArgumentNullException(nameof(source));
         _operations = operations?.ToArray() ?? [];
         Layers = layers ?? new PhotoLayerStack();
+        CompositeLayers = compositeLayers?.ToArray() ?? [];
+        if (CompositeLayers.GroupBy(layer => layer.SourceMediaId).Any(group => group.Count() > 1))
+        {
+            throw new ArgumentException("Composite layer sources must be unique.", nameof(compositeLayers));
+        }
+
         RenderRaster();
     }
 
@@ -172,6 +220,8 @@ public sealed class PhotoEditState
     public IReadOnlyList<PhotoEditOperation> Operations => _operations;
 
     public PhotoLayerStack Layers { get; }
+
+    public IReadOnlyList<PhotoCompositeLayer> CompositeLayers { get; }
 
     public PhotoEditState Crop(int x, int y, int width, int height)
     {
@@ -206,7 +256,7 @@ public sealed class PhotoEditState
             return this;
         }
 
-        return new PhotoEditState(Source, _operations.Take(_operations.Count - 1), Layers);
+        return new PhotoEditState(Source, _operations.Take(_operations.Count - 1), Layers, CompositeLayers);
     }
 
     public byte[] RenderPreview() => RenderRaster().ToPpm();
@@ -214,7 +264,21 @@ public sealed class PhotoEditState
     public byte[] RenderExportImage() => RenderRaster().ToExportImage();
 
     public PhotoEditState WithLayers(PhotoLayerStack layers) =>
-        new(Source, _operations, layers);
+        new(Source, _operations, layers, CompositeLayers);
+
+    public PhotoEditState AddCompositeLayer(PhotoCompositeLayer layer)
+    {
+        ArgumentNullException.ThrowIfNull(layer);
+        if (layer.SourceMediaId == Source.Metadata.Id || CompositeLayers.Any(existing => existing.SourceMediaId == layer.SourceMediaId))
+        {
+            throw new ArgumentException("A photo composite layer must reference a distinct source image.", nameof(layer));
+        }
+
+        return new PhotoEditState(Source, _operations, Layers, CompositeLayers.Append(layer));
+    }
+
+    public PhotoEditState ClearCompositeLayers() =>
+        new(Source, _operations, Layers);
 
     private PhotoEditState WithOperation(PhotoEditOperation operation) =>
         new(Source, _operations.Append(operation), Layers);
@@ -227,7 +291,13 @@ public sealed class PhotoEditState
             raster = ApplyOperation(raster, operation);
         }
 
-        return Layers.Apply(raster);
+        raster = Layers.Apply(raster);
+        foreach (var layer in CompositeLayers)
+        {
+            raster = raster.Composite(PpmRaster.Parse(layer.Source.PreviewPpm), layer.OffsetX, layer.OffsetY, layer.Opacity, layer.BlendMode);
+        }
+
+        return raster;
     }
 
     private static PpmRaster ApplyOperation(PpmRaster raster, PhotoEditOperation operation) => operation.Kind switch
@@ -501,6 +571,76 @@ public sealed class PpmRaster
         }
 
         return new PpmRaster(width, height, output, alpha);
+    }
+
+    public PpmRaster Composite(
+        PpmRaster overlay,
+        int offsetX,
+        int offsetY,
+        float opacity,
+        PhotoBlendMode blendMode = PhotoBlendMode.Normal)
+    {
+        ArgumentNullException.ThrowIfNull(overlay);
+        if (float.IsNaN(opacity) || float.IsInfinity(opacity) || opacity is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(opacity));
+        }
+
+        var output = RgbBytes.ToArray();
+        var alpha = AlphaBytes?.ToArray();
+        for (var overlayY = 0; overlayY < overlay.Height; overlayY++)
+        {
+            var targetY = overlayY + offsetY;
+            if (targetY < 0 || targetY >= Height)
+            {
+                continue;
+            }
+
+            for (var overlayX = 0; overlayX < overlay.Width; overlayX++)
+            {
+                var targetX = overlayX + offsetX;
+                if (targetX < 0 || targetX >= Width)
+                {
+                    continue;
+                }
+
+                var sourceOffset = (overlayY * overlay.Width + overlayX) * 3;
+                var targetOffset = (targetY * Width + targetX) * 3;
+                var sourceAlpha = opacity * (overlay.AlphaBytes?[overlayY * overlay.Width + overlayX] ?? (byte)255) / 255f;
+                if (sourceAlpha <= 0)
+                {
+                    continue;
+                }
+
+                for (var channel = 0; channel < 3; channel++)
+                {
+                    var destination = output[targetOffset + channel];
+                    var source = overlay.RgbBytes[sourceOffset + channel];
+                    var blended = blendMode switch
+                    {
+                        PhotoBlendMode.Normal => source,
+                        PhotoBlendMode.Multiply => destination * source / 255,
+                        PhotoBlendMode.Screen => 255 - ((255 - destination) * (255 - source) / 255),
+                        _ => throw new ArgumentOutOfRangeException(nameof(blendMode))
+                    };
+                    output[targetOffset + channel] = (byte)Math.Clamp(
+                        (int)MathF.Round(destination * (1 - sourceAlpha) + blended * sourceAlpha),
+                        0,
+                        255);
+                }
+
+                if (alpha is not null)
+                {
+                    var destinationAlpha = alpha[targetY * Width + targetX] / 255f;
+                    alpha[targetY * Width + targetX] = (byte)Math.Clamp(
+                        (int)MathF.Round((sourceAlpha + destinationAlpha * (1 - sourceAlpha)) * 255),
+                        0,
+                        255);
+                }
+            }
+        }
+
+        return new PpmRaster(Width, Height, output, alpha);
     }
 
     public PpmRaster Apply(ColorGraph graph, ColorGrade grade) => Apply(graph, grade, null);

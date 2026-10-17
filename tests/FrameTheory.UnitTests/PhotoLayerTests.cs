@@ -29,6 +29,40 @@ public sealed class PhotoLayerTests
         Xunit.Assert.Equal(edited.Layers.InspectorRows, history.Current.Layers.InspectorRows);
     }
 
+    [Xunit.Fact]
+    public void CompositeLayerBlendsPixelsWithOpacityAndSupportsClipping()
+    {
+        var baseDocument = Document(new Uri("file:///base.png"), [100, 100, 100, 20, 40, 60]);
+        var overlayDocument = Document(new Uri("file:///overlay.png"), [200, 0, 50, 255, 255, 0]);
+        var state = new PhotoEditState(baseDocument).AddCompositeLayer(
+            new PhotoCompositeLayer(overlayDocument, offsetX: 1, opacity: 0.5f));
+
+        var rendered = PpmRaster.Parse(state.RenderPreview());
+
+        Xunit.Assert.Equal([100, 100, 100, 110, 20, 55], rendered.RgbBytes);
+        Xunit.Assert.Single(state.CompositeLayers);
+    }
+
+    [Xunit.Fact]
+    public void CompositeLayerSupportsMultiplyAndScreenModes()
+    {
+        var baseDocument = Document(new Uri("file:///base.png"), [100, 100, 100, 20, 40, 60]);
+        var overlayDocument = Document(new Uri("file:///overlay.png"), [200, 0, 50, 255, 255, 0]);
+
+        var multiply = new PhotoEditState(baseDocument).AddCompositeLayer(
+            new PhotoCompositeLayer(overlayDocument, blendMode: PhotoBlendMode.Multiply));
+        var screen = new PhotoEditState(baseDocument).AddCompositeLayer(
+            new PhotoCompositeLayer(overlayDocument, blendMode: PhotoBlendMode.Screen));
+
+        Xunit.Assert.Equal([78, 0, 19, 20, 40, 0], PpmRaster.Parse(multiply.RenderPreview()).RgbBytes);
+        Xunit.Assert.Equal([222, 100, 131, 255, 255, 60], PpmRaster.Parse(screen.RenderPreview()).RgbBytes);
+    }
+
+    private static PhotoDocument Document(Uri source, byte[] pixels) => new(
+        source,
+        new MediaSourceMetadata(MediaId.Create(source, "photo-layer-test"), source, MediaKind.Image, 2, 1, null, 0),
+        [.. "P6\n2 1\n255\n"u8, .. pixels]);
+
     private static byte[] Ppm(byte red, byte green, byte blue) =>
         [.. "P6\n1 1\n255\n"u8, red, green, blue];
 }
