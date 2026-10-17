@@ -27,7 +27,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-102 / E01
-Git SHA: pending commit
+Git SHA: 47b1b8b
 Files changed: src/FrameTheory.Domain/Project.cs, src/FrameTheory.Application/ProjectContracts.cs, src/FrameTheory.Storage/, tests/FrameTheory.UnitTests/ProjectRepositoryTests.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: `JsonProjectRepository` saves versioned project JSON through a same-directory temp file, flushes before atomic replacement, normalizes relative media references, loads with a 10 MB guard, migrates legacy `frameRate` strings, and rejects unsafe paths/invalid schema values.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
