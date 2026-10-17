@@ -1,10 +1,13 @@
 name: Quality gates
+
 on:
   push:
     branches: [main]
   pull_request:
+
 permissions:
   contents: read
+
 jobs:
   docs-and-schema:
     name: Documentation and schema validation
@@ -16,10 +19,10 @@ jobs:
           python-version: '3.12'
       - name: Validate repository docs and schema
         run: python3 scripts/validate_repository.py
+
   dotnet:
     name: .NET build and test (${{ matrix.os }})
     needs: docs-and-schema
-    if: ${{ hashFiles('*.sln', '*.slnx') != '' }}
     strategy:
       fail-fast: false
       matrix:
@@ -27,12 +30,27 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - name: Detect solution
+        id: detect
+        shell: bash
+        run: |
+          if compgen -G '*.sln' > /dev/null || compgen -G '*.slnx' > /dev/null; then
+            echo 'has_solution=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'has_solution=false' >> "$GITHUB_OUTPUT"
+            echo 'No solution yet: documentation phase only.'
+          fi
+      - name: Set up .NET
+        if: steps.detect.outputs.has_solution == 'true'
+        uses: actions/setup-dotnet@v4
         with:
-          global-json-file: global.json
+          dotnet-version: '10.0.x'
       - name: Restore
+        if: steps.detect.outputs.has_solution == 'true'
         run: dotnet restore
       - name: Build
+        if: steps.detect.outputs.has_solution == 'true'
         run: dotnet build --no-restore -c Release
       - name: Test
+        if: steps.detect.outputs.has_solution == 'true'
         run: dotnet test --no-build -c Release
