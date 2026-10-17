@@ -97,6 +97,27 @@ public sealed class AudioSourcePreparerTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task UnsupportedContainerIsRejectedBeforeFfmpeg()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-audio-source-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "clip.txt");
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+            var runner = new StubProcessRunner();
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                new FfmpegAudioSourcePreparer(runner).PrepareAsync(new Uri(sourcePath), CancellationToken.None));
+
+            Xunit.Assert.Equal(0, runner.InvocationCount);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private sealed class StubProcessRunner : IMediaProcessRunner
     {
         public int InvocationCount { get; private set; }
