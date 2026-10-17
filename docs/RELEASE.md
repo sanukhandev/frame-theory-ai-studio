@@ -12,6 +12,8 @@ sh ./scripts/package.sh linux-x64 artifacts/package
 
 The output is a validation publish, not an installer. It must be tested on the matching host before distribution.
 
+CI writes `SHA256SUMS.txt` for the complete validation artifact set and verifies every listed file before upload with `pwsh ./scripts/verify_package.ps1`. The verifier rejects malformed, duplicate, escaping, missing or modified entries.
+
 ## Current matrix
 
 | Platform | Build/CI compile | Local GUI/media evidence | Installer/signing |
