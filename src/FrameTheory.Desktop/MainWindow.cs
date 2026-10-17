@@ -10,6 +10,7 @@ using Avalonia.Platform;
 using Avalonia.Platform.Storage;
 using FrameTheory.AI;
 using FrameTheory.Domain;
+using FrameTheory.Media;
 using System.Runtime.InteropServices;
 using FrameTheory.Photo;
 
@@ -605,6 +606,7 @@ public sealed class MainWindow : Window
             }
         };
         var export = new Button { Content = "Export composite MP4" };
+        var aspectRatio = new ComboBox { ItemsSource = new[] { "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
         export.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(export);
@@ -621,7 +623,13 @@ public sealed class MainWindow : Window
             var path = file?.TryGetLocalPath();
             if (path is not null)
             {
-                await viewModel.ExportTimelineAsync(path, CancellationToken.None);
+                var selectedAspect = aspectRatio.SelectedIndex switch
+                {
+                    1 => SocialAspectRatio.Square1By1,
+                    2 => SocialAspectRatio.Portrait9By16,
+                    _ => SocialAspectRatio.Landscape16By9
+                };
+                await viewModel.ExportTimelineAsync(path, CancellationToken.None, selectedAspect);
             }
         };
         var exportStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
@@ -655,7 +663,7 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { importCaptions, exportCaptions } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { captionFont } },
                     captionStatus,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { export } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { aspectRatio, export } },
                     exportStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { snap, new TextBlock { Text = "Zoom" }, zoom } }
                 }

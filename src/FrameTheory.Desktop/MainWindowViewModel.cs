@@ -291,7 +291,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
-    public async Task<bool> ExportTimelineAsync(string destinationPath, CancellationToken cancellationToken)
+    public async Task<bool> ExportTimelineAsync(string destinationPath, CancellationToken cancellationToken, SocialAspectRatio? aspectRatio = null)
     {
         if (_timelineExporter is null)
         {
@@ -301,7 +301,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         try
         {
-            var plan = TimelineEditor.BuildRenderPlan(_videoWidth, _videoHeight, _mediaSources);
+            var plan = aspectRatio is null
+                ? TimelineEditor.BuildRenderPlan(_videoWidth, _videoHeight, _mediaSources)
+                : TimelineEditor.BuildRenderPlan(SocialVideoExportPreset.Create(aspectRatio.Value).Width, SocialVideoExportPreset.Create(aspectRatio.Value).Height, _mediaSources);
             var preset = new ExportPreset(plan.Width, plan.Height, plan.FrameRate, includeAudio: plan.AudioLayers.Count > 0);
             var receipt = await _timelineExporter.ExportAsync(
                 plan,
