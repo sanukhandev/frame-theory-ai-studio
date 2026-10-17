@@ -118,6 +118,7 @@ jobs:
           grep -F 'queue-retry-output=' artifacts/media-smoke/timeline.txt
           grep -F 'ai-output=' artifacts/media-smoke/timeline.txt
           grep -F 'reel-output=' artifacts/media-smoke/timeline.txt
+          grep -F 'project-roundtrip=' artifacts/media-smoke/timeline.txt
           ffmpeg -hide_banner -loglevel error -y \
             -i artifacts/media-smoke/fixtures/test_chart.ppm \
             -frames:v 1 artifacts/media-smoke/photo-source.png

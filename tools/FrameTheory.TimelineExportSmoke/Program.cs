@@ -1,6 +1,7 @@
 using FrameTheory.Captions;
 using FrameTheory.Domain;
 using FrameTheory.AI;
+using FrameTheory.Application;
 using FrameTheory.Desktop;
 using FrameTheory.Media;
 using System.Security.Cryptography;
@@ -19,6 +20,23 @@ var decoder = new FfmpegFrameDecoder(runner);
 var importer = new FfmpegMediaImporter(new FfprobeMediaProbe(runner), decoder, runner);
 var importedSourceA = await importer.ImportAsync(sourceA, CancellationToken.None);
 var importedSourceB = await importer.ImportAsync(sourceB, CancellationToken.None);
+var projectPath = Path.Combine(Path.GetDirectoryName(destination) ?? ".", "timeline-smoke.ftstudio");
+var projectViewModel = new MainWindowViewModel(new WorkspaceCatalog(), new SmokeCapabilityDetector(), importer);
+await projectViewModel.ImportFilesAsync([sourceA.LocalPath, sourceB.LocalPath], CancellationToken.None);
+if (!await projectViewModel.SaveTimelineProjectAsync(projectPath, CancellationToken.None))
+{
+    throw new InvalidOperationException(projectViewModel.TimelineProjectStatusText);
+}
+
+var reopenedProjectViewModel = new MainWindowViewModel(new WorkspaceCatalog(), new SmokeCapabilityDetector(), importer);
+if (!await reopenedProjectViewModel.OpenTimelineProjectAsync(projectPath, CancellationToken.None) ||
+    reopenedProjectViewModel.ImportedMedia.Count != 2 ||
+    reopenedProjectViewModel.TimelineEditor.TrackRows.All(row => row.Kind != TimelineTrackKind.Video))
+{
+    throw new InvalidOperationException(reopenedProjectViewModel.TimelineProjectStatusText);
+}
+
+Console.WriteLine($"project-roundtrip={projectPath}; media={reopenedProjectViewModel.ImportedMedia.Count}; status={reopenedProjectViewModel.TimelineProjectStatusText}");
 var proxyDirectory = Path.Combine(Path.GetDirectoryName(destination) ?? ".", "proxy-cache");
 var proxyService = new FfmpegPreviewProxyService(runner, proxyDirectory, maximumCacheBytes: 64L * 1024 * 1024);
 var sourceFingerprint = $"sha256:{Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(sourceA.LocalPath))).ToLowerInvariant()}";
@@ -251,3 +269,9 @@ var reelReceipt = await exporter.ExportAsync(
     new Progress<ExportProgress>(update => Console.WriteLine($"reel-stage={update.Stage}; fraction={update.Fraction:0.0}")),
     CancellationToken.None);
 Console.WriteLine($"reel-output={reelReceipt.OutputPath}; bytes={reelReceipt.OutputBytes}; color={reelReceipt.VerifiedMetadata.ColorProfile}");
+
+file sealed class SmokeCapabilityDetector : ICapabilityDetector
+{
+    public Task<CapabilityReport> DetectAsync(CancellationToken cancellationToken) => Task.FromResult(
+        new CapabilityReport("Smoke", "x64", [new("Storage", CapabilityState.Available, "ready")]));
+}
