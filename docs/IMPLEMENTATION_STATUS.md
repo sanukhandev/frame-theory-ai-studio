@@ -89,11 +89,25 @@
 - [x] FT-405 photo project autosave recovery, missing-media relink and corrupt-input UI status paths
 
 ## Next tasks
-1. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
-2. Wire FT-602 into the desktop caption workflow and add a known spoken-fixture/provider integration run, then complete FT-803..FT-804 remaining P0 scope.
+1. Obtain approved live Gemini spoken-fixture/provider evidence and decide whether a local ASR adapter is required for FT-602.
+2. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
 3. Finish manual/cross-platform FT-901..FT-904 acceptance and hosted FT-1001..FT-1005 gates.
 
 ## Latest execution record
+```text
+Date/time: 2026-10-17
+Task / Epic: FT-602 / E06 transcription provider
+Git SHA: bef8d46
+Files changed: src/FrameTheory.Captions/Transcription.cs, src/FrameTheory.Media/AudioSourcePreparer.cs, tests/FrameTheory.UnitTests/TranscriptionTests.cs, tests/FrameTheory.UnitTests/AudioSourcePreparerTests.cs, docs/GEMINI_PROVIDER.md, docs/AI_EDIT_PLAN.md, docs/SECURITY_PRIVACY.md, docs/V1_ACCEPTANCE_AUDIT.md, docs/adr/0005-gemini-transcription-audio-preparation.md, docs/IMPLEMENTATION_STATUS.md
+Actual behavior and UI path: The consent-gated Video workspace transcription path now keeps audio at or below 20 MiB inline and uses the official resumable Gemini Files API for larger approved local audio. It validates the returned upload host, sends only the returned audio URI to the transcription interaction, deletes the temporary `files/*` resource after success or failure, preserves the source SHA-256 and imports only source-timed verified words. Video extraction is bounded to the Gemini 2 GiB Files API per-file limit and remains owned temporary media.
+Commands executed + OS: Windows 11 x64; focused transcription/audio-preparation tests, full `dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror`, full `dotnet test FrameTheory.sln --no-build --configuration Release`, `dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal`, and `git diff --check` using .NET SDK 10.0.100.
+Test outputs / exit codes: Focused provider/preparer suite passed 17 tests. Full local gate passed 128 unit tests, 2 golden tests, 0 build warnings/errors, clean formatting and clean diff. Fake-HTTP coverage verified resumable upload initialization, URI-only interaction input, remote deletion and the 2 GiB extraction boundary.
+Media fixtures and verification: The long-audio test used a sparse 20 MiB-plus-one-byte WAV source; no user media or API key entered Git. Existing synthetic H.264/AAC extraction coverage remains unchanged.
+Known limitations / blockers: No live Gemini key or spoken fixture was available, so live provider/key acceptance remains unverified. Local ASR fallback, MLT/second-OS playback, approved watermark bytes, interactive GUI acceptance, installers/signing and legal/native redistribution review remain open.
+Next unblocked task: Obtain approved live Gemini spoken-fixture evidence when available, otherwise continue FT-901..FT-904 manual acceptance and FT-1002..FT-1006 release gates.
+```
+
+## Previous execution record
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-1003 / E10 supply-chain evidence

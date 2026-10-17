@@ -1,11 +1,11 @@
 # V1 Acceptance Audit
 
-Audit checkpoint: 2026-10-17, commit `0f5c7f6`, Windows 11 x64 plus hosted CI runs `39050810748` and `39051936860`.
+Audit checkpoint: 2026-10-17, commit `bef8d46`, Windows 11 x64 plus hosted CI runs `39050810748`, `39051936860` and `39052895799`.
 
 ## Evidence
 
 - GitHub task visibility: 46 implementation issues are closed; remaining implementation issues are partial, blocked, or future P1/P2 work; epic issues remain open until their aggregate gates pass.
-- Local Release gate: `dotnet format` exit 0, Release build exit 0 with 0 warnings/errors, 127 unit tests passed, 2 golden tests passed, and `git diff --check` passed.
+- Local Release gate: `dotnet format` exit 0, Release build exit 0 with 0 warnings/errors, 128 unit tests passed, 2 golden tests passed, and `git diff --check` passed. Focused FT-602 provider/preparer coverage passed 17 tests.
 - Hosted CI evidence: runs `39050810748` and `39051936860` passed docs/schema validation plus restore/build/format/test/publish/SHA-256 artifact jobs on Windows, macOS and Linux; `39051936860` also passed the native FFmpeg media smoke on all three runners.
 - Real media evidence: Windows FFmpeg/ffprobe photo/video import, extracted transcription audio, color, timeline, audio, AI edit, Reel and queue-retry smoke outputs are recorded in the implementation checkpoint and E2E matrix. Hosted Windows/macOS/Linux native-media import, extracted-audio and repeated-seek smoke passed in `39051936860`.
 - Packaging evidence: framework-dependent per-OS publish artifacts and SHA-256 manifests are verified; no installer, native FFmpeg bundle, signed artifact or notarized artifact is claimed.
