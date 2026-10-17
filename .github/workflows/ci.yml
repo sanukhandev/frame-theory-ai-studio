@@ -26,7 +26,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            platform: windows-x64
+          - os: macos-latest
+            platform: macos
+          - os: ubuntu-latest
+            platform: linux-x64
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -56,4 +62,24 @@ jobs:
         run: dotnet format --no-restore --verify-no-changes --verbosity minimal
       - name: Test
         if: steps.detect.outputs.has_solution == 'true'
-        run: dotnet test --no-build -c Release
+        run: dotnet test --no-build -c Release --logger "trx;LogFileName=test-results.trx" --results-directory artifacts/test-results
+      - name: Publish desktop validation artifact
+        if: steps.detect.outputs.has_solution == 'true'
+        run: dotnet publish src/FrameTheory.Desktop/FrameTheory.Desktop.csproj --no-restore -c Release --no-self-contained -o artifacts/publish
+      - name: Create SHA-256 manifest
+        if: steps.detect.outputs.has_solution == 'true'
+        shell: pwsh
+        run: |
+          $files = Get-ChildItem artifacts -File -Recurse | Sort-Object FullName
+          $lines = foreach ($file in $files) {
+            $hash = Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName
+            "{0}  {1}" -f $hash.Hash.ToLowerInvariant(), $file.FullName.Replace((Get-Location).Path + [IO.Path]::DirectorySeparatorChar, '')
+          }
+          $lines | Set-Content artifacts/SHA256SUMS.txt
+      - name: Upload validation artifacts
+        if: always() && steps.detect.outputs.has_solution == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: frame-theory-${{ matrix.platform }}-${{ github.sha }}
+          path: artifacts
+          if-no-files-found: warn
