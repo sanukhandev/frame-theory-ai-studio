@@ -67,6 +67,23 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public void DesktopKeyboardShortcutsCoverEveryWorkspace()
+    {
+        var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
+            new FrameTheory.Desktop.WorkspaceCatalog(),
+            new TestCapabilityDetector());
+
+        Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.VideoWorkspace));
+        Xunit.Assert.Equal("Video", viewModel.SelectedWorkspace.Name);
+        Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.PhotoWorkspace));
+        Xunit.Assert.Equal("Photo", viewModel.SelectedWorkspace.Name);
+        Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.ColorWorkspace));
+        Xunit.Assert.Equal("Color", viewModel.SelectedWorkspace.Name);
+        Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.AiWorkspace));
+        Xunit.Assert.Equal("AI", viewModel.SelectedWorkspace.Name);
+    }
+
+    [Xunit.Fact]
     public void CapabilitySummaryProvidesActionableMediaDependencyGuidance()
     {
         var report = new CapabilityReport("Test", "x64",

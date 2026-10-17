@@ -20,6 +20,7 @@ public sealed class AiProposalViewModelTests
         Xunit.Assert.False(viewModel.Actions[0].IsApproved);
         Xunit.Assert.Equal(0, viewModel.ApprovedCount);
         Xunit.Assert.Equal("0 of 1 proposal action(s) approved.", viewModel.ApprovalSummary);
+        Xunit.Assert.NotNull(viewModel.ValidatedJson);
         Xunit.Assert.Contains("No project mutation occurred", viewModel.StatusText, StringComparison.Ordinal);
     }
 
@@ -55,6 +56,7 @@ public sealed class AiProposalViewModelTests
         viewModel.Validate("{not-json", new AiPlanValidationContext("project-1", new HashSet<string>(["clip-1"]), 20));
 
         Xunit.Assert.Empty(viewModel.Actions);
+        Xunit.Assert.Null(viewModel.ValidatedJson);
         Xunit.Assert.Contains("Plan rejected", viewModel.StatusText, StringComparison.Ordinal);
     }
 
