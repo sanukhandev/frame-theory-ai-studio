@@ -41,7 +41,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-402 / E04
-Git SHA: pending commit
+Git SHA: ea2f822
 Files changed: src/FrameTheory.Photo/PhotoCanvas.cs, tests/FrameTheory.UnitTests/PhotoEditTests.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: `PhotoEditState` stores an immutable operation list over the imported preview and renders actual PPM pixels for crop, 90°-multiple rotation and resize. `UndoLast` removes only the latest operation; source preview bytes remain unchanged.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
