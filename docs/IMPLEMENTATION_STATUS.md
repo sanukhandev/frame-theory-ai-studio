@@ -22,7 +22,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-003 / E00
-Git SHA: pending commit
+Git SHA: cffe84f
 Files changed: src/FrameTheory.Application/Capabilities.cs, src/FrameTheory.Platform/SystemCapabilityDetector.cs, src/FrameTheory.Desktop/, tests/FrameTheory.UnitTests/, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: The desktop footer shows OS, storage, FFmpeg and ffprobe states. Capability probing uses safe process arguments, temporary storage write/delete, cancellation and a non-fatal unknown GPU state; manual editing remains launchable when tools are missing.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release; dotnet test FrameTheory.sln --no-build --configuration Release; interactive `dotnet` managed-DLL launch for 10 seconds then Ctrl+C; git diff --check
