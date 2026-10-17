@@ -259,6 +259,43 @@ var aiReceipt = await exporter.ExportAsync(
     CancellationToken.None);
 Console.WriteLine($"ai-output={aiReceipt.OutputPath}; bytes={aiReceipt.OutputBytes}; color={aiReceipt.VerifiedMetadata.ColorProfile}");
 
+var roughCutEditor = new TimelineEditorViewModel(frameRate);
+roughCutEditor.AddMedia(importedSourceA.Metadata);
+roughCutEditor.AddMedia(importedSourceB.Metadata);
+var roughCutPlan = RoughCutPlanner.Create([
+    new RoughCutSource(importedSourceA.Metadata.Id.Value, 0, importedSourceA.Metadata.DurationFrames, importedSourceA.WaveformPeaks),
+    new RoughCutSource(importedSourceB.Metadata.Id.Value, importedSourceA.Metadata.DurationFrames, importedSourceB.Metadata.DurationFrames, importedSourceB.WaveformPeaks)
+]);
+roughCutEditor.ApplyRoughCut(roughCutPlan);
+var roughCutState = TimelineProjectStateJson.Serialize(roughCutEditor.CaptureProjectState());
+var reopenedRoughCutEditor = new TimelineEditorViewModel(frameRate);
+reopenedRoughCutEditor.RestoreProjectState(TimelineProjectStateJson.Deserialize(roughCutState));
+var restoredRoughCutIds = reopenedRoughCutEditor.TrackRows
+    .Single(row => row.Kind == TimelineTrackKind.Video)
+    .Clips
+    .Select(clip => clip.MediaId)
+    .ToArray();
+if (!restoredRoughCutIds.SequenceEqual(roughCutPlan.Segments.Select(segment => segment.MediaId), StringComparer.Ordinal))
+{
+    throw new InvalidOperationException("Rough-cut project reopen did not preserve the planned clip order.");
+}
+
+var roughCutOutput = Path.Combine(Path.GetDirectoryName(destination) ?? ".", $"{Path.GetFileNameWithoutExtension(destination)}-rough-cut.mp4");
+var roughCutReceipt = await exporter.ExportAsync(
+    reopenedRoughCutEditor.BuildRenderPlan(
+        importedSourceA.Metadata.Width,
+        importedSourceA.Metadata.Height,
+        new Dictionary<MediaId, Uri>
+        {
+            [importedSourceA.Metadata.Id] = sourceA,
+            [importedSourceB.Metadata.Id] = sourceB
+        }),
+    roughCutOutput,
+    new ExportPreset(importedSourceA.Metadata.Width, importedSourceA.Metadata.Height, frameRate, importedSourceA.Metadata.HasAudio),
+    new Progress<ExportProgress>(update => Console.WriteLine($"rough-cut-stage={update.Stage}; fraction={update.Fraction:0.0}")),
+    CancellationToken.None);
+Console.WriteLine($"rough-cut-output={roughCutReceipt.OutputPath}; bytes={roughCutReceipt.OutputBytes}; color={roughCutReceipt.VerifiedMetadata.ColorProfile}");
+
 var reelEditor = new TimelineEditorViewModel(frameRate);
 reelEditor.AddMedia(importedSourceA.Metadata);
 reelEditor.AddMedia(importedSourceB.Metadata);
