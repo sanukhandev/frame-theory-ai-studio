@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Current status: MEDIA IMPORT PREVIEW COMPLETE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105 and FT-201 through FT-204 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
+**Current status: VERIFIED VIDEO EXPORT COMPLETE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105 and FT-201 through FT-205 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
 
 ## Completed
 - [x] Product README and Codex agent operating contract
@@ -24,24 +24,25 @@
 - [x] FT-202 cancellable exact-frame FFmpeg decoder with bounded in-memory cache
 - [x] FT-203 synchronized video/audio timeline graph with deterministic seek, scrub, step and sample mapping
 - [x] FT-204 real local media import, thumbnail/waveform extraction and Avalonia drag/drop browser
+- [x] FT-205 cancellable FFmpeg H.264/AAC export with progress, atomic finalization and ffprobe verification
 
 ## Next tasks
-1. FT-205 cancellable export worker with atomic finalization and stream verification.
+1. FT-301 canonical color graph with explicit input/working/output profiles.
 2. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
 3. Iterate per docs/EPICS_AND_TASKS.md; update this checkpoint **after every tested commit**.
 
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
-Task / Epic: FT-204 / E02
-Git SHA: 560178a
-Files changed: src/FrameTheory.Media/MediaImport.cs, tests/FrameTheory.UnitTests/MediaImportTests.cs, tools/FrameTheory.MediaImportSmoke/, src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/FrameTheory.Desktop.csproj, FrameTheory.sln, docs/DEVELOPMENT.md, docs/IMPLEMENTATION_STATUS.md
-Actual behavior and UI path: Dropping local files on the desktop window invokes the shared probe/decoder/import service, lists each successful import and reports metadata, thumbnail size and waveform peak count. `FfmpegMediaImporter` uses temp PCM output, bounded peak extraction and cleanup without mutating source media. Existing FT-104 relink logic remains available headlessly.
-Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; real `FrameTheory.MediaImportSmoke` against temporary H.264/AAC MP4; git diff --check
-Test outputs / exit codes: restore 0; build 0 with 0 warnings/0 errors; format verification 0; 24 unit tests and 1 golden test passed; real import returned a 107-byte PPM thumbnail and 128 waveform peaks with peak 0.295.
+Task / Epic: FT-205 / E02
+Git SHA: pending commit
+Files changed: src/FrameTheory.Media/MediaExport.cs, tests/FrameTheory.UnitTests/MediaExportTests.cs, tools/FrameTheory.MediaExportSmoke/, FrameTheory.sln, docs/IMPLEMENTATION_STATUS.md
+Actual behavior and UI path: `FfmpegMediaExporter` encodes a local video to H.264/AAC in a destination-directory temp file, reports encoding/verifying/completed progress, probes the temp stream, then atomically moves it to the requested output. Source replacement is rejected; failed and canceled jobs clean temp files.
+Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; real `FrameTheory.MediaExportSmoke` and `FrameTheory.MediaProbeSmoke` against temporary H.264/AAC MP4; git diff --check
+Test outputs / exit codes: restore 0; build 0 with 0 warnings/0 errors; format verification 0; 26 unit tests and 1 golden test passed; real export reported 30 frames, 8x4, 1 second, audio=true and 19,255 output bytes.
 Media fixtures and verification: Temporary FFmpeg-generated MP4 under `%TEMP%\frame-theory-ffmpeg-spike`; no media binary committed.
-Known limitations / blockers: FT-006 remains partial pending MLT and second-OS evidence. Relink has no dedicated picker UI yet; playback, audio output and export remain separate tasks. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux import runs are unverified.
-Next unblocked task: FT-205
+Known limitations / blockers: FT-006 remains partial pending MLT and second-OS evidence. Export currently renders one local source video rather than the timeline/effect graph; photo export and UI export controls remain later tasks. Relink has no dedicated picker UI yet. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux export runs are unverified.
+Next unblocked task: FT-301
 ```
 
 ## Task execution record template
@@ -59,7 +60,7 @@ Next unblocked task:
 ```
 
 ## Release verification status
-Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204 built/tested; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
+Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205 built/tested; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
 
 ## Honest reporting
 Codex should not mark a task complete for a mock UI, TODO, downloaded asset, simulated exporter, docs-only passing CI, or speculative integration. If execution is interrupted, preserve status and resume from first unblocked task on next run.
