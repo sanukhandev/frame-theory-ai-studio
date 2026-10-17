@@ -7,7 +7,7 @@ Decisions must be revisited only with evidence. Create `docs/adr/NNNN-*.md` for 
 | ADR-0001 | .NET C# + Avalonia for shared desktop shell | Accepted direction, pending real boot | Free core, Windows/macOS/Linux support; test native packages |
 | ADR-0002 | Offline core; Gemini optional and consent-based | Accepted | Manual workflows must survive no key/internet |
 | ADR-0003 | Structured AI plan + strict local executor | Accepted | Reversibility and safety; see AI_EDIT_PLAN |
-| ADR-0004 | FFmpeg/ffprobe for decode/export; evaluate MLT for timeline | **Provisional; spike partial** | Windows FFmpeg smoke and safe process adapter recorded in [ADR-0004](adr/0004-ffmpeg-spike.md); second OS, MLT and release licensing proof remain required |
+| ADR-0004 | FFmpeg/ffprobe for decode/export with a deterministic timeline compositor; do not adopt MLT yet | **Accepted for current path** | Hosted three-OS seek, multitrack, audio-mix, AI-edit and Reel exports are recorded in [ADR-0004](adr/0004-ffmpeg-spike.md); interactive GUI parity and release licensing remain separate gates |
 | ADR-0005 | Unified color graph with explicit profiles | Accepted direction | Prevent differing photo vs video results |
 | ADR-0006 | Versioned project JSON, optional SQLite indexes | Accepted direction | Portable edit history and cheap cache invalidation |
 | ADR-0007 | Image renderer library selection | **Open** | SkiaSharp vs ImageSharp: cost/licensing, GPU, ICC, fidelity, cross-platform |
