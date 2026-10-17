@@ -62,6 +62,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private ITimelineVideoExporter? _timelineExporter;
     private readonly ExportQueueService _exportQueue;
     private readonly HttpClient _transcriptionHttpClient;
+    private readonly IAudioSourcePreparer _audioSourcePreparer;
     private readonly IGeminiInteractionHistory _geminiInteractionHistory;
     private string? _lastGeminiInteractionId;
     private ExportQueueJob? _activeExport;
@@ -85,12 +86,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ExportQueueService? exportQueue = null,
         IDiagnosticsLog? diagnosticsLog = null,
         HttpClient? transcriptionHttpClient = null,
-        IGeminiInteractionHistory? geminiInteractionHistory = null)
+        IGeminiInteractionHistory? geminiInteractionHistory = null,
+        IAudioSourcePreparer? audioSourcePreparer = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
         _diagnosticsLog = diagnosticsLog ?? new FileDiagnosticsLog();
         _transcriptionHttpClient = transcriptionHttpClient ?? new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
+        _audioSourcePreparer = audioSourcePreparer ?? new FfmpegAudioSourcePreparer(new FfmpegProcessRunner());
         _geminiInteractionHistory = geminiInteractionHistory ?? new FileGeminiInteractionHistory();
         _mediaImporter = mediaImporter;
         _exportQueue = exportQueue ?? new ExportQueueService();
@@ -592,15 +595,20 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 return false;
             }
 
+            CaptionStatusText = $"Preparing approved media: {Path.GetFileName(fullPath)}.";
+            await using var preparedSource = await _audioSourcePreparer.PrepareAsync(new Uri(fullPath), cancellationToken);
             CaptionStatusText = $"Uploading approved audio: {Path.GetFileName(fullPath)}.";
             var provider = new GeminiTranscriptionProvider(
                 _transcriptionHttpClient,
                 new GeminiTranscriptionOptions(apiKey, uploadConsent: true));
             var result = await provider.TranscribeAsync(
-                new Uri(fullPath),
+                preparedSource.Source,
                 new Progress<TranscriptionProgress>(update => CaptionStatusText = $"{update.Stage} ({update.Fraction:P0})"),
                 cancellationToken);
-            TimelineEditor.ImportTranscript(result);
+            TimelineEditor.ImportTranscript(new TranscriptResult(
+                new Uri(fullPath),
+                result.SourceFingerprint,
+                result.Words));
             CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} verified transcript caption cue(s) from {Path.GetFileName(fullPath)}.";
             return true;
         }

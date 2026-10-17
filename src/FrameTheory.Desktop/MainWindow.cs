@@ -764,7 +764,7 @@ public sealed class MainWindow : Window
         };
         var captionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         captionStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CaptionStatusText)));
-        var transcriptionConsent = new CheckBox { Content = "I approve uploading this exact local audio file to Gemini" };
+        var transcriptionConsent = new CheckBox { Content = "I approve uploading this exact local audio file or extracted video audio track to Gemini" };
         AutomationProperties.SetName(transcriptionConsent, "Gemini transcription upload consent");
         var transcribeAudio = new Button { Content = "Transcribe approved audio" };
         transcribeAudio.Click += async (_, _) =>

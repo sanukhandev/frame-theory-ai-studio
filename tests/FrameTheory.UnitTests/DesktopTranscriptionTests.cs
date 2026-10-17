@@ -3,6 +3,7 @@ using System.Text;
 using FrameTheory.AI;
 using FrameTheory.Application;
 using FrameTheory.Desktop;
+using FrameTheory.Media;
 
 namespace FrameTheory.UnitTests;
 
@@ -65,6 +66,54 @@ public sealed class DesktopTranscriptionTests
         Xunit.Assert.Contains("approve uploading", viewModel.CaptionStatusText, StringComparison.Ordinal);
     }
 
+    [Xunit.Fact]
+    public async Task DesktopTranscriptionExtractsVideoAudioBeforeUpload()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-transcription-video-");
+        try
+        {
+            var videoPath = Path.Combine(directory.FullName, "spoken.mp4");
+            var audioPath = Path.Combine(directory.FullName, "spoken.wav");
+            await File.WriteAllBytesAsync(videoPath, [9, 9, 9]);
+            await File.WriteAllBytesAsync(audioPath, [7, 8, 9]);
+            var secretStore = new InMemorySecretStore();
+            var settings = new GeminiSettingsViewModel(new GeminiConfigurationService(secretStore));
+            await settings.SaveAsync("video-secret", CancellationToken.None);
+            string? requestBody = null;
+            using var client = new HttpClient(new StubHandler(request =>
+            {
+                requestBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        "{\"status\":\"completed\",\"steps\":[{\"content\":[{\"annotations\":[{\"type\":\"word_info\",\"text\":\"video\",\"start_offset\":\"0.100s\",\"end_offset\":\"0.400s\"}]}]}]}",
+                        Encoding.UTF8,
+                        "application/json")
+                };
+            }));
+            var preparer = new StubAudioSourcePreparer(new Uri(audioPath));
+            var viewModel = new MainWindowViewModel(
+                new WorkspaceCatalog(),
+                new TestCapabilityDetector(),
+                geminiSettings: settings,
+                transcriptionHttpClient: client,
+                audioSourcePreparer: preparer);
+
+            var succeeded = await viewModel.TranscribeAudioAsync(videoPath, uploadConsent: true, CancellationToken.None);
+
+            Xunit.Assert.True(succeeded);
+            Xunit.Assert.Equal(new Uri(videoPath), preparer.RequestedSource);
+            Xunit.Assert.Contains("audio/wav", requestBody, StringComparison.Ordinal);
+            Xunit.Assert.Contains(Convert.ToBase64String([7, 8, 9]), requestBody, StringComparison.Ordinal);
+            Xunit.Assert.DoesNotContain(Convert.ToBase64String([9, 9, 9]), requestBody, StringComparison.Ordinal);
+            Xunit.Assert.Equal("video", viewModel.TimelineEditor.Captions.Single().Text);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private sealed class InMemorySecretStore : ISecretStore
     {
         private string? _secret;
@@ -88,6 +137,17 @@ public sealed class DesktopTranscriptionTests
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
             Task.FromResult(responder(request));
+    }
+
+    private sealed class StubAudioSourcePreparer(Uri preparedSource) : IAudioSourcePreparer
+    {
+        public Uri? RequestedSource { get; private set; }
+
+        public Task<PreparedAudioSource> PrepareAsync(Uri source, CancellationToken cancellationToken)
+        {
+            RequestedSource = source;
+            return Task.FromResult(new PreparedAudioSource(preparedSource, temporaryPath: null));
+        }
     }
 
     private sealed class TestCapabilityDetector : ICapabilityDetector
