@@ -82,4 +82,10 @@ public sealed record ProjectSnapshot
     public string WorkingColorSpace { get; }
 
     public IReadOnlyList<MediaReference> MediaReferences { get; }
+
+    public ProjectSnapshot WithCanvas(int canvasWidth, int canvasHeight) =>
+        new(ProjectId, FrameRate, canvasWidth, canvasHeight, WorkingColorSpace, MediaReferences);
+
+    public ProjectSnapshot WithMediaReferences(IEnumerable<MediaReference> mediaReferences) =>
+        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, mediaReferences);
 }
