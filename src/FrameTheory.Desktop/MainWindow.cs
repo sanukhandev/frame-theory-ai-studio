@@ -146,6 +146,9 @@ public sealed class MainWindow : Window
             Foreground = Brushes.LightGray
         };
         status.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CapabilityStatusText)));
+        var refresh = new Button { Content = "Refresh capability check", Margin = new Thickness(16, 0, 16, 8) };
+        AutomationProperties.SetName(refresh, "Refresh capability check");
+        refresh.Click += async (_, _) => await viewModel.RefreshCapabilitiesAsync(CancellationToken.None);
         var diagnostics = new TextBlock
         {
             Margin = new Thickness(16, 0, 16, 8),
@@ -156,7 +159,7 @@ public sealed class MainWindow : Window
         return new Border
         {
             Background = Brushes.Black,
-            Child = new StackPanel { Children = { status, diagnostics } }
+            Child = new StackPanel { Children = { status, refresh, diagnostics } }
         };
     }
 
