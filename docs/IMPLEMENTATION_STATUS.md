@@ -8,7 +8,7 @@
 
 **Timeline restore safety checkpoint (2026-10-17):** Restore now validates and constructs all derived clip settings, media mappings and view state before swapping them into the active editor. An invalid saved grade is covered by a regression test proving the current timeline remains unchanged. Focused persistence tests pass 4/4.
 
-**FT-1002 timeline relink checkpoint (2026-10-18):** Video project open now detects missing relative media before mutating the active timeline, exposes the missing references in the Video workspace and atomically relinks selected replacements within the project folder before reopening. Focused persistence/relink coverage passes 5/5; failures and cancellation preserve the current project.
+**FT-1002 timeline relink checkpoint (2026-10-18):** Video project open now detects missing relative media before mutating the active timeline, exposes the missing references in the Video workspace and atomically relinks selected replacements within the project folder before reopening. Focused persistence/relink coverage passes 5/5; failures and cancellation preserve the current project. Hosted run `39068478308` passed the full three-OS quality and native-media matrix.
 
 **Timeline playback checkpoint (2026-10-17):** The Video workspace now exposes cancellable frame-accurate Play/Stop controls. Playback temporarily disables timeline snapping so boundary clamping cannot stall frame advancement, decodes every frame through the shared preview path, restores the prior snapping setting and reports cancellation or completion. Focused playback coverage passes 4/4.
 
