@@ -24,7 +24,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-004 / E00
-Git SHA: pending commit
+Git SHA: 293080f
 Files changed: Directory.Build.props, .github/workflows/ci.yml, docs/DEPENDENCIES_AND_LICENSES.md, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: Release builds use deterministic compiler settings and the pinned analyzer package; CI now runs restore, build, format verification and tests on Windows, macOS and Linux runners when a solution exists.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release
