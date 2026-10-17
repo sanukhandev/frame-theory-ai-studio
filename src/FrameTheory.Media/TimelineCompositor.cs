@@ -12,7 +12,8 @@ public sealed record TimelineVideoRenderPlan
         long durationFrames,
         IReadOnlyDictionary<MediaId, Uri> sources,
         IReadOnlyList<TimelineVideoLayer> layers,
-        IReadOnlyList<TimelineAudioLayer>? audioLayers = null)
+        IReadOnlyList<TimelineAudioLayer>? audioLayers = null,
+        IReadOnlyList<TimelineTitle>? titles = null)
     {
         if (width <= 0 || height <= 0 || durationFrames <= 0)
         {
@@ -28,6 +29,7 @@ public sealed record TimelineVideoRenderPlan
         Sources = sources;
         Layers = layers.OrderBy(layer => layer.Order).ToArray();
         AudioLayers = (audioLayers ?? []).OrderBy(layer => layer.Order).ToArray();
+        Titles = (titles ?? []).OrderBy(title => title.Order).ToArray();
     }
 
     public RationalFrameRate FrameRate { get; }
@@ -43,6 +45,8 @@ public sealed record TimelineVideoRenderPlan
     public IReadOnlyList<TimelineVideoLayer> Layers { get; }
 
     public IReadOnlyList<TimelineAudioLayer> AudioLayers { get; }
+
+    public IReadOnlyList<TimelineTitle> Titles { get; }
 }
 
 public sealed record TimelineFilterGraph(string FilterComplex, IReadOnlyList<Uri> Inputs, string OutputLabel, string? AudioOutputLabel);
@@ -74,6 +78,16 @@ public sealed class TimelineFilterGraphBuilder
             var layerStream = BuildLayer(plan, layer, inputIndexes, filters, layerIndex++);
             var nextBase = $"base{layerIndex}";
             filters.Add($"[{currentBase}][{layerStream}]overlay=x=0:y=0:eof_action=pass:shortest=0:format=auto[{nextBase}]");
+            currentBase = nextBase;
+        }
+
+        var titleIndex = 0;
+        foreach (var title in plan.Titles)
+        {
+            var fontPath = GetFontPath(title);
+            var nextBase = $"title{titleIndex++}";
+            var titleEndFrame = checked(title.TimelineRange.StartFrame + title.TimelineRange.Length);
+            filters.Add($"[{currentBase}]drawtext=fontfile='{EscapeDrawText(fontPath)}':text='{EscapeDrawText(title.Text)}':fontsize={title.FontSize}:fontcolor=0x{title.ColorRgb:X6}:x={TitleX(title.Placement)}:y={TitleY(title.Placement)}:enable='between(t,{FormatSeconds(title.TimelineRange.StartFrame, plan.FrameRate)},{FormatSeconds(titleEndFrame, plan.FrameRate)})'[{nextBase}]");
             currentBase = nextBase;
         }
 
@@ -294,6 +308,44 @@ public sealed class TimelineFilterGraphBuilder
 
         return new Uri(path);
     }
+
+    private static string GetFontPath(TimelineTitle title)
+    {
+        var path = Path.GetFullPath(title.FontPath);
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("The selected title font was not found.", path);
+        }
+
+        if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new MediaExportException("Symlinked title fonts are not accepted.");
+        }
+
+        return path;
+    }
+
+    private static string TitleX(TimelineTitlePlacement placement) => placement switch
+    {
+        TimelineTitlePlacement.TopLeft => "w*0.1",
+        TimelineTitlePlacement.TopCenter or TimelineTitlePlacement.Center or TimelineTitlePlacement.BottomCenter => "(w-text_w)/2",
+        _ => throw new ArgumentOutOfRangeException(nameof(placement))
+    };
+
+    private static string TitleY(TimelineTitlePlacement placement) => placement switch
+    {
+        TimelineTitlePlacement.TopLeft or TimelineTitlePlacement.TopCenter => "h*0.1",
+        TimelineTitlePlacement.Center => "(h-text_h)/2",
+        TimelineTitlePlacement.BottomCenter => "h*0.8",
+        _ => throw new ArgumentOutOfRangeException(nameof(placement))
+    };
+
+    private static string EscapeDrawText(string value) => value
+        .Replace("\\", "\\\\", StringComparison.Ordinal)
+        .Replace(":", "\\:", StringComparison.Ordinal)
+        .Replace(",", "\\,", StringComparison.Ordinal)
+        .Replace("'", "\\'", StringComparison.Ordinal)
+        .Replace("%", "\\%", StringComparison.Ordinal);
 
     private static string Rate(RationalFrameRate frameRate) => $"{frameRate.Numerator}/{frameRate.Denominator}";
 

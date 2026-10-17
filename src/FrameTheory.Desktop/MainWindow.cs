@@ -360,6 +360,36 @@ public sealed class MainWindow : Window
         fadeAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioSettingsToSelected(0, muted: false, fadeInFrames: 2, fadeOutFrames: 2));
         var clearAudio = new Button { Content = "Clear audio" };
         clearAudio.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedAudioSettings);
+        var titleText = new TextBox { PlaceholderText = "Title text", Width = 220 };
+        var addTitle = new Button { Content = "Add title" };
+        addTitle.Click += async (_, _) =>
+        {
+            if (string.IsNullOrWhiteSpace(titleText.Text))
+            {
+                operationStatus.Text = "Enter title text before adding a title.";
+                return;
+            }
+
+            var topLevel = TopLevel.GetTopLevel(addTitle);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var font = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("OpenType or TrueType font") { Patterns = ["*.ttf", "*.otf"] }]
+            });
+            var fontPath = font.SingleOrDefault()?.TryGetLocalPath();
+            if (fontPath is null)
+            {
+                operationStatus.Text = "Choose a licensed local .ttf or .otf font.";
+                return;
+            }
+
+            RunTimelineAction(() => timeline.AddTitle(titleText.Text!, fontPath));
+        };
         var export = new Button { Content = "Export composite MP4" };
         export.Click += async (_, _) =>
         {
@@ -406,6 +436,7 @@ public sealed class MainWindow : Window
                     operationStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { fadeIn, pushIn, clearAnimation } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { muteAudio, gainAudio, fadeAudio, clearAudio } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { titleText, addTitle } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { export } },
                     exportStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { snap, new TextBlock { Text = "Zoom" }, zoom } }

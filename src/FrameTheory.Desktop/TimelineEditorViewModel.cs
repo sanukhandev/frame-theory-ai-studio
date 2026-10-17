@@ -37,6 +37,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private readonly List<TimelineClip> _audioClips = [];
     private readonly Dictionary<TimelineClip, TimelineTransformKeyframes> _animations = [];
     private readonly Dictionary<TimelineClip, TimelineAudioSegment> _audioSettings = [];
+    private readonly List<TimelineTitle> _titles = [];
     private readonly HashSet<MediaId> _mediaIds = [];
     private TimelineGraph _graph;
     private TimelineTransport _transport;
@@ -178,7 +179,24 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             [new TimelineVideoLayer("Video 1", 0, _videoClips.Select(clip => new TimelineVideoSegment(
                 clip,
                 animation: _animations.TryGetValue(clip, out var animation) ? animation : null)))],
-            audioLayers);
+            audioLayers,
+            _titles);
+    }
+
+    public void AddTitle(string text, string fontPath)
+    {
+        if (_videoClips.Count == 0)
+        {
+            throw new InvalidOperationException("Import at least one video before adding a title.");
+        }
+
+        var duration = Math.Min(90, TotalFrames - CurrentFrame);
+        if (duration <= 0)
+        {
+            throw new InvalidOperationException("The playhead is outside the title range.");
+        }
+
+        _titles.Add(new TimelineTitle(text, fontPath, CurrentFrame, duration, order: _titles.Count));
     }
 
     public void ApplyAnimationPresetToSelected(TimelineAnimationPreset preset)

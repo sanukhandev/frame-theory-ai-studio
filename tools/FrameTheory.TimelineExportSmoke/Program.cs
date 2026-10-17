@@ -1,9 +1,9 @@
 using FrameTheory.Domain;
 using FrameTheory.Media;
 
-if (args.Length != 3)
+if (args.Length is < 3 or > 4)
 {
-    throw new ArgumentException("Usage: FrameTheory.TimelineExportSmoke <source-a> <source-b> <destination>");
+    throw new ArgumentException("Usage: FrameTheory.TimelineExportSmoke <source-a> <source-b> <destination> [font-path]");
 }
 
 var sourceA = new Uri(Path.GetFullPath(args[0]));
@@ -19,6 +19,9 @@ var audioA = TimelineClip.Audio(idA, 0, 48000, 0, 30, 48000);
 var audioB = TimelineClip.Audio(idB, 0, 48000, 30, 30, 48000);
 var baseTransform = new TimelineVideoTransform(opacity: 0.9, scale: 1, offsetX: 0, offsetY: 0);
 var overlayTransform = new TimelineVideoTransform(opacity: 0.35, scale: 0.5, offsetX: 2, offsetY: 1);
+var titles = args.Length == 4
+    ? new[] { new TimelineTitle("FRAME THEORY", Path.GetFullPath(args[3]), 5, 45, placement: TimelineTitlePlacement.TopCenter) }
+    : Array.Empty<TimelineTitle>();
 var plan = new TimelineVideoRenderPlan(
     frameRate,
     16,
@@ -40,7 +43,8 @@ var plan = new TimelineVideoRenderPlan(
     [new TimelineAudioLayer("audio", 0, [
             new TimelineAudioSegment(audioA, fadeInFrames: 2, fadeOutFrames: 3),
             new TimelineAudioSegment(audioB, gainDb: -3, fadeInFrames: 2, fadeOutFrames: 3)
-        ])]
+        ])],
+    titles
     );
 var runner = new FfmpegProcessRunner();
 var exporter = new FfmpegTimelineVideoExporter(runner, new FfprobeMediaProbe(runner));

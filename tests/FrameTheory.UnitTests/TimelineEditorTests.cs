@@ -103,6 +103,21 @@ public sealed class TimelineEditorTests
         Xunit.Assert.Equal(2, audio.FadeOutFrames);
     }
 
+    [Xunit.Fact]
+    public void TimelineEditorAddsTitlesAtTheCurrentFrame()
+    {
+        var source = new Uri("file:///title.mp4");
+        var metadata = Metadata(source, "title", 90, hasAudio: false);
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(metadata);
+        editor.SeekFrame(10);
+        editor.AddTitle("Hook", "C:\\Fonts\\licensed.ttf");
+
+        var title = editor.BuildRenderPlan(1920, 1080, new Dictionary<MediaId, Uri> { [metadata.Id] = source }).Titles.Single();
+        Xunit.Assert.Equal("Hook", title.Text);
+        Xunit.Assert.Equal(10, title.TimelineRange.StartFrame);
+    }
+
     private static MediaSourceMetadata Metadata(Uri uri, string fingerprint, long durationFrames, bool hasAudio = true) => new(
         MediaId.Create(uri, fingerprint),
         uri,
