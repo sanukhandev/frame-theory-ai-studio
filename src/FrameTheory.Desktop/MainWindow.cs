@@ -778,7 +778,7 @@ public sealed class MainWindow : Window
             var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
                 AllowMultiple = false,
-                FileTypeFilter = [new FilePickerFileType("Audio or video with audio") { Patterns = ["*.wav", "*.mp3", "*.m4a", "*.aac", "*.flac", "*.ogg", "*.mp4", "*.mov"] }]
+                FileTypeFilter = [new FilePickerFileType("Audio or video with audio") { Patterns = ["*.wav", "*.mp3", "*.m4a", "*.aac", "*.flac", "*.ogg", "*.opus", "*.aif", "*.aiff", "*.avi", "*.mkv", "*.mp4", "*.mov", "*.mpeg", "*.mpg", "*.webm"] }]
             });
             var path = files.SingleOrDefault()?.TryGetLocalPath();
             if (path is not null)
