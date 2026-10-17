@@ -812,6 +812,11 @@ public sealed class MainWindow : Window
         var timelinePreview = new Image { Width = 320, Height = 180, Stretch = Stretch.Uniform };
         var timelinePreviewStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         timelinePreviewStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePreviewStatusText)));
+        var analyzeMotion = new Button { Content = "Analyze motion" };
+        AutomationProperties.SetName(analyzeMotion, "Analyze timeline motion");
+        analyzeMotion.Click += async (_, _) => await viewModel.AnalyzeTimelineMotionAsync(CancellationToken.None);
+        var motionAnalysisStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        motionAnalysisStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.MotionAnalysisStatusText)));
         void RefreshTimelinePreview() => timelinePreview.Source = CreateBitmap(viewModel.TimelinePreviewPpm);
         viewModel.PropertyChanged += (_, args) =>
         {
@@ -1234,7 +1239,7 @@ public sealed class MainWindow : Window
                 Children =
                 {
                     new TextBlock { Text = "Frame-accurate timeline", FontWeight = FontWeight.SemiBold },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { timelinePreview, new StackPanel { Spacing = 8, Children = { previewCurrentFrame, playTimeline, stopTimeline, usePreviewProxy, timelinePreviewStatus } } } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { timelinePreview, new StackPanel { Spacing = 8, Children = { previewCurrentFrame, playTimeline, stopTimeline, usePreviewProxy, analyzeMotion, timelinePreviewStatus, motionAnalysisStatus } } } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { new TextBlock { Text = "Frame" }, frameStatus, new TextBlock { Text = "Position" }, positionStatus } },
                     playhead,
                     ruler,

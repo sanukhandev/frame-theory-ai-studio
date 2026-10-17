@@ -80,6 +80,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private int _videoHeight;
     private byte[]? _timelinePreviewPpm;
     private string _timelinePreviewStatusText = "No timeline frame preview requested.";
+    private string _motionAnalysisStatusText = "No timeline motion analysis requested.";
     private string _timelineProjectStatusText = "No timeline project opened.";
     private ProjectSnapshot? _pendingTimelineSnapshot;
     private string? _pendingTimelineProjectPath;
@@ -176,6 +177,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             _timelineProjectStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string MotionAnalysisStatusText
+    {
+        get => _motionAnalysisStatusText;
+        private set
+        {
+            if (value == _motionAnalysisStatusText)
+            {
+                return;
+            }
+
+            _motionAnalysisStatusText = value;
             OnPropertyChanged();
         }
     }
@@ -704,6 +720,72 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     }
 
     public void StopTimelinePreview() => _timelinePlaybackCancellation?.Cancel();
+
+    public async Task<bool> AnalyzeTimelineMotionAsync(CancellationToken cancellationToken)
+    {
+        var originalFrame = TimelineEditor.CurrentFrame;
+        var frames = new List<MotionFrame>();
+        try
+        {
+            var initialSample = TimelineEditor.SeekFrame(originalFrame).Samples
+                .FirstOrDefault(item => item.TrackKind == TimelineTrackKind.Video && item.SourceFrame is not null);
+            if (initialSample is null || initialSample.SourceFrame is not long ||
+                !_mediaSources.TryGetValue(initialSample.MediaId, out var source) ||
+                !_analysisAssets.TryGetValue(initialSample.MediaId, out var media) || media.Metadata.FrameRate is not { } frameRate)
+            {
+                MotionAnalysisStatusText = "Import a video and place the playhead over a video clip first.";
+                return false;
+            }
+
+            var endFrame = Math.Min(TimelineEditor.TotalFrames, checked(originalFrame + 12));
+            for (var timelineFrame = originalFrame; timelineFrame < endFrame; timelineFrame++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var sample = TimelineEditor.SeekFrame(timelineFrame).Samples
+                    .FirstOrDefault(item => item.TrackKind == TimelineTrackKind.Video && item.SourceFrame is not null);
+                if (sample is null || sample.MediaId != initialSample.MediaId || sample.SourceFrame is not long sourceFrame)
+                {
+                    break;
+                }
+
+                var ppm = await _timelinePreviewDecoder.DecodeFrameAsync(source, frameRate, sourceFrame, cancellationToken);
+                var raster = PpmRaster.Parse(ppm);
+                frames.Add(new MotionFrame(frames.Count, raster.Width, raster.Height, raster.RgbBytes));
+            }
+
+            if (frames.Count < 2)
+            {
+                MotionAnalysisStatusText = "Motion analysis needs at least two decodable frames from one video clip.";
+                return false;
+            }
+
+            var vectors = new TranslationMotionTracker().Track(frames);
+            var plan = StabilizationPlanner.Plan(vectors);
+            var meanX = vectors.Average(vector => vector.OffsetX);
+            var meanY = vectors.Average(vector => vector.OffsetY);
+            var maxCompensation = plan.Transforms
+                .Select(transform => Math.Max(Math.Abs(transform.OffsetX), Math.Abs(transform.OffsetY)))
+                .DefaultIfEmpty()
+                .Max();
+            MotionAnalysisStatusText = $"Analyzed {frames.Count} frames; mean translation {meanX:0.##},{meanY:0.##}; max compensation {maxCompensation}px.";
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            MotionAnalysisStatusText = "Timeline motion analysis canceled.";
+            return false;
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidOperationException or MediaDecodeException)
+        {
+            _diagnosticsLog.Record("timeline-motion-analysis-failed", exception);
+            MotionAnalysisStatusText = $"Timeline motion analysis failed: {exception.Message}";
+            return false;
+        }
+        finally
+        {
+            TimelineEditor.SeekFrame(originalFrame);
+        }
+    }
 
     public async Task<bool> SaveTimelineProjectAsync(string projectPath, CancellationToken cancellationToken)
     {

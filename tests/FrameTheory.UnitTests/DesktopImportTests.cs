@@ -95,6 +95,25 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task TimelineMotionAnalysisUsesDecodedFramesAndRestoresThePlayhead()
+    {
+        var decoder = new StubPreviewDecoder();
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new VideoImporter(),
+            timelinePreviewDecoder: decoder);
+
+        await viewModel.ImportFilesAsync(["motion.mp4"], CancellationToken.None);
+        viewModel.TimelineEditor.SeekFrame(4);
+
+        Xunit.Assert.True(await viewModel.AnalyzeTimelineMotionAsync(CancellationToken.None));
+        Xunit.Assert.Equal(4, viewModel.TimelineEditor.CurrentFrame);
+        Xunit.Assert.Equal(12, decoder.Frames.Count);
+        Xunit.Assert.Contains("Analyzed 12 frames", viewModel.MotionAnalysisStatusText, StringComparison.Ordinal);
+    }
+
+    [Xunit.Fact]
     public async Task TimelinePlaybackDecodesEveryFrameWithoutBoundarySnapping()
     {
         var decoder = new StubPreviewDecoder();
