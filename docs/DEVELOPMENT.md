@@ -23,6 +23,7 @@ dotnet tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaI
 dotnet tools/FrameTheory.PhotoImportSmoke/bin/Release/net10.0/FrameTheory.PhotoImportSmoke.dll <image-path>
 dotnet tools/FrameTheory.PhotoExportSmoke/bin/Release/net10.0/FrameTheory.PhotoExportSmoke.dll <image-path> <output-path> [png|jpeg]
 ```
+For a video fixture, the media-import smoke also extracts its first audio track through the transcription preparer, probes the owned temporary WAV, and deletes it on completion.
 The solution targets .NET 10. The desktop shell uses Avalonia 12.1.2 with code-only controls and the Fluent theme; media tasks beginning with FT-003/FT-006 still require FFmpeg/ffprobe.
 
 ## Repository target layout
