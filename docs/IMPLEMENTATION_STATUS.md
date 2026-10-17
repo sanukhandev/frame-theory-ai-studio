@@ -36,7 +36,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-301 / E03
-Git SHA: pending commit
+Git SHA: 6e6891f
 Files changed: src/FrameTheory.Color/ColorGraph.cs, tests/FrameTheory.UnitTests/ColorGraphTests.cs, src/FrameTheory.Desktop/MainWindow.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: `ColorGraph` requires explicit input, linear-light working and output profiles. `ColorPipeline` deterministically decodes sRGB/Rec.709 transfer curves into the shared working representation and maps back while preserving alpha. No unsupported grading operation is claimed.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
