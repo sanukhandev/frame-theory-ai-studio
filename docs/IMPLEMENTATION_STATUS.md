@@ -47,7 +47,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-501 / E05
-Git SHA: pending commit
+Git SHA: ec5ba14
 Files changed: src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/TimelineEditorViewModel.cs, tests/FrameTheory.UnitTests/TimelineEditorTests.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: Imported video/audio metadata creates real video and audio track rows. The Video workspace exposes a playhead slider, frame-step controls, ruler ticks, snap toggle, zoom and scroll controls, and clip selection at the current exact frame. The editor uses the existing rational-rate `TimelineGraph` and synchronized `TimelineTransport`.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check; managed desktop launch smoke for 3 seconds
