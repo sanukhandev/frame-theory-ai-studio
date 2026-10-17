@@ -58,6 +58,60 @@ public sealed class GeminiReferenceAnalysisTests
             .AnalyzeAsync(new GeminiReferenceAnalysisRequest([Sample()], [Sample()], uploadConsent: true), null, CancellationToken.None));
     }
 
+    [Xunit.Fact]
+    public async Task LargeReferenceSampleUsesFilesApiAndCleansUpBeforeReturning()
+    {
+        var requests = new List<HttpRequestMessage>();
+        string? interactionBody = null;
+        using var client = new HttpClient(new StubHandler(request =>
+        {
+            requests.Add(request);
+            if (request.Method == HttpMethod.Post && request.Headers.TryGetValues("X-Goog-Upload-Command", out var uploadValues))
+            {
+                var uploadCommand = uploadValues.Single();
+                if (string.Equals(uploadCommand, "start", StringComparison.Ordinal))
+                {
+                    var startResponse = new HttpResponseMessage(HttpStatusCode.OK);
+                    startResponse.Headers.TryAddWithoutValidation("X-Goog-Upload-URL", "https://generativelanguage.googleapis.com/upload/v1beta/files/reference-1");
+                    return startResponse;
+                }
+
+                var response = new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"file\":{\"name\":\"files/reference-1\",\"uri\":\"https://generativelanguage.googleapis.com/v1beta/files/reference-1\",\"mime_type\":\"image/png\"}}", Encoding.UTF8, "application/json")
+                };
+                return response;
+            }
+
+            if (request.Method == HttpMethod.Delete)
+            {
+                return new HttpResponseMessage(HttpStatusCode.OK);
+            }
+
+            if (request.Method == HttpMethod.Post && request.RequestUri?.AbsolutePath.EndsWith("/interactions", StringComparison.Ordinal) == true)
+            {
+                interactionBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"status\":\"completed\",\"output_text\":\"{\\\"exposureEV\\\":0,\\\"contrast\\\":0,\\\"saturation\\\":0,\\\"temperature\\\":0,\\\"tint\\\":0}\"}", Encoding.UTF8, "application/json")
+                };
+            }
+
+            return new HttpResponseMessage(HttpStatusCode.NotFound);
+        }));
+
+        var result = await new GeminiReferenceAnalysisClient(
+            client,
+            new GeminiClientOptions("test-secret", "gemini-test", TimeSpan.FromSeconds(30), 1, TimeSpan.Zero))
+            .AnalyzeAsync(new GeminiReferenceAnalysisRequest([LargeSample()], [Sample()], uploadConsent: true), null, CancellationToken.None);
+
+        Xunit.Assert.Equal(0, result.Grade.ExposureEV);
+        Xunit.Assert.Equal(4, requests.Count);
+        Xunit.Assert.Contains("\"uri\":\"https://generativelanguage.googleapis.com/v1beta/files/reference-1\"", interactionBody);
+        Xunit.Assert.DoesNotContain("test-secret", interactionBody);
+        Xunit.Assert.Contains(requests, request => request.Method == HttpMethod.Delete);
+    }
+
     private static LocalAnalysisSample Sample() => new(
         new Uri("file:///sample.png"),
         FrameTheory.Domain.MediaKind.Image,
@@ -65,6 +119,24 @@ public sealed class GeminiReferenceAnalysisTests
         0,
         TimeSpan.Zero,
         [.. "P6\n1 1\n255\n"u8, 255, 0, 0]);
+
+    private static LocalAnalysisSample LargeSample()
+    {
+        const int width = 3000;
+        const int height = 2500;
+        var header = Encoding.ASCII.GetBytes($"P6\n{width} {height}\n255\n");
+        var payload = new byte[checked(header.Length + width * height * 3)];
+        header.CopyTo(payload, 0);
+        var random = new Random(17);
+        random.NextBytes(payload.AsSpan(header.Length));
+        return new LocalAnalysisSample(
+            new Uri("file:///large-reference.png"),
+            FrameTheory.Domain.MediaKind.Image,
+            "photo-preview-ppm",
+            0,
+            TimeSpan.Zero,
+            payload);
+    }
 
     private sealed class StubHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
     {
