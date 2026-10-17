@@ -24,7 +24,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-005 / E00
-Git SHA: pending commit
+Git SHA: 9e3fd87
 Files changed: tools/FrameTheory.Fixtures/, tests/FrameTheory.GoldenTests/, FrameTheory.sln, .gitignore, docs/DEVELOPMENT.md, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: The fixture CLI generates deterministic PPM color chart, 1 kHz WAV tone and 90-frame 30/1 fps counter CSV. The golden test compares two independent generations byte-for-byte and reports a first mismatch after a controlled mutation.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; dotnet tools/FrameTheory.Fixtures/bin/Release/net10.0/FrameTheory.Fixtures.dll tools/fixtures/generated
