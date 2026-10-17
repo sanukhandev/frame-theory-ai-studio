@@ -29,7 +29,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-104 / E01
-Git SHA: pending commit
+Git SHA: d926f05
 Files changed: src/FrameTheory.Storage/ProjectRecoveryService.cs, src/FrameTheory.Storage/CacheIndex.cs, tests/FrameTheory.UnitTests/RecoveryTests.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: Autosaves use the same atomic JSON path with `.ftstudio.autosave` suffix; recovery loads or clears them, missing references are enumerated, relink is constrained to project-relative files, and a JSON cache index evicts oldest entries to a byte budget.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
