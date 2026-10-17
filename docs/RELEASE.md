@@ -16,9 +16,9 @@ The output is a validation publish, not an installer. It must be tested on the m
 
 | Platform | Build/CI compile | Local GUI/media evidence | Installer/signing |
 |---|---|---|---|
-| Windows 11 x64 | Local and hosted CI publish verified in run `39050810748` | FFmpeg import/export/smoke verified; interactive shell and package relaunch remain open | Not packaged, signed or notarized |
-| macOS Apple Silicon/Intel | Hosted restore/build/test/publish verified in run `39050810748` | Native media and local GUI not run here | Not packaged or notarized |
-| Linux x64 | Hosted restore/build/test/publish verified in run `39050810748` | Native media and local GUI not run here | Not packaged or signed |
+| Windows 11 x64 | Local and hosted CI publish verified in runs `39050810748` and `39051936860` | Local FFmpeg import/export/smoke plus hosted native media smoke verified; interactive shell and package relaunch remain open | Not packaged, signed or notarized |
+| macOS Apple Silicon/Intel | Hosted restore/build/test/publish and native media smoke verified in run `39051936860` | Hosted FFmpeg import/extraction/seek smoke verified; local GUI and package relaunch not run here | Not packaged or notarized |
+| Linux x64 | Hosted restore/build/test/publish and native media smoke verified in run `39051936860` | Hosted FFmpeg import/extraction/seek smoke verified; local GUI and package relaunch not run here | Not packaged or signed |
 
 ## Release blockers
 
