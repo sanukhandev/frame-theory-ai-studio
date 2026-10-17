@@ -58,6 +58,19 @@ public sealed class PhotoLayerTests
         Xunit.Assert.Equal([222, 100, 131, 255, 255, 60], PpmRaster.Parse(screen.RenderPreview()).RgbBytes);
     }
 
+    [Xunit.Fact]
+    public void CompositeLayerSurvivesSubsequentEditOperations()
+    {
+        var baseDocument = Document(new Uri("file:///base.png"), [100, 100, 100, 20, 40, 60]);
+        var overlayDocument = Document(new Uri("file:///overlay.png"), [200, 0, 50, 255, 255, 0]);
+        var edited = new PhotoEditState(baseDocument)
+            .AddCompositeLayer(new PhotoCompositeLayer(overlayDocument, blendMode: PhotoBlendMode.Screen))
+            .Rotate(90);
+
+        Xunit.Assert.Single(edited.CompositeLayers);
+        Xunit.Assert.Equal(PhotoBlendMode.Screen, edited.CompositeLayers[0].BlendMode);
+    }
+
     private static PhotoDocument Document(Uri source, byte[] pixels) => new(
         source,
         new MediaSourceMetadata(MediaId.Create(source, "photo-layer-test"), source, MediaKind.Image, 2, 1, null, 0),

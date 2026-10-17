@@ -281,7 +281,7 @@ public sealed class PhotoEditState
         new(Source, _operations, Layers);
 
     private PhotoEditState WithOperation(PhotoEditOperation operation) =>
-        new(Source, _operations.Append(operation), Layers);
+        new(Source, _operations.Append(operation), Layers, CompositeLayers);
 
     private PpmRaster RenderRaster()
     {
