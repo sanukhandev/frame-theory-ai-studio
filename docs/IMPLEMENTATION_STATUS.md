@@ -39,7 +39,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-304 / E03
-Git SHA: pending commit
+Git SHA: 3a772d8
 Files changed: src/FrameTheory.Color/ColorPreset.cs, src/FrameTheory.Domain/Project.cs, src/FrameTheory.Domain/Editing.cs, src/FrameTheory.Storage/JsonProjectRepository.cs, tests/FrameTheory.UnitTests/ColorPresetTests.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: `JsonColorPresetStore` atomically persists named grades and optional LUT text. `ColorPreset.Apply` is shared by photo/video color pixels, while `SetColorPresetCommand` makes the project reference undoable and preserves source media.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
