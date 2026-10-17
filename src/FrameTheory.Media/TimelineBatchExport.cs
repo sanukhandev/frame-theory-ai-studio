@@ -71,7 +71,7 @@ public sealed class TimelineBatchExporter
             cancellationToken.ThrowIfCancellationRequested();
             var target = targets[index];
             var completed = index;
-            var targetProgress = new Progress<ExportProgress>(update =>
+            var targetProgress = new InlineProgress<ExportProgress>(update =>
                 progress?.Report(new TimelineBatchExportProgress(target.Name, completed, targets.Count, update)));
             receipts.Add(await _exporter.ExportAsync(target.Plan, target.DestinationPath, target.Preset, targetProgress, cancellationToken).ConfigureAwait(false));
             progress?.Report(new TimelineBatchExportProgress(
@@ -82,5 +82,10 @@ public sealed class TimelineBatchExporter
         }
 
         return receipts;
+    }
+
+    private sealed class InlineProgress<T>(Action<T> callback) : IProgress<T>
+    {
+        public void Report(T value) => callback(value);
     }
 }
