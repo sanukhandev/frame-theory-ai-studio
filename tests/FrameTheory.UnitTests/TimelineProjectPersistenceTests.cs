@@ -106,6 +106,40 @@ public sealed class TimelineProjectPersistenceTests
     }
 
     [Xunit.Fact]
+    public async Task TimelineProjectOpenOffersMissingMediaRelinkBeforeMutation()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), $"frame-theory-relink-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        try
+        {
+            var mediaPath = Path.Combine(directory, "clip.mp4");
+            var replacementPath = Path.Combine(directory, "clip-relinked.mp4");
+            await File.WriteAllBytesAsync(mediaPath, [1, 2, 3]);
+            var projectPath = Path.Combine(directory, "project.ftstudio");
+            var first = CreateViewModel();
+            await first.ImportFilesAsync([mediaPath], CancellationToken.None);
+            Xunit.Assert.True(await first.SaveTimelineProjectAsync(projectPath, CancellationToken.None));
+
+            File.Move(mediaPath, replacementPath);
+            var second = CreateViewModel();
+
+            Xunit.Assert.False(await second.OpenTimelineProjectAsync(projectPath, CancellationToken.None));
+            Xunit.Assert.Single(second.MissingTimelineMedia);
+            Xunit.Assert.Contains("missing media", second.TimelineProjectStatusText, StringComparison.OrdinalIgnoreCase);
+            Xunit.Assert.Empty(second.ImportedMedia);
+
+            Xunit.Assert.True(await second.RelinkSelectedTimelineMediaAsync(replacementPath, CancellationToken.None));
+            Xunit.Assert.Empty(second.MissingTimelineMedia);
+            Xunit.Assert.Single(second.ImportedMedia);
+            Xunit.Assert.Contains("Opened timeline project", second.TimelineProjectStatusText, StringComparison.Ordinal);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Xunit.Fact]
     public void TimelineStateRejectsMalformedJson()
     {
         Xunit.Assert.Throws<InvalidDataException>(() => TimelineProjectStateJson.Deserialize("{not-json"));

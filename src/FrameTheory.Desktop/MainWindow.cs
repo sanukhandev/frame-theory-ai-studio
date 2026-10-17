@@ -921,6 +921,18 @@ public sealed class MainWindow : Window
                 await viewModel.OpenTimelineProjectAsync(path, CancellationToken.None);
             }
         };
+        var timelineReplacementPath = new TextBox { PlaceholderText = "Replacement media path within project folder" };
+        AutomationProperties.SetName(timelineReplacementPath, "Timeline replacement media path");
+        var missingTimelineMedia = new ListBox { Height = 80 };
+        AutomationProperties.SetName(missingTimelineMedia, "Missing timeline media");
+        missingTimelineMedia.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(MainWindowViewModel.MissingTimelineMedia)));
+        missingTimelineMedia.Bind(SelectingItemsControl.SelectedItemProperty, new Binding(nameof(MainWindowViewModel.SelectedMissingTimelineMedia))
+        {
+            Mode = BindingMode.TwoWay
+        });
+        var relinkTimelineMedia = new Button { Content = "Relink selected timeline media" };
+        AutomationProperties.SetName(relinkTimelineMedia, "Relink selected timeline media");
+        relinkTimelineMedia.Click += async (_, _) => await viewModel.RelinkSelectedTimelineMediaAsync(timelineReplacementPath.Text ?? string.Empty, CancellationToken.None);
         var projectStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         projectStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineProjectStatusText)));
         var aspectRatio = new ComboBox { ItemsSource = new[] { "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
@@ -1013,6 +1025,9 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { captionFont } },
                     captionStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { saveProject, openProject } },
+                    missingTimelineMedia,
+                    timelineReplacementPath,
+                    relinkTimelineMedia,
                     projectStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { aspectRatio, export, cancelExport, retryExport } },
                     exportStatus,

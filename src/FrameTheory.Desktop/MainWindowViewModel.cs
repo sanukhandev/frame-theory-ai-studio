@@ -71,11 +71,16 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private readonly ILocalAnalysisSampler? _analysisSampler;
     private readonly IPreviewFrameDecoder _timelinePreviewDecoder;
     private readonly FfmpegPreviewProxyService? _timelinePreviewProxy;
+    private readonly JsonProjectRepository _timelineProjectRepository = new();
+    private readonly ProjectRecoveryService _timelineProjectRecovery;
     private int _videoWidth;
     private int _videoHeight;
     private byte[]? _timelinePreviewPpm;
     private string _timelinePreviewStatusText = "No timeline frame preview requested.";
     private string _timelineProjectStatusText = "No timeline project opened.";
+    private ProjectSnapshot? _pendingTimelineSnapshot;
+    private string? _pendingTimelineProjectPath;
+    private MissingMediaViewModel? _selectedMissingTimelineMedia;
     private CancellationTokenSource? _timelinePlaybackCancellation;
     private bool _isTimelinePreviewPlaying;
     private bool _useTimelinePreviewProxy;
@@ -121,6 +126,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         _analysisSampler = analysisSampler;
         _timelinePreviewDecoder = timelinePreviewDecoder ?? new FfmpegFrameDecoder(new FfmpegProcessRunner());
         _timelinePreviewProxy = timelinePreviewProxy;
+        _timelineProjectRecovery = new ProjectRecoveryService(_timelineProjectRepository);
         if (Workspaces.Count == 0)
         {
             throw new InvalidOperationException("At least one workspace is required.");
@@ -167,6 +173,23 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             _timelineProjectStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public IReadOnlyList<MissingMediaViewModel> MissingTimelineMedia { get; private set; } = [];
+
+    public MissingMediaViewModel? SelectedMissingTimelineMedia
+    {
+        get => _selectedMissingTimelineMedia;
+        set
+        {
+            if (value == _selectedMissingTimelineMedia)
+            {
+                return;
+            }
+
+            _selectedMissingTimelineMedia = value;
             OnPropertyChanged();
         }
     }
@@ -651,13 +674,26 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         try
         {
             var fullPath = Path.GetFullPath(projectPath);
-            var snapshot = await new JsonProjectRepository().LoadAsync(fullPath, cancellationToken);
+            var snapshot = await _timelineProjectRepository.LoadAsync(fullPath, cancellationToken);
             if (snapshot.TimelineStateJson is null)
             {
                 throw new InvalidDataException("The project does not contain a saved timeline.");
             }
 
             var timelineState = TimelineProjectStateJson.Deserialize(snapshot.TimelineStateJson);
+            var missing = _timelineProjectRecovery.FindMissingMedia(fullPath, snapshot);
+            if (missing.Count > 0)
+            {
+                _pendingTimelineProjectPath = fullPath;
+                _pendingTimelineSnapshot = snapshot;
+                SetMissingTimelineMedia(missing);
+                TimelineProjectStatusText = $"Timeline project has {missing.Count} missing media file(s); relink them before opening.";
+                return false;
+            }
+
+            _pendingTimelineProjectPath = null;
+            _pendingTimelineSnapshot = null;
+            SetMissingTimelineMedia([]);
             var directory = Path.GetDirectoryName(fullPath) ?? throw new ArgumentException("A project directory is required.", nameof(projectPath));
             var imported = new List<(MediaReference Reference, ImportedMedia Media, Uri Source)>();
             foreach (var reference in snapshot.MediaReferences)
@@ -709,6 +745,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             TimelinePreviewStatusText = "Project reopened; preview a current timeline frame to decode it.";
             MediaImportStatusText = $"Reopened {imported.Count} project media file(s).";
             TimelineProjectStatusText = $"Opened timeline project {Path.GetFileName(fullPath)}.";
+            _pendingTimelineProjectPath = null;
+            _pendingTimelineSnapshot = null;
+            SetMissingTimelineMedia([]);
             return true;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -720,6 +759,50 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         {
             _diagnosticsLog.Record("timeline-project-open-failed", exception);
             TimelineProjectStatusText = $"Timeline project could not be opened: {exception.Message}";
+            return false;
+        }
+    }
+
+    public async Task<bool> RelinkSelectedTimelineMediaAsync(string replacementPath, CancellationToken cancellationToken)
+    {
+        if (_pendingTimelineProjectPath is null || _pendingTimelineSnapshot is null || SelectedMissingTimelineMedia is null)
+        {
+            TimelineProjectStatusText = "Open a timeline project with missing media and select a file to relink.";
+            return false;
+        }
+
+        try
+        {
+            var relinked = _timelineProjectRecovery.RelinkMedia(
+                _pendingTimelineProjectPath,
+                _pendingTimelineSnapshot,
+                SelectedMissingTimelineMedia.Id,
+                replacementPath);
+            await _timelineProjectRepository.SaveAtomicAsync(_pendingTimelineProjectPath, relinked, cancellationToken);
+            _pendingTimelineSnapshot = relinked;
+            var missing = _timelineProjectRecovery.FindMissingMedia(_pendingTimelineProjectPath, relinked);
+            if (missing.Count > 0)
+            {
+                SetMissingTimelineMedia(missing);
+                TimelineProjectStatusText = $"Relinked media; {missing.Count} missing media file(s) remain.";
+                return false;
+            }
+
+            var projectPath = _pendingTimelineProjectPath;
+            _pendingTimelineProjectPath = null;
+            _pendingTimelineSnapshot = null;
+            SetMissingTimelineMedia([]);
+            return await OpenTimelineProjectAsync(projectPath, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            TimelineProjectStatusText = "Timeline media relink canceled; the current project remains loaded.";
+            return false;
+        }
+        catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException or UnauthorizedAccessException)
+        {
+            _diagnosticsLog.Record("timeline-media-relink-failed", exception);
+            TimelineProjectStatusText = $"Timeline media could not be relinked: {exception.Message}";
             return false;
         }
     }
@@ -977,6 +1060,15 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void SetMissingTimelineMedia(IReadOnlyList<MediaReference> references)
+    {
+        MissingTimelineMedia = references
+            .Select(reference => new MissingMediaViewModel(reference.Id, reference.RelativePath))
+            .ToArray();
+        SelectedMissingTimelineMedia = MissingTimelineMedia.FirstOrDefault();
+        OnPropertyChanged(nameof(MissingTimelineMedia));
+    }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
