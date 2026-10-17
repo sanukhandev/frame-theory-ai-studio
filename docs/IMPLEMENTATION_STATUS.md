@@ -19,7 +19,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-001 / E00
-Git SHA: pending commit
+Git SHA: 08e7108
 Files changed: global.json, Directory.Build.props, FrameTheory.sln, src/, tests/, docs/DEVELOPMENT.md
 Actual behavior and UI path: Managed desktop foundation entry point runs and prints its startup marker; all foundation assemblies load from the test host.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet build FrameTheory.sln --configuration Release; dotnet test FrameTheory.sln --no-build --configuration Release; `$dotnet = Join-Path `$env:TEMP 'frame-theory-dotnet-10\dotnet.exe'; & `$dotnet src/FrameTheory.Desktop/bin/Release/net10.0/FrameTheory.Desktop.dll; git diff --check
