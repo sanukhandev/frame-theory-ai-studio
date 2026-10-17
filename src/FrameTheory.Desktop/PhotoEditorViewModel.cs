@@ -132,6 +132,7 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
                 throw new FileNotFoundException($"Saved photo is missing: {reference.RelativePath}", sourcePath);
             }
 
+            await VerifySourceFingerprintAsync(sourcePath, reference.ContentFingerprint, cancellationToken);
             var document = await _importer.ImportAsync(new Uri(sourcePath), cancellationToken);
             var state = snapshot.PhotoStateJson is null
                 ? new PhotoEditState(document)
@@ -268,6 +269,21 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         }
 
         return path;
+    }
+
+    private static async Task VerifySourceFingerprintAsync(string sourcePath, string expectedFingerprint, CancellationToken cancellationToken)
+    {
+        if (!expectedFingerprint.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
+        await using var stream = File.OpenRead(sourcePath);
+        var actualFingerprint = $"sha256:{Convert.ToHexString(await SHA256.HashDataAsync(stream, cancellationToken)).ToLowerInvariant()}";
+        if (!string.Equals(actualFingerprint, expectedFingerprint, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidDataException("The saved photo source fingerprint does not match the project.");
+        }
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

@@ -79,6 +79,32 @@ public sealed class PhotoProjectPersistenceTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task PhotoProjectOpenRejectsChangedSourceBeforeImport()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-photo-project-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "photo.png");
+            var projectPath = Path.Combine(directory.FullName, "photo.ftstudio");
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+            var repository = new JsonProjectRepository();
+            var editor = CreateEditor(repository);
+            await editor.OpenAsync(sourcePath, CancellationToken.None);
+            editor.RotateRight();
+            Xunit.Assert.True(await editor.SaveProjectAsync(projectPath, CancellationToken.None));
+            await File.WriteAllBytesAsync(sourcePath, [4, 5, 6]);
+
+            Xunit.Assert.False(await editor.OpenProjectAsync(projectPath, CancellationToken.None));
+            Xunit.Assert.Single(editor.Current!.Operations);
+            Xunit.Assert.Contains("fingerprint", editor.StatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private static PhotoEditorViewModel CreateEditor(IProjectRepository repository) => new(
         new PhotoImporter(new StubProbe(), new StubDecoder()),
         new PhotoExporter(new StubProcessRunner(), new StubProbe()),
