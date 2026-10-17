@@ -45,7 +45,8 @@ public sealed record ProjectSnapshot
         int canvasHeight,
         string workingColorSpace,
         IEnumerable<MediaReference>? mediaReferences = null,
-        string? colorPresetName = null)
+        string? colorPresetName = null,
+        string? timelineStateJson = null)
     {
         if (string.IsNullOrWhiteSpace(projectId))
         {
@@ -69,6 +70,7 @@ public sealed record ProjectSnapshot
         WorkingColorSpace = workingColorSpace.Trim();
         MediaReferences = mediaReferences?.ToArray() ?? [];
         ColorPresetName = string.IsNullOrWhiteSpace(colorPresetName) ? null : colorPresetName.Trim();
+        TimelineStateJson = string.IsNullOrWhiteSpace(timelineStateJson) ? null : timelineStateJson;
     }
 
     public int SchemaVersion => CurrentSchemaVersion;
@@ -87,12 +89,17 @@ public sealed record ProjectSnapshot
 
     public string? ColorPresetName { get; }
 
+    public string? TimelineStateJson { get; }
+
     public ProjectSnapshot WithCanvas(int canvasWidth, int canvasHeight) =>
-        new(ProjectId, FrameRate, canvasWidth, canvasHeight, WorkingColorSpace, MediaReferences, ColorPresetName);
+        new(ProjectId, FrameRate, canvasWidth, canvasHeight, WorkingColorSpace, MediaReferences, ColorPresetName, TimelineStateJson);
 
     public ProjectSnapshot WithMediaReferences(IEnumerable<MediaReference> mediaReferences) =>
-        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, mediaReferences, ColorPresetName);
+        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, mediaReferences, ColorPresetName, TimelineStateJson);
 
     public ProjectSnapshot WithColorPreset(string? colorPresetName) =>
-        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, MediaReferences, colorPresetName);
+        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, MediaReferences, colorPresetName, TimelineStateJson);
+
+    public ProjectSnapshot WithTimelineState(string? timelineStateJson) =>
+        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, MediaReferences, ColorPresetName, timelineStateJson);
 }

@@ -74,6 +74,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private int _videoHeight;
     private byte[]? _timelinePreviewPpm;
     private string _timelinePreviewStatusText = "No timeline frame preview requested.";
+    private string _timelineProjectStatusText = "No timeline project opened.";
 
     public MainWindowViewModel(
         IWorkspaceCatalog workspaceCatalog,
@@ -145,6 +146,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             _timelinePreviewStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string TimelineProjectStatusText
+    {
+        get => _timelineProjectStatusText;
+        private set
+        {
+            if (value == _timelineProjectStatusText)
+            {
+                return;
+            }
+
+            _timelineProjectStatusText = value;
             OnPropertyChanged();
         }
     }
@@ -459,6 +475,140 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             _diagnosticsLog.Record("timeline-preview-failed", exception);
             TimelinePreviewStatusText = $"Timeline preview failed: {exception.Message}";
             TimelinePreviewPpm = null;
+            return false;
+        }
+    }
+
+    public async Task<bool> SaveTimelineProjectAsync(string projectPath, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var fullPath = Path.GetFullPath(projectPath);
+            var directory = Path.GetDirectoryName(fullPath) ?? throw new ArgumentException("A project directory is required.", nameof(projectPath));
+            if (!Directory.Exists(directory))
+            {
+                throw new DirectoryNotFoundException(directory);
+            }
+
+            var mediaReferences = _mediaSources.Select(item =>
+            {
+                if (!_analysisAssets.TryGetValue(item.Key, out var media))
+                {
+                    throw new InvalidDataException($"Imported media {item.Key.Value} has no metadata.");
+                }
+
+                var relativePath = Path.GetRelativePath(directory, item.Value.LocalPath);
+                return new MediaReference(
+                    item.Key,
+                    relativePath,
+                    $"probe:{media.Metadata.SourceUri.AbsoluteUri}");
+            }).ToArray();
+            var timelineState = TimelineProjectStateJson.Serialize(TimelineEditor.CaptureProjectState());
+            var snapshot = new ProjectSnapshot(
+                "active-project",
+                TimelineEditor.ProjectFrameRate,
+                Math.Max(1, _videoWidth),
+                Math.Max(1, _videoHeight),
+                "sRGB",
+                mediaReferences,
+                timelineStateJson: timelineState);
+            await new JsonProjectRepository().SaveAtomicAsync(fullPath, snapshot, cancellationToken);
+            TimelineProjectStatusText = $"Saved timeline project {Path.GetFileName(fullPath)}.";
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            TimelineProjectStatusText = "Timeline project save canceled; the previous file is unchanged.";
+            return false;
+        }
+        catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException or UnauthorizedAccessException)
+        {
+            _diagnosticsLog.Record("timeline-project-save-failed", exception);
+            TimelineProjectStatusText = $"Timeline project could not be saved: {exception.Message}";
+            return false;
+        }
+    }
+
+    public async Task<bool> OpenTimelineProjectAsync(string projectPath, CancellationToken cancellationToken)
+    {
+        if (_mediaImporter is null)
+        {
+            TimelineProjectStatusText = "Timeline project open is unavailable because media import is unavailable.";
+            return false;
+        }
+
+        try
+        {
+            var fullPath = Path.GetFullPath(projectPath);
+            var snapshot = await new JsonProjectRepository().LoadAsync(fullPath, cancellationToken);
+            if (snapshot.TimelineStateJson is null)
+            {
+                throw new InvalidDataException("The project does not contain a saved timeline.");
+            }
+
+            var timelineState = TimelineProjectStateJson.Deserialize(snapshot.TimelineStateJson);
+            var directory = Path.GetDirectoryName(fullPath) ?? throw new ArgumentException("A project directory is required.", nameof(projectPath));
+            var imported = new List<(MediaReference Reference, ImportedMedia Media, Uri Source)>();
+            foreach (var reference in snapshot.MediaReferences)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var sourcePath = Path.GetFullPath(Path.Combine(directory, reference.RelativePath.Replace('/', Path.DirectorySeparatorChar)));
+                if (!File.Exists(sourcePath))
+                {
+                    throw new FileNotFoundException($"Saved media is missing: {reference.RelativePath}", sourcePath);
+                }
+
+                var source = new Uri(sourcePath);
+                var media = await _mediaImporter.ImportAsync(source, cancellationToken);
+                imported.Add((reference, media, source));
+            }
+
+            var mediaIdMap = imported.ToDictionary(
+                item => item.Reference.Id.Value,
+                item => item.Media.Metadata.Id.Value,
+                StringComparer.Ordinal);
+            TimelineEditor.RestoreProjectState(timelineState, mediaIdMap);
+
+            _mediaSources.Clear();
+            _analysisAssets.Clear();
+            var importedViewModels = new List<ImportedMediaViewModel>();
+            foreach (var item in imported)
+            {
+                _mediaSources[item.Media.Metadata.Id] = item.Source;
+                _analysisAssets[item.Media.Metadata.Id] = item.Media;
+                importedViewModels.Add(new ImportedMediaViewModel(
+                    Path.GetFileName(item.Source.LocalPath),
+                    $"{item.Media.Metadata.Kind}; {item.Media.Metadata.Width}x{item.Media.Metadata.Height}; thumbnail {item.Media.ThumbnailPpm?.Length ?? 0} bytes; waveform {item.Media.WaveformPeaks.Count} peaks",
+                    item.Media.ThumbnailPpm));
+            }
+
+            ImportedMedia = importedViewModels;
+            OnPropertyChanged(nameof(ImportedMedia));
+            var video = imported.Select(item => item.Media.Metadata).FirstOrDefault(metadata => metadata.Kind == MediaKind.Video);
+            _videoWidth = video?.Width ?? 0;
+            _videoHeight = video?.Height ?? 0;
+            if (imported.Select(item => item.Media.ThumbnailPpm).FirstOrDefault(thumbnail => thumbnail is not null) is { } thumbnail)
+            {
+                ColorInspector.SetSource(thumbnail);
+            }
+
+            LastLocalAnalysisReport = null;
+            OnPropertyChanged(nameof(LastLocalAnalysisReport));
+            TimelinePreviewPpm = null;
+            TimelinePreviewStatusText = "Project reopened; preview a current timeline frame to decode it.";
+            MediaImportStatusText = $"Reopened {imported.Count} project media file(s).";
+            TimelineProjectStatusText = $"Opened timeline project {Path.GetFileName(fullPath)}.";
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            TimelineProjectStatusText = "Timeline project open canceled; the current project remains loaded.";
+            return false;
+        }
+        catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException or UnauthorizedAccessException)
+        {
+            _diagnosticsLog.Record("timeline-project-open-failed", exception);
+            TimelineProjectStatusText = $"Timeline project could not be opened: {exception.Message}";
             return false;
         }
     }

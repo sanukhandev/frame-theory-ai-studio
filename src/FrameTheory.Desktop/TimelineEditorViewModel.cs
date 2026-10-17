@@ -79,6 +79,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public long CurrentFrame => _transport.CurrentFrame;
 
+    public RationalFrameRate ProjectFrameRate => _projectFrameRate;
+
     public TimeSpan CurrentPosition => _projectFrameRate.TimeAtFrame(CurrentFrame);
 
     public long TotalFrames { get; private set; } = 1;
@@ -294,6 +296,208 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             _beforeAfterStyle,
             TotalFrames / 2,
             _watermark);
+    }
+
+    public TimelineProjectState CaptureProjectState() => new()
+    {
+        FrameRateNumerator = _projectFrameRate.Numerator,
+        FrameRateDenominator = _projectFrameRate.Denominator,
+        VideoClips = _videoClips.Select(ToProjectState).ToList(),
+        AudioClips = _audioClips.Select(ToProjectState).ToList(),
+        VideoSettings = _animations.Keys
+            .Concat(_transitions.Keys)
+            .Concat(_staticTransforms.Keys)
+            .Distinct()
+            .Select(clip => new TimelineVideoSettingsProjectState
+            {
+                Clip = ToProjectState(clip),
+                Transform = _staticTransforms.TryGetValue(clip, out var transform) ? ToProjectState(transform) : null,
+                Transition = _transitions.TryGetValue(clip, out var transition) ? transition.Kind : null,
+                TransitionDurationFrames = _transitions.TryGetValue(clip, out transition) ? transition.DurationFrames : 0,
+                Animation = _animations.TryGetValue(clip, out var animation) ? ToProjectState(animation) : null
+            })
+            .ToList(),
+        AudioSettings = _audioSettings.Values.Select(settings => new TimelineAudioSettingsProjectState
+        {
+            Clip = ToProjectState(settings.Clip),
+            GainDb = settings.GainDb,
+            Muted = settings.Muted,
+            FadeInFrames = settings.FadeInFrames,
+            FadeOutFrames = settings.FadeOutFrames,
+            DuckingDb = settings.DuckingDb
+        }).ToList(),
+        ColorGrades = _colorGrades.Select(item => new TimelineColorGradeProjectState
+        {
+            MediaId = item.Key.Value,
+            ExposureEV = item.Value.ExposureEV,
+            Contrast = item.Value.Contrast,
+            Saturation = item.Value.Saturation,
+            Temperature = item.Value.Temperature,
+            Tint = item.Value.Tint
+        }).ToList(),
+        Titles = _titles.Select(ToProjectState).ToList(),
+        Captions = _captions.Select(caption => new TimelineCaptionProjectState
+        {
+            Sequence = caption.Sequence,
+            StartTicks = caption.Start.Ticks,
+            EndTicks = caption.End.Ticks,
+            Text = caption.Text,
+            Provenance = caption.Provenance
+        }).ToList(),
+        BeforeAfterStyle = _beforeAfterStyle,
+        Watermark = _watermark is null ? null : new TimelineWatermarkProjectState
+        {
+            SourcePath = _watermark.SourcePath,
+            Opacity = _watermark.Opacity,
+            Margin = _watermark.Margin
+        },
+        TranscriptSourceFingerprint = _transcriptSourceFingerprint,
+        CaptionFontPath = _captionFontPath,
+        CurrentFrame = CurrentFrame,
+        ScrollFrame = ScrollFrame,
+        FramesPerPixel = FramesPerPixel,
+        SnapEnabled = SnapEnabled,
+        BeatMarkers = _beatMarkers.ToList(),
+        BeatMarkerMediaId = _beatMarkerMediaId?.Value,
+        BeatMarkerWaveform = _beatMarkerWaveform.ToList(),
+        BeatDetectionMode = BeatDetectionMode,
+        SelectedTrackId = _selectedTrackId,
+        SelectedClipStart = _selectedClipStart
+    };
+
+    public void RestoreProjectState(
+        TimelineProjectState state,
+        IReadOnlyDictionary<string, string>? mediaIdMap = null)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        if (state.SchemaVersion != 1 || state.FrameRateNumerator != _projectFrameRate.Numerator ||
+            state.FrameRateDenominator != _projectFrameRate.Denominator)
+        {
+            throw new InvalidDataException("The timeline state schema or frame rate is unsupported.");
+        }
+
+        var videoClips = state.VideoClips.Select(clip => FromProjectState(clip, mediaIdMap)).ToArray();
+        var audioClips = state.AudioClips.Select(clip => FromProjectState(clip, mediaIdMap)).ToArray();
+        if (videoClips.Any(clip => !clip.IsVideo) || audioClips.Any(clip => !clip.IsAudio))
+        {
+            throw new InvalidDataException("The timeline contains a clip on the wrong track.");
+        }
+
+        var videoSettings = new Dictionary<TimelineClip, TimelineVideoSettingsProjectState>();
+        foreach (var settings in state.VideoSettings)
+        {
+            var clip = FromProjectState(settings.Clip, mediaIdMap);
+            var actual = videoClips.SingleOrDefault(candidate => candidate.Equals(clip));
+            if (actual is null || !actual.IsVideo)
+            {
+                throw new InvalidDataException("Timeline video settings reference an unknown clip.");
+            }
+
+            videoSettings[actual] = settings;
+        }
+
+        var audioSettings = new Dictionary<TimelineClip, TimelineAudioSettingsProjectState>();
+        foreach (var settings in state.AudioSettings)
+        {
+            var clip = FromProjectState(settings.Clip, mediaIdMap);
+            var actual = audioClips.SingleOrDefault(candidate => candidate.Equals(clip));
+            if (actual is null || !actual.IsAudio)
+            {
+                throw new InvalidDataException("Timeline audio settings reference an unknown clip.");
+            }
+
+            audioSettings[actual] = settings;
+        }
+
+        var titles = state.Titles.Select(FromProjectState).ToArray();
+        var captions = state.Captions.Select(caption => new TimedCaption(
+            caption.Sequence,
+            TimeSpan.FromTicks(caption.StartTicks),
+            TimeSpan.FromTicks(caption.EndTicks),
+            caption.Text,
+            caption.Provenance)).ToArray();
+        var watermark = state.Watermark is null
+            ? null
+            : new TimelineWatermark(state.Watermark.SourcePath, state.Watermark.Opacity, state.Watermark.Margin);
+
+        _videoClips.Clear();
+        _videoClips.AddRange(videoClips);
+        _audioClips.Clear();
+        _audioClips.AddRange(audioClips);
+        _animations.Clear();
+        _transitions.Clear();
+        _staticTransforms.Clear();
+        foreach (var settings in videoSettings)
+        {
+            if (settings.Value.Animation is not null)
+            {
+                _animations[settings.Key] = FromProjectState(settings.Value.Animation);
+            }
+
+            if (settings.Value.Transition is not null)
+            {
+                _transitions[settings.Key] = new TimelineTransitionSettings(
+                    settings.Value.Transition.Value,
+                    settings.Value.TransitionDurationFrames);
+            }
+
+            if (settings.Value.Transform is not null)
+            {
+                _staticTransforms[settings.Key] = FromProjectState(settings.Value.Transform);
+            }
+        }
+
+        _audioSettings.Clear();
+        foreach (var settings in audioSettings)
+        {
+            _audioSettings[settings.Key] = new TimelineAudioSegment(
+                settings.Key,
+                settings.Value.GainDb,
+                settings.Value.Muted,
+                settings.Value.FadeInFrames,
+                settings.Value.FadeOutFrames,
+                settings.Value.DuckingDb);
+        }
+
+        _colorGrades.Clear();
+        foreach (var grade in state.ColorGrades)
+        {
+            _colorGrades[MapMediaId(grade.MediaId, mediaIdMap)] = new ColorGrade(
+                grade.ExposureEV,
+                grade.Contrast,
+                grade.Saturation,
+                grade.Temperature,
+                grade.Tint);
+        }
+
+        _titles.Clear();
+        _titles.AddRange(titles);
+        _captions = captions;
+        _beforeAfterStyle = state.BeforeAfterStyle;
+        _watermark = watermark;
+        _transcriptSourceFingerprint = state.TranscriptSourceFingerprint;
+        _captionFontPath = state.CaptionFontPath;
+        _selectedTrackId = state.SelectedTrackId;
+        _selectedClipStart = state.SelectedClipStart;
+        _mediaIds.Clear();
+        _mediaIds.UnionWith(videoClips.Concat(audioClips).Select(clip => clip.MediaId));
+        _beatMarkers.Clear();
+        _beatMarkers.AddRange(state.BeatMarkers);
+        _beatMarkerMediaId = state.BeatMarkerMediaId is null ? null : MediaId.Parse(MapMediaId(state.BeatMarkerMediaId, mediaIdMap).Value);
+        _beatMarkerWaveform = state.BeatMarkerWaveform.ToArray();
+        BeatDetectionMode = state.BeatDetectionMode;
+        SnapEnabled = state.SnapEnabled;
+        SetZoom(state.FramesPerPixel);
+        _aiUndo.Clear();
+        Refresh();
+        _scrollFrame = Math.Clamp(state.ScrollFrame, 0, Math.Max(0, TotalFrames - 1));
+        SeekFrame(state.CurrentFrame);
+        OnPropertyChanged(nameof(BeatMarkers));
+        OnPropertyChanged(nameof(BeatMarkersText));
+        OnPropertyChanged(nameof(Watermark));
+        OnPropertyChanged(nameof(WatermarkStatusText));
+        OnPropertyChanged(nameof(Captions));
+        OnPropertyChanged(nameof(TranscriptSourceFingerprint));
     }
 
     public void ApplyBeforeAfterStyle(TimelineRevealStyle style)
@@ -1001,6 +1205,106 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _audioClips.Clear();
         _audioClips.AddRange(audioArray);
         Refresh();
+    }
+
+    private static TimelineClipProjectState ToProjectState(TimelineClip clip) => new()
+    {
+        MediaId = clip.MediaId.Value,
+        SourceStartUnit = clip.SourceStartUnit,
+        SourceUnitCount = clip.SourceUnitCount,
+        TimelineStartFrame = clip.TimelineRange.StartFrame,
+        TimelineDurationFrames = clip.TimelineRange.Length,
+        SourceFrameRateNumerator = clip.SourceFrameRate?.Numerator,
+        SourceFrameRateDenominator = clip.SourceFrameRate?.Denominator,
+        AudioSampleRate = clip.AudioSampleRate,
+        SourceStartSample = clip.SourceStartSample
+    };
+
+    private static TimelineTransformProjectState ToProjectState(TimelineVideoTransform transform) => new()
+    {
+        Opacity = transform.Opacity,
+        Scale = transform.Scale,
+        OffsetX = transform.OffsetX,
+        OffsetY = transform.OffsetY
+    };
+
+    private static TimelineAnimationProjectState ToProjectState(TimelineTransformKeyframes animation) => new()
+    {
+        Keyframes = animation.Keyframes.Select(keyframe => new TimelineKeyframeProjectState
+        {
+            Frame = keyframe.Frame,
+            Value = ToProjectState(keyframe.Value),
+            Easing = keyframe.Easing
+        }).ToList()
+    };
+
+    private static TimelineTitleProjectState ToProjectState(TimelineTitle title) => new()
+    {
+        Text = title.Text,
+        FontPath = title.FontPath,
+        StartFrame = title.TimelineRange.StartFrame,
+        DurationFrames = title.TimelineRange.Length,
+        FontSize = title.FontSize,
+        ColorRgb = title.ColorRgb,
+        Placement = title.Placement,
+        Order = title.Order,
+        Animation = title.Animation is null ? null : ToProjectState(title.Animation)
+    };
+
+    private static TimelineClip FromProjectState(
+        TimelineClipProjectState state,
+        IReadOnlyDictionary<string, string>? mediaIdMap)
+    {
+        var mediaId = MapMediaId(state.MediaId, mediaIdMap);
+        if (state.SourceFrameRateNumerator is int numerator && state.SourceFrameRateDenominator is int denominator)
+        {
+            return TimelineClip.Video(
+                mediaId,
+                state.SourceStartUnit,
+                state.SourceUnitCount,
+                state.TimelineStartFrame,
+                state.TimelineDurationFrames,
+                new RationalFrameRate(numerator, denominator));
+        }
+
+        return TimelineClip.Audio(
+            mediaId,
+            state.SourceStartSample,
+            state.SourceUnitCount,
+            state.TimelineStartFrame,
+            state.TimelineDurationFrames,
+            state.AudioSampleRate);
+    }
+
+    private static TimelineVideoTransform FromProjectState(TimelineTransformProjectState state) =>
+        new(state.Opacity, state.Scale, state.OffsetX, state.OffsetY);
+
+    private static TimelineTransformKeyframes FromProjectState(TimelineAnimationProjectState state) =>
+        new(state.Keyframes.Select(keyframe => new TimelineTransformKeyframe(
+            keyframe.Frame,
+            FromProjectState(keyframe.Value),
+            keyframe.Easing)));
+
+    private static TimelineTitle FromProjectState(TimelineTitleProjectState state) =>
+        new(
+            state.Text,
+            state.FontPath,
+            state.StartFrame,
+            state.DurationFrames,
+            state.FontSize,
+            state.ColorRgb,
+            state.Placement,
+            state.Order,
+            state.Animation is null ? null : FromProjectState(state.Animation));
+
+    private static MediaId MapMediaId(string mediaId, IReadOnlyDictionary<string, string>? mediaIdMap)
+    {
+        if (mediaIdMap is not null && mediaIdMap.TryGetValue(mediaId, out var mappedMediaId))
+        {
+            mediaId = mappedMediaId;
+        }
+
+        return MediaId.Parse(mediaId);
     }
 
     private long SourceUnitAt(TimelineClip clip, long timelineFrame) =>

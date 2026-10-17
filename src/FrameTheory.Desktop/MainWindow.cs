@@ -822,6 +822,48 @@ public sealed class MainWindow : Window
         var export = new Button { Content = "Export composite MP4" };
         var cancelExport = new Button { Content = "Cancel export" };
         cancelExport.Click += (_, _) => viewModel.CancelTimelineExport();
+        var saveProject = new Button { Content = "Save timeline project" };
+        saveProject.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(saveProject);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            {
+                SuggestedFileName = "frame-theory-project.ftstudio",
+                FileTypeChoices = [new FilePickerFileType("Frame Theory project") { Patterns = ["*.ftstudio"] }]
+            });
+            var path = file?.TryGetLocalPath();
+            if (path is not null)
+            {
+                await viewModel.SaveTimelineProjectAsync(path, CancellationToken.None);
+            }
+        };
+        var openProject = new Button { Content = "Open timeline project" };
+        openProject.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(openProject);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Frame Theory project") { Patterns = ["*.ftstudio"] }]
+            });
+            var path = files.SingleOrDefault()?.TryGetLocalPath();
+            if (path is not null)
+            {
+                await viewModel.OpenTimelineProjectAsync(path, CancellationToken.None);
+            }
+        };
+        var projectStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        projectStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineProjectStatusText)));
         var aspectRatio = new ComboBox { ItemsSource = new[] { "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
         AutomationProperties.SetName(aspectRatio, "Video export aspect ratio");
         export.Click += async (_, _) =>
@@ -910,6 +952,8 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { transcribeAudio, transcriptionConsent } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { captionFont } },
                     captionStatus,
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { saveProject, openProject } },
+                    projectStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { aspectRatio, export, cancelExport, retryExport } },
                     exportStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { selectWatermark, clearWatermark } },
