@@ -54,17 +54,45 @@ public sealed class AudioSourcePreparerTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task OversizedExtractedAudioIsRejectedAndDeleted()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-audio-source-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "clip.mp4");
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+            var runner = new StubProcessRunner { OutputLength = 20 * 1024 * 1024 + 1 };
+
+            var exception = await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                new FfmpegAudioSourcePreparer(runner).PrepareAsync(new Uri(sourcePath), CancellationToken.None));
+
+            Xunit.Assert.Contains("20 MiB", exception.Message, StringComparison.Ordinal);
+            Xunit.Assert.False(File.Exists(runner.OutputPath));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private sealed class StubProcessRunner : IMediaProcessRunner
     {
         public int InvocationCount { get; private set; }
 
         public string Arguments { get; private set; } = string.Empty;
 
+        public long OutputLength { get; init; } = 4;
+
+        public string OutputPath { get; private set; } = string.Empty;
+
         public Task<MediaProcessResult> RunAsync(string executable, IReadOnlyList<string> arguments, CancellationToken cancellationToken)
         {
             InvocationCount++;
             Arguments = string.Join(' ', arguments);
-            File.WriteAllBytes(arguments[^1], [82, 73, 70, 70]);
+            OutputPath = arguments[^1];
+            using var output = File.Create(OutputPath);
+            output.SetLength(OutputLength);
             return Task.FromResult(new MediaProcessResult(0, string.Empty, string.Empty));
         }
     }
