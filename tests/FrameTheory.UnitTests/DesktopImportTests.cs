@@ -40,6 +40,47 @@ public sealed class DesktopImportTests
         Xunit.Assert.Contains("frame 5", viewModel.TimelinePreviewStatusText, StringComparison.Ordinal);
     }
 
+    [Xunit.Fact]
+    public async Task TimelinePlaybackDecodesEveryFrameWithoutBoundarySnapping()
+    {
+        var decoder = new StubPreviewDecoder();
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new ShortVideoImporter(),
+            timelinePreviewDecoder: decoder);
+
+        await viewModel.ImportFilesAsync(["playback.mp4"], CancellationToken.None);
+
+        Xunit.Assert.True(await viewModel.PlayTimelinePreviewAsync(CancellationToken.None));
+        Xunit.Assert.Equal([0L, 1L, 2L], decoder.Frames);
+        Xunit.Assert.Equal(2, viewModel.TimelineEditor.CurrentFrame);
+        Xunit.Assert.True(viewModel.TimelineEditor.SnapEnabled);
+        Xunit.Assert.False(viewModel.IsTimelinePreviewPlaying);
+        Xunit.Assert.Contains("finished", viewModel.TimelinePreviewStatusText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Xunit.Fact]
+    public async Task TimelinePlaybackStopsWhenCanceled()
+    {
+        var decoder = new BlockingPreviewDecoder();
+        var cancellation = new CancellationTokenSource();
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new ShortVideoImporter(),
+            timelinePreviewDecoder: decoder);
+
+        await viewModel.ImportFilesAsync(["playback-cancel.mp4"], CancellationToken.None);
+        var playback = viewModel.PlayTimelinePreviewAsync(cancellation.Token);
+        await decoder.Started.Task;
+        cancellation.Cancel();
+
+        Xunit.Assert.False(await playback);
+        Xunit.Assert.False(viewModel.IsTimelinePreviewPlaying);
+        Xunit.Assert.True(viewModel.TimelineEditor.SnapEnabled);
+    }
+
     private sealed class StubCapabilityDetector : ICapabilityDetector
     {
         public Task<CapabilityReport> DetectAsync(CancellationToken cancellationToken) => Task.FromResult(
@@ -69,14 +110,46 @@ public sealed class DesktopImportTests
         }
     }
 
+    private sealed class ShortVideoImporter : IMediaImporter
+    {
+        public Task<ImportedMedia> ImportAsync(Uri file, CancellationToken cancellationToken)
+        {
+            var metadata = new MediaSourceMetadata(
+                MediaId.Create(file, "playback-test"),
+                file,
+                MediaKind.Video,
+                16,
+                9,
+                new RationalFrameRate(30, 1),
+                3,
+                TimeSpan.FromSeconds(0.1));
+            return Task.FromResult(new ImportedMedia(metadata, null, []));
+        }
+    }
+
     private sealed class StubPreviewDecoder : IPreviewFrameDecoder
     {
         public long FrameIndex { get; private set; }
 
+        public List<long> Frames { get; } = [];
+
         public Task<byte[]> DecodeFrameAsync(Uri file, RationalFrameRate frameRate, long frameIndex, CancellationToken cancellationToken)
         {
             FrameIndex = frameIndex;
+            Frames.Add(frameIndex);
             return Task.FromResult("P6\n1 1\n255\n\0\0\0"u8.ToArray());
+        }
+    }
+
+    private sealed class BlockingPreviewDecoder : IPreviewFrameDecoder
+    {
+        public TaskCompletionSource Started { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        public async Task<byte[]> DecodeFrameAsync(Uri file, RationalFrameRate frameRate, long frameIndex, CancellationToken cancellationToken)
+        {
+            Started.TrySetResult();
+            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+            return [];
         }
     }
 }

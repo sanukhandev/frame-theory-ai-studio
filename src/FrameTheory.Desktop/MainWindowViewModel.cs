@@ -75,6 +75,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private byte[]? _timelinePreviewPpm;
     private string _timelinePreviewStatusText = "No timeline frame preview requested.";
     private string _timelineProjectStatusText = "No timeline project opened.";
+    private CancellationTokenSource? _timelinePlaybackCancellation;
+    private bool _isTimelinePreviewPlaying;
 
     public MainWindowViewModel(
         IWorkspaceCatalog workspaceCatalog,
@@ -161,6 +163,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             _timelineProjectStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool IsTimelinePreviewPlaying
+    {
+        get => _isTimelinePreviewPlaying;
+        private set
+        {
+            if (value == _isTimelinePreviewPlaying)
+            {
+                return;
+            }
+
+            _isTimelinePreviewPlaying = value;
             OnPropertyChanged();
         }
     }
@@ -478,6 +495,59 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             return false;
         }
     }
+
+    public async Task<bool> PlayTimelinePreviewAsync(CancellationToken cancellationToken)
+    {
+        if (IsTimelinePreviewPlaying)
+        {
+            return false;
+        }
+
+        using var playbackCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        _timelinePlaybackCancellation = playbackCancellation;
+        IsTimelinePreviewPlaying = true;
+        var snapEnabled = TimelineEditor.SnapEnabled;
+        TimelineEditor.SnapEnabled = false;
+        try
+        {
+            var frameDuration = TimeSpan.FromSeconds(
+                (double)TimelineEditor.ProjectFrameRate.Denominator / TimelineEditor.ProjectFrameRate.Numerator);
+            while (true)
+            {
+                playbackCancellation.Token.ThrowIfCancellationRequested();
+                if (!await PreviewCurrentTimelineFrameAsync(playbackCancellation.Token))
+                {
+                    return false;
+                }
+
+                if (TimelineEditor.CurrentFrame >= TimelineEditor.TotalFrames - 1)
+                {
+                    TimelinePreviewStatusText = "Timeline playback finished.";
+                    return true;
+                }
+
+                await Task.Delay(frameDuration, playbackCancellation.Token);
+                TimelineEditor.SeekFrame(TimelineEditor.CurrentFrame + 1);
+            }
+        }
+        catch (OperationCanceledException) when (playbackCancellation.IsCancellationRequested)
+        {
+            TimelinePreviewStatusText = "Timeline playback canceled.";
+            return false;
+        }
+        finally
+        {
+            TimelineEditor.SnapEnabled = snapEnabled;
+            if (ReferenceEquals(_timelinePlaybackCancellation, playbackCancellation))
+            {
+                _timelinePlaybackCancellation = null;
+            }
+
+            IsTimelinePreviewPlaying = false;
+        }
+    }
+
+    public void StopTimelinePreview() => _timelinePlaybackCancellation?.Cancel();
 
     public async Task<bool> SaveTimelineProjectAsync(string projectPath, CancellationToken cancellationToken)
     {
