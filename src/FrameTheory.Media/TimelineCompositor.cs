@@ -217,7 +217,21 @@ public sealed class TimelineFilterGraphBuilder
             var sourceEnd = checked(clip.SourceStartUnit + clip.SourceUnitCount);
             var label = $"audio{index}";
             var gain = segment.Muted ? "-60" : Format(segment.GainDb);
-            var filter = $"[{input}:a:0]atrim=start_sample={clip.SourceStartUnit}:end_sample={sourceEnd},asetpts=PTS-STARTPTS,aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo,volume={gain}dB";
+            var speedRamp = plan.Layers
+                .SelectMany(layer => layer.Segments)
+                .SingleOrDefault(videoSegment => videoSegment.Clip.MediaId == clip.MediaId &&
+                    videoSegment.Clip.TimelineRange == clip.TimelineRange)?.SpeedRamp;
+            string filter;
+            if (speedRamp is null)
+            {
+                filter = $"[{input}:a:0]atrim=start_sample={clip.SourceStartUnit}:end_sample={sourceEnd},asetpts=PTS-STARTPTS,aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo,volume={gain}dB";
+            }
+            else
+            {
+                var rampedLabel = $"{label}ramped";
+                BuildSpeedRampAudio(plan, clip, input, speedRamp, rampedLabel, filters);
+                filter = $"[{rampedLabel}]volume={gain}dB";
+            }
             if (segment.FadeInFrames > 0)
             {
                 filter += $",afade=t=in:st=0:d={FormatSeconds(segment.FadeInFrames, plan.FrameRate)}";
@@ -260,6 +274,66 @@ public sealed class TimelineFilterGraphBuilder
         var joined = string.Join("][", labels);
         filters.Add($"[{joined}]amix=inputs={labels.Count}:duration=first:dropout_transition=0:normalize=0[aout]");
         return "aout";
+    }
+
+    private static void BuildSpeedRampAudio(
+        TimelineVideoRenderPlan plan,
+        TimelineClip clip,
+        int input,
+        TimelineSpeedRamp speedRamp,
+        string label,
+        ICollection<string> filters)
+    {
+        var sourceCursor = clip.SourceStartUnit;
+        var sourceEnd = checked(clip.SourceStartUnit + clip.SourceUnitCount);
+        var partLabels = new List<string>();
+        for (var index = 0; index < speedRamp.Points.Count - 1; index++)
+        {
+            var start = speedRamp.Points[index];
+            var end = speedRamp.Points[index + 1];
+            var timelineFrames = end.Frame - start.Frame;
+            var speed = speedRamp.SpeedAt(start.Frame + timelineFrames / 2);
+            var sampleCount = RequiredSourceSamples(plan.FrameRate, clip.AudioSampleRate, timelineFrames, speed);
+            var partEnd = checked(sourceCursor + sampleCount);
+            if (partEnd > sourceEnd)
+            {
+                throw new MediaExportException("The speed ramp consumes more source audio than the clip contains.");
+            }
+
+            var partLabel = $"{label}part{index}";
+            var filter = $"[{input}:a:0]atrim=start_sample={sourceCursor}:end_sample={partEnd},asetpts=PTS-STARTPTS,aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo,{AtempoFilters(speed)}[{partLabel}]";
+            filters.Add(filter);
+            partLabels.Add(partLabel);
+            sourceCursor = partEnd;
+        }
+
+        filters.Add($"[{string.Join("][", partLabels)}]concat=n={partLabels.Count}:v=0:a=1:unsafe=1[{label}]");
+    }
+
+    private static long RequiredSourceSamples(
+        RationalFrameRate projectFrameRate,
+        int sampleRate,
+        long timelineFrames,
+        double speed) => Math.Max(1, checked((long)Math.Ceiling(
+            (double)timelineFrames * sampleRate * projectFrameRate.Denominator * speed / projectFrameRate.Numerator)));
+
+    private static string AtempoFilters(double speed)
+    {
+        var filters = new List<string>();
+        while (speed > 2)
+        {
+            filters.Add("atempo=2");
+            speed /= 2;
+        }
+
+        while (speed < 0.5)
+        {
+            filters.Add("atempo=0.5");
+            speed /= 0.5;
+        }
+
+        filters.Add($"atempo={Format(speed)}");
+        return string.Join(',', filters);
     }
 
     private static string BuildLayer(
@@ -415,6 +489,12 @@ public sealed class TimelineFilterGraphBuilder
         var clip = segment.Clip;
         var input = inputIndexes[clip.MediaId];
         var sourceEnd = checked(clip.SourceStartUnit + clip.SourceUnitCount);
+        if (segment.SpeedRamp is not null)
+        {
+            BuildSpeedRampSegment(plan, segment, inputIndexes, filters, label, includeTimelineOffset, padToCanvas, applyGrade);
+            return;
+        }
+
         var scale = segment.Animation?.ToFfmpegExpression(value => value.Scale, clip.TimelineRange.StartFrame) ?? Format(transform.Scale);
         var opacity = segment.Animation?.ToFfmpegExpression(value => value.Opacity, clip.TimelineRange.StartFrame, "N") ?? Format(transform.Opacity);
         scale = EscapeFilterExpression(scale);
@@ -441,6 +521,77 @@ public sealed class TimelineFilterGraphBuilder
         }
 
         filters.Add($"{filter}[{label}]");
+    }
+
+    private static void BuildSpeedRampSegment(
+        TimelineVideoRenderPlan plan,
+        TimelineVideoSegment segment,
+        IReadOnlyDictionary<MediaId, int> inputIndexes,
+        ICollection<string> filters,
+        string label,
+        bool includeTimelineOffset,
+        bool padToCanvas,
+        bool applyGrade)
+    {
+        var clip = segment.Clip;
+        var input = inputIndexes[clip.MediaId];
+        var sourceEnd = checked(clip.SourceStartUnit + clip.SourceUnitCount);
+        var sourceCursor = clip.SourceStartUnit;
+        var partLabels = new List<string>();
+        var points = segment.SpeedRamp!.Points;
+        for (var index = 0; index < points.Count - 1; index++)
+        {
+            var start = points[index];
+            var end = points[index + 1];
+            var timelineFrames = end.Frame - start.Frame;
+            var speed = segment.SpeedRamp.SpeedAt(start.Frame + timelineFrames / 2);
+            var sourceFrames = RequiredSourceFrames(clip, plan.FrameRate, timelineFrames, speed);
+            var partEnd = checked(sourceCursor + sourceFrames);
+            if (partEnd > sourceEnd)
+            {
+                throw new MediaExportException("The speed ramp consumes more source media than the clip contains.");
+            }
+
+            var transform = segment.Transform;
+            var scale = segment.Animation?.ToFfmpegExpression(value => value.Scale, start.Frame) ?? Format(transform.Scale);
+            var opacity = segment.Animation?.ToFfmpegExpression(value => value.Opacity, start.Frame, "N") ?? Format(transform.Opacity);
+            var alpha = segment.Animation is null
+                ? $"colorchannelmixer=aa={EscapeFilterExpression(opacity)}"
+                : $"geq=r='r(X\\,Y)':g='g(X\\,Y)':b='b(X\\,Y)':a='alpha(X\\,Y)*({EscapeFilterExpression(opacity)})'";
+            var filter = $"[{input}:v:0]trim=start_frame={sourceCursor}:end_frame={partEnd},setpts=(PTS-STARTPTS)/{Format(speed)},fps={Rate(plan.FrameRate)},scale=trunc(iw*{EscapeFilterExpression(scale)}/2)*2:trunc(ih*{EscapeFilterExpression(scale)}/2)*2:eval=frame,format=yuva420p";
+            if (applyGrade && plan.ColorGrades.TryGetValue(clip.MediaId, out var grade))
+            {
+                filter += $",eq=brightness={Format((Math.Pow(2, grade.ExposureEV) - 1) * 0.5)}:contrast={Format(1 + grade.Contrast)}:saturation={Format(1 + grade.Saturation)}";
+                filter += $",colorbalance=rs={Format(grade.Temperature * 0.1)}:bs={Format(-grade.Temperature * 0.1)}:gs={Format(-grade.Tint * 0.1)}";
+            }
+
+            if (padToCanvas)
+            {
+                filter += $",pad={plan.Width}:{plan.Height}:{transform.OffsetX}:{transform.OffsetY}:color=black@0:eval=frame";
+            }
+
+            var partLabel = $"{label}part{index}";
+            filters.Add($"{filter},{alpha}[{partLabel}]");
+            partLabels.Add(partLabel);
+            sourceCursor = partEnd;
+        }
+
+        var joined = $"{label}joined";
+        filters.Add($"[{string.Join("][", partLabels)}]concat=n={partLabels.Count}:v=1:a=0:unsafe=1[{joined}]");
+        var offset = includeTimelineOffset ? $"+{FormatSeconds(clip.TimelineRange.StartFrame, plan.FrameRate)}/TB" : string.Empty;
+        filters.Add($"[{joined}]settb=1/{Rate(plan.FrameRate)},setpts=PTS-STARTPTS{offset}[{label}]");
+    }
+
+    private static long RequiredSourceFrames(
+        TimelineClip clip,
+        RationalFrameRate projectFrameRate,
+        long timelineFrames,
+        double speed)
+    {
+        var sourceFrameRate = clip.SourceFrameRate!.Value;
+        var requested = (double)timelineFrames * sourceFrameRate.Numerator * projectFrameRate.Denominator * speed /
+            (sourceFrameRate.Denominator * projectFrameRate.Numerator);
+        return Math.Max(1, checked((long)Math.Ceiling(requested)));
     }
 
     private static string OverlaySegments(ICollection<string> filters, IReadOnlyList<string> labels, int layerIndex)

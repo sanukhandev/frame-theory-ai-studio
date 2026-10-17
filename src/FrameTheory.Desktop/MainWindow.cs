@@ -13,6 +13,7 @@ using FrameTheory.AI;
 using FrameTheory.Domain;
 using FrameTheory.Media;
 using System.Runtime.InteropServices;
+using System.Globalization;
 using FrameTheory.Photo;
 
 namespace FrameTheory.Desktop;
@@ -740,6 +741,26 @@ public sealed class MainWindow : Window
         pushIn.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToSelected(TimelineAnimationPreset.PushIn));
         var clearAnimation = new Button { Content = "Clear animation" };
         clearAnimation.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedAnimation);
+        var speedRampStart = new TextBox { Text = "1", Width = 55 };
+        AutomationProperties.SetName(speedRampStart, "Speed ramp start multiplier");
+        var speedRampEnd = new TextBox { Text = "2", Width = 55 };
+        AutomationProperties.SetName(speedRampEnd, "Speed ramp end multiplier");
+        var applySpeedRamp = new Button { Content = "Apply speed ramp" };
+        AutomationProperties.SetName(applySpeedRamp, "Apply speed ramp");
+        applySpeedRamp.Click += (_, _) =>
+        {
+            if (!double.TryParse(speedRampStart.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var startSpeed) ||
+                !double.TryParse(speedRampEnd.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var endSpeed))
+            {
+                operationStatus.Text = "Enter speed values from 0.25 to 4.";
+                return;
+            }
+
+            RunTimelineAction(() => timeline.ApplySpeedRampToSelected(startSpeed, endSpeed));
+        };
+        var clearSpeedRamp = new Button { Content = "Clear speed ramp" };
+        AutomationProperties.SetName(clearSpeedRamp, "Clear speed ramp");
+        clearSpeedRamp.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedSpeedRamp);
         var muteAudio = new Button { Content = "Mute audio" };
         muteAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioSettingsToSelected(0, muted: true));
         var gainAudio = new Button { Content = "Audio +3 dB" };
@@ -1016,6 +1037,7 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { copy, paste, split, trim, move, rippleDelete } },
                     operationStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { fadeIn, pushIn, clearAnimation } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { new TextBlock { Text = "Speed" }, speedRampStart, new TextBlock { Text = "to" }, speedRampEnd, applySpeedRamp, clearSpeedRamp } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { muteAudio, gainAudio, fadeAudio, duckAudio, clearDucking, clearAudio } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { titleText, addTitle, fadeTitle, pushTitle } },
                     titleAnimationStatus,

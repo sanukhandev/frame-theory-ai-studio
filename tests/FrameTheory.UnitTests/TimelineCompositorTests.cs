@@ -27,6 +27,45 @@ public sealed class TimelineCompositorTests
     }
 
     [Xunit.Fact]
+    public void SpeedRampGraphKeepsVideoAndAudioOnTheSameTimelineDuration()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-speed-ramp-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            File.WriteAllText(sourcePath, "source");
+            var mediaId = MediaId.Create(new Uri(sourcePath), "speed-ramp-test");
+            var frameRate = new RationalFrameRate(30, 1);
+            var videoClip = TimelineClip.Video(mediaId, 0, 60, 0, 30, frameRate);
+            var audioClip = TimelineClip.Audio(mediaId, 0, 96000, 0, 30, 48000);
+            var speedRamp = new TimelineSpeedRamp([
+                new TimelineSpeedPoint(0, 0.5),
+                new TimelineSpeedPoint(15, 1),
+                new TimelineSpeedPoint(30, 2)
+            ]);
+            var plan = new TimelineVideoRenderPlan(
+                frameRate,
+                16,
+                8,
+                30,
+                new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
+                [new TimelineVideoLayer("video", 0, [new TimelineVideoSegment(videoClip, speedRamp: speedRamp)])],
+                [new TimelineAudioLayer("audio", 0, [new TimelineAudioSegment(audioClip)])]);
+
+            var graph = new TimelineFilterGraphBuilder().Build(plan);
+
+            Xunit.Assert.Contains("setpts=(PTS-STARTPTS)/", graph.FilterComplex, StringComparison.Ordinal);
+            Xunit.Assert.Contains("concat=n=2:v=1:a=0", graph.FilterComplex, StringComparison.Ordinal);
+            Xunit.Assert.Contains("concat=n=2:v=0:a=1", graph.FilterComplex, StringComparison.Ordinal);
+            Xunit.Assert.Contains("atempo=", graph.FilterComplex, StringComparison.Ordinal);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public void FilterGraphBuildsOrderedOverlayAndTransitionStages()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-compositor-");

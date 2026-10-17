@@ -47,7 +47,8 @@ public sealed record TimelineVideoSegment
         TimelineVideoTransform? transform = null,
         TimelineTransitionKind? transition = null,
         long transitionDurationFrames = 0,
-        TimelineTransformKeyframes? animation = null)
+        TimelineTransformKeyframes? animation = null,
+        TimelineSpeedRamp? speedRamp = null)
     {
         ArgumentNullException.ThrowIfNull(clip);
         if (!clip.IsVideo)
@@ -68,6 +69,12 @@ public sealed record TimelineVideoSegment
             }
         }
 
+        if (speedRamp is not null && (speedRamp.Points[0].Frame != clip.TimelineRange.StartFrame ||
+            speedRamp.Points[^1].Frame != clip.TimelineRange.EndFrameExclusive))
+        {
+            throw new ArgumentException("Speed-ramp points must start at the clip and end at its exclusive boundary.", nameof(speedRamp));
+        }
+
         Clip = clip;
         Transform = transform ?? new TimelineVideoTransform();
         Transition = transition;
@@ -78,6 +85,7 @@ public sealed record TimelineVideoSegment
         }
 
         Animation = animation;
+        SpeedRamp = speedRamp;
     }
 
     public TimelineClip Clip { get; }
@@ -89,6 +97,8 @@ public sealed record TimelineVideoSegment
     public long TransitionDurationFrames { get; }
 
     public TimelineTransformKeyframes? Animation { get; }
+
+    public TimelineSpeedRamp? SpeedRamp { get; }
 }
 
 public sealed record TimelineVideoLayer

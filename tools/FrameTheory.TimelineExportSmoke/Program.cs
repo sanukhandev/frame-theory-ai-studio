@@ -71,6 +71,11 @@ var musicA = TimelineClip.Audio(idA, 0, 48000, 0, 30, 48000);
 var musicB = TimelineClip.Audio(idB, 0, 48000, 30, 30, 48000);
 var baseTransform = new TimelineVideoTransform(opacity: 0.9, scale: 1, offsetX: 0, offsetY: 0);
 var overlayTransform = new TimelineVideoTransform(opacity: 0.35, scale: 0.5, offsetX: 2, offsetY: 1);
+var speedRamp = new TimelineSpeedRamp([
+    new TimelineSpeedPoint(0, 0.5),
+    new TimelineSpeedPoint(15, 0.75),
+    new TimelineSpeedPoint(30, 1)
+]);
 var titles = args.Length == 4
     ? new[]
     {
@@ -115,7 +120,7 @@ var plan = new TimelineVideoRenderPlan(
     new Dictionary<MediaId, Uri> { [idA] = sourceA, [idB] = sourceB },
     [
         new TimelineVideoLayer("base", 0, [
-            new TimelineVideoSegment(first, baseTransform),
+            new TimelineVideoSegment(first, baseTransform, speedRamp: speedRamp),
             new TimelineVideoSegment(second, transition: TimelineTransitionKind.CrossDissolve, transitionDurationFrames: 5)
         ]),
         new TimelineVideoLayer("overlay", 1, [

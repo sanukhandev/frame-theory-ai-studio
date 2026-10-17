@@ -78,6 +78,34 @@ public sealed class TimelineProjectPersistenceTests
     }
 
     [Xunit.Fact]
+    public void TimelineStateRoundTripPreservesSpeedRamp()
+    {
+        var mediaId = MediaId.Parse(new string('e', 64));
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(new MediaSourceMetadata(
+            mediaId,
+            new Uri(Path.GetFullPath("speed-ramp.mp4")),
+            MediaKind.Video,
+            16,
+            9,
+            new RationalFrameRate(30, 1),
+            60,
+            TimeSpan.FromSeconds(2),
+            hasAudio: false));
+        editor.SelectFirst(TimelineTrackKind.Video);
+        editor.ApplySpeedRampToSelected(0.5, 2);
+
+        var restored = new TimelineEditorViewModel();
+        restored.RestoreProjectState(TimelineProjectStateJson.Deserialize(TimelineProjectStateJson.Serialize(editor.CaptureProjectState())));
+
+        var ramp = restored.BuildRenderPlan(16, 9, new Dictionary<MediaId, Uri> { [mediaId] = new Uri(Path.GetFullPath("speed-ramp.mp4")) })
+            .Layers.Single().Segments.Single().SpeedRamp;
+        Xunit.Assert.NotNull(ramp);
+        Xunit.Assert.Equal(0.5, ramp!.Points[0].Speed);
+        Xunit.Assert.Equal(2, ramp.Points[^1].Speed);
+    }
+
+    [Xunit.Fact]
     public async Task DesktopProjectSaveAndOpenReimportsRelativeMediaAndRestoresTimeline()
     {
         var directory = Path.Combine(Path.GetTempPath(), $"frame-theory-project-{Guid.NewGuid():N}");

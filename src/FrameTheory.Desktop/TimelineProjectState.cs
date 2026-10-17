@@ -116,6 +116,20 @@ public sealed class TimelineVideoSettingsProjectState
     public long TransitionDurationFrames { get; set; }
 
     public TimelineAnimationProjectState? Animation { get; set; }
+
+    public TimelineSpeedRampProjectState? SpeedRamp { get; set; }
+}
+
+public sealed class TimelineSpeedRampProjectState
+{
+    public List<TimelineSpeedPointProjectState> Points { get; set; } = [];
+}
+
+public sealed class TimelineSpeedPointProjectState
+{
+    public long Frame { get; set; }
+
+    public double Speed { get; set; }
 }
 
 public sealed class TimelineAudioSettingsProjectState
@@ -251,6 +265,12 @@ public static class TimelineProjectStateJson
             state.Captions.Any(caption => caption is null || caption.Words is null || caption.Words.Any(word => word is null)))
         {
             throw new InvalidDataException("The timeline state contains null collections or entries.");
+        }
+
+        if (state.VideoSettings.Any(settings => settings.SpeedRamp is not null &&
+            (settings.SpeedRamp.Points is null || settings.SpeedRamp.Points.Any(point => point is null))))
+        {
+            throw new InvalidDataException("The timeline speed-ramp state is incomplete.");
         }
 
         if (state.VideoSettings.Any(settings => settings.Animation is not null &&
