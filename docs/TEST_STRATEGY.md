@@ -2,7 +2,7 @@
 
 ## Test pyramid
 1. **Unit:** pure Domain frame math, clip ranges, undo/redo, schema parse+semantic validation, color transformations, LUT parsing, subtitle timecodes, project migrations.
-2. **Integration:** real ffprobe decode, media composite render, project save/reload, native host and subprocess failure/retry, Gemini mocked HTTP against real deserializer, OS secure-store adapters.
+2. **Integration:** real ffprobe decode, media composite render, project save/reload, native host and subprocess failure/retry, Gemini mocked HTTP against real deserializer, OS secure-store adapters, and the CI native-media smoke that generates an H.264/AAC fixture then verifies import, extracted audio and repeated exact-frame seeks.
 3. **Golden:** synthetic color wedges, known LUTs, moving timecode counters, mixed-rate source video, title/captions/transition composite and expected pixel/frame/audio results.
 4. **End-to-end:** interactive workflows UC-01..UC-06 through the actual desktop UI and exported media; run with network blocked, then user-approved Gemini integration.
 5. **Release:** dependency/license matrix, package/install/uninstall, keychain, OS/CPU compatibility, code signing where possible, smoke on real hardware.
@@ -31,7 +31,7 @@ Use FFmpeg lavfi generators where useful; keep recorded scripts and expected che
 Prompt injection embedded in subtitles, unexpected JSON keys, path traversal in media references, huge frames/LUTs, negative/overflow durations, symlink redirects, hostile file names, model retry storms, cache eviction and OS secret-store failure.
 
 ## Platform matrix
-Windows 11 x64, macOS Apple Silicon + Intel if available, Linux Ubuntu x64 baseline; track exact OS versions / hardware / driver / native binaries. CI compile is not a substitute for GUI smoke. Mark untested environments unverified.
+Windows 11 x64, macOS Apple Silicon + Intel if available, Linux Ubuntu x64 baseline; track exact OS versions / hardware / driver / native binaries. CI native-media smoke is evidence for host codec/process behavior, not a substitute for GUI smoke. Mark untested environments unverified.
 
 ## Gates
 - Every commit: formatting/analyzers + unit + integration tests executable on runner.
