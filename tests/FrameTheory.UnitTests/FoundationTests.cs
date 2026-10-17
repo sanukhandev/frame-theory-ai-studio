@@ -67,6 +67,27 @@ public sealed class FoundationTests
         await Xunit.Assert.ThrowsAsync<OperationCanceledException>(() => detector.DetectAsync(cancellation.Token));
     }
 
+    [Xunit.Fact]
+    public async Task MediaProcessRunnerPassesArgumentsWithoutShellParsing()
+    {
+        var runner = new FrameTheory.Media.FfmpegProcessRunner();
+        var result = await runner.RunAsync("dotnet", ["--version"], CancellationToken.None);
+
+        Xunit.Assert.Equal(0, result.ExitCode);
+        Xunit.Assert.Contains("10.0", result.StandardOutput);
+    }
+
+    [Xunit.Fact]
+    public async Task MediaProcessRunnerHonorsPreCanceledWork()
+    {
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+        var runner = new FrameTheory.Media.FfmpegProcessRunner();
+
+        await Xunit.Assert.ThrowsAsync<OperationCanceledException>(() =>
+            runner.RunAsync("dotnet", ["--version"], cancellation.Token));
+    }
+
     private sealed class TestCapabilityDetector : ICapabilityDetector
     {
         public Task<CapabilityReport> DetectAsync(CancellationToken cancellationToken) => Task.FromResult(

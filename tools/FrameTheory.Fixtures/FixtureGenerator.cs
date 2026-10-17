@@ -49,7 +49,7 @@ public static class FixtureGenerator
         using var stream = File.Create(path);
         using var writer = new BinaryWriter(stream, Encoding.ASCII, leaveOpen: true);
         writer.Write(Encoding.ASCII.GetBytes("RIFF"));
-        writer.Write(36 + dataLength);
+        writer.Write(36 + dataLength + 34);
         writer.Write(Encoding.ASCII.GetBytes("WAVEfmt "));
         writer.Write(16);
         writer.Write((short)1);
@@ -58,6 +58,12 @@ public static class FixtureGenerator
         writer.Write(sampleRate * channels * (bitsPerSample / 8));
         writer.Write((short)(channels * (bitsPerSample / 8)));
         writer.Write(bitsPerSample);
+        writer.Write(Encoding.ASCII.GetBytes("LIST"));
+        writer.Write(26);
+        writer.Write(Encoding.ASCII.GetBytes("INFOISFT"));
+        writer.Write(13);
+        writer.Write(Encoding.ASCII.GetBytes("FrameTheory 1"));
+        writer.Write((byte)0);
         writer.Write(Encoding.ASCII.GetBytes("data"));
         writer.Write(dataLength);
         for (var sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++)
