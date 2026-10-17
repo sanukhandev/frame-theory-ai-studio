@@ -54,6 +54,10 @@ jobs:
       - name: Restore
         if: steps.detect.outputs.has_solution == 'true'
         run: dotnet restore
+      - name: Audit NuGet vulnerabilities
+        if: steps.detect.outputs.has_solution == 'true'
+        shell: pwsh
+        run: ./scripts/check_nuget_vulnerabilities.ps1 -OutputPath artifacts/nuget-vulnerabilities.json
       - name: Build
         if: steps.detect.outputs.has_solution == 'true'
         run: dotnet build --no-restore -c Release
