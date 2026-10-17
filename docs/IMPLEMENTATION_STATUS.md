@@ -26,7 +26,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-101 / E01
-Git SHA: pending commit
+Git SHA: b0b94cb
 Files changed: src/FrameTheory.Domain/TimeAndMedia.cs, tests/FrameTheory.UnitTests/FoundationTests.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: Domain code now represents normalized rational frame rates, deterministic frame/time mapping, non-negative frame ranges, stable SHA-256 media IDs from canonical URI plus fingerprint, and validated source metadata without UI/native dependencies.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
