@@ -83,6 +83,16 @@ public sealed class TimelineFilterGraphBuilder
     {
         var contiguous = layer.Segments.Zip(layer.Segments.Skip(1), (previous, current) =>
             previous.Clip.TimelineRange.EndFrameExclusive == current.Clip.TimelineRange.StartFrame).All(value => value);
+        if (layer.Segments.Any(segment => segment.Animation is not null))
+        {
+            if (layer.Segments.Any(segment => segment.Transition is not null))
+            {
+                throw new MediaExportException("Animated visual segments cannot currently be combined with transitions on the same layer.");
+            }
+
+            return BuildAnimatedLayer(plan, layer, inputIndexes, filters, layerIndex);
+        }
+
         if (!contiguous && layer.Segments.Any(segment => segment.Transition is not null))
         {
             throw new MediaExportException("Transitions require contiguous visual segments on one layer.");
@@ -140,21 +150,57 @@ public sealed class TimelineFilterGraphBuilder
         return timedLabel;
     }
 
+    private static string BuildAnimatedLayer(
+        TimelineVideoRenderPlan plan,
+        TimelineVideoLayer layer,
+        IReadOnlyDictionary<MediaId, int> inputIndexes,
+        ICollection<string> filters,
+        int layerIndex)
+    {
+        var current = $"layer{layerIndex}animated0";
+        filters.Add($"color=c=black@0.0:s={plan.Width}x{plan.Height}:r={Rate(plan.FrameRate)}:d={FormatSeconds(plan.DurationFrames, plan.FrameRate)},format=yuva420p[{current}]");
+        for (var index = 0; index < layer.Segments.Count; index++)
+        {
+            var segment = layer.Segments[index];
+            var segmentLabel = $"layer{layerIndex}animatedSegment{index}";
+            BuildSegment(plan, segment, inputIndexes, filters, segmentLabel, includeTimelineOffset: true, padToCanvas: false);
+            var offsetX = segment.Animation?.ToFfmpegExpression(value => value.OffsetX, 0) ?? Format(segment.Transform.OffsetX);
+            var offsetY = segment.Animation?.ToFfmpegExpression(value => value.OffsetY, 0) ?? Format(segment.Transform.OffsetY);
+            var next = $"layer{layerIndex}animated{index + 1}";
+            filters.Add($"[{current}][{segmentLabel}]overlay=x={EscapeFilterExpression(offsetX)}:y={EscapeFilterExpression(offsetY)}:eof_action=pass:shortest=0:format=auto:eval=frame[{next}]");
+            current = next;
+        }
+
+        return current;
+    }
+
     private static void BuildSegment(
         TimelineVideoRenderPlan plan,
         TimelineVideoSegment segment,
         IReadOnlyDictionary<MediaId, int> inputIndexes,
         ICollection<string> filters,
         string label,
-        bool includeTimelineOffset)
+        bool includeTimelineOffset,
+        bool padToCanvas = true)
     {
         var transform = segment.Transform;
         var clip = segment.Clip;
         var input = inputIndexes[clip.MediaId];
         var sourceEnd = checked(clip.SourceStartUnit + clip.SourceUnitCount);
-        var scale = Format(transform.Scale);
-        var opacity = Format(transform.Opacity);
-        var filter = $"[{input}:v:0]trim=start_frame={clip.SourceStartUnit}:end_frame={sourceEnd},setpts=PTS-STARTPTS,fps={Rate(plan.FrameRate)},scale=trunc(iw*{scale}/2)*2:trunc(ih*{scale}/2)*2,format=yuva420p,pad={plan.Width}:{plan.Height}:{transform.OffsetX}:{transform.OffsetY}:color=black@0,colorchannelmixer=aa={opacity}";
+        var scale = segment.Animation?.ToFfmpegExpression(value => value.Scale, clip.TimelineRange.StartFrame) ?? Format(transform.Scale);
+        var opacity = segment.Animation?.ToFfmpegExpression(value => value.Opacity, clip.TimelineRange.StartFrame, "N") ?? Format(transform.Opacity);
+        scale = EscapeFilterExpression(scale);
+        opacity = EscapeFilterExpression(opacity);
+        var alpha = segment.Animation is null
+            ? $"colorchannelmixer=aa={opacity}"
+            : $"geq=r='r(X\\,Y)':g='g(X\\,Y)':b='b(X\\,Y)':a='alpha(X\\,Y)*({opacity})'";
+        var filter = $"[{input}:v:0]trim=start_frame={clip.SourceStartUnit}:end_frame={sourceEnd},setpts=PTS-STARTPTS,fps={Rate(plan.FrameRate)},scale=trunc(iw*{scale}/2)*2:trunc(ih*{scale}/2)*2:eval=frame,format=yuva420p";
+        if (padToCanvas)
+        {
+            filter += $",pad={plan.Width}:{plan.Height}:{transform.OffsetX}:{transform.OffsetY}:color=black@0:eval=frame";
+        }
+
+        filter += $",{alpha}";
         if (includeTimelineOffset)
         {
             filter += $",setpts=PTS-STARTPTS+{FormatSeconds(clip.TimelineRange.StartFrame, plan.FrameRate)}/TB";
@@ -203,6 +249,8 @@ public sealed class TimelineFilterGraphBuilder
         Format((double)frames * frameRate.Denominator / frameRate.Numerator);
 
     private static string Format(double value) => value.ToString("0.######", CultureInfo.InvariantCulture);
+
+    private static string EscapeFilterExpression(string expression) => expression.Replace(",", "\\,", StringComparison.Ordinal);
 }
 
 public interface ITimelineVideoExporter
@@ -281,7 +329,7 @@ public sealed class FfmpegTimelineVideoExporter : ITimelineVideoExporter
             var result = await _processRunner.RunAsync("ffmpeg", arguments, cancellationToken);
             if (result.ExitCode != 0 || !File.Exists(temporaryPath))
             {
-                throw new MediaExportException("FFmpeg could not complete the timeline export.");
+                throw new MediaExportException($"FFmpeg could not complete the timeline export: {result.StandardError.Trim()}");
             }
 
             progress?.Report(new ExportProgress("Verifying", 0.9));

@@ -8,6 +8,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
+using FrameTheory.Domain;
 using System.Runtime.InteropServices;
 using FrameTheory.Photo;
 
@@ -343,6 +344,12 @@ public sealed class MainWindow : Window
         move.Click += (_, _) => RunTimelineAction(() => timeline.MoveSelected(timeline.CurrentFrame));
         var rippleDelete = new Button { Content = "Ripple delete" };
         rippleDelete.Click += (_, _) => RunTimelineAction(timeline.RippleDeleteSelected);
+        var fadeIn = new Button { Content = "Fade in preset" };
+        fadeIn.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToSelected(TimelineAnimationPreset.FadeIn));
+        var pushIn = new Button { Content = "Push in preset" };
+        pushIn.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToSelected(TimelineAnimationPreset.PushIn));
+        var clearAnimation = new Button { Content = "Clear animation" };
+        clearAnimation.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedAnimation);
         var export = new Button { Content = "Export composite MP4" };
         export.Click += async (_, _) =>
         {
@@ -387,6 +394,7 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { back, forward, select, scrollBack, scrollForward } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { copy, paste, split, trim, move, rippleDelete } },
                     operationStatus,
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { fadeIn, pushIn, clearAnimation } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { export } },
                     exportStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { snap, new TextBlock { Text = "Zoom" }, zoom } }

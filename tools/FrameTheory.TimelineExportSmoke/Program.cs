@@ -15,6 +15,8 @@ var idB = MediaId.Create(sourceB, "timeline-smoke-b");
 var first = TimelineClip.Video(idA, 0, 30, 0, 30, frameRate);
 var second = TimelineClip.Video(idB, 0, 30, 30, 30, frameRate);
 var overlay = TimelineClip.Video(idB, 0, 30, 15, 30, frameRate);
+var baseTransform = new TimelineVideoTransform(opacity: 0.9, scale: 1, offsetX: 0, offsetY: 0);
+var overlayTransform = new TimelineVideoTransform(opacity: 0.35, scale: 0.5, offsetX: 2, offsetY: 1);
 var plan = new TimelineVideoRenderPlan(
     frameRate,
     16,
@@ -23,11 +25,14 @@ var plan = new TimelineVideoRenderPlan(
     new Dictionary<MediaId, Uri> { [idA] = sourceA, [idB] = sourceB },
     [
         new TimelineVideoLayer("base", 0, [
-            new TimelineVideoSegment(first),
+            new TimelineVideoSegment(first, baseTransform),
             new TimelineVideoSegment(second, transition: TimelineTransitionKind.CrossDissolve, transitionDurationFrames: 5)
         ]),
         new TimelineVideoLayer("overlay", 1, [
-            new TimelineVideoSegment(overlay, new TimelineVideoTransform(opacity: 0.35, scale: 0.5, offsetX: 2, offsetY: 1))
+            new TimelineVideoSegment(overlay, overlayTransform, animation: new TimelineTransformKeyframes([
+                new TimelineTransformKeyframe(15, new TimelineVideoTransform(opacity: 0, scale: 0.4, offsetX: 0, offsetY: 1), TimelineEasing.EaseIn),
+                new TimelineTransformKeyframe(44, overlayTransform)
+            ]))
         ])
     ]);
 var runner = new FfmpegProcessRunner();

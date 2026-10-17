@@ -37,27 +37,39 @@ public sealed class TimelineCompositorTests
             var mediaId = MediaId.Create(new Uri(sourcePath), "compositor-test");
             var first = TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1));
             var second = TimelineClip.Video(mediaId, 30, 30, 30, 30, new RationalFrameRate(30, 1));
+            var animation = TimelineTransformKeyframes.FromPreset(
+                TimelineAnimationPreset.FadeIn,
+                0,
+                30,
+                new TimelineVideoTransform(opacity: 0.8, scale: 0.5, offsetX: 2, offsetY: 1));
             var plan = new TimelineVideoRenderPlan(
                 new RationalFrameRate(30, 1),
                 16,
                 8,
                 60,
                 new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
-                [new TimelineVideoLayer(
-                    "video-1",
-                    0,
-                    [
-                        new TimelineVideoSegment(first, transform: new TimelineVideoTransform(opacity: 0.8, scale: 0.5, offsetX: 2, offsetY: 1)),
-                        new TimelineVideoSegment(second, transition: TimelineTransitionKind.WipeLeft, transitionDurationFrames: 5)
-                    ])]);
+                [
+                    new TimelineVideoLayer(
+                        "video-1",
+                        0,
+                        [
+                            new TimelineVideoSegment(first, transform: new TimelineVideoTransform(opacity: 0.8, scale: 0.5, offsetX: 2, offsetY: 1)),
+                            new TimelineVideoSegment(second, transition: TimelineTransitionKind.WipeLeft, transitionDurationFrames: 5)
+                        ]),
+                    new TimelineVideoLayer(
+                        "animated-1",
+                        1,
+                        [new TimelineVideoSegment(first, animation: animation)])
+                ]);
 
             var graph = new TimelineFilterGraphBuilder().Build(plan);
 
             Xunit.Assert.Single(graph.Inputs);
             Xunit.Assert.Contains("xfade=transition=wipeleft", graph.FilterComplex);
             Xunit.Assert.Contains("overlay=x=0:y=0", graph.FilterComplex);
-            Xunit.Assert.Contains("scale=trunc(iw*0.5/2)*2", graph.FilterComplex);
-            Xunit.Assert.Contains("colorchannelmixer=aa=0.8", graph.FilterComplex);
+            Xunit.Assert.Contains("scale=trunc(iw*if", graph.FilterComplex);
+            Xunit.Assert.Contains("geq=r=", graph.FilterComplex);
+            Xunit.Assert.Contains("if(lt(n\\,29)", graph.FilterComplex);
             Xunit.Assert.EndsWith("[outv]", graph.FilterComplex, StringComparison.Ordinal);
         }
         finally

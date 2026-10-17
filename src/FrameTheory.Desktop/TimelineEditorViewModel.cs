@@ -35,6 +35,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private readonly RationalFrameRate _projectFrameRate;
     private readonly List<TimelineClip> _videoClips = [];
     private readonly List<TimelineClip> _audioClips = [];
+    private readonly Dictionary<TimelineClip, TimelineTransformKeyframes> _animations = [];
     private readonly HashSet<MediaId> _mediaIds = [];
     private TimelineGraph _graph;
     private TimelineTransport _transport;
@@ -170,7 +171,30 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             height,
             TotalFrames,
             sources,
-            [new TimelineVideoLayer("Video 1", 0, _videoClips.Select(clip => new TimelineVideoSegment(clip)))]);
+            [new TimelineVideoLayer("Video 1", 0, _videoClips.Select(clip => new TimelineVideoSegment(
+                clip,
+                animation: _animations.TryGetValue(clip, out var animation) ? animation : null)))]);
+    }
+
+    public void ApplyAnimationPresetToSelected(TimelineAnimationPreset preset)
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        if (!selected.Clip.IsVideo)
+        {
+            throw new InvalidOperationException("Animation presets require a video clip.");
+        }
+
+        _animations[selected.Clip] = TimelineTransformKeyframes.FromPreset(
+            preset,
+            selected.Clip.TimelineRange.StartFrame,
+            selected.Clip.TimelineRange.EndFrameExclusive,
+            new TimelineVideoTransform());
+    }
+
+    public void ClearSelectedAnimation()
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        _animations.Remove(selected.Clip);
     }
 
     public void InsertClip(TimelineTrackKind kind, TimelineClip clip)

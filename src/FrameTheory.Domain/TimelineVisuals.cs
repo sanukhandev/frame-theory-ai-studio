@@ -46,7 +46,8 @@ public sealed record TimelineVideoSegment
         TimelineClip clip,
         TimelineVideoTransform? transform = null,
         TimelineTransitionKind? transition = null,
-        long transitionDurationFrames = 0)
+        long transitionDurationFrames = 0,
+        TimelineTransformKeyframes? animation = null)
     {
         ArgumentNullException.ThrowIfNull(clip);
         if (!clip.IsVideo)
@@ -71,6 +72,12 @@ public sealed record TimelineVideoSegment
         Transform = transform ?? new TimelineVideoTransform();
         Transition = transition;
         TransitionDurationFrames = transitionDurationFrames;
+        if (animation is not null && (animation.Keyframes[0].Frame != clip.TimelineRange.StartFrame || animation.Keyframes[^1].Frame >= clip.TimelineRange.EndFrameExclusive))
+        {
+            throw new ArgumentException("Transform keyframes must fit within the segment timeline range.", nameof(animation));
+        }
+
+        Animation = animation;
     }
 
     public TimelineClip Clip { get; }
@@ -80,6 +87,8 @@ public sealed record TimelineVideoSegment
     public TimelineTransitionKind? Transition { get; }
 
     public long TransitionDurationFrames { get; }
+
+    public TimelineTransformKeyframes? Animation { get; }
 }
 
 public sealed record TimelineVideoLayer

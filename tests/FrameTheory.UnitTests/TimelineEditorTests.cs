@@ -66,6 +66,26 @@ public sealed class TimelineEditorTests
         Xunit.Assert.Equal(120, editor.TotalFrames);
     }
 
+    [Xunit.Fact]
+    public void TimelineEditorAppliesAnimationPresetsToRenderPlans()
+    {
+        var source = new Uri("file:///animated.mp4");
+        var metadata = Metadata(source, "animated", 30, hasAudio: false);
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(metadata);
+        editor.SelectAt(0, "Video 1");
+        editor.ApplyAnimationPresetToSelected(TimelineAnimationPreset.FadeIn);
+
+        var plan = editor.BuildRenderPlan(1920, 1080, new Dictionary<MediaId, Uri> { [metadata.Id] = source });
+        var segment = plan.Layers.Single().Segments.Single();
+
+        Xunit.Assert.NotNull(segment.Animation);
+        Xunit.Assert.Equal(0, segment.Animation!.Evaluate(0).Opacity);
+        Xunit.Assert.Equal(1, segment.Animation.Evaluate(29).Opacity);
+        editor.ClearSelectedAnimation();
+        Xunit.Assert.Null(editor.BuildRenderPlan(1920, 1080, new Dictionary<MediaId, Uri> { [metadata.Id] = source }).Layers.Single().Segments.Single().Animation);
+    }
+
     private static MediaSourceMetadata Metadata(Uri uri, string fingerprint, long durationFrames, bool hasAudio = true) => new(
         MediaId.Create(uri, fingerprint),
         uri,
