@@ -18,6 +18,22 @@ var decoder = new FfmpegFrameDecoder(runner);
 var importer = new FfmpegMediaImporter(new FfprobeMediaProbe(runner), decoder, runner);
 var importedSourceA = await importer.ImportAsync(sourceA, CancellationToken.None);
 var importedSourceB = await importer.ImportAsync(sourceB, CancellationToken.None);
+var proxyDirectory = Path.Combine(Path.GetDirectoryName(destination) ?? ".", "proxy-cache");
+var proxyService = new FfmpegPreviewProxyService(runner, proxyDirectory, maximumCacheBytes: 64L * 1024 * 1024);
+var proxy = await proxyService.CreateAsync(sourceA, importedSourceA.Metadata.Id.Value, 8, 8, CancellationToken.None);
+var proxyMetadata = await new FfprobeMediaProbe(runner).ProbeAsync(new Uri(proxy.OutputPath), CancellationToken.None);
+if (proxyMetadata.Kind != MediaKind.Video || proxyMetadata.Width > 8 || proxyMetadata.Height > 8)
+{
+    throw new InvalidOperationException($"Preview proxy dimensions were invalid: {proxyMetadata.Kind} {proxyMetadata.Width}x{proxyMetadata.Height}.");
+}
+
+var reusedProxy = await proxyService.CreateAsync(sourceA, importedSourceA.Metadata.Id.Value, 8, 8, CancellationToken.None);
+if (!reusedProxy.Reused)
+{
+    throw new InvalidOperationException("Preview proxy was not reused on the second request.");
+}
+
+Console.WriteLine($"proxy={proxy.OutputPath}; bytes={proxy.OutputBytes}; reused={reusedProxy.Reused}; size={proxyMetadata.Width}x{proxyMetadata.Height}");
 var analysis = await new LocalAnalysisSampler(decoder).PrepareAsync(
     new GeminiAnalysisRequest([importedSourceA], GeminiAnalysisScope.VideoFrames | GeminiAnalysisScope.AudioWaveform, uploadConsent: false),
     new Progress<LocalAnalysisProgress>(update => Console.WriteLine($"analysis={update.Stage}; fraction={update.Fraction:0.0}")),

@@ -113,6 +113,7 @@ jobs:
             artifacts/media-smoke/clip.mp4 \
             artifacts/media-smoke/clip-b.mp4 \
             artifacts/media-smoke/timeline.mp4 | tee artifacts/media-smoke/timeline.txt
+          grep -F 'proxy=' artifacts/media-smoke/timeline.txt
           grep -F 'output=' artifacts/media-smoke/timeline.txt
           grep -F 'queue-retry-output=' artifacts/media-smoke/timeline.txt
           grep -F 'ai-output=' artifacts/media-smoke/timeline.txt
