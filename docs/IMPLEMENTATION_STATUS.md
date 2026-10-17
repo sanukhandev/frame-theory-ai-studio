@@ -18,6 +18,8 @@
 
 **FT-801 checkpoint:** Before/after now composes an editable multi-clip base layer twice—unaltered and graded—and the split/wipe/timed-reveal output is covered by graph tests plus a real two-clip FFmpeg smoke.
 
+**FT-402 source-integrity checkpoint (2026-10-18):** Photo project open now verifies a saved `sha256:` source fingerprint before importing; changed source bytes are rejected and the current edit remains loaded. Focused photo persistence coverage passes 4/4.
+
 **FT-802 checkpoint:** Video and Photo workspaces expose the same 16:9, 1:1 and 9:16 presets. Photo exports cover-crop to exact dimensions, preserve metadata/source bytes, and use the shared cancellable export queue when hosted by the desktop view model.
 
 **FT-803 checkpoint:** Timeline editing now offers amplitude-peak and energy-onset beat marker modes plus an explicit local PNG/JPEG/WebP watermark selection path. Watermarks are validated, looped for the full render, opacity-adjusted and overlaid non-destructively; no approved Frame Theory logo asset is present in the repository, so branded output remains unverified.
@@ -37,6 +39,8 @@
 **Photo persistence CI checkpoint:** Run `39065309000` passed photo project persistence, repository compatibility and the full quality matrix on Windows, macOS and Linux for `7d35174`; hosted packaging remains framework-dependent and unsigned.
 
 **Native photo persistence CI checkpoint:** Run `39065964020` passed the generated-image FFmpeg photo project save/open smoke and its output assertion on Windows, macOS and Linux for `ad9cbd8`; hosted packaging remains framework-dependent and unsigned.
+
+**Photo source-integrity CI checkpoint:** Run `39066595061` passed the fingerprint guard and full quality matrix on Windows, macOS and Linux for `1f0d285`; hosted packaging remains framework-dependent and unsigned.
 
 **E09 test checkpoint:** Added focused evidence for every keyboard workspace shortcut, validated-plan JSON synchronization/clearing, repeatable seek traces, cancellable frame playback and credential-assignment redaction. Hosted native media smoke now covers all three OS runners; these tests strengthen FT-901/FT-902/FT-903/FT-904 but do not replace the required interactive 1280x800/HiDPI manual acceptance.
 
@@ -117,6 +121,20 @@
 5. Keep MLT deferred unless interactive playback parity or a release licensing decision requires a new native engine spike.
 
 ## Latest execution record
+```text
+Date/time: 2026-10-18
+Task / Epic: FT-402 / photo source integrity
+Git SHA: 1f0d285
+Files changed: src/FrameTheory.Desktop/PhotoEditorViewModel.cs, tests/FrameTheory.UnitTests/PhotoProjectPersistenceTests.cs
+Actual behavior and UI path: Photo project open verifies the saved SHA-256 source fingerprint before importing and preserves the current editor state when source bytes change.
+Commands executed + OS: Focused photo persistence tests, full unit/golden tests, Release build and formatting verification on Windows 11 x64; hosted quality gate run 39066595061 passed on Windows, macOS and Linux.
+Test outputs / exit codes: Focused photo persistence tests passed 4/4; full unit tests passed 144/144; golden tests passed 2/2; Release build passed with 0 warnings/errors; hosted run 39066595061 passed all jobs.
+Media fixtures and verification: Changed-source coverage uses temporary local bytes; no user media, API key, generated fixture or binary entered Git.
+Known limitations / blockers: Interactive Photo workspace close/reopen and cross-platform GUI acceptance remain open.
+Next unblocked task: Continue the native-media journey matrix while manual UI and external-input gates remain visible.
+```
+
+## Previous execution record
 ```text
 Date/time: 2026-10-18
 Task / Epic: FT-402 / native photo project smoke
