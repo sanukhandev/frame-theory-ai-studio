@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Current status: TRANSCRIPTION CONTRACT BASELINE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405, FT-501 through FT-506 and FT-601 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-602 has a strict source-bound provider contract and JSON fixture adapter, but real local ASR/Gemini transcription is not connected. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
+**Current status: CAPTION RENDERING COMPLETE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405, FT-501 through FT-506, FT-601 and FT-603 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-602 has a strict source-bound provider contract and JSON fixture adapter, but real local ASR/Gemini transcription is not connected. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
 
 ## Completed
 - [x] Product README and Codex agent operating contract
@@ -39,6 +39,7 @@
 - [x] FT-506 validated title overlays with user-supplied font paths, safe-area placement, z-order and real FFmpeg drawtext export
 - [x] FT-601 bounded timed-caption model with imported-subtitle provenance, timezone-independent SRT import/export and Video workspace actions
 - [~] FT-602 source-bound transcription provider contract and validated timed-word JSON fixture adapter; real local/Gemini provider remains open
+- [x] FT-603 timed caption overlays with deterministic word wrapping, safe-area placement, font validation and real FFmpeg drawtext preview/export
 - [x] FT-401 FFmpeg-backed PNG/JPEG photo import, PPM preview and bounded canvas fit/100%/zoom/pan state
 - [x] FT-402 non-destructive PPM crop, 90° rotation, nearest-neighbor resize and undo-last operation stack
 - [x] FT-403 immutable photo adjustment layers with ordering, inspector state and undo/redo history
@@ -46,22 +47,22 @@
 - [x] FT-405 photo project autosave recovery, missing-media relink and corrupt-input UI status paths
 
 ## Next tasks
-1. FT-603 caption overlay rendering, line wrapping and preview/export parity using verified timed cues.
+1. FT-604 animated title presets with inspectable per-property keyframes and real export.
 2. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
 3. Iterate per docs/EPICS_AND_TASKS.md; update this checkpoint **after every tested commit**.
 
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
-Task / Epic: FT-602 / E06
-Git SHA: 0cb2084
-Files changed: src/FrameTheory.Captions/Transcription.cs, tests/FrameTheory.UnitTests/TranscriptionTests.cs
-Actual behavior and UI path: `ITranscriptionProvider` defines cancellable source transcription results with verified word timings and provenance. `JsonTranscriptProvider` accepts only a source-matching, bounded JSON fixture, rejects mismatched media and overlapping/malformed words, and never claims to perform speech recognition.
-Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet test tests/FrameTheory.UnitTests/FrameTheory.UnitTests.csproj --no-build --configuration Release --filter FullyQualifiedName~TranscriptionTests; git diff --check
-Test outputs / exit codes: build 0 with 0 warnings/0 errors; 2 transcription contract tests passed. Full release gate remains represented by the preceding FT-601 record; real ASR/Gemini provider is not verified.
-Media fixtures and verification: Synthetic rational-rate video/audio metadata only; actual media import continues to feed the timeline through the existing FFmpeg importer; no media binary committed.
-Known limitations / blockers: FT-006 remains partial pending MLT and second-OS evidence. Timeline mutations, playback clock and rendered timeline export remain later tasks. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux photo and timeline runs are unverified.
-Next unblocked task: FT-603
+Task / Epic: FT-603 / E06
+Git SHA: 4e57179
+Files changed: src/FrameTheory.Media/TimelineCaptions.cs, src/FrameTheory.Media/TimelineCompositor.cs, src/FrameTheory.Desktop/TimelineEditorViewModel.cs, src/FrameTheory.Desktop/MainWindow.cs, tools/FrameTheory.TimelineExportSmoke/Program.cs, tests/FrameTheory.UnitTests/TimelineCaptionTests.cs
+Actual behavior and UI path: Imported SRT cues can be assigned a validated local TrueType/OpenType font from the Video workspace and are included in the editable timeline render plan. The compositor wraps words deterministically, places captions in the bottom safe area, gates visibility to exact cue times, and renders them with FFmpeg drawtext while preserving the existing title/audio/color pipeline.
+Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet test FrameTheory.sln --no-build --configuration Release --logger console\;verbosity=minimal; git diff --check; synthetic H.264/AAC timeline export smoke with `C:\Windows\Fonts\arial.ttf` and ffprobe.
+Test outputs / exit codes: format 0; build 0 with 0 warnings/0 errors; 72 unit tests and 2 golden tests passed; export 0 with verified 16x8 H.264/AAC 48 kHz stereo and bt709/bt709/bt709/tv metadata.
+Media fixtures and verification: Real temporary red/blue video and sine-wave AAC sources; captioned MP4 exported and ffprobe-verified. No media binary committed.
+Known limitations / blockers: FT-602 remains a contract/fixture adapter pending a real local ASR or consented Gemini provider. FT-006 remains partial pending MLT and second-OS evidence. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux photo and timeline runs are unverified.
+Next unblocked task: FT-604
 ```
 
 ## Task execution record template
@@ -79,7 +80,7 @@ Next unblocked task:
 ```
 
 ## Release verification status
-Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601 built/tested; FT-602 contract/fixture tested only; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
+Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601/FT-603 built/tested; FT-602 contract/fixture tested only; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
 
 ## Honest reporting
 Codex should not mark a task complete for a mock UI, TODO, downloaded asset, simulated exporter, docs-only passing CI, or speculative integration. If execution is interrupted, preserve status and resume from first unblocked task on next run.
