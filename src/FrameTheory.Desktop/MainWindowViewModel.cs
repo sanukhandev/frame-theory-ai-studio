@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using FrameTheory.Application;
+using FrameTheory.Captions;
 using FrameTheory.Domain;
 using FrameTheory.Media;
 using FrameTheory.Storage;
@@ -38,6 +39,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _capabilityStatusText = "Checking local capabilities...";
     private string _mediaImportStatusText = "Drop local media files into the window to import previews.";
     private string _timelineExportStatusText = "Timeline export is available after importing video.";
+    private string _captionStatusText = "No captions imported.";
     private readonly Dictionary<MediaId, Uri> _mediaSources = [];
     private ITimelineVideoExporter? _timelineExporter;
     private int _videoWidth;
@@ -140,6 +142,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    public string CaptionStatusText
+    {
+        get => _captionStatusText;
+        private set
+        {
+            if (value == _captionStatusText)
+            {
+                return;
+            }
+
+            _captionStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
     public async Task ImportFilesAsync(IEnumerable<string> paths, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(paths);
@@ -216,6 +233,48 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaExportException or MediaProbeException)
         {
             TimelineExportStatusText = $"Timeline export failed: {exception.Message}";
+            return false;
+        }
+    }
+
+    public async Task<bool> ImportCaptionsAsync(string sourcePath, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var content = await File.ReadAllTextAsync(sourcePath, cancellationToken);
+            TimelineEditor.ImportCaptions(content);
+            CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} caption cue(s).";
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            CaptionStatusText = "Caption import canceled.";
+            return false;
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException or ArgumentException)
+        {
+            CaptionStatusText = $"Caption import failed: {exception.Message}";
+            return false;
+        }
+    }
+
+    public async Task<bool> ExportCaptionsAsync(string destinationPath, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var content = TimelineEditor.ExportCaptions();
+            await File.WriteAllTextAsync(destinationPath, content, cancellationToken);
+            CaptionStatusText = $"Exported {TimelineEditor.Captions.Count} caption cue(s).";
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            CaptionStatusText = "Caption export canceled.";
+            return false;
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException)
+        {
+            CaptionStatusText = $"Caption export failed: {exception.Message}";
             return false;
         }
     }

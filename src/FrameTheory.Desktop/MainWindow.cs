@@ -390,6 +390,48 @@ public sealed class MainWindow : Window
 
             RunTimelineAction(() => timeline.AddTitle(titleText.Text!, fontPath));
         };
+        var importCaptions = new Button { Content = "Import SRT" };
+        importCaptions.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(importCaptions);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("SubRip captions") { Patterns = ["*.srt"] }]
+            });
+            var path = files.SingleOrDefault()?.TryGetLocalPath();
+            if (path is not null)
+            {
+                await viewModel.ImportCaptionsAsync(path, CancellationToken.None);
+            }
+        };
+        var exportCaptions = new Button { Content = "Export SRT" };
+        exportCaptions.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(exportCaptions);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            {
+                SuggestedFileName = "captions.srt",
+                FileTypeChoices = [new FilePickerFileType("SubRip captions") { Patterns = ["*.srt"] }]
+            });
+            var path = file?.TryGetLocalPath();
+            if (path is not null)
+            {
+                await viewModel.ExportCaptionsAsync(path, CancellationToken.None);
+            }
+        };
+        var captionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        captionStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CaptionStatusText)));
         var export = new Button { Content = "Export composite MP4" };
         export.Click += async (_, _) =>
         {
@@ -437,6 +479,8 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { fadeIn, pushIn, clearAnimation } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { muteAudio, gainAudio, fadeAudio, clearAudio } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { titleText, addTitle } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { importCaptions, exportCaptions } },
+                    captionStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { export } },
                     exportStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { snap, new TextBlock { Text = "Zoom" }, zoom } }

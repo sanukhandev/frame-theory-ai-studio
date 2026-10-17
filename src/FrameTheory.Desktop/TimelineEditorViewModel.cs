@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using FrameTheory.Captions;
 using FrameTheory.Domain;
 using FrameTheory.Media;
 
@@ -38,6 +39,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private readonly Dictionary<TimelineClip, TimelineTransformKeyframes> _animations = [];
     private readonly Dictionary<TimelineClip, TimelineAudioSegment> _audioSettings = [];
     private readonly List<TimelineTitle> _titles = [];
+    private IReadOnlyList<TimedCaption> _captions = [];
     private readonly HashSet<MediaId> _mediaIds = [];
     private TimelineGraph _graph;
     private TimelineTransport _transport;
@@ -198,6 +200,12 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
         _titles.Add(new TimelineTitle(text, fontPath, CurrentFrame, duration, order: _titles.Count));
     }
+
+    public IReadOnlyList<TimedCaption> Captions => _captions;
+
+    public void ImportCaptions(string content) => _captions = SrtCaptionFile.Import(content);
+
+    public string ExportCaptions() => SrtCaptionFile.Export(_captions);
 
     public void ApplyAnimationPresetToSelected(TimelineAnimationPreset preset)
     {
