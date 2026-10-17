@@ -232,7 +232,8 @@ public sealed class TimelineFilterGraphBuilder
         TimelineVideoLayer layer,
         IReadOnlyDictionary<MediaId, int> inputIndexes,
         ICollection<string> filters,
-        int layerIndex)
+        int layerIndex,
+        bool applyGrade = true)
     {
         var contiguous = layer.Segments.Zip(layer.Segments.Skip(1), (previous, current) =>
             previous.Clip.TimelineRange.EndFrameExclusive == current.Clip.TimelineRange.StartFrame).All(value => value);
@@ -243,7 +244,7 @@ public sealed class TimelineFilterGraphBuilder
                 throw new MediaExportException("Animated visual segments cannot currently be combined with transitions on the same layer.");
             }
 
-            return BuildAnimatedLayer(plan, layer, inputIndexes, filters, layerIndex);
+            return BuildAnimatedLayer(plan, layer, inputIndexes, filters, layerIndex, applyGrade);
         }
 
         if (!contiguous && layer.Segments.Any(segment => segment.Transition is not null))
@@ -257,7 +258,7 @@ public sealed class TimelineFilterGraphBuilder
             for (var index = 0; index < layer.Segments.Count; index++)
             {
                 var segmentLabel = $"layer{layerIndex}segment{index}";
-                BuildSegment(plan, layer.Segments[index], inputIndexes, filters, segmentLabel, includeTimelineOffset: true);
+                BuildSegment(plan, layer.Segments[index], inputIndexes, filters, segmentLabel, includeTimelineOffset: true, applyGrade: applyGrade);
                 labels.Add(segmentLabel);
             }
 
@@ -271,7 +272,7 @@ public sealed class TimelineFilterGraphBuilder
         {
             var segment = layer.Segments[index];
             var segmentLabel = $"layer{layerIndex}segment{index}";
-            BuildSegment(plan, segment, inputIndexes, filters, segmentLabel, includeTimelineOffset: false);
+            BuildSegment(plan, segment, inputIndexes, filters, segmentLabel, includeTimelineOffset: false, applyGrade: applyGrade);
             if (index == 0)
             {
                 previousLabel = segmentLabel;
@@ -308,16 +309,14 @@ public sealed class TimelineFilterGraphBuilder
         IReadOnlyDictionary<MediaId, int> inputIndexes,
         ICollection<string> filters)
     {
-        var segment = plan.Layers.SelectMany(layer => layer.Segments).SingleOrDefault()
-            ?? throw new MediaExportException("Before/after composition currently requires exactly one video segment.");
-        var beforeLabel = "beforeafter_before";
-        var afterLabel = "beforeafter_after";
-        BuildSegment(plan, segment, inputIndexes, filters, beforeLabel, includeTimelineOffset: false, applyGrade: false);
-        BuildSegment(plan, segment, inputIndexes, filters, afterLabel, includeTimelineOffset: false, applyGrade: true);
-        var raw = "beforeafter_raw";
-        var graded = "beforeafter_graded";
-        filters.Add($"[{beforeLabel}]setpts=PTS-STARTPTS[{raw}]");
-        filters.Add($"[{afterLabel}]setpts=PTS-STARTPTS[{graded}]");
+        var layers = plan.Layers.Where(layer => layer.Segments.Count > 0).ToArray();
+        if (layers.Length != 1)
+        {
+            throw new MediaExportException("Before/after composition requires one editable video layer.");
+        }
+
+        var raw = BuildLayer(plan, layers[0], inputIndexes, filters, 100, applyGrade: false);
+        var graded = BuildLayer(plan, layers[0], inputIndexes, filters, 101, applyGrade: true);
         var result = "beforeafter_result";
         switch (plan.BeforeAfterStyle)
         {
@@ -347,7 +346,8 @@ public sealed class TimelineFilterGraphBuilder
         TimelineVideoLayer layer,
         IReadOnlyDictionary<MediaId, int> inputIndexes,
         ICollection<string> filters,
-        int layerIndex)
+        int layerIndex,
+        bool applyGrade)
     {
         var current = $"layer{layerIndex}animated0";
         filters.Add($"color=c=black@0.0:s={plan.Width}x{plan.Height}:r={Rate(plan.FrameRate)}:d={FormatSeconds(plan.DurationFrames, plan.FrameRate)},format=yuva420p[{current}]");
@@ -355,7 +355,7 @@ public sealed class TimelineFilterGraphBuilder
         {
             var segment = layer.Segments[index];
             var segmentLabel = $"layer{layerIndex}animatedSegment{index}";
-            BuildSegment(plan, segment, inputIndexes, filters, segmentLabel, includeTimelineOffset: true, padToCanvas: false);
+            BuildSegment(plan, segment, inputIndexes, filters, segmentLabel, includeTimelineOffset: true, padToCanvas: false, applyGrade: applyGrade);
             var offsetX = segment.Animation?.ToFfmpegExpression(value => value.OffsetX, 0) ?? Format(segment.Transform.OffsetX);
             var offsetY = segment.Animation?.ToFfmpegExpression(value => value.OffsetY, 0) ?? Format(segment.Transform.OffsetY);
             var next = $"layer{layerIndex}animated{index + 1}";

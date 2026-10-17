@@ -9,7 +9,7 @@ This matrix records executable evidence without confusing headless smoke with in
 | UC-03 Universal look | Color golden tests, LUT roundtrip tests and Color workspace inspector | Deterministic preview/export color path and LUT validation pass | Cross-media normalized sample comparison through UI |
 | UC-04 Gemini loop | AI parser/validator/executor tests and timeline smoke AI multi-clip grade/transition plus Reel export | Invalid plans reject; approved actions mutate multiple editable clips transactionally; rollback/undo tested; real MP4 outputs are probed | Real provider request, follow-up history and consented interactive flow |
 | UC-05 Offline and failures | No-key settings tests, capability detector, cancellation, diagnostics and atomic export tests | Manual paths remain local; failures do not replace outputs; diagnostics are local/redacted | Network-blocked interactive launch on Windows/macOS/Linux |
-| UC-06 Before/after Reel | Timeline smoke AI `reel.before_after` action with real MP4 output | Editable one-clip split/wipe/timed reveal paths render and probe successfully | Multi-clip wizard, approved watermark and interactive 9:16 acceptance |
+| UC-06 Before/after Reel | Timeline smoke AI `reel.before_after` action with real MP4 output | Editable multi-clip split/wipe/timed reveal composition renders and probes successfully | Approved watermark and interactive 9:16 acceptance |
 
 ## Windows reference commands
 

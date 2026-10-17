@@ -2,6 +2,8 @@
 
 **Current implementation note:** FT-706 transport, bounded retry policy, typed failures, usage records and redacted local history are now implemented and tested; desktop revision UI and live provider-to-plan verification remain pending.
 
+**FT-801 checkpoint:** Before/after now composes an editable multi-clip base layer twice—unaltered and graded—and the split/wipe/timed-reveal output is covered by graph tests plus a real two-clip FFmpeg smoke.
+
 **Current status: PACKAGING MATRIX AND CI ARTIFACTS PARTIAL (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405, FT-501 through FT-506, FT-601, FT-603 through FT-605, and FT-701 through FT-704 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-705 now executes approved grade, clip, transition, title, caption, keyframe, audio, trusted-preset and Reel operations transactionally; FT-801 provides split, wipe and timed-reveal output for exactly one video clip. FT-802 provides real 16:9, 1:1 and 9:16 MP4 presets plus Photo workspace PNG/JPEG import, non-destructive rotate/undo, preview and quality-controlled export; FT-803 adds imported user audio and waveform-derived editable beat markers; FT-804 adds a single-worker cancellable export queue and Video workspace cancel control; FT-706 exposes undo for the last AI transaction. FT-901 adds keyboard workspace/frame shortcuts, scroll-safe dense workspace layout, automation names for key controls and bounded dense/HiDPI ruler evidence. FT-902 surfaces synchronized selected-clip/playhead context in Video and approved-action counts plus current AI status in the AI panel. FT-903 records real cold/warm frame-seek timing, working-set bytes, bounded cache metrics and cancellation/cache policy; optional disk proxies remain deferred. FT-904 adds local secret-redacting diagnostics, unhandled-failure capture, actionable missing FFmpeg/ffprobe guidance and visible log location. FT-1001 adds an explicit source SHA-256 preservation assertion to the core unit/integration/golden gate. FT-1002 maps all UC-01..UC-06 to executable Windows smoke/test evidence and records the interactive/platform limits. FT-1003 records the actual restored NuGet/native dependency inventory and external FFmpeg redistribution blockers in `docs/SBOM.md`. FT-1004 extends the Windows/macOS/Linux CI matrix with desktop publish/test artifacts and SHA-256 manifests. FT-1005 now provides reproducible framework-dependent publish scripts and a platform/release matrix; installers, native media bundling, signing and notarization remain open. FT-602 now has a real consent-gated Gemini Interactions adapter with SHA-256 source provenance and strict word-timing rejection; local ASR, video audio extraction, Files API uploads and desktop wiring remain open. Watermark licensing, provider retries and usage/redaction logs remain open. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
 
 ## Completed
@@ -49,7 +51,7 @@
 - [x] FT-703 bounded JSON edit-plan parser, semantic project validation and allowlisted operation catalog
 - [x] FT-704 AI proposal review panel with action summaries, per-action approval state and no-mutation-before-approval behavior
 - [x] FT-705 transactional executor for approved grades, clip edits, transitions, titles, captions, keyframes, audio, trusted presets and bounded Reel actions across multiple clips; real two-clip FFmpeg export smoke verified
-- [~] FT-801 editable one-clip before/after split, wipe and timed-reveal composition with real FFmpeg output; multi-clip wizard remains open
+- [x] FT-801 editable multi-clip before/after split, wipe and timed-reveal composition with real FFmpeg output; no watermark asset was invented
 - [~] FT-802 real MP4 social aspect presets for 16:9, 1:1 and 9:16 plus Photo workspace PNG/JPEG quality export; social photo dimensions and queue parity remain open
 - [~] FT-803 imported user audio, waveform-derived beat markers and existing creative title/caption slots; approved watermark and richer beat options remain open
 - [~] FT-804 single-worker cancellable background export queue with Video workspace cancellation; retry policy and multi-job progress remain open
@@ -72,21 +74,21 @@
 
 ## Next tasks
 1. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
-2. Wire FT-602 into the desktop caption workflow and add a known spoken-fixture/provider integration run, then complete FT-706 and FT-801..FT-804 remaining P0 scope.
+2. Wire FT-602 into the desktop caption workflow and add a known spoken-fixture/provider integration run, then complete FT-802..FT-804 remaining P0 scope.
 3. Finish manual/cross-platform FT-901..FT-904 acceptance and hosted FT-1001..FT-1005 gates.
 
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
-Task / Epic: FT-706 / E07
+Task / Epic: FT-801 / E08
 Git SHA: pending commit
-Files changed: src/FrameTheory.AI/GeminiInteractions.cs, src/FrameTheory.AI/GeminiConfiguration.cs, tests/FrameTheory.UnitTests/GeminiInteractionsTests.cs, docs/GEMINI_PROVIDER.md, docs/IMPLEMENTATION_STATUS.md
-Actual behavior and UI path: The headless `GeminiInteractionsClient` sends text-only follow-up prompts with prior interaction IDs, bounded retries and per-attempt timeouts. It returns typed output/usage and writes only redacted local history; output remains untrusted and is not applied by the client.
-Commands executed + OS: Windows 11 x64; focused Gemini interaction tests with .NET SDK 10.0.100.
-Test outputs / exit codes: `dotnet test tests/FrameTheory.UnitTests/FrameTheory.UnitTests.csproj --no-restore --configuration Release --filter FullyQualifiedName~GeminiInteractionsTests` passed 4/4 (exit 0); AI project build passed 0 warnings/0 errors.
+Files changed: src/FrameTheory.Media/TimelineCompositor.cs, src/FrameTheory.Desktop/TimelineEditorViewModel.cs, tests/FrameTheory.UnitTests/TimelineCompositorTests.cs, tools/FrameTheory.TimelineExportSmoke/Program.cs, docs/E2E_JOURNEYS.md, docs/IMPLEMENTATION_STATUS.md
+Actual behavior and UI path: `reel.before_after` now accepts every imported clip on the editable base video layer, builds aligned raw and graded sequences, and applies the selected split, wipe or timed reveal. The Video workspace AI path remains undoable and the smoke exports the resulting Reel.
+Commands executed + OS: Windows 11 x64; focused compositor/executor tests, Release smoke build, and `FrameTheory.TimelineExportSmoke` with two synthetic H.264/AAC clips and .NET SDK 10.0.100.
+Test outputs / exit codes: Focused tests passed 8/8 (exit 0); smoke build passed 0 warnings/0 errors; `timeline-ai-reel.mp4` exported at 29,871 bytes with a 16x8 `bt709` ffprobe receipt (exit 0).
 Media fixtures and verification: Photo export continues to use real FFmpeg/ffprobe and atomic temporary files; no source media or API keys entered Git. Approved logo/watermark asset is still absent from the repository, so no watermark was invented.
 Known limitations / blockers: FT-602 still needs desktop wiring, a known spoken fixture against an approved user key, Files API support for longer audio, video audio extraction and a local ASR fallback. FT-706 still needs desktop revision history/UI wiring and a live provider-to-parser run. FT-804 has one active worker and no persisted queue/retry history; FT-802 social photo dimensions and queue parity remain open. FT-803 uses amplitude peaks as a basic marker aid. FT-006 remains partial pending MLT and second-OS evidence. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux analysis and desktop runs are unverified.
-Next unblocked task: FT-602 desktop wiring / FT-706 revision UI / FT-801 remaining P0 scope
+Next unblocked task: FT-602 desktop wiring / FT-706 revision UI / FT-802 remaining P0 scope
 ```
 
 ## Task execution record template
@@ -104,7 +106,7 @@ Next unblocked task:
 ```
 
 ## Release verification status
-Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601/FT-603/FT-604/FT-605/FT-701/FT-702/FT-703/FT-704/FT-705, bounded FT-801/FT-802/FT-803, FT-804 and FT-706 undo paths built/tested; FT-801 multi-clip, FT-802 social-photo/queue parity, FT-803 watermark/spectral-marker, FT-804 retry/history, FT-602 desktop/provider fixture integration and FT-706 provider scope remain partial; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini provider: headless adapter contract tested; no live key/media upload run. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
+Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601/FT-603/FT-604/FT-605/FT-701/FT-702/FT-703/FT-704/FT-705/FT-801, bounded FT-802/FT-803, FT-804 and FT-706 undo paths built/tested; FT-802 social-photo/queue parity, FT-803 watermark/spectral-marker, FT-804 retry/history, FT-602 desktop/provider fixture integration and FT-706 provider scope remain partial; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini provider: headless adapter contract tested; no live key/media upload run. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
 
 ## Honest reporting
 Codex should not mark a task complete for a mock UI, TODO, downloaded asset, simulated exporter, docs-only passing CI, or speculative integration. If execution is interrupted, preserve status and resume from first unblocked task on next run.

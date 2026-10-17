@@ -176,6 +176,7 @@ Console.WriteLine($"ai-output={aiReceipt.OutputPath}; bytes={aiReceipt.OutputByt
 
 var reelEditor = new TimelineEditorViewModel(frameRate);
 reelEditor.AddMedia(importedSourceA.Metadata);
+reelEditor.AddMedia(importedSourceB.Metadata);
 var reelResult = AiEditPlanExecutor.Execute(
     [reelAction],
     reelEditor,
@@ -190,7 +191,11 @@ var reelOutput = Path.Combine(Path.GetDirectoryName(destination) ?? ".", $"{Path
 var reelPlan = reelEditor.BuildRenderPlan(
     importedSourceA.Metadata.Width,
     importedSourceA.Metadata.Height,
-    new Dictionary<MediaId, Uri> { [importedSourceA.Metadata.Id] = sourceA });
+    new Dictionary<MediaId, Uri>
+    {
+        [importedSourceA.Metadata.Id] = sourceA,
+        [importedSourceB.Metadata.Id] = sourceB
+    });
 var reelReceipt = await exporter.ExportAsync(
     reelPlan,
     reelOutput,

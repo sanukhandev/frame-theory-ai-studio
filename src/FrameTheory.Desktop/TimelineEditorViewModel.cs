@@ -253,9 +253,9 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public void ApplyBeforeAfterStyle(TimelineRevealStyle style)
     {
-        if (_videoClips.Count != 1)
+        if (_videoClips.Count == 0)
         {
-            throw new InvalidOperationException("Before/after composition currently requires exactly one video clip.");
+            throw new InvalidOperationException("Before/after composition requires at least one video clip.");
         }
 
         _beforeAfterStyle = style;

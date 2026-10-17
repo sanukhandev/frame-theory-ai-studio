@@ -79,6 +79,52 @@ public sealed class TimelineCompositorTests
     }
 
     [Xunit.Fact]
+    public void FilterGraphBuildsEditableBeforeAfterForMultipleClips()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-before-after-multi-");
+        try
+        {
+            var firstPath = Path.Combine(directory.FullName, "first.mp4");
+            var secondPath = Path.Combine(directory.FullName, "second.mp4");
+            File.WriteAllText(firstPath, "first");
+            File.WriteAllText(secondPath, "second");
+            var firstId = MediaId.Create(new Uri(firstPath), "before-after-first");
+            var secondId = MediaId.Create(new Uri(secondPath), "before-after-second");
+            var frameRate = new RationalFrameRate(30, 1);
+            var first = TimelineClip.Video(firstId, 0, 30, 0, 30, frameRate);
+            var second = TimelineClip.Video(secondId, 0, 30, 30, 30, frameRate);
+            var plan = new TimelineVideoRenderPlan(
+                frameRate,
+                16,
+                8,
+                60,
+                new Dictionary<MediaId, Uri>
+                {
+                    [firstId] = new Uri(firstPath),
+                    [secondId] = new Uri(secondPath)
+                },
+                [new TimelineVideoLayer("video-1", 0, [new TimelineVideoSegment(first), new TimelineVideoSegment(second)])],
+                colorGrades: new Dictionary<MediaId, FrameTheory.Color.ColorGrade>
+                {
+                    [secondId] = new(0.2f, 0.1f, 0.1f, 0, 0)
+                },
+                beforeAfterStyle: TimelineRevealStyle.Split,
+                beforeAfterRevealFrame: 30);
+
+            var graph = new TimelineFilterGraphBuilder().Build(plan);
+
+            Xunit.Assert.Equal(2, graph.Inputs.Count);
+            Xunit.Assert.Equal(2, graph.FilterComplex.Split("concat=n=2:v=1:a=0", StringSplitOptions.None).Length - 1);
+            Xunit.Assert.Contains("beforeafter_result", graph.FilterComplex, StringComparison.Ordinal);
+            Xunit.Assert.Contains("eq=brightness=", graph.FilterComplex, StringComparison.Ordinal);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task TimelineExportIsAtomicAndMapsTimelineAudio()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-compositor-export-");
