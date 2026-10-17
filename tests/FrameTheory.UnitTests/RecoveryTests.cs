@@ -1,0 +1,75 @@
+using FrameTheory.Domain;
+using FrameTheory.Storage;
+
+namespace FrameTheory.UnitTests;
+
+public sealed class RecoveryTests
+{
+    [Xunit.Fact]
+    public async Task AutosaveRecoveryAndRelinkDoNotChangeTheOriginalSource()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-recovery-");
+        try
+        {
+            var projectPath = Path.Combine(directory.FullName, "project.ftstudio");
+            var mediaDirectory = Directory.CreateDirectory(Path.Combine(directory.FullName, "media"));
+            var missingPath = Path.Combine(mediaDirectory.FullName, "missing.mov");
+            var replacementPath = Path.Combine(mediaDirectory.FullName, "replacement.mov");
+            await File.WriteAllTextAsync(replacementPath, "synthetic media");
+            var mediaId = MediaId.Create(new Uri("file:///media/missing.mov"), "sha256:missing");
+            var snapshot = new ProjectSnapshot(
+                "project",
+                new RationalFrameRate(30, 1),
+                1920,
+                1080,
+                "sRGB",
+                [new MediaReference(mediaId, "media/missing.mov", "sha256:missing")]);
+            var recovery = new ProjectRecoveryService(new JsonProjectRepository());
+
+            await recovery.SaveAutosaveAsync(projectPath, snapshot, CancellationToken.None);
+            var recovered = await recovery.TryLoadAutosaveAsync(projectPath, CancellationToken.None);
+            var missing = recovery.FindMissingMedia(projectPath, snapshot);
+            var relinked = recovery.RelinkMedia(projectPath, snapshot, mediaId, replacementPath);
+
+            Xunit.Assert.NotNull(recovered);
+            Xunit.Assert.Single(missing);
+            Xunit.Assert.Equal("media/replacement.mov", relinked.MediaReferences.Single().RelativePath);
+            Xunit.Assert.False(File.Exists(missingPath));
+            Xunit.Assert.Equal("synthetic media", await File.ReadAllTextAsync(replacementPath));
+            recovery.ClearAutosave(projectPath);
+            Xunit.Assert.Null(await recovery.TryLoadAutosaveAsync(projectPath, CancellationToken.None));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
+    public async Task CacheIndexPersistsAndEvictsOldestEntriesWithinBudget()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-cache-");
+        try
+        {
+            var index = new CacheIndex();
+            var older = DateTimeOffset.UtcNow.AddMinutes(-2);
+            index.Register("old", "cache/old.bin", 8, older);
+            index.Register("new", "cache/new.bin", 8, older.AddMinutes(1));
+            var evicted = index.EvictToSize(8);
+
+            Xunit.Assert.Equal("old", Xunit.Assert.Single(evicted).Key);
+            var path = Path.Combine(directory.FullName, "cache-index.json");
+            var store = new JsonCacheIndexStore();
+            await store.SaveAtomicAsync(path, index, CancellationToken.None);
+            var loaded = await store.LoadAsync(path, CancellationToken.None);
+
+            Xunit.Assert.True(loaded.TryGet("new", out var entry));
+            Xunit.Assert.Equal("cache/new.bin", entry!.RelativePath);
+            Xunit.Assert.Equal(8, loaded.TotalSizeBytes);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+}
