@@ -590,6 +590,11 @@ public sealed class MainWindow : Window
         tracks.Bind(ItemsControl.ItemsSourceProperty, new Binding("TimelineEditor.TrackRows"));
         var beatMarkers = new TextBlock { TextWrapping = TextWrapping.Wrap };
         beatMarkers.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.BeatMarkersText"));
+        var beatDetection = new ComboBox { ItemsSource = new[] { "Amplitude peaks", "Energy onsets" }, SelectedIndex = 0, Width = 150 };
+        AutomationProperties.SetName(beatDetection, "Beat detection mode");
+        beatDetection.SelectionChanged += (_, _) => timeline.BeatDetectionMode = beatDetection.SelectedIndex == 1
+            ? BeatDetectionMode.EnergyOnsets
+            : BeatDetectionMode.AmplitudePeaks;
         var snap = new CheckBox { Content = "Snap to clip boundaries" };
         snap.Bind(ToggleButton.IsCheckedProperty, new Binding("TimelineEditor.SnapEnabled") { Mode = BindingMode.TwoWay });
         var zoom = new Slider { Minimum = 0.05, Maximum = 20, Value = timeline.FramesPerPixel };
@@ -795,6 +800,30 @@ public sealed class MainWindow : Window
         };
         var exportStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         exportStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
+        var watermarkStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        watermarkStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.WatermarkStatusText"));
+        var selectWatermark = new Button { Content = "Select watermark" };
+        selectWatermark.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(selectWatermark);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("PNG, JPEG or WebP image") { Patterns = ["*.png", "*.jpg", "*.jpeg", "*.webp"] }]
+            });
+            var path = files.SingleOrDefault()?.TryGetLocalPath();
+            if (path is not null)
+            {
+                RunTimelineAction(() => timeline.SetWatermark(path));
+            }
+        };
+        var clearWatermark = new Button { Content = "Clear watermark" };
+        clearWatermark.Click += (_, _) => timeline.ClearWatermark();
         var scrollBack = new Button { Content = "Scroll ◀" };
         scrollBack.Click += (_, _) => timeline.ScrollBy(-30);
         var scrollForward = new Button { Content = "Scroll ▶" };
@@ -815,7 +844,7 @@ public sealed class MainWindow : Window
                     ruler,
                     selectionContext,
                     tracks,
-                    beatMarkers,
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { beatDetection, beatMarkers } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { back, forward, select, selectAudio, scrollBack, scrollForward } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { copy, paste, split, trim, move, rippleDelete } },
                     operationStatus,
@@ -828,6 +857,8 @@ public sealed class MainWindow : Window
                     captionStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { aspectRatio, export, cancelExport } },
                     exportStatus,
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { selectWatermark, clearWatermark } },
+                    watermarkStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { snap, new TextBlock { Text = "Zoom" }, zoom } }
                 }
             }

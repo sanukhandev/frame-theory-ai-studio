@@ -20,7 +20,8 @@ public sealed record TimelineVideoRenderPlan
         TimelineCaptionStyle? captionStyle = null,
         IReadOnlyDictionary<MediaId, ColorGrade>? colorGrades = null,
         TimelineRevealStyle? beforeAfterStyle = null,
-        long beforeAfterRevealFrame = 0)
+        long beforeAfterRevealFrame = 0,
+        TimelineWatermark? watermark = null)
     {
         if (width <= 0 || height <= 0 || durationFrames <= 0)
         {
@@ -49,6 +50,7 @@ public sealed record TimelineVideoRenderPlan
 
         BeforeAfterStyle = beforeAfterStyle;
         BeforeAfterRevealFrame = beforeAfterRevealFrame;
+        Watermark = watermark;
     }
 
     public RationalFrameRate FrameRate { get; }
@@ -76,6 +78,8 @@ public sealed record TimelineVideoRenderPlan
     public TimelineRevealStyle? BeforeAfterStyle { get; }
 
     public long BeforeAfterRevealFrame { get; }
+
+    public TimelineWatermark? Watermark { get; }
 }
 
 public sealed record TimelineFilterGraph(string FilterComplex, IReadOnlyList<Uri> Inputs, string OutputLabel, string? AudioOutputLabel);
@@ -89,7 +93,13 @@ public sealed class TimelineFilterGraphBuilder
             .Concat(plan.AudioLayers.SelectMany(layer => layer.Segments).Select(segment => segment.Clip.MediaId))
             .Distinct()
             .ToArray();
-        var inputs = usedMediaIds.Select(mediaId => GetSource(plan, mediaId)).ToArray();
+        var inputs = usedMediaIds.Select(mediaId => GetSource(plan, mediaId)).ToList();
+        var watermarkInputIndex = -1;
+        if (plan.Watermark is not null)
+        {
+            watermarkInputIndex = inputs.Count;
+            inputs.Add(GetWatermarkSource(plan.Watermark));
+        }
         var inputIndexes = usedMediaIds.Select((mediaId, index) => (mediaId, index)).ToDictionary(item => item.mediaId, item => item.index);
         var filters = new List<string>();
         var durationSeconds = FormatSeconds(plan.DurationFrames, plan.FrameRate);
@@ -153,6 +163,15 @@ public sealed class TimelineFilterGraphBuilder
                 filters.Add($"[{currentBase}]drawtext=fontfile='{EscapeDrawText(captionFontPath)}':text='{text}':fontsize={plan.CaptionStyle.FontSize}:fontcolor=0x{plan.CaptionStyle.ColorRgb:X6}:x=(w-text_w)/2:y=h-text_h-{plan.CaptionStyle.MarginBottom}:enable='between(t,{start},{end})'[{nextBase}]");
                 currentBase = nextBase;
             }
+        }
+
+        if (plan.Watermark is not null)
+        {
+            var watermarkLabel = "timeline_watermark";
+            var watermarkedLabel = "timeline_watermarked";
+            filters.Add($"[{watermarkInputIndex}:v:0]format=rgba,colorchannelmixer=aa={Format(plan.Watermark.Opacity)},loop=loop=-1:size=1:start=0[{watermarkLabel}]");
+            filters.Add($"[{currentBase}][{watermarkLabel}]overlay=x=W-w-{plan.Watermark.Margin}:y=H-h-{plan.Watermark.Margin}:eof_action=pass:shortest=0:format=auto[{watermarkedLabel}]");
+            currentBase = watermarkedLabel;
         }
 
         filters.Add($"[{currentBase}]format=yuv420p,setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv[outv]");
@@ -440,6 +459,27 @@ public sealed class TimelineFilterGraphBuilder
         }
 
         return new Uri(path);
+    }
+
+    private static Uri GetWatermarkSource(TimelineWatermark watermark)
+    {
+        var extension = Path.GetExtension(watermark.SourcePath).ToLowerInvariant();
+        if (extension is not ".png" and not ".jpg" and not ".jpeg" and not ".webp")
+        {
+            throw new MediaExportException("Watermarks must be PNG, JPEG or WebP images.");
+        }
+
+        if (!File.Exists(watermark.SourcePath))
+        {
+            throw new FileNotFoundException("The selected watermark file was not found.", watermark.SourcePath);
+        }
+
+        if ((File.GetAttributes(watermark.SourcePath) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new MediaExportException("Symlinked watermark files are not accepted.");
+        }
+
+        return new Uri(watermark.SourcePath);
     }
 
     private static string GetFontPath(TimelineTitle title) => GetFontPath(title.FontPath);

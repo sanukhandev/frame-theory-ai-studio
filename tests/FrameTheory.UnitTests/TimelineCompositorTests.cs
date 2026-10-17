@@ -125,6 +125,39 @@ public sealed class TimelineCompositorTests
     }
 
     [Xunit.Fact]
+    public void FilterGraphAddsOnlyExplicitValidatedWatermarkInput()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-watermark-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            var watermarkPath = Path.Combine(directory.FullName, "watermark.png");
+            File.WriteAllText(sourcePath, "source");
+            File.WriteAllText(watermarkPath, "watermark");
+            var mediaId = MediaId.Create(new Uri(sourcePath), "watermark-source");
+            var clip = TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1));
+            var plan = new TimelineVideoRenderPlan(
+                new RationalFrameRate(30, 1),
+                16,
+                8,
+                30,
+                new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
+                [new TimelineVideoLayer("video-1", 0, [new TimelineVideoSegment(clip)])],
+                watermark: new TimelineWatermark(watermarkPath, 0.5f, 12));
+
+            var graph = new TimelineFilterGraphBuilder().Build(plan);
+
+            Xunit.Assert.Equal(2, graph.Inputs.Count);
+            Xunit.Assert.Contains("colorchannelmixer=aa=0.5,loop=loop=-1:size=1:start=0", graph.FilterComplex, StringComparison.Ordinal);
+            Xunit.Assert.Contains("overlay=x=W-w-12:y=H-h-12", graph.FilterComplex, StringComparison.Ordinal);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task TimelineExportIsAtomicAndMapsTimelineAudio()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-compositor-export-");

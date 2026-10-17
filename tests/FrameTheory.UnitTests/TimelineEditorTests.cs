@@ -134,6 +134,24 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void TimelineEditorCanRebuildMarkersUsingEnergyOnsets()
+    {
+        var source = new Uri("file:///energy-beats.mp4");
+        var metadata = Metadata(source, "energy-beats", 90);
+        var editor = new TimelineEditorViewModel
+        {
+            BeatDetectionMode = BeatDetectionMode.EnergyOnsets
+        };
+        editor.AddMedia(metadata);
+
+        editor.AddBeatMarkers(metadata.Id, [0.1f, 0.4f, 0.8f, 0.2f, 0.3f]);
+
+        Xunit.Assert.Equal([36L], editor.BeatMarkers);
+        editor.BeatDetectionMode = BeatDetectionMode.AmplitudePeaks;
+        Xunit.Assert.Equal([36L], editor.BeatMarkers);
+    }
+
+    [Xunit.Fact]
     public void TimelineEditorAddsTitlesAtTheCurrentFrame()
     {
         var source = new Uri("file:///title.mp4");

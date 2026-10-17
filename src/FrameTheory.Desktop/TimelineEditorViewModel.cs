@@ -32,6 +32,12 @@ public sealed record TimelineRulerTick(long Frame, TimeSpan Position)
 
 public sealed record TimelineClipboard(TimelineTrackKind Kind, TimelineClip Clip);
 
+public enum BeatDetectionMode
+{
+    AmplitudePeaks,
+    EnergyOnsets
+}
+
 public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 {
     private const int AudioSampleRate = 48000;
@@ -56,7 +62,11 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private bool _snapEnabled = true;
     private TimelineRevealStyle? _beforeAfterStyle;
     private readonly List<long> _beatMarkers = [];
+    private MediaId? _beatMarkerMediaId;
+    private IReadOnlyList<float> _beatMarkerWaveform = [];
+    private BeatDetectionMode _beatDetectionMode;
     private readonly Stack<TimelineEditorState> _aiUndo = [];
+    private TimelineWatermark? _watermark;
 
     public TimelineEditorViewModel(RationalFrameRate? projectFrameRate = null)
     {
@@ -123,9 +133,34 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public IReadOnlyList<long> BeatMarkers => _beatMarkers;
 
+    public BeatDetectionMode BeatDetectionMode
+    {
+        get => _beatDetectionMode;
+        set
+        {
+            if (!Enum.IsDefined(value) || value == _beatDetectionMode)
+            {
+                return;
+            }
+
+            _beatDetectionMode = value;
+            OnPropertyChanged();
+            if (_beatMarkerMediaId is not null && _beatMarkerWaveform.Count > 0)
+            {
+                AddBeatMarkers(_beatMarkerMediaId.Value, _beatMarkerWaveform);
+            }
+        }
+    }
+
     public string BeatMarkersText => _beatMarkers.Count == 0
         ? "No beat markers detected. Import audio or video with audio."
         : $"Beat markers: {string.Join(", ", _beatMarkers)} frames";
+
+    public TimelineWatermark? Watermark => _watermark;
+
+    public string WatermarkStatusText => _watermark is null
+        ? "No watermark selected; approved brand assets are opt-in."
+        : $"Watermark: {Path.GetFileName(_watermark.SourcePath)}";
 
     public string SelectionContextText
     {
@@ -188,6 +223,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     public void AddBeatMarkers(MediaId mediaId, IReadOnlyList<float> waveformPeaks)
     {
         ArgumentNullException.ThrowIfNull(waveformPeaks);
+        _beatMarkerMediaId = mediaId;
+        _beatMarkerWaveform = waveformPeaks.ToArray();
         var clip = _audioClips.FirstOrDefault(candidate => candidate.MediaId == mediaId);
         if (clip is null || waveformPeaks.Count == 0)
         {
@@ -195,13 +232,12 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         }
 
         _beatMarkers.Clear();
-        // shortcut: amplitude peaks are only a basic marker aid; upgrade to spectral/onset analysis for production beat tracking.
         for (var index = 0; index < waveformPeaks.Count; index++)
         {
             var peak = waveformPeaks[index];
             var previous = index == 0 ? peak : waveformPeaks[index - 1];
             var next = index == waveformPeaks.Count - 1 ? peak : waveformPeaks[index + 1];
-            if (peak < 0.6f || peak < previous || peak < next)
+            if (float.IsNaN(peak) || float.IsInfinity(peak) || !IsBeatCandidate(peak, previous, next, index))
             {
                 continue;
             }
@@ -216,6 +252,13 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(BeatMarkers));
         OnPropertyChanged(nameof(BeatMarkersText));
     }
+
+    private bool IsBeatCandidate(float peak, float previous, float next, int index) => BeatDetectionMode switch
+    {
+        BeatDetectionMode.AmplitudePeaks => peak >= 0.6f && peak >= previous && peak >= next,
+        BeatDetectionMode.EnergyOnsets => index > 0 && peak >= 0.35f && peak - previous >= 0.2f && peak >= next,
+        _ => false
+    };
 
     public TimelineVideoRenderPlan BuildRenderPlan(
         int width,
@@ -248,7 +291,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             _captionFontPath is null ? null : new TimelineCaptionStyle(_captionFontPath),
             _colorGrades,
             _beforeAfterStyle,
-            TotalFrames / 2);
+            TotalFrames / 2,
+            _watermark);
     }
 
     public void ApplyBeforeAfterStyle(TimelineRevealStyle style)
@@ -259,6 +303,20 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         }
 
         _beforeAfterStyle = style;
+    }
+
+    public void SetWatermark(string sourcePath)
+    {
+        _watermark = new TimelineWatermark(sourcePath);
+        OnPropertyChanged(nameof(Watermark));
+        OnPropertyChanged(nameof(WatermarkStatusText));
+    }
+
+    public void ClearWatermark()
+    {
+        _watermark = null;
+        OnPropertyChanged(nameof(Watermark));
+        OnPropertyChanged(nameof(WatermarkStatusText));
     }
 
     public bool SelectMedia(string mediaId, TimelineTrackKind kind)
@@ -396,6 +454,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         new Dictionary<TimelineClip, TimelineVideoTransform>(_staticTransforms),
         new Dictionary<MediaId, ColorGrade>(_colorGrades),
         _beforeAfterStyle,
+        _watermark,
         _titles.ToArray(),
         _captions.ToArray(),
         _captionFontPath,
@@ -445,6 +504,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         }
 
         _beforeAfterStyle = state.BeforeAfterStyle;
+        _watermark = state.Watermark;
 
         _titles.Clear();
         _titles.AddRange(state.Titles);
@@ -456,6 +516,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _selectedClipStart = state.SelectedClipStart;
         Refresh();
         SeekFrame(state.CurrentFrame);
+        OnPropertyChanged(nameof(Watermark));
+        OnPropertyChanged(nameof(WatermarkStatusText));
     }
 
     public bool UndoAiEdit()
@@ -938,6 +1000,7 @@ internal sealed record TimelineEditorState(
     IReadOnlyDictionary<TimelineClip, TimelineVideoTransform> StaticTransforms,
     IReadOnlyDictionary<MediaId, ColorGrade> ColorGrades,
     TimelineRevealStyle? BeforeAfterStyle,
+    TimelineWatermark? Watermark,
     IReadOnlyList<TimelineTitle> Titles,
     IReadOnlyList<TimedCaption> Captions,
     string? CaptionFontPath,
