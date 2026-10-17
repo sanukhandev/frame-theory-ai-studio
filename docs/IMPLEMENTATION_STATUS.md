@@ -38,7 +38,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-303 / E03
-Git SHA: pending commit
+Git SHA: 84b0c23
 Files changed: src/FrameTheory.Color/CubeLut.cs, tests/FrameTheory.UnitTests/CubeLutTests.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: `CubeLut` parses standard 3D directives, comments, domains and bounded 2..65 grids, performs trilinear interpolation, and emits deterministic `.cube` text. Unsupported 1D LUTs, malformed rows, invalid domains and oversized grids fail visibly.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
