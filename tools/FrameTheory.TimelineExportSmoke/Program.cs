@@ -21,7 +21,20 @@ var audioB = TimelineClip.Audio(idB, 0, 48000, 30, 30, 48000);
 var baseTransform = new TimelineVideoTransform(opacity: 0.9, scale: 1, offsetX: 0, offsetY: 0);
 var overlayTransform = new TimelineVideoTransform(opacity: 0.35, scale: 0.5, offsetX: 2, offsetY: 1);
 var titles = args.Length == 4
-    ? new[] { new TimelineTitle("FRAME THEORY", Path.GetFullPath(args[3]), 5, 45, placement: TimelineTitlePlacement.TopCenter) }
+    ? new[]
+    {
+        new TimelineTitle(
+            "FRAME THEORY",
+            Path.GetFullPath(args[3]),
+            5,
+            45,
+            placement: TimelineTitlePlacement.TopCenter,
+            animation: TimelineTransformKeyframes.FromPreset(
+                TimelineAnimationPreset.PushIn,
+                5,
+                50,
+                new TimelineVideoTransform()))
+    }
     : Array.Empty<TimelineTitle>();
 var captions = args.Length == 4
     ? new[] { new TimedCaption(1, TimeSpan.FromSeconds(0.2), TimeSpan.FromSeconds(0.8), "caption smoke test words") }

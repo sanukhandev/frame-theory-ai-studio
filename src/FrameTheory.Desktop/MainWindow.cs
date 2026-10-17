@@ -390,6 +390,12 @@ public sealed class MainWindow : Window
 
             RunTimelineAction(() => timeline.AddTitle(titleText.Text!, fontPath));
         };
+        var fadeTitle = new Button { Content = "Fade title in" };
+        fadeTitle.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToLastTitle(TimelineAnimationPreset.FadeIn));
+        var pushTitle = new Button { Content = "Push title in" };
+        pushTitle.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToLastTitle(TimelineAnimationPreset.PushIn));
+        var titleAnimationStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        titleAnimationStatus.Bind(TextBlock.TextProperty, new Binding(nameof(TimelineEditorViewModel.TitleAnimationStatus)));
         var importCaptions = new Button { Content = "Import SRT" };
         importCaptions.Click += async (_, _) =>
         {
@@ -498,7 +504,8 @@ public sealed class MainWindow : Window
                     operationStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { fadeIn, pushIn, clearAnimation } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { muteAudio, gainAudio, fadeAudio, clearAudio } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { titleText, addTitle } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { titleText, addTitle, fadeTitle, pushTitle } },
+                    titleAnimationStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { importCaptions, exportCaptions } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { captionFont } },
                     captionStatus,

@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using FrameTheory.Captions;
 using FrameTheory.Domain;
@@ -202,6 +203,46 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         }
 
         _titles.Add(new TimelineTitle(text, fontPath, CurrentFrame, duration, order: _titles.Count));
+        OnPropertyChanged(nameof(TitleAnimationStatus));
+    }
+
+    public void ApplyAnimationPresetToLastTitle(TimelineAnimationPreset preset)
+    {
+        if (_titles.Count == 0)
+        {
+            throw new InvalidOperationException("Add a title before applying an animation.");
+        }
+
+        var title = _titles[^1];
+        _titles[^1] = new TimelineTitle(
+            title.Text,
+            title.FontPath,
+            title.TimelineRange.StartFrame,
+            title.TimelineRange.Length,
+            title.FontSize,
+            title.ColorRgb,
+            title.Placement,
+            title.Order,
+            TimelineTransformKeyframes.FromPreset(
+                preset,
+                title.TimelineRange.StartFrame,
+                title.TimelineRange.EndFrameExclusive,
+                new TimelineVideoTransform()));
+        OnPropertyChanged(nameof(TitleAnimationStatus));
+    }
+
+    public string TitleAnimationStatus
+    {
+        get
+        {
+            var animation = _titles.LastOrDefault()?.Animation;
+            return animation is null
+                ? "No animation on the last title."
+                : string.Join(
+                    " | ",
+                    animation.Keyframes.Select(keyframe =>
+                        $"frame {keyframe.Frame}: opacity {keyframe.Value.Opacity.ToString("0.###", CultureInfo.InvariantCulture)}, scale {keyframe.Value.Scale.ToString("0.###", CultureInfo.InvariantCulture)}, offset {keyframe.Value.OffsetX},{keyframe.Value.OffsetY}"));
+        }
     }
 
     public IReadOnlyList<TimedCaption> Captions => _captions;

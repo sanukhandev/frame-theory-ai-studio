@@ -18,7 +18,8 @@ public sealed record TimelineTitle
         int fontSize = 48,
         uint colorRgb = 0xFFFFFF,
         TimelineTitlePlacement placement = TimelineTitlePlacement.Center,
-        int order = 0)
+        int order = 0,
+        TimelineTransformKeyframes? animation = null)
     {
         if (string.IsNullOrWhiteSpace(text) || text.Length > 1000)
         {
@@ -43,10 +44,17 @@ public sealed record TimelineTitle
         Text = text;
         FontPath = fontPath;
         TimelineRange = new FrameRange(startFrame, durationFrames);
+        if (animation is not null &&
+            (animation.Keyframes[0].Frame < startFrame || animation.Keyframes[^1].Frame >= TimelineRange.EndFrameExclusive))
+        {
+            throw new ArgumentOutOfRangeException(nameof(animation), "Title keyframes must stay within the title range.");
+        }
+
         FontSize = fontSize;
         ColorRgb = colorRgb;
         Placement = placement;
         Order = order;
+        Animation = animation;
     }
 
     public string Text { get; }
@@ -62,4 +70,6 @@ public sealed record TimelineTitle
     public TimelineTitlePlacement Placement { get; }
 
     public int Order { get; }
+
+    public TimelineTransformKeyframes? Animation { get; }
 }

@@ -133,6 +133,23 @@ public sealed class TimelineEditorTests
         Xunit.Assert.NotNull(plan.CaptionStyle);
     }
 
+    [Xunit.Fact]
+    public void TimelineEditorAppliesInspectableAnimationToLastTitle()
+    {
+        var source = new Uri("file:///animated-title.mp4");
+        var metadata = Metadata(source, "animated-title", 90, hasAudio: false);
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(metadata);
+        editor.AddTitle("Animated", "C:\\Fonts\\licensed.ttf");
+        editor.ApplyAnimationPresetToLastTitle(TimelineAnimationPreset.PushIn);
+
+        var title = editor.BuildRenderPlan(1920, 1080, new Dictionary<MediaId, Uri> { [metadata.Id] = source }).Titles.Single();
+        Xunit.Assert.NotNull(title.Animation);
+        Xunit.Assert.Equal(2, title.Animation!.Keyframes.Count);
+        Xunit.Assert.Equal(0.8, title.Animation.Keyframes[0].Value.Scale);
+        Xunit.Assert.Equal(1, title.Animation.Keyframes[1].Value.Scale);
+    }
+
     private static MediaSourceMetadata Metadata(Uri uri, string fingerprint, long durationFrames, bool hasAudio = true) => new(
         MediaId.Create(uri, fingerprint),
         uri,

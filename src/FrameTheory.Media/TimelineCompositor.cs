@@ -96,7 +96,14 @@ public sealed class TimelineFilterGraphBuilder
             var fontPath = GetFontPath(title);
             var nextBase = $"title{titleIndex++}";
             var titleEndFrame = checked(title.TimelineRange.StartFrame + title.TimelineRange.Length);
-            filters.Add($"[{currentBase}]drawtext=fontfile='{EscapeDrawText(fontPath)}':text='{EscapeDrawText(title.Text)}':fontsize={title.FontSize}:fontcolor=0x{title.ColorRgb:X6}:x={TitleX(title.Placement)}:y={TitleY(title.Placement)}:enable='between(t,{FormatSeconds(title.TimelineRange.StartFrame, plan.FrameRate)},{FormatSeconds(titleEndFrame, plan.FrameRate)})'[{nextBase}]");
+            var animation = title.Animation;
+            var scale = animation is null ? title.FontSize.ToString(CultureInfo.InvariantCulture) : $"{title.FontSize}*({animation.ToFfmpegExpression(value => value.Scale, 0)})";
+            var offsetX = animation?.ToFfmpegExpression(value => value.OffsetX, 0);
+            var offsetY = animation?.ToFfmpegExpression(value => value.OffsetY, 0);
+            var alpha = animation?.ToFfmpegExpression(value => value.Opacity, 0) ?? "1";
+            var x = TitleX(title.Placement, offsetX);
+            var y = TitleY(title.Placement, offsetY);
+            filters.Add($"[{currentBase}]drawtext=fontfile='{EscapeDrawText(fontPath)}':text='{EscapeDrawText(title.Text)}':fontsize={EscapeFilterExpression(scale)}:fontcolor=0x{title.ColorRgb:X6}:alpha={EscapeFilterExpression(alpha)}:x={EscapeFilterExpression(x)}:y={EscapeFilterExpression(y)}:enable='between(t,{FormatSeconds(title.TimelineRange.StartFrame, plan.FrameRate)},{FormatSeconds(titleEndFrame, plan.FrameRate)})'[{nextBase}]");
             currentBase = nextBase;
         }
 
@@ -383,20 +390,22 @@ public sealed class TimelineFilterGraphBuilder
         return string.Join("\\n", lines);
     }
 
-    private static string TitleX(TimelineTitlePlacement placement) => placement switch
+    private static string TitleX(TimelineTitlePlacement placement, string? offset) => AddOffset(placement switch
     {
         TimelineTitlePlacement.TopLeft => "w*0.1",
         TimelineTitlePlacement.TopCenter or TimelineTitlePlacement.Center or TimelineTitlePlacement.BottomCenter => "(w-text_w)/2",
         _ => throw new ArgumentOutOfRangeException(nameof(placement))
-    };
+    }, offset);
 
-    private static string TitleY(TimelineTitlePlacement placement) => placement switch
+    private static string TitleY(TimelineTitlePlacement placement, string? offset) => AddOffset(placement switch
     {
         TimelineTitlePlacement.TopLeft or TimelineTitlePlacement.TopCenter => "h*0.1",
         TimelineTitlePlacement.Center => "(h-text_h)/2",
         TimelineTitlePlacement.BottomCenter => "h*0.8",
         _ => throw new ArgumentOutOfRangeException(nameof(placement))
-    };
+    }, offset);
+
+    private static string AddOffset(string position, string? offset) => offset is null ? position : $"({position})+({offset})";
 
     private static string EscapeDrawText(string value) => value
         .Replace("\\", "\\\\", StringComparison.Ordinal)

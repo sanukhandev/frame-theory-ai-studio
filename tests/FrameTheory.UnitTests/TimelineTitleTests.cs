@@ -46,4 +46,43 @@ public sealed class TimelineTitleTests
             directory.Delete(true);
         }
     }
+
+    [Xunit.Fact]
+    public void AnimatedTitleCarriesInspectableKeyframesIntoDrawtextExpressions()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-animated-title-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            var fontPath = Path.Combine(directory.FullName, "licensed.ttf");
+            File.WriteAllText(sourcePath, "source");
+            File.WriteAllText(fontPath, "font");
+            var mediaId = MediaId.Create(new Uri(sourcePath), "animated-title-test");
+            var clip = TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1));
+            var animation = TimelineTransformKeyframes.FromPreset(
+                TimelineAnimationPreset.PushIn,
+                0,
+                30,
+                new TimelineVideoTransform());
+            var title = new TimelineTitle("Animated", fontPath, 0, 30, animation: animation);
+            var plan = new TimelineVideoRenderPlan(
+                new RationalFrameRate(30, 1),
+                16,
+                8,
+                30,
+                new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
+                [new TimelineVideoLayer("video", 0, [new TimelineVideoSegment(clip)])],
+                titles: [title]);
+
+            var graph = new TimelineFilterGraphBuilder().Build(plan);
+
+            Xunit.Assert.Equal(2, title.Animation!.Keyframes.Count);
+            Xunit.Assert.Contains("fontsize=48*(if(lt(n", graph.FilterComplex);
+            Xunit.Assert.Contains("alpha=if(lt(n", graph.FilterComplex);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
 }
