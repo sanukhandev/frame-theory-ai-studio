@@ -74,11 +74,11 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-1005 / E10
-Git SHA: pending commit
+Git SHA: 6de3b7a
 Files changed: scripts/package.ps1, scripts/package.sh, docs/RELEASE.md
 Actual behavior and UI path: Release operators can publish the Avalonia desktop for a selected runtime identifier and receive a SHA-256 manifest; the release matrix documents what is actually verified on Windows and what remains unverified on macOS/Linux. No fake installer or signing artifact is created.
-Commands executed + OS: Script definitions reviewed locally; the Windows package publish, relaunch/recovery and platform-host execution remain to be run.
-Test outputs / exit codes: no installer artifact claimed; native media redistribution and signing blockers remain explicit.
+Commands executed + OS: Windows 11 x64; `pwsh -NoProfile -File scripts/package.ps1 -RuntimeIdentifier win-x64 -OutputDirectory <temp>` with .NET SDK 10.0.100.
+Test outputs / exit codes: package publish exit 0; 55 files emitted and a relative-path SHA-256 manifest generated without self-hashing; installer artifact not claimed; native media redistribution and signing blockers remain explicit.
 Media fixtures and verification: Photo export continues to use real FFmpeg/ffprobe and atomic temporary files; no source media or API keys entered Git. Approved logo/watermark asset is still absent from the repository, so no watermark was invented.
 Known limitations / blockers: FT-706 still lacks Gemini transport, follow-up request history, provider retries/timeouts, usage accounting and redaction logs. FT-804 has one active worker and no persisted queue/retry history; FT-802 social photo dimensions and queue parity remain open. FT-803 uses amplitude peaks as a basic marker aid. FT-602 remains a contract/fixture adapter pending a real local ASR or consented Gemini provider. FT-006 remains partial pending MLT and second-OS evidence. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux analysis and desktop runs are unverified.
 Next unblocked task: FT-1002
