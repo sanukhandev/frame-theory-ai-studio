@@ -94,6 +94,20 @@
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
+Task / Epic: FT-1003 / E10 supply-chain evidence
+Git SHA: 754312c
+Files changed: scripts/check_nuget_vulnerabilities.ps1, .github/workflows/ci.yml, docs/SBOM.md, docs/IMPLEMENTATION_STATUS.md
+Actual behavior and UI path: The release workflow now runs a reproducible transitive NuGet advisory scan after restore, stores the JSON report as a validation artifact, and fails when vulnerability records are present. This is release automation rather than a desktop UI path.
+Commands executed + OS: Windows 11 x64; `pwsh ./scripts/check_nuget_vulnerabilities.ps1 -OutputPath <temp-file>` and `git diff --check`.
+Test outputs / exit codes: The scan reported no NuGet vulnerabilities and exited 0; the report was written and removed from the temporary directory; diff check exited 0.
+Media fixtures and verification: Not applicable; no media or application binaries changed.
+Known limitations / blockers: A clean NuGet advisory result does not clear package licenses, FFmpeg codec patents, native redistribution, application licensing, signing or installer requirements. The next hosted workflow run will validate the new step on all runners.
+Next unblocked task: Continue FT-1003 dependency/license evidence and FT-1005 packaging validation without claiming legal or installer completion.
+```
+
+## Previous execution record
+```text
+Date/time: 2026-10-17
 Task / Epic: FT-602 / FT-903 / FT-904
 Git SHA: 0f5c7f6
 Files changed: src/FrameTheory.Media/AudioSourcePreparer.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Application/Diagnostics.cs, tests/FrameTheory.UnitTests/AudioSourcePreparerTests.cs, tests/FrameTheory.UnitTests/DesktopTranscriptionTests.cs, tests/FrameTheory.UnitTests/DiagnosticsTests.cs, tests/FrameTheory.UnitTests/FoundationTests.cs, tools/FrameTheory.MediaImportSmoke/Program.cs, .github/workflows/ci.yml, docs/DEVELOPMENT.md, docs/TEST_STRATEGY.md, docs/SECURITY_PRIVACY.md, docs/AI_EDIT_PLAN.md, docs/adr/0005-gemini-transcription-audio-preparation.md
