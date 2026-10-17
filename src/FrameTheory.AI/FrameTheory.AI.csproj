@@ -7,5 +7,6 @@
     <ProjectReference Include="..\FrameTheory.Application\FrameTheory.Application.csproj" />
     <ProjectReference Include="..\FrameTheory.Domain\FrameTheory.Domain.csproj" />
     <ProjectReference Include="..\FrameTheory.Media\FrameTheory.Media.csproj" />
+    <ProjectReference Include="..\FrameTheory.Color\FrameTheory.Color.csproj" />
   </ItemGroup>
 </Project>
