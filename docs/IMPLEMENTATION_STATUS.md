@@ -150,10 +150,10 @@ Git SHA: b1725a7
 Files changed: src/FrameTheory.Captions/Transcription.cs, src/FrameTheory.AI/GeminiReferenceAnalysis.cs, tests/FrameTheory.UnitTests/TranscriptionTests.cs
 Actual behavior and UI/headless path: Audio and visual Files API responses are accepted only when the returned URI is absolute HTTPS on `generativelanguage.googleapis.com`. If the provider returns a valid `files/*` name with an untrusted URI, the adapter attempts cleanup and returns a typed failure without sending that URI to an interaction.
 Commands executed + OS: Windows 11 x64 with .NET SDK 10.0.402; focused transcription/reference tests, full Release tests, Release build and formatting verification.
-Test outputs / exit codes: Focused transcription tests passed 12/12; focused reference tests passed 3/3; full tests passed 164 unit and 2 golden tests; Release build passed with 0 warnings/errors; formatting verification passed.
+Test outputs / exit codes: Focused transcription tests passed 12/12; focused reference tests passed 3/3; full tests passed 164 unit and 2 golden tests; Release build passed with 0 warnings/errors; formatting verification passed. Hosted quality gate run `39072895456` passed documentation/schema validation, advisory scan, restore/build, native media smoke, formatting, tests, publish and checksum verification on Windows, macOS and Linux.
 Media fixtures and verification: Sparse synthetic long-audio and generated reference fixtures exercised fake HTTP upload, rejection, cleanup and no-key-in-body invariants; no user media, API key or binary entered Git.
 Known limitations / blockers: Live Gemini provider/key and spoken/reference fixture acceptance remain open; manual Avalonia UI, branding, licensing and installer evidence remain open.
-Next unblocked task: Verify the hosted three-OS matrix for `b1725a7`, then continue remaining manual/platform and external-input gates.
+Next unblocked task: Continue remaining manual/platform and external-input gates; live Gemini, approved branding, licensing/native redistribution, installers/signing and native UI evidence remain open.
 ```
 
 ## Previous execution record
