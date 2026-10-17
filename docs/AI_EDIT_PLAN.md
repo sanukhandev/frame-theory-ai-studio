@@ -5,7 +5,7 @@ Gemini is a **remote, untrusted recommender**. Only the locally implemented allo
 
 ## Planning lifecycle
 1. UI selects media/frames/audio scope and shows exactly what leaves device; explicit consent is mandatory.
-2. Local sampler collects permissioned assets + metadata, optional transcription and shot boundaries; never upload full project silently.
+2. Local sampler collects permissioned assets + metadata, optional transcription and shot boundaries; transcription uploads approved audio bytes only, extracting the first audio track from an approved local video when needed; never upload full project silently.
 3. Gemini receives request + supported action catalog + clip IDs, frame rates, bounds and color ranges. Set schema-controlled JSON output where supported.
 4. Parse **and** validate JSON locally against `schemas/ai-edit-plan.v1.schema.json`; semantic validation checks every clip/asset ref, range, target duration, effect availability, text length, transform bounds, color parameter bounds and total work estimate.
 5. UI presents edit proposal, predicted impact, uploaded scope, provider usage and per-action approve/reject toggles.
@@ -61,7 +61,7 @@ Each operation has `OperationDescriptor`: type, version, target kind, bounds, pr
 - **Offline:** AI controls unavailable; manual operations and saved plans still executable locally.
 
 ## Provider abstractions
-`IGeminiClient` supports model discovery/configuration, upload scopes, cancellation, usage/limits, error handling and file cleanup. Do not hardcode model availability/prices or assume a key is free. Never log key or raw user media. Prefer provider API documentation for active request shapes.
+`IGeminiClient` supports model discovery/configuration, upload scopes, cancellation, usage/limits, error handling and file cleanup. Transcription providers must enforce local-source validation, derived-audio size limits and cleanup before sending bytes. Do not hardcode model availability/prices or assume a key is free. Never log key or raw user media. Prefer provider API documentation for active request shapes.
 
 ## Test cases
 Valid plan; unknown action; wrong clip; negative frame; overflow duration; invalid numeric; duplicate action ID; captions without timed provenance; prompt-injection text; partial failure rollback; undo/redo; export parity; offline no-key; declined upload; cancellation; media relink; Gemini rate limit; unexpected provider JSON.
