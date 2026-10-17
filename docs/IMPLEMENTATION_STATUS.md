@@ -35,7 +35,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-205 / E02
-Git SHA: pending commit
+Git SHA: 34a3099
 Files changed: src/FrameTheory.Media/MediaExport.cs, tests/FrameTheory.UnitTests/MediaExportTests.cs, tools/FrameTheory.MediaExportSmoke/, FrameTheory.sln, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: `FfmpegMediaExporter` encodes a local video to H.264/AAC in a destination-directory temp file, reports encoding/verifying/completed progress, probes the temp stream, then atomically moves it to the requested output. Source replacement is rejected; failed and canceled jobs clean temp files.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; real `FrameTheory.MediaExportSmoke` and `FrameTheory.MediaProbeSmoke` against temporary H.264/AAC MP4; git diff --check
