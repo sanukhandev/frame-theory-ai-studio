@@ -1,0 +1,28 @@
+# Release and Platform Matrix
+
+## Reproducible validation publish
+
+The repository provides a framework-dependent desktop publish for each runtime and a SHA-256 manifest:
+
+```text
+pwsh ./scripts/package.ps1 -RuntimeIdentifier win-x64 -OutputDirectory artifacts/package
+sh ./scripts/package.sh osx-x64 artifacts/package
+sh ./scripts/package.sh linux-x64 artifacts/package
+```
+
+The output is a validation publish, not an installer. It must be tested on the matching host before distribution.
+
+## Current matrix
+
+| Platform | Build/CI compile | Local GUI/media evidence | Installer/signing |
+|---|---|---|---|
+| Windows 11 x64 | Verified locally; CI artifact job configured | FFmpeg import/export/smoke verified; interactive shell and package relaunch remain open | Not packaged, signed or notarized |
+| macOS Apple Silicon/Intel | CI matrix configured; hosted result pending | Not run locally | Not packaged or notarized |
+| Linux x64 | CI matrix configured; hosted result pending | Not run locally | Not packaged or signed |
+
+## Release blockers
+
+- Approved Frame Theory logo bytes are absent from the repository; no replacement asset is allowed.
+- FFmpeg/ffprobe are host dependencies and are not bundled; exact build, license mode, codec notices and redistribution path are not approved.
+- The application license is undecided.
+- Install/relaunch/recover, package checksums on each host, and code-signing/notarization evidence are still required before V1.
