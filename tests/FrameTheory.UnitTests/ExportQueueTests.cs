@@ -10,10 +10,13 @@ public sealed class ExportQueueTests
     {
         await using var queue = new ExportQueueService();
         var order = new List<int>();
+        var firstStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var releaseFirst = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         var first = queue.Enqueue(async cancellationToken =>
         {
             order.Add(1);
-            await Task.Delay(10, cancellationToken);
+            firstStarted.SetResult();
+            await releaseFirst.Task.WaitAsync(cancellationToken);
             return Receipt("first");
         });
         var second = queue.Enqueue(async cancellationToken =>
@@ -24,8 +27,10 @@ public sealed class ExportQueueTests
             return Receipt("second");
         });
 
-        await first.Completion;
+        await firstStarted.Task;
         second.Cancel();
+        releaseFirst.SetResult();
+        await first.Completion;
         await Xunit.Assert.ThrowsAnyAsync<OperationCanceledException>(() => second.Completion);
 
         Xunit.Assert.InRange(order.Count, 1, 2);
