@@ -153,6 +153,10 @@ public sealed class MainWindow : Window
         if (workspace.Name == "Photo")
         {
             children.Add(CreatePhotoRecoveryPanel(viewModel));
+            if (viewModel.PhotoEditor is not null)
+            {
+                children.Add(CreatePhotoEditorPanel(viewModel.PhotoEditor));
+            }
         }
         else if (workspace.Name == "Color")
         {
@@ -215,6 +219,86 @@ public sealed class MainWindow : Window
                     missingList,
                     replacementPath,
                     relink
+                }
+            }
+        };
+    }
+
+    private static Control CreatePhotoEditorPanel(PhotoEditorViewModel editor)
+    {
+        var preview = new Image { Width = 320, Height = 180, Stretch = Stretch.Uniform };
+        void RefreshPreview() => preview.Source = CreateBitmap(editor.PreviewPpm);
+        editor.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(PhotoEditorViewModel.PreviewPpm) or nameof(PhotoEditorViewModel.Current))
+            {
+                RefreshPreview();
+            }
+        };
+        var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        status.Bind(TextBlock.TextProperty, new Binding(nameof(PhotoEditorViewModel.StatusText)));
+        var open = new Button { Content = "Open image" };
+        open.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(open);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Images") { Patterns = ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp", "*.tif", "*.tiff"] }]
+            });
+            var path = files.SingleOrDefault()?.TryGetLocalPath();
+            if (path is not null)
+            {
+                await editor.OpenAsync(path, CancellationToken.None);
+            }
+        };
+        var rotate = new Button { Content = "Rotate 90°" };
+        rotate.Click += (_, _) => editor.RotateRight();
+        var undo = new Button { Content = "Undo photo edit" };
+        undo.Click += (_, _) => editor.Undo();
+        var format = new ComboBox { ItemsSource = new[] { "PNG", "JPEG" }, SelectedIndex = 0, Width = 90 };
+        var quality = new Slider { Minimum = 1, Maximum = 100, Value = 95, Width = 140 };
+        var export = new Button { Content = "Export image" };
+        export.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(export);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var jpeg = format.SelectedIndex == 1;
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            {
+                SuggestedFileName = jpeg ? "frame-theory-photo.jpg" : "frame-theory-photo.png",
+                FileTypeChoices = [new FilePickerFileType(jpeg ? "JPEG image" : "PNG image") { Patterns = [jpeg ? "*.jpg" : "*.png"] }]
+            });
+            var path = file?.TryGetLocalPath();
+            if (path is not null)
+            {
+                await editor.ExportAsync(path, jpeg ? PhotoExportFormat.Jpeg : PhotoExportFormat.Png, (int)Math.Round(quality.Value), CancellationToken.None);
+            }
+        };
+        return new Border
+        {
+            Margin = new Thickness(0, 16, 0, 0),
+            Padding = new Thickness(12),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 48, 48)),
+            Child = new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    new TextBlock { Text = "Non-destructive photo editor", FontWeight = FontWeight.SemiBold },
+                    preview,
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { open, rotate, undo } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { format, quality, export } },
+                    status
                 }
             }
         };

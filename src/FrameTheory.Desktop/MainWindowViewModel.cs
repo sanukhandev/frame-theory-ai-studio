@@ -6,6 +6,7 @@ using FrameTheory.Captions;
 using FrameTheory.Domain;
 using FrameTheory.Media;
 using FrameTheory.Platform;
+using FrameTheory.Photo;
 using FrameTheory.Storage;
 
 namespace FrameTheory.Desktop;
@@ -57,6 +58,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ICapabilityDetector capabilityDetector,
         IMediaImporter? mediaImporter = null,
         PhotoRecoveryViewModel? photoRecovery = null,
+        PhotoEditorViewModel? photoEditor = null,
         ColorGradeInspectorViewModel? colorInspector = null,
         TimelineEditorViewModel? timelineEditor = null,
         ITimelineVideoExporter? timelineExporter = null,
@@ -70,8 +72,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         PhotoRecovery = photoRecovery ?? new PhotoRecoveryViewModel(
             new ProjectRecoveryService(new JsonProjectRepository()),
             new JsonProjectRepository());
+        PhotoEditor = photoEditor;
         ColorInspector = colorInspector ?? new ColorGradeInspectorViewModel();
         TimelineEditor = timelineEditor ?? new TimelineEditorViewModel();
+        PhotoEditor = new PhotoEditorViewModel(
+            new PhotoImporter(new FfprobeMediaProbe(new FfmpegProcessRunner()), new FfmpegFrameDecoder(new FfmpegProcessRunner())),
+            new PhotoExporter(new FfmpegProcessRunner(), new FfprobeMediaProbe(new FfmpegProcessRunner())));
         GeminiSettings = geminiSettings ?? new GeminiSettingsViewModel(new GeminiConfigurationService(new OperatingSystemSecretStore()));
         _timelineExporter = timelineExporter;
         _exportQueue = exportQueue ?? new ExportQueueService();
@@ -87,6 +93,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public IReadOnlyList<ImportedMediaViewModel> ImportedMedia { get; private set; } = [];
 
     public PhotoRecoveryViewModel PhotoRecovery { get; }
+
+    public PhotoEditorViewModel? PhotoEditor { get; }
 
     public ColorGradeInspectorViewModel ColorInspector { get; }
 
@@ -436,12 +444,14 @@ public sealed class DesktopServices
             new FfprobeMediaProbe(processRunner),
             decoder,
             processRunner);
+        var probe = new FfprobeMediaProbe(processRunner);
         var repository = new JsonProjectRepository();
         return new(
             new WorkspaceCatalog(),
             new FrameTheory.Platform.SystemCapabilityDetector(),
             importer,
             new PhotoRecoveryViewModel(new ProjectRecoveryService(repository), repository),
+            new PhotoEditorViewModel(new PhotoImporter(probe, decoder), new PhotoExporter(processRunner, probe)),
             timelineExporter: new FfmpegTimelineVideoExporter(processRunner, new FfprobeMediaProbe(processRunner)),
             analysisSampler: new LocalAnalysisSampler(decoder));
     }
