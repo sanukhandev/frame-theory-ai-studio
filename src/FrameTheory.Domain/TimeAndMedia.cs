@@ -126,6 +126,16 @@ public readonly record struct MediaId
         return new MediaId(Convert.ToHexString(SHA256.HashData(identity)).ToLowerInvariant());
     }
 
+    public static MediaId Parse(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || value.Length != 64 || !value.All(Uri.IsHexDigit))
+        {
+            throw new ArgumentException("Media IDs must be 64 hexadecimal characters.", nameof(value));
+        }
+
+        return new MediaId(value.ToLowerInvariant());
+    }
+
     public override string ToString() => Value;
 }
 
