@@ -6,6 +6,20 @@ namespace FrameTheory.Platform;
 
 public sealed class SystemCapabilityDetector : ICapabilityDetector
 {
+    private readonly string _ffmpegExecutable;
+    private readonly string _ffprobeExecutable;
+    private readonly string _probeArgument;
+
+    public SystemCapabilityDetector(
+        string ffmpegExecutable = "ffmpeg",
+        string ffprobeExecutable = "ffprobe",
+        string probeArgument = "-version")
+    {
+        _ffmpegExecutable = RequireExecutable(ffmpegExecutable, nameof(ffmpegExecutable));
+        _ffprobeExecutable = RequireExecutable(ffprobeExecutable, nameof(ffprobeExecutable));
+        _probeArgument = RequireExecutable(probeArgument, nameof(probeArgument));
+    }
+
     public async Task<CapabilityReport> DetectAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -14,8 +28,8 @@ public sealed class SystemCapabilityDetector : ICapabilityDetector
         {
             new("Operating system", CapabilityState.Available, RuntimeInformation.OSDescription),
             await ProbeStorageAsync(cancellationToken),
-            await ProbeExecutableAsync("ffmpeg", cancellationToken),
-            await ProbeExecutableAsync("ffprobe", cancellationToken),
+            await ProbeExecutableAsync(_ffmpegExecutable, "FFmpeg", cancellationToken),
+            await ProbeExecutableAsync(_ffprobeExecutable, "ffprobe", cancellationToken),
             new("GPU", CapabilityState.Unknown, "Native backend detection is not configured yet.")
         };
 
@@ -25,9 +39,8 @@ public sealed class SystemCapabilityDetector : ICapabilityDetector
             entries);
     }
 
-    private static async Task<CapabilityStatus> ProbeExecutableAsync(string executable, CancellationToken cancellationToken)
+    private async Task<CapabilityStatus> ProbeExecutableAsync(string executable, string displayName, CancellationToken cancellationToken)
     {
-        var displayName = executable.Equals("ffmpeg", StringComparison.OrdinalIgnoreCase) ? "FFmpeg" : "ffprobe";
         try
         {
             using var process = new Process
@@ -36,20 +49,36 @@ public sealed class SystemCapabilityDetector : ICapabilityDetector
                 {
                     FileName = executable,
                     UseShellExecute = false,
+                    RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     CreateNoWindow = true
                 }
             };
-            process.StartInfo.ArgumentList.Add("-version");
+            process.StartInfo.ArgumentList.Add(_probeArgument);
 
             if (!process.Start())
             {
                 return new CapabilityStatus(displayName, CapabilityState.Missing, "The process could not be started.");
             }
 
-            var output = await process.StandardError.ReadToEndAsync(cancellationToken);
+            var standardOutput = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            var standardError = process.StandardError.ReadToEndAsync(cancellationToken);
             await process.WaitForExitAsync(cancellationToken);
-            var version = output.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.Trim();
+            var output = await Task.WhenAll(standardOutput, standardError);
+            if (process.ExitCode != 0)
+            {
+                var detail = output.SelectMany(value => value.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                    .Select(value => value.Trim())
+                    .FirstOrDefault(value => value.Length > 0);
+                return new CapabilityStatus(
+                    displayName,
+                    CapabilityState.Unknown,
+                    $"Exited with code {process.ExitCode}." + (detail is null ? string.Empty : $" {detail}"));
+            }
+
+            var version = output.SelectMany(value => value.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                .Select(value => value.Trim())
+                .FirstOrDefault(value => value.Length > 0);
             return new CapabilityStatus(displayName, CapabilityState.Available, version ?? "Executable responded.");
         }
         catch (System.ComponentModel.Win32Exception)
@@ -57,6 +86,9 @@ public sealed class SystemCapabilityDetector : ICapabilityDetector
             return new CapabilityStatus(displayName, CapabilityState.Missing, "Not found on PATH.");
         }
     }
+
+    private static string RequireExecutable(string value, string parameterName) =>
+        string.IsNullOrWhiteSpace(value) ? throw new ArgumentException("An executable or probe argument is required.", parameterName) : value.Trim();
 
     private static async Task<CapabilityStatus> ProbeStorageAsync(CancellationToken cancellationToken)
     {

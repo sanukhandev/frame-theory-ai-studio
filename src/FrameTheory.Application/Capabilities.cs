@@ -20,7 +20,9 @@ public sealed record CapabilityReport(string Platform, string Architecture, IRea
     {
         if (entry.State != CapabilityState.Missing)
         {
-            return $"{entry.Name}: {entry.State.ToString().ToLowerInvariant()}";
+            return entry.State == CapabilityState.Unknown && !string.IsNullOrWhiteSpace(entry.Detail)
+                ? $"{entry.Name}: unknown ({entry.Detail})"
+                : $"{entry.Name}: {entry.State.ToString().ToLowerInvariant()}";
         }
 
         var guidance = entry.Name is "FFmpeg" or "ffprobe"

@@ -114,6 +114,21 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public async Task CapabilityDetectorReportsNonzeroDependencyProbeAsUnknown()
+    {
+        var detector = new FrameTheory.Platform.SystemCapabilityDetector("dotnet", "dotnet", "--frame-theory-invalid-probe");
+
+        var report = await detector.DetectAsync(CancellationToken.None);
+
+        Xunit.Assert.All(report.Entries.Where(entry => entry.Name is "FFmpeg" or "ffprobe"), entry =>
+        {
+            Xunit.Assert.Equal(CapabilityState.Unknown, entry.State);
+            Xunit.Assert.Contains("Exited with code", entry.Detail, StringComparison.Ordinal);
+        });
+        Xunit.Assert.Contains("FFmpeg: unknown (Exited with code", report.Summary, StringComparison.Ordinal);
+    }
+
+    [Xunit.Fact]
     public async Task CapabilityFailureIsVisibleAndRecordedLocally()
     {
         var diagnostics = new RecordingDiagnostics();
