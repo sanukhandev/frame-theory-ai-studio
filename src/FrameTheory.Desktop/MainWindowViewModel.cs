@@ -69,8 +69,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private ExportQueueJob? _lastTimelineExport;
     private TimelineExportRequest? _lastTimelineExportRequest;
     private readonly ILocalAnalysisSampler? _analysisSampler;
+    private readonly IPreviewFrameDecoder _timelinePreviewDecoder;
     private int _videoWidth;
     private int _videoHeight;
+    private byte[]? _timelinePreviewPpm;
+    private string _timelinePreviewStatusText = "No timeline frame preview requested.";
 
     public MainWindowViewModel(
         IWorkspaceCatalog workspaceCatalog,
@@ -87,7 +90,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         IDiagnosticsLog? diagnosticsLog = null,
         HttpClient? transcriptionHttpClient = null,
         IGeminiInteractionHistory? geminiInteractionHistory = null,
-        IAudioSourcePreparer? audioSourcePreparer = null)
+        IAudioSourcePreparer? audioSourcePreparer = null,
+        IPreviewFrameDecoder? timelinePreviewDecoder = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
@@ -109,6 +113,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         GeminiSettings = geminiSettings ?? new GeminiSettingsViewModel(new GeminiConfigurationService(new OperatingSystemSecretStore()));
         _timelineExporter = timelineExporter;
         _analysisSampler = analysisSampler;
+        _timelinePreviewDecoder = timelinePreviewDecoder ?? new FfmpegFrameDecoder(new FfmpegProcessRunner());
         if (Workspaces.Count == 0)
         {
             throw new InvalidOperationException("At least one workspace is required.");
@@ -118,6 +123,31 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public IReadOnlyList<WorkspaceViewModel> Workspaces { get; }
 
     public IReadOnlyList<ImportedMediaViewModel> ImportedMedia { get; private set; } = [];
+
+    public byte[]? TimelinePreviewPpm
+    {
+        get => _timelinePreviewPpm;
+        private set
+        {
+            _timelinePreviewPpm = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string TimelinePreviewStatusText
+    {
+        get => _timelinePreviewStatusText;
+        private set
+        {
+            if (value == _timelinePreviewStatusText)
+            {
+                return;
+            }
+
+            _timelinePreviewStatusText = value;
+            OnPropertyChanged();
+        }
+    }
 
     public PhotoRecoveryViewModel PhotoRecovery { get; }
 
@@ -394,6 +424,43 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         MediaImportStatusText = imported.Count == 0 && failures.Count == 0
             ? "No local media files were dropped."
             : $"Imported {imported.Count} file(s)." + (failures.Count == 0 ? string.Empty : $" Failed: {string.Join(", ", failures)}");
+    }
+
+    public async Task<bool> PreviewCurrentTimelineFrameAsync(CancellationToken cancellationToken)
+    {
+        var seek = TimelineEditor.SeekFrame(TimelineEditor.CurrentFrame);
+        var sample = seek.Samples.FirstOrDefault(item => item.TrackKind == TimelineTrackKind.Video && item.SourceFrame is not null);
+        if (sample is null || sample.SourceFrame is not long sourceFrame ||
+            !_mediaSources.TryGetValue(sample.MediaId, out var source) || !_analysisAssets.TryGetValue(sample.MediaId, out var media))
+        {
+            TimelinePreviewStatusText = "Import a video and place the playhead over a video clip first.";
+            TimelinePreviewPpm = null;
+            return false;
+        }
+
+        try
+        {
+            TimelinePreviewStatusText = $"Decoding frame {sourceFrame}...";
+            TimelinePreviewPpm = await _timelinePreviewDecoder.DecodeFrameAsync(
+                source,
+                media.Metadata.FrameRate ?? new RationalFrameRate(30, 1),
+                sourceFrame,
+                cancellationToken);
+            TimelinePreviewStatusText = $"Previewed frame {sourceFrame} from {Path.GetFileName(source.LocalPath)}.";
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            TimelinePreviewStatusText = "Timeline preview canceled.";
+            return false;
+        }
+        catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaDecodeException)
+        {
+            _diagnosticsLog.Record("timeline-preview-failed", exception);
+            TimelinePreviewStatusText = $"Timeline preview failed: {exception.Message}";
+            TimelinePreviewPpm = null;
+            return false;
+        }
     }
 
     public async Task<bool> PrepareLocalAnalysisAsync(GeminiAnalysisScope scopes, bool uploadConsent, CancellationToken cancellationToken)
@@ -685,6 +752,7 @@ public sealed class DesktopServices
             timelineExporter: new FfmpegTimelineVideoExporter(processRunner, new FfprobeMediaProbe(processRunner)),
             analysisSampler: new LocalAnalysisSampler(decoder),
             exportQueue: exportQueue,
-            diagnosticsLog: _diagnosticsLog);
+            diagnosticsLog: _diagnosticsLog,
+            timelinePreviewDecoder: decoder);
     }
 }

@@ -582,6 +582,19 @@ public sealed class MainWindow : Window
     private static Control CreateTimelinePanel(MainWindowViewModel viewModel)
     {
         var timeline = viewModel.TimelineEditor;
+        var timelinePreview = new Image { Width = 320, Height = 180, Stretch = Stretch.Uniform };
+        var timelinePreviewStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        timelinePreviewStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePreviewStatusText)));
+        void RefreshTimelinePreview() => timelinePreview.Source = CreateBitmap(viewModel.TimelinePreviewPpm);
+        viewModel.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(MainWindowViewModel.TimelinePreviewPpm))
+            {
+                RefreshTimelinePreview();
+            }
+        };
+        var previewCurrentFrame = new Button { Content = "Preview current frame" };
+        previewCurrentFrame.Click += async (_, _) => await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None);
         var playhead = new Slider { Minimum = 0, Maximum = Math.Max(1, timeline.TotalFrames - 1), Value = timeline.CurrentFrame };
         AutomationProperties.SetName(playhead, "Timeline playhead frame");
         playhead.ValueChanged += (_, args) => timeline.SeekFrame((long)Math.Round(args.NewValue, MidpointRounding.AwayFromZero));
@@ -879,6 +892,7 @@ public sealed class MainWindow : Window
                 Children =
                 {
                     new TextBlock { Text = "Frame-accurate timeline", FontWeight = FontWeight.SemiBold },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { timelinePreview, new StackPanel { Spacing = 8, Children = { previewCurrentFrame, timelinePreviewStatus } } } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { new TextBlock { Text = "Frame" }, frameStatus, new TextBlock { Text = "Position" }, positionStatus } },
                     playhead,
                     ruler,
