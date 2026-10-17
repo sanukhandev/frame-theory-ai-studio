@@ -258,6 +258,58 @@ public sealed class TranscriptionTests
     }
 
     [Xunit.Fact]
+    public async Task GeminiProviderRejectsAndCleansUpAnUntrustedFileUri()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-transcript-uri-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "long.wav");
+            await using (var source = File.Create(sourcePath))
+            {
+                source.SetLength(20 * 1024 * 1024 + 1);
+            }
+
+            var deleted = false;
+            using var client = new HttpClient(new StubHandler(request =>
+            {
+                if (request.Method == HttpMethod.Post && request.Headers.Contains("X-Goog-Upload-Protocol"))
+                {
+                    var response = new HttpResponseMessage(HttpStatusCode.OK);
+                    response.Headers.TryAddWithoutValidation("x-goog-upload-url", "https://generativelanguage.googleapis.com/upload/session");
+                    return response;
+                }
+
+                if (request.Method == HttpMethod.Post && request.RequestUri!.AbsolutePath.EndsWith("/upload/session", StringComparison.Ordinal))
+                {
+                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("{\"file\":{\"name\":\"files/untrusted-uri\",\"uri\":\"https://example.test/file\",\"mimeType\":\"audio/wav\"}}", Encoding.UTF8, "application/json")
+                    };
+                }
+
+                if (request.Method == HttpMethod.Delete)
+                {
+                    deleted = true;
+                    return new HttpResponseMessage(HttpStatusCode.OK);
+                }
+
+                return new HttpResponseMessage(HttpStatusCode.NotFound);
+            }));
+
+            await Xunit.Assert.ThrowsAsync<GeminiTranscriptionException>(() => new GeminiTranscriptionProvider(
+                client,
+                new GeminiTranscriptionOptions("test-secret", uploadConsent: true))
+                .TranscribeAsync(new Uri(sourcePath), CancellationToken.None));
+
+            Xunit.Assert.True(deleted);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task GeminiProviderRejectsReparsePointSource()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-transcript-link-");

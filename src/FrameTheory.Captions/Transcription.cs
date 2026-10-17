@@ -329,13 +329,21 @@ public sealed class GeminiTranscriptionProvider : IProgressiveTranscriptionProvi
             throw new GeminiTranscriptionException("Gemini Files API returned an incomplete upload response.");
         }
 
+        if (!Uri.TryCreate(file.Uri, UriKind.Absolute, out var fileUri) ||
+            fileUri.Scheme != Uri.UriSchemeHttps ||
+            !string.Equals(fileUri.Host, FilesUploadEndpoint.Host, StringComparison.OrdinalIgnoreCase))
+        {
+            await DeleteFileAsync(file.Name, cancellationToken);
+            throw new GeminiTranscriptionException("Gemini returned an invalid Files API file URI.");
+        }
+
         var mimeType = string.IsNullOrWhiteSpace(file.MimeType) ? file.LegacyMimeType : file.MimeType;
         if (string.IsNullOrWhiteSpace(mimeType))
         {
             mimeType = contentType;
         }
 
-        return new GeminiUploadedFile(file.Name, file.Uri, mimeType);
+        return new GeminiUploadedFile(file.Name, fileUri.AbsoluteUri, mimeType);
     }
 
     private async Task DeleteFileAsync(string fileName, CancellationToken cancellationToken)
