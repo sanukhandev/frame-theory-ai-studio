@@ -40,7 +40,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-401 / E04
-Git SHA: pending commit
+Git SHA: 7403944
 Files changed: src/FrameTheory.Media/MediaProbe.cs, src/FrameTheory.Photo/PhotoCanvas.cs, src/FrameTheory.Photo/FrameTheory.Photo.csproj, tests/FrameTheory.UnitTests/MediaProbeTests.cs, tests/FrameTheory.UnitTests/PhotoCanvasTests.cs, tests/FrameTheory.UnitTests/PhotoImporterTests.cs, tools/FrameTheory.PhotoImportSmoke/, FrameTheory.sln, docs/DEVELOPMENT.md, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: `PhotoImporter` probes local PNG/JPEG media and decodes a real PPM preview. `PhotoCanvasState` supports fit, 100%, clamped zoom and pan state without modifying source bytes. Still-image extensions are classified as images even though ffprobe exposes a video stream.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; real `FrameTheory.PhotoImportSmoke` against temporary FFmpeg-generated PNG; git diff --check
