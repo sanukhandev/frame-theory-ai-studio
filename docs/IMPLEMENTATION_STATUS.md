@@ -32,7 +32,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-202 / E02
-Git SHA: pending commit
+Git SHA: 7e20fb0
 Files changed: src/FrameTheory.Media/FrameDecoder.cs, tests/FrameTheory.UnitTests/FrameDecoderTests.cs, tools/FrameTheory.FrameDecodeSmoke/, FrameTheory.sln, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: `FfmpegFrameDecoder` accepts only local non-reparse files, seeks an exact frame with FFmpeg, returns bounded PPM bytes, honors cancellation, and caches recent frames without exposing mutable buffers. The smoke CLI exposes the headless preview contract.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; real `FrameTheory.FrameDecodeSmoke` against temporary H.264/AAC MP4; git diff --check
