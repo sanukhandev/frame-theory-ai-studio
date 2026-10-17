@@ -28,7 +28,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-103 / E01
-Git SHA: pending commit
+Git SHA: 9f4e4e1
 Files changed: src/FrameTheory.Domain/Project.cs, src/FrameTheory.Domain/Editing.cs, tests/FrameTheory.UnitTests/CommandHistoryTests.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: Immutable domain commands support canvas edits and media-reference add/remove, command groups apply in order, inverse commands are generated, and `EditHistory` keeps bounded undo/redo snapshots with redo invalidation after new edits.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
