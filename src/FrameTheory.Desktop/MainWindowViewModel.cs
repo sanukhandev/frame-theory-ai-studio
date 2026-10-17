@@ -1,10 +1,16 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using FrameTheory.Application;
+using FrameTheory.Media;
 
 namespace FrameTheory.Desktop;
 
 public sealed record WorkspaceViewModel(string Name, string Description, string OfflineMessage);
+
+public sealed record ImportedMediaViewModel(string Name, string Summary)
+{
+    public override string ToString() => $"{Name} — {Summary}";
+}
 
 public interface IWorkspaceCatalog
 {
@@ -25,13 +31,19 @@ public sealed class WorkspaceCatalog : IWorkspaceCatalog
 public sealed class MainWindowViewModel : INotifyPropertyChanged
 {
     private readonly ICapabilityDetector _capabilityDetector;
+    private readonly IMediaImporter? _mediaImporter;
     private int _selectedWorkspaceIndex;
     private string _capabilityStatusText = "Checking local capabilities...";
+    private string _mediaImportStatusText = "Drop local media files into the window to import previews.";
 
-    public MainWindowViewModel(IWorkspaceCatalog workspaceCatalog, ICapabilityDetector capabilityDetector)
+    public MainWindowViewModel(
+        IWorkspaceCatalog workspaceCatalog,
+        ICapabilityDetector capabilityDetector,
+        IMediaImporter? mediaImporter = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
+        _mediaImporter = mediaImporter;
         if (Workspaces.Count == 0)
         {
             throw new InvalidOperationException("At least one workspace is required.");
@@ -39,6 +51,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     }
 
     public IReadOnlyList<WorkspaceViewModel> Workspaces { get; }
+
+    public IReadOnlyList<ImportedMediaViewModel> ImportedMedia { get; private set; } = [];
 
     public int SelectedWorkspaceIndex
     {
@@ -73,6 +87,56 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    public string MediaImportStatusText
+    {
+        get => _mediaImportStatusText;
+        private set
+        {
+            if (value == _mediaImportStatusText)
+            {
+                return;
+            }
+
+            _mediaImportStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public async Task ImportFilesAsync(IEnumerable<string> paths, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(paths);
+        if (_mediaImporter is null)
+        {
+            MediaImportStatusText = "Media import is unavailable.";
+            return;
+        }
+
+        var imported = new List<ImportedMediaViewModel>();
+        var failures = new List<string>();
+        foreach (var path in paths.Where(path => !string.IsNullOrWhiteSpace(path)).Distinct(StringComparer.OrdinalIgnoreCase))
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            try
+            {
+                var fullPath = Path.GetFullPath(path);
+                var media = await _mediaImporter.ImportAsync(new Uri(fullPath), cancellationToken);
+                imported.Add(new ImportedMediaViewModel(
+                    Path.GetFileName(fullPath),
+                    $"{media.Metadata.Kind}; {media.Metadata.Width}x{media.Metadata.Height}; thumbnail {media.ThumbnailPpm?.Length ?? 0} bytes; waveform {media.WaveformPeaks.Count} peaks"));
+            }
+            catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaImportException)
+            {
+                failures.Add($"{Path.GetFileName(path)} ({exception.Message})");
+            }
+        }
+
+        ImportedMedia = imported;
+        OnPropertyChanged(nameof(ImportedMedia));
+        MediaImportStatusText = imported.Count == 0 && failures.Count == 0
+            ? "No local media files were dropped."
+            : $"Imported {imported.Count} file(s)." + (failures.Count == 0 ? string.Empty : $" Failed: {string.Join(", ", failures)}");
+    }
+
     public async Task RefreshCapabilitiesAsync(CancellationToken cancellationToken)
     {
         try
@@ -98,6 +162,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
 public sealed class DesktopServices
 {
-    public MainWindowViewModel CreateMainWindowViewModel() =>
-        new(new WorkspaceCatalog(), new FrameTheory.Platform.SystemCapabilityDetector());
+    public MainWindowViewModel CreateMainWindowViewModel()
+    {
+        var processRunner = new FfmpegProcessRunner();
+        var importer = new FfmpegMediaImporter(
+            new FfprobeMediaProbe(processRunner),
+            new FfmpegFrameDecoder(processRunner),
+            processRunner);
+        return new(new WorkspaceCatalog(), new FrameTheory.Platform.SystemCapabilityDetector(), importer);
+    }
 }
