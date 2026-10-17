@@ -10,6 +10,7 @@
     <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.2" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FrameTheory.AI\FrameTheory.AI.csproj" />
     <ProjectReference Include="..\FrameTheory.Application\FrameTheory.Application.csproj" />
     <ProjectReference Include="..\FrameTheory.Captions\FrameTheory.Captions.csproj" />
     <ProjectReference Include="..\FrameTheory.Media\FrameTheory.Media.csproj" />

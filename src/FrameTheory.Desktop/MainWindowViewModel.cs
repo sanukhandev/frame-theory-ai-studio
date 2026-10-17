@@ -1,9 +1,11 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using FrameTheory.AI;
 using FrameTheory.Application;
 using FrameTheory.Captions;
 using FrameTheory.Domain;
 using FrameTheory.Media;
+using FrameTheory.Platform;
 using FrameTheory.Storage;
 
 namespace FrameTheory.Desktop;
@@ -52,7 +54,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         PhotoRecoveryViewModel? photoRecovery = null,
         ColorGradeInspectorViewModel? colorInspector = null,
         TimelineEditorViewModel? timelineEditor = null,
-        ITimelineVideoExporter? timelineExporter = null)
+        ITimelineVideoExporter? timelineExporter = null,
+        GeminiSettingsViewModel? geminiSettings = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
@@ -62,6 +65,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             new JsonProjectRepository());
         ColorInspector = colorInspector ?? new ColorGradeInspectorViewModel();
         TimelineEditor = timelineEditor ?? new TimelineEditorViewModel();
+        GeminiSettings = geminiSettings ?? new GeminiSettingsViewModel(new GeminiConfigurationService(new OperatingSystemSecretStore()));
         _timelineExporter = timelineExporter;
         if (Workspaces.Count == 0)
         {
@@ -78,6 +82,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public ColorGradeInspectorViewModel ColorInspector { get; }
 
     public TimelineEditorViewModel TimelineEditor { get; }
+
+    public GeminiSettingsViewModel GeminiSettings { get; }
 
     public int SelectedWorkspaceIndex
     {

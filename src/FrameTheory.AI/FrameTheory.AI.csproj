@@ -4,6 +4,7 @@
     <RootNamespace>FrameTheory.AI</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FrameTheory.Application\FrameTheory.Application.csproj" />
     <ProjectReference Include="..\FrameTheory.Domain\FrameTheory.Domain.csproj" />
   </ItemGroup>
 </Project>

@@ -160,6 +160,10 @@ public sealed class MainWindow : Window
         {
             children.Add(CreateTimelinePanel(viewModel));
         }
+        else if (workspace.Name == "AI")
+        {
+            children.Add(CreateGeminiSettingsPanel(viewModel));
+        }
 
         var stack = new StackPanel { Spacing = 12 };
         stack.Children.AddRange(children);
@@ -208,6 +212,47 @@ public sealed class MainWindow : Window
                     missingList,
                     replacementPath,
                     relink
+                }
+            }
+        };
+    }
+
+    private static Control CreateGeminiSettingsPanel(MainWindowViewModel viewModel)
+    {
+        var settings = viewModel.GeminiSettings;
+        var model = new ComboBox { ItemsSource = settings.Models, SelectedIndex = 0 };
+        model.Bind(SelectingItemsControl.SelectedItemProperty, new Binding(nameof(GeminiSettingsViewModel.SelectedModelId))
+        {
+            Mode = BindingMode.TwoWay
+        });
+        var apiKey = new TextBox { PlaceholderText = "Gemini API key (stored securely)", PasswordChar = '•' };
+        var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        status.Bind(TextBlock.TextProperty, new Binding(nameof(GeminiSettingsViewModel.StatusText)));
+        var save = new Button { Content = "Store Gemini key" };
+        save.Click += async (_, _) =>
+        {
+            await settings.SaveAsync(apiKey.Text ?? string.Empty, CancellationToken.None);
+            apiKey.Text = string.Empty;
+        };
+        var clear = new Button { Content = "Remove Gemini key" };
+        clear.Click += async (_, _) => await settings.ClearAsync(CancellationToken.None);
+        _ = settings.LoadAsync(CancellationToken.None);
+        return new Border
+        {
+            Margin = new Thickness(0, 16, 0, 0),
+            Padding = new Thickness(12),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 48, 48)),
+            Child = new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    new TextBlock { Text = "Optional Gemini Creative Director", FontWeight = FontWeight.SemiBold },
+                    new TextBlock { Text = "Manual import, editing, preview and export never require a key.", TextWrapping = TextWrapping.Wrap },
+                    model,
+                    apiKey,
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { save, clear } },
+                    status
                 }
             }
         };
