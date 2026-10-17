@@ -16,7 +16,7 @@
 
 **FT-804 checkpoint:** The shared export queue now exposes queued/running/succeeded/failed/canceled state, bounded in-memory job history, immediate cancellation completion and retry of failed/canceled jobs. Video export exposes a real “Retry last export” action; exporter temp-file cleanup and atomic finalization remain in the existing exporter contracts.
 
-**CI checkpoint:** GitHub Actions run `39050810748` passed documentation/schema validation and .NET restore/build/format/test/publish/checksum jobs on Windows, macOS and Linux for `71b9bca`. Run `39051936860` also passed host-FFmpeg installation plus generated import/extracted-audio/repeated-seek assertions on Windows, macOS and Linux for `c37d112`. Run `39052895799` passed the same three-OS matrix with the NuGet advisory scan and published-artifact checksum verifier for `882c1c3`. Run `39053781388` passed the same three-OS matrix for `2858e59` after the FT-602 Files API implementation. Run `39054338193` passed the self-contained packaging/status checkpoint for `a4affa2`. Run `39054513784` passed the same three-OS matrix plus the new shell packaging syntax gate for `3808988`. Run `39055332326` passed the three-OS native-media matrix with the real multitrack timeline smoke for `b06a406`. Run `39056049489` passed the three-OS matrix with the generated NuGet dependency graph and FFmpeg/ffprobe version/build-configuration artifacts for `c2a67e2`. The Windows line-ending failure is resolved by `.gitattributes`; hosted packaging is still framework-dependent and unsigned. The local FT-903 trace tool passed on Windows at `f92c57f`.
+**CI checkpoint:** GitHub Actions run `39050810748` passed documentation/schema validation and .NET restore/build/format/test/publish/checksum jobs on Windows, macOS and Linux for `71b9bca`. Run `39051936860` also passed host-FFmpeg installation plus generated import/extracted-audio/repeated-seek assertions on Windows, macOS and Linux for `c37d112`. Run `39052895799` passed the same three-OS matrix with the NuGet advisory scan and published-artifact checksum verifier for `882c1c3`. Run `39053781388` passed the same three-OS matrix for `2858e59` after the FT-602 Files API implementation. Run `39054338193` passed the self-contained packaging/status checkpoint for `a4affa2`. Run `39054513784` passed the same three-OS matrix plus the new shell packaging syntax gate for `3808988`. Run `39055332326` passed the three-OS native-media matrix with the real multitrack timeline smoke for `b06a406`. Run `39056049489` passed the three-OS matrix with the generated NuGet dependency graph and FFmpeg/ffprobe version/build-configuration artifacts for `c2a67e2`. Run `39056614730` passed the three-OS native-media matrix with generated still-image conversion, photo import and PNG export for `dea377f`. The Windows line-ending failure is resolved by `.gitattributes`; hosted packaging is still framework-dependent and unsigned. The local FT-903 trace tool passed on Windows at `f92c57f`.
 
 **E09 test checkpoint:** Added focused evidence for every keyboard workspace shortcut, validated-plan JSON synchronization/clearing, repeatable seek traces and credential-assignment redaction. Hosted native media smoke now covers all three OS runners; these tests strengthen FT-901/FT-902/FT-903/FT-904 but do not replace the required interactive 1280x800/HiDPI manual acceptance.
 
@@ -77,7 +77,7 @@
 - [~] FT-903 bounded preview cache and cancellable rendering are implemented; the Windows smoke now records cold/warm seeks, p50/p95 latency, decode throughput and working-set bytes, while optional disk proxy implementation and cross-platform traces remain open
 - [~] FT-904 local redacted diagnostics, unhandled-failure capture and actionable dependency guidance are implemented; cross-platform failure UX acceptance remains open
 - [x] FT-1001 core unit/golden/adversarial suite, caption provenance coverage and source SHA-256 preservation assertion pass on the hosted Windows/macOS/Linux matrix; broader manual/media journeys remain tracked by FT-1002
-- [~] FT-1002 UC-01..UC-06 executable smoke/test matrix is documented with Windows evidence and hosted native-media evidence; interactive and macOS/Linux acceptance remains open
+- [~] FT-1002 UC-01..UC-06 executable smoke/test matrix is documented with Windows evidence and hosted photo/video/native-media evidence; interactive and macOS/Linux acceptance remains open
 - [~] FT-1003 dependency inventory and external FFmpeg/native asset assessment are documented; license/CVE clearance and redistribution evidence remain open
 - [x] FT-1004 GitHub Actions verifies Windows/macOS/Linux restore/build/format/test/publish jobs and uploads per-OS SHA-256 manifests; optional signing/notarization is not part of this task claim
 - [~] FT-1005 framework-dependent Windows/macOS/Linux publish scripts and release matrix are documented; installers, native media bundling and signing remain open
@@ -94,6 +94,20 @@
 3. Keep MLT deferred unless interactive playback parity or a release licensing decision requires a new native engine spike.
 
 ## Latest execution record
+```text
+Date/time: 2026-10-17
+Task / Epic: FT-1002 / E10 photo journey smoke
+Git SHA: dea377f
+Files changed: .github/workflows/ci.yml
+Actual behavior and UI path: The native-media CI job converts the deterministic generated color chart to a real PNG, imports it through `PhotoImporter`, renders a preview, applies the existing exposure layer and exports a real PNG through `PhotoExporter` with ffprobe verification.
+Commands executed + OS: Hosted GitHub Actions run `39056614730` on Windows, macOS and Linux; FFmpeg conversion plus `FrameTheory.PhotoImportSmoke` and `FrameTheory.PhotoExportSmoke`.
+Test outputs / exit codes: Run `39056614730` passed all three OS jobs. Each runner reported `kind=Image; size=8x4` and `format=Png; size=8x4` with a verified output path. Prior run `39056387134` correctly failed because the raw PPM fixture was identified as non-still media; `dea377f` converted it to PNG before import.
+Media fixtures and verification: The chart, PNG source and PNG export were generated outside Git; no user media was used and source-preserving photo tests remain unchanged.
+Known limitations / blockers: This is native headless media evidence, not Photo workspace close/reopen or interactive GUI evidence on any OS.
+Next unblocked task: Continue FT-602 live provider evidence and FT-901..FT-904 / FT-1002..FT-1006 release acceptance.
+```
+
+## Previous execution record
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-1003 / E10 dependency evidence

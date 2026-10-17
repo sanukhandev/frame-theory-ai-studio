@@ -4,7 +4,7 @@ This matrix records executable evidence without confusing headless smoke with in
 
 | Journey | Executable evidence | Current result | Remaining gate |
 |---|---|---|---|
-| UC-01 Local photo edit | `FrameTheory.PhotoImportSmoke`, `FrameTheory.PhotoExportSmoke`, photo recovery/import/export tests | Real FFmpeg import, preview and PNG/JPEG export including exact 16:9, 1:1 and 9:16 photo presets; source-preserving tests pass | Run through the Photo workspace and verify close/reopen manually |
+| UC-01 Local photo edit | `FrameTheory.PhotoImportSmoke`, `FrameTheory.PhotoExportSmoke`, photo recovery/import/export tests; hosted run `39056614730` | Real FFmpeg import, preview and PNG export passed on Windows, macOS and Linux; exact 16:9, 1:1 and 9:16 photo presets and source-preserving tests pass | Run through the Photo workspace and verify close/reopen manually |
 | UC-02 Local video edit | `FrameTheory.TimelineExportSmoke <source-a> <source-b> <output.mp4> [font]`; hosted run `39055332326` | Real multitrack video/audio composite, transition, title/caption and ffprobe receipt passed on Windows, macOS and Linux | UI journey and 1080x1920 acceptance on each OS |
 | UC-03 Universal look | Color golden tests, LUT roundtrip tests and Color workspace inspector | Deterministic preview/export color path and LUT validation pass | Cross-media normalized sample comparison through UI |
 | UC-04 Gemini loop | AI parser/validator/executor tests and timeline smoke AI multi-clip grade/transition plus Reel export; hosted run `39055332326` | Invalid plans reject; approved actions mutate multiple editable clips transactionally; rollback/undo tested; real MP4 outputs are probed on all three OS runners | Real provider request, follow-up history and consented interactive flow |
