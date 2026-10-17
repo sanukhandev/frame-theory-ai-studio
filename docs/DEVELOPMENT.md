@@ -17,6 +17,7 @@ dotnet restore
 dotnet build --configuration Release
 dotnet test --configuration Release
 dotnet run --project src/FrameTheory.Desktop
+dotnet run --project tools/FrameTheory.Fixtures -- tools/fixtures/generated
 ```
 The solution targets .NET 10. The desktop shell uses Avalonia 12.1.2 with code-only controls and the Fluent theme; media tasks beginning with FT-003/FT-006 still require FFmpeg/ffprobe.
 
@@ -54,7 +55,7 @@ Never put Gemini keys in environment sample files with real values, source code,
 dotnet test --filter FullyQualifiedName~Domain
 dotnet test --filter FullyQualifiedName~Color
 dotnet test --filter FullyQualifiedName~AI
-# tools/fixtures/generate.* to create artificial color/video/audio clips
+# tools/fixtures/generated/ is populated by the deterministic fixture CLI
 # tools/fixtures/verify-export.* to probe A/V and compare frames
 ```
 

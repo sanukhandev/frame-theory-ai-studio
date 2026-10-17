@@ -24,6 +24,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrameTheory.Platform", "src
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrameTheory.UnitTests", "tests\FrameTheory.UnitTests\FrameTheory.UnitTests.csproj", "{4567EF01-89AB-4234-F012-3456789ABCDE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrameTheory.Fixtures", "tools\FrameTheory.Fixtures\FrameTheory.Fixtures.csproj", "{5678F012-9ABC-4345-0123-456789ABCDEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrameTheory.GoldenTests", "tests\FrameTheory.GoldenTests\FrameTheory.GoldenTests.csproj", "{6789A123-BCDE-4456-1234-56789ABCDEF0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -74,6 +78,14 @@ Global
 		{4567EF01-89AB-4234-F012-3456789ABCDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4567EF01-89AB-4234-F012-3456789ABCDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4567EF01-89AB-4234-F012-3456789ABCDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5678F012-9ABC-4345-0123-456789ABCDEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5678F012-9ABC-4345-0123-456789ABCDEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5678F012-9ABC-4345-0123-456789ABCDEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5678F012-9ABC-4345-0123-456789ABCDEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6789A123-BCDE-4456-1234-56789ABCDEF0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6789A123-BCDE-4456-1234-56789ABCDEF0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6789A123-BCDE-4456-1234-56789ABCDEF0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6789A123-BCDE-4456-1234-56789ABCDEF0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

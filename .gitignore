@@ -22,6 +22,7 @@ exports/
 temp/
 tmp/
 *.ftstudio.autosave
+tools/fixtures/generated/
 # Secrets / local-only settings
 .env
 .env.*
