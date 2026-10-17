@@ -155,7 +155,11 @@ public sealed record MediaSourceMetadata
         int width,
         int height,
         RationalFrameRate? frameRate,
-        long durationFrames)
+        long durationFrames,
+        TimeSpan? duration = null,
+        int orientationDegrees = 0,
+        string? colorProfile = null,
+        bool hasAudio = false)
     {
         ArgumentNullException.ThrowIfNull(sourceUri);
         if (!sourceUri.IsAbsoluteUri)
@@ -173,6 +177,11 @@ public sealed record MediaSourceMetadata
             throw new ArgumentOutOfRangeException(nameof(durationFrames));
         }
 
+        if (orientationDegrees % 90 != 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(orientationDegrees));
+        }
+
         if (kind == MediaKind.Video && frameRate is null)
         {
             throw new ArgumentException("Video metadata requires a frame rate.", nameof(frameRate));
@@ -185,6 +194,10 @@ public sealed record MediaSourceMetadata
         Height = height;
         FrameRate = frameRate;
         DurationFrames = durationFrames;
+        Duration = duration ?? TimeSpan.Zero;
+        OrientationDegrees = ((orientationDegrees % 360) + 360) % 360;
+        ColorProfile = colorProfile;
+        HasAudio = hasAudio;
     }
 
     public MediaId Id { get; }
@@ -200,4 +213,12 @@ public sealed record MediaSourceMetadata
     public RationalFrameRate? FrameRate { get; }
 
     public long DurationFrames { get; }
+
+    public TimeSpan Duration { get; }
+
+    public int OrientationDegrees { get; }
+
+    public string? ColorProfile { get; }
+
+    public bool HasAudio { get; }
 }
