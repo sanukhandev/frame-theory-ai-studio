@@ -23,6 +23,9 @@ Use a dedicated timestamped transcription capability with source provenance. Do 
 
 The current adapter intentionally keeps inline audio at 20 MiB and requires the Files API upload URL to remain on the official Gemini host. The desktop workflow still extracts audio from video before this provider is called; it never uploads video frames for transcription. Local ASR fallback and live approved-key/spoken-fixture verification remain separate release work.
 
+## FT-1104 reference analysis
+`FrameTheory.AI.GeminiReferenceAnalysisClient` accepts only explicitly consented bounded visual PPM samples. It converts samples to PNG, keeps them inline while the request remains within the 20 MiB budget, and switches additional bytes to the resumable Files API when needed. Uploaded images are referenced only through validated HTTPS Gemini-hosted URIs and are deleted in a bounded cleanup path after the interaction, including failed responses. The API key is sent only as a header; the returned grade is strict JSON with locally enforced bounds and is never applied automatically. Live provider execution and reference-grade semantic quality still require an approved user key and fixture.
+
 ## FT-706 follow-up transport
 `FrameTheory.AI.GeminiInteractionsClient` provides text-only follow-up requests against the fixed Interactions endpoint. It sends the previous interaction ID as provider conversation state, applies a per-attempt timeout, retries only bounded 408/429/5xx failures, classifies invalid-key/quota/rate-limit/timeout/cancellation/transport failures, and returns provider usage without applying output. `FileGeminiInteractionHistory` stores timestamp, model, interaction ID, outcome, attempt count, prompt length and token usage as local JSONL; it never stores the prompt, API key or raw provider response. Callers must pass returned text through the existing local parser and validator before any edit can be approved.
 
