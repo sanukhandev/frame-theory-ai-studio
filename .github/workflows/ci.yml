@@ -89,6 +89,10 @@ jobs:
             -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest artifacts/media-smoke/clip.mp4
           dotnet tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4 | tee artifacts/media-smoke/import.txt
           dotnet tools/FrameTheory.FrameDecodeSmoke/bin/Release/net10.0/FrameTheory.FrameDecodeSmoke.dll artifacts/media-smoke/clip.mp4 2 4 | tee artifacts/media-smoke/seek.txt
+          grep -F 'kind=Video' artifacts/media-smoke/import.txt
+          grep -F 'kind=Audio' artifacts/media-smoke/import.txt
+          grep -F 'has_audio=True' artifacts/media-smoke/import.txt
+          grep -F 'seek_p95_ms=' artifacts/media-smoke/seek.txt
       - name: Verify formatting
         if: steps.detect.outputs.has_solution == 'true'
         run: dotnet format --no-restore --verify-no-changes --verbosity minimal
