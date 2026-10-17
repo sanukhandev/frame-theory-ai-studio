@@ -150,11 +150,11 @@
 ```text
 Date/time: 2026-10-18
 Task / Epic: FT-706 / E07 larger-scope creative direction
-Git SHA: e753be9
+Git SHA: 6399016
 Files changed: src/FrameTheory.AI/GeminiInteractions.cs, src/FrameTheory.AI/GeminiCreativeDirector.cs, tests/FrameTheory.UnitTests/GeminiCreativeDirectorTests.cs, docs/GEMINI_PROVIDER.md, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: The consented initial-plan path keeps approved visual PNG samples inline within 20 MiB and uploads larger approved samples through the shared bounded Files API transport. The provider validates the upload session URL, file name, returned URI and MIME type before adding a URI input, deletes temporary files after success/failure and leaves the review-only proposal flow unchanged.
 Commands executed + OS: Windows 11 x64 with .NET SDK 10.0.402; focused Gemini creative-director/interactions tests.
-Test outputs / exit codes: Focused suite passed 7/7; the full Release build passed with 0 warnings/errors; all 168 unit tests and 2 golden tests passed; formatting and diff checks passed. Hosted quality gate run `39074521344` passed documentation/schema validation, advisory scan, restore/build, native media smoke, formatting, tests, publish and checksum verification on Windows, macOS and Linux.
+Test outputs / exit codes: Focused suite passed 7/7 after the final validation-message correction; the full Release build passed with 0 warnings/errors; all 168 unit tests and 2 golden tests passed; formatting and diff checks passed. Hosted quality gate run `39074789600` passed documentation/schema validation, advisory scan, restore/build, native media smoke, formatting, tests, publish and checksum verification on Windows, macOS and Linux for the code head.
 Media fixtures and verification: A sparse deterministic 3000x2500 PPM fixture forced Files API routing and verified official-host URI input, cleanup and no-key-in-body invariants; no user media, API key or binary entered Git.
 Known limitations / blockers: Live Gemini key/provider-to-plan acceptance, manual Avalonia UI, branding, licensing and installer evidence remain open.
 Next unblocked task: Continue remaining manual/platform and external-input gates; live provider, approved branding, licensing/native redistribution, installers/signing and native UI evidence remain open.
