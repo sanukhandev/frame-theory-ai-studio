@@ -14,6 +14,8 @@
 
 **FT-402 photo project checkpoint (2026-10-18):** The Photo workspace now saves and reopens `.ftstudio` projects through the existing atomic repository. The persisted state includes crop/rotate/resize operations and adjustment layers, uses relative local media references with SHA-256 provenance, restores the editable state before replacing the current photo and preserves the current photo when open fails. Focused photo project coverage passes 3/3.
 
+**FT-402 native smoke checkpoint (2026-10-18):** The real `FrameTheory.PhotoExportSmoke` now imports a generated PNG through FFmpeg, applies a non-destructive rotation, saves and reopens a `.ftstudio` project through `PhotoEditorViewModel`, compares the restored rendered bytes and exports a verified PNG. Hosted run `39065964020` passed this smoke on Windows, macOS and Linux.
+
 **FT-801 checkpoint:** Before/after now composes an editable multi-clip base layer twice—unaltered and graded—and the split/wipe/timed-reveal output is covered by graph tests plus a real two-clip FFmpeg smoke.
 
 **FT-802 checkpoint:** Video and Photo workspaces expose the same 16:9, 1:1 and 9:16 presets. Photo exports cover-crop to exact dimensions, preserve metadata/source bytes, and use the shared cancellable export queue when hosted by the desktop view model.
@@ -33,6 +35,8 @@
 **Playback CI checkpoint:** Run `39063757381` passed the cancellable timeline playback implementation on Windows, macOS and Linux for `70805c9`; hosted packaging remains framework-dependent and unsigned.
 
 **Photo persistence CI checkpoint:** Run `39065309000` passed photo project persistence, repository compatibility and the full quality matrix on Windows, macOS and Linux for `7d35174`; hosted packaging remains framework-dependent and unsigned.
+
+**Native photo persistence CI checkpoint:** Run `39065964020` passed the generated-image FFmpeg photo project save/open smoke and its output assertion on Windows, macOS and Linux for `ad9cbd8`; hosted packaging remains framework-dependent and unsigned.
 
 **E09 test checkpoint:** Added focused evidence for every keyboard workspace shortcut, validated-plan JSON synchronization/clearing, repeatable seek traces, cancellable frame playback and credential-assignment redaction. Hosted native media smoke now covers all three OS runners; these tests strengthen FT-901/FT-902/FT-903/FT-904 but do not replace the required interactive 1280x800/HiDPI manual acceptance.
 
@@ -113,6 +117,20 @@
 5. Keep MLT deferred unless interactive playback parity or a release licensing decision requires a new native engine spike.
 
 ## Latest execution record
+```text
+Date/time: 2026-10-18
+Task / Epic: FT-402 / native photo project smoke
+Git SHA: ad9cbd8
+Files changed: tools/FrameTheory.PhotoExportSmoke/Program.cs, tools/FrameTheory.PhotoExportSmoke/FrameTheory.PhotoExportSmoke.csproj, .github/workflows/ci.yml
+Actual behavior and UI path: The native photo export smoke imports a generated PNG through FFmpeg, applies a non-destructive rotation through PhotoEditorViewModel, saves and reopens a real `.ftstudio` project, compares restored rendered bytes and exports a verified PNG. CI asserts the `photo-project-roundtrip=` receipt.
+Commands executed + OS: Local Release tool build, generated fixture/FFmpeg PNG smoke and hosted quality gate run 39065964020 on Windows, macOS and Linux.
+Test outputs / exit codes: Local smoke exited 0 and reported `format=Png; size=8x4` plus `photo-project-roundtrip=...; operations=1`; hosted run 39065964020 passed all jobs.
+Media fixtures and verification: The local smoke used a generated deterministic chart and FFmpeg/ffprobe 9.0.2; outputs remained under `%TEMP%` and no user media, API key or binary entered Git.
+Known limitations / blockers: Interactive Photo workspace close/reopen and cross-platform GUI acceptance remain open; the project still requires the source media to remain within its project directory.
+Next unblocked task: Continue the native-media journey matrix while manual UI and external-input gates remain visible.
+```
+
+## Previous execution record
 ```text
 Date/time: 2026-10-18
 Task / Epic: FT-402 / editable photo project persistence
