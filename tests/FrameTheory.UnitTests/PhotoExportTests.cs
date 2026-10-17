@@ -33,6 +33,7 @@ public sealed class PhotoExportTests
             Xunit.Assert.Equal("encoded", await File.ReadAllTextAsync(destinationPath));
             Xunit.Assert.Equal(["Rendering", "Encoding", "Verifying", "Completed"], progress.Select(item => item.Stage));
             Xunit.Assert.Contains("-c:v mjpeg", runner.ArgumentsSeen.Single());
+            Xunit.Assert.Contains("setparams=color_primaries=bt709", runner.ArgumentsSeen.Single());
             Xunit.Assert.Contains("-q:v 8", runner.ArgumentsSeen.Single());
             Xunit.Assert.Contains("-map_metadata 1", runner.ArgumentsSeen.Single());
             Xunit.Assert.Contains("source_color_profile=sRGB", runner.ArgumentsSeen.Single());

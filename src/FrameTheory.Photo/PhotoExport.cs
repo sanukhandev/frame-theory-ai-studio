@@ -118,7 +118,8 @@ public sealed class PhotoExporter
             var rendered = PpmRaster.Parse(state.RenderPreview());
             if (verifiedMetadata.Kind != MediaKind.Image ||
                 verifiedMetadata.Width != rendered.Width ||
-                verifiedMetadata.Height != rendered.Height)
+                verifiedMetadata.Height != rendered.Height ||
+                string.IsNullOrWhiteSpace(verifiedMetadata.ColorProfile))
             {
                 throw new PhotoExportException("The exported image dimensions or media kind did not match the edit.");
             }
@@ -151,6 +152,7 @@ public sealed class PhotoExporter
             "-i", sourcePath,
             "-map", "0:v:0", "-map_metadata", "1",
             "-frames:v", "1",
+            "-vf", $"format={(options.Format == PhotoExportFormat.Png && hasAlpha ? "rgba" : "rgb24")},setparams=color_primaries=bt709:color_trc=iec61966-2-1:colorspace=bt709:range=pc",
             "-c:v", options.Format == PhotoExportFormat.Png ? "png" : "mjpeg",
             "-colorspace", "bt709",
             "-color_primaries", "bt709",

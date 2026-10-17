@@ -16,4 +16,4 @@ var receipt = await exporter.ExportAsync(
     new ExportPreset(8, 4, new RationalFrameRate(30, 1)),
     new Progress<ExportProgress>(update => Console.WriteLine($"stage={update.Stage}; fraction={update.Fraction:0.0}")),
     CancellationToken.None);
-Console.WriteLine($"output={receipt.OutputPath}; bytes={receipt.OutputBytes}; kind={receipt.VerifiedMetadata.Kind}; size={receipt.VerifiedMetadata.Width}x{receipt.VerifiedMetadata.Height}; audio={receipt.VerifiedMetadata.HasAudio}");
+Console.WriteLine($"output={receipt.OutputPath}; bytes={receipt.OutputBytes}; kind={receipt.VerifiedMetadata.Kind}; size={receipt.VerifiedMetadata.Width}x{receipt.VerifiedMetadata.Height}; audio={receipt.VerifiedMetadata.HasAudio}; color={receipt.VerifiedMetadata.ColorProfile}");

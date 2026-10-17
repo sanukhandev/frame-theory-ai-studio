@@ -33,6 +33,8 @@ public sealed class MediaExportTests
             Xunit.Assert.Equal(["Encoding", "Verifying", "Completed"], progress.Select(item => item.Stage));
             Xunit.Assert.Contains("-i " + sourcePath, runner.ArgumentsSeen.Single());
             Xunit.Assert.Contains("-f mp4", runner.ArgumentsSeen.Single());
+            Xunit.Assert.Contains("-color_primaries bt709", runner.ArgumentsSeen.Single());
+            Xunit.Assert.Contains("setparams=color_primaries=bt709", runner.ArgumentsSeen.Single());
             Xunit.Assert.Equal("source", await File.ReadAllTextAsync(sourcePath));
         }
         finally
@@ -70,7 +72,7 @@ public sealed class MediaExportTests
 
     private static MediaSourceMetadata Metadata(Uri uri, bool hasAudio) => new(
         MediaId.Create(uri, "export-test"), uri, MediaKind.Video, 8, 4,
-        new RationalFrameRate(30, 1), 30, TimeSpan.FromSeconds(1), hasAudio: hasAudio);
+        new RationalFrameRate(30, 1), 30, TimeSpan.FromSeconds(1), colorProfile: "bt709/bt709/bt709/tv", hasAudio: hasAudio);
 
     private sealed class StubProbe(MediaSourceMetadata metadata) : IMediaProbe
     {

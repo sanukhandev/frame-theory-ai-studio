@@ -115,7 +115,11 @@ public sealed class FfmpegMediaExporter : IMediaExporter
                 "-c:v", "libx264",
                 "-preset", "medium",
                 "-pix_fmt", "yuv420p",
-                "-vf", $"scale={preset.Width}:{preset.Height}",
+                "-colorspace", "bt709",
+                "-color_primaries", "bt709",
+                "-color_trc", "bt709",
+                "-color_range", "tv",
+                "-vf", $"scale={preset.Width}:{preset.Height},setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv",
                 "-r", preset.FrameRate.ToString()
             };
             if (preset.IncludeAudio)
@@ -139,7 +143,8 @@ public sealed class FfmpegMediaExporter : IMediaExporter
             if (verifiedMetadata.Kind != MediaKind.Video ||
                 verifiedMetadata.Width != preset.Width ||
                 verifiedMetadata.Height != preset.Height ||
-                (preset.IncludeAudio && !verifiedMetadata.HasAudio))
+                (preset.IncludeAudio && !verifiedMetadata.HasAudio) ||
+                !string.Equals(verifiedMetadata.ColorProfile, "bt709/bt709/bt709/tv", StringComparison.OrdinalIgnoreCase))
             {
                 throw new MediaExportException("The exported stream did not match the requested preset.");
             }

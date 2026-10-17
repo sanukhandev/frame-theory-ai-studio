@@ -22,4 +22,4 @@ var receipt = await new PhotoExporter(runner, new FfprobeMediaProbe(runner)).Exp
     new PhotoExportOptions(format, 90),
     new Progress<ExportProgress>(progress => Console.WriteLine($"{progress.Stage} {progress.Fraction:P0}")),
     CancellationToken.None);
-Console.WriteLine($"format={format}; size={receipt.VerifiedMetadata.Width}x{receipt.VerifiedMetadata.Height}; bytes={receipt.OutputBytes}; path={receipt.OutputPath}");
+Console.WriteLine($"format={format}; size={receipt.VerifiedMetadata.Width}x{receipt.VerifiedMetadata.Height}; color={receipt.VerifiedMetadata.ColorProfile}; bytes={receipt.OutputBytes}; path={receipt.OutputPath}");
