@@ -310,6 +310,46 @@ public sealed class MainWindow : Window
                 await editor.OpenAsync(path, CancellationToken.None);
             }
         };
+        var openProject = new Button { Content = "Open photo project" };
+        openProject.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(openProject);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Frame Theory project") { Patterns = ["*.ftstudio"] }]
+            });
+            var path = files.SingleOrDefault()?.TryGetLocalPath();
+            if (path is not null)
+            {
+                await editor.OpenProjectAsync(path, CancellationToken.None);
+            }
+        };
+        var saveProject = new Button { Content = "Save photo project" };
+        saveProject.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(saveProject);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            {
+                SuggestedFileName = "frame-theory-photo.ftstudio",
+                FileTypeChoices = [new FilePickerFileType("Frame Theory project") { Patterns = ["*.ftstudio"] }]
+            });
+            var path = file?.TryGetLocalPath();
+            if (path is not null)
+            {
+                await editor.SaveProjectAsync(path, CancellationToken.None);
+            }
+        };
         var rotate = new Button { Content = "Rotate 90°" };
         rotate.Click += (_, _) => editor.RotateRight();
         var undo = new Button { Content = "Undo photo edit" };
@@ -358,7 +398,7 @@ public sealed class MainWindow : Window
                 {
                     new TextBlock { Text = "Non-destructive photo editor", FontWeight = FontWeight.SemiBold },
                     preview,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { open, rotate, undo } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { open, openProject, saveProject, rotate, undo } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { format, quality, socialPreset, export } },
                     status
                 }

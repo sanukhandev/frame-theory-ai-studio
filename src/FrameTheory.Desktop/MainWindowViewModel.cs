@@ -1012,7 +1012,7 @@ public sealed class DesktopServices
             new FrameTheory.Platform.SystemCapabilityDetector(),
             importer,
             new PhotoRecoveryViewModel(new ProjectRecoveryService(repository), repository),
-            new PhotoEditorViewModel(new PhotoImporter(probe, decoder), new PhotoExporter(processRunner, probe), exportQueue),
+            new PhotoEditorViewModel(new PhotoImporter(probe, decoder), new PhotoExporter(processRunner, probe), exportQueue, repository),
             timelineExporter: new FfmpegTimelineVideoExporter(processRunner, new FfprobeMediaProbe(processRunner)),
             analysisSampler: new LocalAnalysisSampler(decoder),
             exportQueue: exportQueue,

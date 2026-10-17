@@ -46,7 +46,8 @@ public sealed record ProjectSnapshot
         string workingColorSpace,
         IEnumerable<MediaReference>? mediaReferences = null,
         string? colorPresetName = null,
-        string? timelineStateJson = null)
+        string? timelineStateJson = null,
+        string? photoStateJson = null)
     {
         if (string.IsNullOrWhiteSpace(projectId))
         {
@@ -71,6 +72,7 @@ public sealed record ProjectSnapshot
         MediaReferences = mediaReferences?.ToArray() ?? [];
         ColorPresetName = string.IsNullOrWhiteSpace(colorPresetName) ? null : colorPresetName.Trim();
         TimelineStateJson = string.IsNullOrWhiteSpace(timelineStateJson) ? null : timelineStateJson;
+        PhotoStateJson = string.IsNullOrWhiteSpace(photoStateJson) ? null : photoStateJson;
     }
 
     public int SchemaVersion => CurrentSchemaVersion;
@@ -91,15 +93,20 @@ public sealed record ProjectSnapshot
 
     public string? TimelineStateJson { get; }
 
+    public string? PhotoStateJson { get; }
+
     public ProjectSnapshot WithCanvas(int canvasWidth, int canvasHeight) =>
-        new(ProjectId, FrameRate, canvasWidth, canvasHeight, WorkingColorSpace, MediaReferences, ColorPresetName, TimelineStateJson);
+        new(ProjectId, FrameRate, canvasWidth, canvasHeight, WorkingColorSpace, MediaReferences, ColorPresetName, TimelineStateJson, PhotoStateJson);
 
     public ProjectSnapshot WithMediaReferences(IEnumerable<MediaReference> mediaReferences) =>
-        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, mediaReferences, ColorPresetName, TimelineStateJson);
+        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, mediaReferences, ColorPresetName, TimelineStateJson, PhotoStateJson);
 
     public ProjectSnapshot WithColorPreset(string? colorPresetName) =>
-        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, MediaReferences, colorPresetName, TimelineStateJson);
+        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, MediaReferences, colorPresetName, TimelineStateJson, PhotoStateJson);
 
     public ProjectSnapshot WithTimelineState(string? timelineStateJson) =>
-        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, MediaReferences, ColorPresetName, timelineStateJson);
+        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, MediaReferences, ColorPresetName, timelineStateJson, PhotoStateJson);
+
+    public ProjectSnapshot WithPhotoState(string? photoStateJson) =>
+        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, MediaReferences, ColorPresetName, TimelineStateJson, photoStateJson);
 }
