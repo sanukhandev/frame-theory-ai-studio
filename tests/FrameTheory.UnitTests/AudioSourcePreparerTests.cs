@@ -68,12 +68,12 @@ public sealed class AudioSourcePreparerTests
         {
             var sourcePath = Path.Combine(directory.FullName, "clip.mp4");
             await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
-            var runner = new StubProcessRunner { OutputLength = 20 * 1024 * 1024 + 1 };
+            var runner = new StubProcessRunner { OutputLength = 2L * 1024 * 1024 * 1024 + 1 };
 
             var exception = await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
                 new FfmpegAudioSourcePreparer(runner).PrepareAsync(new Uri(sourcePath), CancellationToken.None));
 
-            Xunit.Assert.Contains("20 MiB", exception.Message, StringComparison.Ordinal);
+            Xunit.Assert.Contains("2 GiB", exception.Message, StringComparison.Ordinal);
             Xunit.Assert.False(File.Exists(runner.OutputPath));
         }
         finally

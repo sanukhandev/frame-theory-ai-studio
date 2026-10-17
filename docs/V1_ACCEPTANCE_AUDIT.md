@@ -15,7 +15,7 @@ Audit checkpoint: 2026-10-17, commit `0f5c7f6`, Windows 11 x64 plus hosted CI ru
 | Area | Open task(s) | Reason V1 cannot be tagged |
 |---|---|---|
 | Native playback decision | FT-006 | MLT and a native second-OS playback/seek proof are not available |
-| Source-grounded transcription | FT-602 | Desktop/provider adapter, safe video-audio extraction and fake-HTTP coverage exist, but live approved-key fixture, local ASR and long-audio/Files API upload remain open |
+| Source-grounded transcription | FT-602 | Desktop/provider adapter, safe video-audio extraction, resumable Files API cleanup and fake-HTTP coverage exist; live approved-key/spoken-fixture verification and local ASR fallback remain open |
 | Gemini production loop | FT-706 | Desktop revision validation, retries, usage and redacted history exist; live provider-to-plan execution remains unverified |
 | Creator Reel/export | FT-803 | Multi-clip Reel, social photo dimensions and queue retry are verified; approved Frame Theory watermark asset/branded export remains unavailable |
 | UX/performance/reliability | FT-901..FT-904 | Interactive/manual GUI acceptance remains open; optional proxy is deferred even though hosted native-media traces now pass |

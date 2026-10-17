@@ -131,7 +131,10 @@ public sealed class GeminiTranscriptionException : InvalidOperationException
 public sealed class GeminiTranscriptionProvider : IProgressiveTranscriptionProvider
 {
     private const int MaximumInlineBytes = 20 * 1024 * 1024;
+    private const long MaximumFilesApiBytes = 2L * 1024 * 1024 * 1024;
     private static readonly Uri InteractionsEndpoint = new("https://generativelanguage.googleapis.com/v1beta/interactions");
+    private static readonly Uri FilesUploadEndpoint = new("https://generativelanguage.googleapis.com/upload/v1beta/files");
+    private static readonly Uri FilesApiEndpoint = new("https://generativelanguage.googleapis.com/v1beta/");
     private readonly HttpClient _httpClient;
     private readonly GeminiTranscriptionOptions _options;
 
@@ -174,67 +177,193 @@ public sealed class GeminiTranscriptionProvider : IProgressiveTranscriptionProvi
             throw new InvalidDataException("The transcription source is empty.");
         }
 
-        if (fileInfo.Length > MaximumInlineBytes)
+        if (fileInfo.Length > MaximumFilesApiBytes)
         {
-            throw new InvalidDataException("Gemini transcription currently supports inline audio up to 20 MiB; use a shorter audio source.");
+            throw new InvalidDataException("Gemini transcription supports audio files up to 2 GiB through the Files API.");
         }
 
         progress?.Report(new TranscriptionProgress("Reading approved audio", 0));
         await using var stream = File.OpenRead(sourcePath);
-        await using var payload = new MemoryStream((int)fileInfo.Length);
+        using var payload = fileInfo.Length <= MaximumInlineBytes ? new MemoryStream((int)fileInfo.Length) : null;
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var buffer = new byte[64 * 1024];
         long bytesRead = 0;
         int read;
         while ((read = await stream.ReadAsync(buffer.AsMemory(), cancellationToken)) > 0)
         {
-            await payload.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+            if (payload is not null)
+            {
+                await payload.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+            }
+
             hash.AppendData(buffer, 0, read);
             bytesRead += read;
             progress?.Report(new TranscriptionProgress("Reading approved audio", bytesRead / (double)fileInfo.Length));
         }
 
         var sourceFingerprint = $"sha256:{Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant()}";
-        progress?.Report(new TranscriptionProgress("Uploading approved audio", 0));
-        using var request = new HttpRequestMessage(HttpMethod.Post, InteractionsEndpoint)
+        GeminiUploadedFile? uploadedFile = null;
+        try
         {
-            Content = JsonContent.Create(new GeminiInteractionRequest(
-                _options.ModelId,
-                [new GeminiAudioInput(Convert.ToBase64String(payload.ToArray()), contentType)],
-                new GeminiGenerationConfig(new GeminiTranscriptionConfig(new GeminiTranscriptionMode("verbatim", ["word"])))))
-        };
-        request.Headers.TryAddWithoutValidation("x-goog-api-key", _options.ApiKey);
+            GeminiAudioInput input;
+            if (payload is not null)
+            {
+                progress?.Report(new TranscriptionProgress("Uploading approved audio", 0));
+                input = GeminiAudioInput.FromInline(Convert.ToBase64String(payload.ToArray()), contentType);
+            }
+            else
+            {
+                progress?.Report(new TranscriptionProgress("Uploading approved audio via Gemini Files API", 0));
+                uploadedFile = await UploadFileAsync(sourcePath, contentType, fileInfo.Length, cancellationToken);
+                progress?.Report(new TranscriptionProgress("Uploading approved audio via Gemini Files API", 0.8));
+                input = GeminiAudioInput.FromUri(uploadedFile.Uri, uploadedFile.MimeType);
+            }
 
+            using var request = new HttpRequestMessage(HttpMethod.Post, InteractionsEndpoint)
+            {
+                Content = JsonContent.Create(new GeminiInteractionRequest(
+                    _options.ModelId,
+                    [input],
+                    new GeminiGenerationConfig(new GeminiTranscriptionConfig(new GeminiTranscriptionMode("verbatim", ["word"])))))
+            };
+            request.Headers.TryAddWithoutValidation("x-goog-api-key", _options.ApiKey);
+
+            using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new GeminiTranscriptionException(
+                    $"Gemini transcription failed with HTTP {(int)response.StatusCode} ({response.StatusCode}).",
+                    response.StatusCode);
+            }
+
+            progress?.Report(new TranscriptionProgress("Parsing word timings", 0.9));
+            await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
+            var interaction = await JsonSerializer.DeserializeAsync<GeminiInteractionResponse>(responseStream, cancellationToken: cancellationToken)
+                ?? throw new GeminiTranscriptionException("Gemini returned an empty transcription response.");
+            if (!string.Equals(interaction.Status, "completed", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new GeminiTranscriptionException($"Gemini transcription did not complete (status: {interaction.Status ?? "unknown"}).");
+            }
+
+            var words = interaction.Steps?
+                .SelectMany(step => step.Content ?? [])
+                .SelectMany(content => content.Annotations ?? [])
+                .Where(annotation => string.Equals(annotation.Type, "word_info", StringComparison.OrdinalIgnoreCase))
+                .Select(ToTranscriptWord)
+                .ToArray() ?? [];
+            if (words.Length == 0)
+            {
+                throw new GeminiTranscriptionException("Gemini returned no source-timed word annotations; the result was rejected as ungrounded.");
+            }
+
+            progress?.Report(new TranscriptionProgress("Completed", 1));
+            return new TranscriptResult(source, sourceFingerprint, words);
+        }
+        finally
+        {
+            if (uploadedFile is not null)
+            {
+                using var cleanupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+                await DeleteFileAsync(uploadedFile.Name, cleanupTimeout.Token);
+            }
+        }
+    }
+
+    private async Task<GeminiUploadedFile> UploadFileAsync(
+        string sourcePath,
+        string contentType,
+        long contentLength,
+        CancellationToken cancellationToken)
+    {
+        using var startRequest = new HttpRequestMessage(HttpMethod.Post, FilesUploadEndpoint)
+        {
+            Content = JsonContent.Create(new GeminiFileUploadStartRequest(
+                new GeminiFileMetadata(Path.GetFileName(sourcePath))))
+        };
+        startRequest.Headers.TryAddWithoutValidation("x-goog-api-key", _options.ApiKey);
+        startRequest.Headers.TryAddWithoutValidation("X-Goog-Upload-Protocol", "resumable");
+        startRequest.Headers.TryAddWithoutValidation("X-Goog-Upload-Command", "start");
+        startRequest.Headers.TryAddWithoutValidation("X-Goog-Upload-Header-Content-Length", contentLength.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        startRequest.Headers.TryAddWithoutValidation("X-Goog-Upload-Header-Content-Type", contentType);
+
+        using var startResponse = await _httpClient.SendAsync(startRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        if (!startResponse.IsSuccessStatusCode)
+        {
+            throw new GeminiTranscriptionException(
+                $"Gemini Files API upload initialization failed with HTTP {(int)startResponse.StatusCode} ({startResponse.StatusCode}).",
+                startResponse.StatusCode);
+        }
+
+        var uploadUrl = GetHeader(startResponse, "x-goog-upload-url");
+        if (!Uri.TryCreate(uploadUrl, UriKind.Absolute, out var uploadUri) ||
+            uploadUri.Scheme != Uri.UriSchemeHttps ||
+            !string.Equals(uploadUri.Host, FilesUploadEndpoint.Host, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new GeminiTranscriptionException("Gemini returned an invalid Files API upload URL.");
+        }
+
+        await using var sourceStream = File.OpenRead(sourcePath);
+        using var uploadRequest = new HttpRequestMessage(HttpMethod.Post, uploadUri)
+        {
+            Content = new StreamContent(sourceStream)
+        };
+        uploadRequest.Headers.TryAddWithoutValidation("x-goog-api-key", _options.ApiKey);
+        uploadRequest.Headers.TryAddWithoutValidation("X-Goog-Upload-Offset", "0");
+        uploadRequest.Headers.TryAddWithoutValidation("X-Goog-Upload-Command", "upload, finalize");
+        uploadRequest.Content.Headers.ContentLength = contentLength;
+        uploadRequest.Content.Headers.TryAddWithoutValidation("Content-Type", contentType);
+
+        using var uploadResponse = await _httpClient.SendAsync(uploadRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        if (!uploadResponse.IsSuccessStatusCode)
+        {
+            throw new GeminiTranscriptionException(
+                $"Gemini Files API upload failed with HTTP {(int)uploadResponse.StatusCode} ({uploadResponse.StatusCode}).",
+                uploadResponse.StatusCode);
+        }
+
+        var upload = await uploadResponse.Content.ReadFromJsonAsync<GeminiFileUploadResponse>(cancellationToken: cancellationToken)
+            ?? throw new GeminiTranscriptionException("Gemini Files API returned an empty upload response.");
+        var file = upload.File;
+        if (file is null || string.IsNullOrWhiteSpace(file.Name) || string.IsNullOrWhiteSpace(file.Uri))
+        {
+            throw new GeminiTranscriptionException("Gemini Files API returned an incomplete upload response.");
+        }
+
+        var mimeType = string.IsNullOrWhiteSpace(file.MimeType) ? file.LegacyMimeType : file.MimeType;
+        if (string.IsNullOrWhiteSpace(mimeType))
+        {
+            mimeType = contentType;
+        }
+
+        return new GeminiUploadedFile(file.Name, file.Uri, mimeType);
+    }
+
+    private async Task DeleteFileAsync(string fileName, CancellationToken cancellationToken)
+    {
+        if (!fileName.StartsWith("files/", StringComparison.Ordinal) || fileName.Contains("..", StringComparison.Ordinal) || fileName.Contains('?') || fileName.Contains('#'))
+        {
+            throw new GeminiTranscriptionException("Gemini returned an invalid uploaded file name; cleanup was refused.");
+        }
+
+        using var request = new HttpRequestMessage(HttpMethod.Delete, new Uri(FilesApiEndpoint, fileName));
+        request.Headers.TryAddWithoutValidation("x-goog-api-key", _options.ApiKey);
         using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         if (!response.IsSuccessStatusCode)
         {
             throw new GeminiTranscriptionException(
-                $"Gemini transcription failed with HTTP {(int)response.StatusCode} ({response.StatusCode}).",
+                $"Gemini temporary file cleanup failed with HTTP {(int)response.StatusCode} ({response.StatusCode}).",
                 response.StatusCode);
         }
+    }
 
-        progress?.Report(new TranscriptionProgress("Parsing word timings", 0.9));
-        await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        var interaction = await JsonSerializer.DeserializeAsync<GeminiInteractionResponse>(responseStream, cancellationToken: cancellationToken)
-            ?? throw new GeminiTranscriptionException("Gemini returned an empty transcription response.");
-        if (!string.Equals(interaction.Status, "completed", StringComparison.OrdinalIgnoreCase))
+    private static string? GetHeader(HttpResponseMessage response, string name)
+    {
+        if (response.Headers.TryGetValues(name, out var values))
         {
-            throw new GeminiTranscriptionException($"Gemini transcription did not complete (status: {interaction.Status ?? "unknown"}).");
+            return values.SingleOrDefault();
         }
 
-        var words = interaction.Steps?
-            .SelectMany(step => step.Content ?? [])
-            .SelectMany(content => content.Annotations ?? [])
-            .Where(annotation => string.Equals(annotation.Type, "word_info", StringComparison.OrdinalIgnoreCase))
-            .Select(ToTranscriptWord)
-            .ToArray() ?? [];
-        if (words.Length == 0)
-        {
-            throw new GeminiTranscriptionException("Gemini returned no source-timed word annotations; the result was rejected as ungrounded.");
-        }
-
-        progress?.Report(new TranscriptionProgress("Completed", 1));
-        return new TranscriptResult(source, sourceFingerprint, words);
+        return response.Content.Headers.TryGetValues(name, out values) ? values.SingleOrDefault() : null;
     }
 
     private static TranscriptWord ToTranscriptWord(GeminiWordAnnotation annotation)
@@ -295,11 +424,45 @@ public sealed class GeminiTranscriptionProvider : IProgressiveTranscriptionProvi
 
     private sealed record GeminiAudioInput(
         [property: JsonPropertyName("type")] string Type,
-        [property: JsonPropertyName("data")] string Data,
+        [property: JsonPropertyName("data")]
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Data,
+        [property: JsonPropertyName("uri")]
+        [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? Uri,
         [property: JsonPropertyName("mime_type")] string MimeType)
     {
-        public GeminiAudioInput(string data, string mimeType) : this("audio", data, mimeType) { }
+        public static GeminiAudioInput FromInline(string data, string mimeType) => new("audio", data, null, mimeType);
+
+        public static GeminiAudioInput FromUri(string uri, string mimeType) => new("audio", null, uri, mimeType);
     }
+
+    private sealed record GeminiFileUploadStartRequest(
+        [property: JsonPropertyName("file")] GeminiFileMetadata File);
+
+    private sealed record GeminiFileMetadata(
+        [property: JsonPropertyName("display_name")] string DisplayName);
+
+    private sealed class GeminiFileUploadResponse
+    {
+        [JsonPropertyName("file")]
+        public GeminiFile? File { get; set; }
+    }
+
+    private sealed class GeminiFile
+    {
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
+
+        [JsonPropertyName("uri")]
+        public string? Uri { get; set; }
+
+        [JsonPropertyName("mimeType")]
+        public string? MimeType { get; set; }
+
+        [JsonPropertyName("mime_type")]
+        public string? LegacyMimeType { get; set; }
+    }
+
+    private sealed record GeminiUploadedFile(string Name, string Uri, string MimeType);
 
     private sealed record GeminiGenerationConfig(
         [property: JsonPropertyName("transcription_config")] GeminiTranscriptionConfig TranscriptionConfig);

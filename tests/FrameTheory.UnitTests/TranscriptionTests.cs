@@ -187,6 +187,77 @@ public sealed class TranscriptionTests
     }
 
     [Xunit.Fact]
+    public async Task GeminiProviderUsesFilesApiForLongAudioAndDeletesRemoteFile()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-transcript-files-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "long.wav");
+            await using (var source = File.Create(sourcePath))
+            {
+                source.SetLength(20 * 1024 * 1024 + 1);
+            }
+
+            var requests = new List<HttpRequestMessage>();
+            string? interactionBody = null;
+            using (var client = new HttpClient(new StubHandler(request =>
+            {
+                requests.Add(request);
+                if (request.Method == HttpMethod.Post && request.RequestUri!.AbsolutePath.EndsWith("/upload/v1beta/files", StringComparison.Ordinal))
+                {
+                    if (request.Headers.Contains("X-Goog-Upload-Protocol"))
+                    {
+                        var response = new HttpResponseMessage(HttpStatusCode.OK);
+                        response.Headers.TryAddWithoutValidation("x-goog-upload-url", "https://generativelanguage.googleapis.com/upload/session");
+                        return response;
+                    }
+
+                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("{\"file\":{\"name\":\"files/test-long-audio\",\"uri\":\"https://generativelanguage.googleapis.com/v1beta/files/test-long-audio\",\"mimeType\":\"audio/wav\"}}", Encoding.UTF8, "application/json")
+                    };
+                }
+
+                if (request.Method == HttpMethod.Post && request.RequestUri!.AbsolutePath.EndsWith("/upload/session", StringComparison.Ordinal))
+                {
+                    return new HttpResponseMessage(HttpStatusCode.OK)
+                    {
+                        Content = new StringContent("{\"file\":{\"name\":\"files/test-long-audio\",\"uri\":\"https://generativelanguage.googleapis.com/v1beta/files/test-long-audio\",\"mimeType\":\"audio/wav\"}}", Encoding.UTF8, "application/json")
+                    };
+                }
+
+                if (request.Method == HttpMethod.Delete)
+                {
+                    return new HttpResponseMessage(HttpStatusCode.OK);
+                }
+
+                interactionBody = request.Content!.ReadAsStringAsync().GetAwaiter().GetResult();
+
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"status\":\"completed\",\"steps\":[{\"content\":[{\"annotations\":[{\"type\":\"word_info\",\"text\":\"hello\",\"start_offset\":\"0.100s\",\"end_offset\":\"0.400s\"}]}]}]}", Encoding.UTF8, "application/json")
+                };
+            })))
+            {
+                var result = await new GeminiTranscriptionProvider(
+                    client,
+                    new GeminiTranscriptionOptions("test-secret", uploadConsent: true))
+                    .TranscribeAsync(new Uri(sourcePath), CancellationToken.None);
+
+                Xunit.Assert.Single(result.Words);
+                Xunit.Assert.Contains(requests, request => request.Method == HttpMethod.Delete && request.RequestUri!.AbsolutePath.EndsWith("/v1beta/files/test-long-audio", StringComparison.Ordinal));
+                Xunit.Assert.NotNull(interactionBody);
+                Xunit.Assert.Contains("\"uri\":\"https://generativelanguage.googleapis.com/v1beta/files/test-long-audio\"", interactionBody);
+                Xunit.Assert.DoesNotContain("\"data\"", interactionBody);
+            }
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task GeminiProviderRejectsReparsePointSource()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-transcript-link-");

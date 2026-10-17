@@ -51,7 +51,7 @@ public interface IAudioSourcePreparer
 
 public sealed class FfmpegAudioSourcePreparer : IAudioSourcePreparer
 {
-    private const long MaximumPreparedAudioBytes = 20 * 1024 * 1024;
+    private const long MaximumPreparedAudioBytes = 2L * 1024 * 1024 * 1024;
     private static readonly HashSet<string> AudioExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
         ".aac", ".aiff", ".aif", ".flac", ".m4a", ".mp3", ".ogg", ".opus", ".wav"
@@ -116,7 +116,7 @@ public sealed class FfmpegAudioSourcePreparer : IAudioSourcePreparer
             var outputLength = new FileInfo(outputPath).Length;
             if (outputLength == 0 || outputLength > MaximumPreparedAudioBytes)
             {
-                throw new InvalidDataException("The extracted audio exceeds the supported 20 MiB inline transcription limit; use a shorter audio source.");
+                throw new InvalidDataException("The extracted audio exceeds the supported 2 GiB Gemini Files API limit; use a shorter audio source.");
             }
 
             return new PreparedAudioSource(new Uri(outputPath), outputPath);

@@ -61,7 +61,7 @@ Each operation has `OperationDescriptor`: type, version, target kind, bounds, pr
 - **Offline:** AI controls unavailable; manual operations and saved plans still executable locally.
 
 ## Provider abstractions
-`IGeminiClient` supports model discovery/configuration, upload scopes, cancellation, usage/limits, error handling and file cleanup. Transcription providers must enforce local-source validation, derived-audio size limits and cleanup before sending bytes. Do not hardcode model availability/prices or assume a key is free. Never log key or raw user media. Prefer provider API documentation for active request shapes.
+`IGeminiClient` supports model discovery/configuration, upload scopes, cancellation, usage/limits, error handling and file cleanup. Transcription providers must enforce local-source validation, derived-audio limits, explicit consent and cleanup before sending bytes; audio over the inline limit uses the provider's reviewed Files API path and is deleted after use. Do not hardcode model availability/prices or assume a key is free. Never log key or raw user media. Prefer provider API documentation for active request shapes.
 
 ## Test cases
 Valid plan; unknown action; wrong clip; negative frame; overflow duration; invalid numeric; duplicate action ID; captions without timed provenance; prompt-injection text; partial failure rollback; undo/redo; export parity; offline no-key; declined upload; cancellation; media relink; Gemini rate limit; unexpected provider JSON.

@@ -15,7 +15,7 @@ Editing is local. Gemini is an **optional online service** that requires a user-
 - UI explicitly previews **which frames/segments/audio** are being sent and identifies destination/provider.
 - Default: select sampled frames plus coarse metadata, excluding audio unless explicitly selected. Allow full video analysis only with separate opt-in.
 - Include cost/usage disclosures; model inventory and pricing are fetched/configured, not falsely assumed.
-- Respect provider media size/duration limits at runtime; bounded retries, cancellation, local extracted-audio cleanup and remote temporary-file deletion where available.
+- Respect provider media size/duration limits at runtime; bounded retries, cancellation, local extracted-audio cleanup and remote temporary-file deletion for Gemini Files API uploads.
 - Do not promise data is never retained by the third-party model; link to provider terms and display network/privacy notice.
 - Manual editing, presets, imports, exports and saved projects work offline without API access.
 
