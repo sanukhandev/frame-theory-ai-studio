@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Current implementation note:** FT-602 now has consented desktop transcription wiring with source-timed caption import; live user-key verification, local ASR and long-audio handling remain pending. FT-706 now has a desktop natural-language revision flow that validates provider output before proposal display, chains interaction IDs, records redacted local history and preserves transactional undo; live provider-to-plan verification remains pending.
+**Current implementation note:** FT-602 now has consented desktop transcription wiring with source-timed caption import; live user-key verification, local ASR and long-audio handling remain pending. FT-706 now has a desktop natural-language revision flow that validates provider output before proposal display, chains interaction IDs, records redacted local history and preserves transactional undo; live provider-to-plan verification remains pending. FT-903 now has a bounded repeatable seek trace with p50/p95 latency and decode-throughput output; cross-platform captures remain pending.
 
 **FT-801 checkpoint:** Before/after now composes an editable multi-clip base layer twice—unaltered and graded—and the split/wipe/timed-reveal output is covered by graph tests plus a real two-clip FFmpeg smoke.
 
@@ -14,7 +14,7 @@
 
 **FT-804 checkpoint:** The shared export queue now exposes queued/running/succeeded/failed/canceled state, bounded in-memory job history, immediate cancellation completion and retry of failed/canceled jobs. Video export exposes a real “Retry last export” action; exporter temp-file cleanup and atomic finalization remain in the existing exporter contracts.
 
-**CI checkpoint:** GitHub Actions run `39050810748` passed documentation/schema validation and .NET restore/build/format/test/publish/checksum jobs on Windows, macOS and Linux for `71b9bca`. The Windows line-ending failure is resolved by `.gitattributes`; hosted packaging is still framework-dependent and unsigned.
+**CI checkpoint:** GitHub Actions run `39050810748` passed documentation/schema validation and .NET restore/build/format/test/publish/checksum jobs on Windows, macOS and Linux for `71b9bca`. The Windows line-ending failure is resolved by `.gitattributes`; hosted packaging is still framework-dependent and unsigned. The local FT-903 trace tool passed on Windows at `f92c57f`.
 
 **E09 test checkpoint:** Added focused evidence for every keyboard workspace shortcut and validated-plan JSON synchronization/clearing. These tests strengthen FT-901/FT-902 but do not replace the required interactive 1280x800/HiDPI manual acceptance.
 
@@ -72,14 +72,14 @@
 - [~] FT-706 AI transaction undo control, bounded Gemini follow-up transport, typed retry/timeout/cancellation failures, usage accounting, prompt/secret-redacted local history and desktop revision-to-validator wiring are implemented; live provider-to-plan verification remains open
 - [~] FT-901 keyboard workspace/frame shortcuts, scroll-safe layout and automation labels are implemented; interactive 1280x800/HiDPI acceptance remains unverified
 - [~] FT-902 synchronized selected-clip/playhead context and AI approval summary are implemented; full manual workspace acceptance remains open
-- [~] FT-903 bounded preview cache and cancellable rendering are implemented; real Windows seek evidence is recorded, while optional disk proxy implementation and cross-platform traces remain open
+- [~] FT-903 bounded preview cache and cancellable rendering are implemented; the Windows smoke now records cold/warm seeks, p50/p95 latency, decode throughput and working-set bytes, while optional disk proxy implementation and cross-platform traces remain open
 - [~] FT-904 local redacted diagnostics, unhandled-failure capture and actionable dependency guidance are implemented; cross-platform failure UX acceptance remains open
 - [x] FT-1001 core unit/golden/adversarial suite, caption provenance coverage and source SHA-256 preservation assertion pass on the hosted Windows/macOS/Linux matrix; broader manual/media journeys remain tracked by FT-1002
 - [~] FT-1002 UC-01..UC-06 executable smoke/test matrix is documented with Windows evidence; interactive and macOS/Linux acceptance remains open
 - [~] FT-1003 dependency inventory and external FFmpeg/native asset assessment are documented; license/CVE clearance and redistribution evidence remain open
 - [x] FT-1004 GitHub Actions verifies Windows/macOS/Linux restore/build/format/test/publish jobs and uploads per-OS SHA-256 manifests; optional signing/notarization is not part of this task claim
 - [~] FT-1005 framework-dependent Windows/macOS/Linux publish scripts and release matrix are documented; installers, native media bundling and signing remain open
-- [~] FT-1006 V1 acceptance audit is recorded with 40 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
+- [~] FT-1006 V1 acceptance audit is recorded with 46 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
 - [x] FT-401 FFmpeg-backed PNG/JPEG photo import, PPM preview and bounded canvas fit/100%/zoom/pan state
 - [x] FT-402 non-destructive PPM crop, 90° rotation, nearest-neighbor resize and undo-last operation stack
 - [x] FT-403 immutable photo adjustment layers with ordering, inspector state and undo/redo history
@@ -94,15 +94,15 @@
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
-Task / Epic: FT-804 / E08
-Git SHA: 46d0720
-Files changed: src/FrameTheory.Media/ExportQueue.cs, src/FrameTheory.Desktop/AiProposalViewModel.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/MainWindow.cs, tests/FrameTheory.UnitTests/ExportQueueTests.cs, tests/FrameTheory.UnitTests/DesktopAiRevisionTests.cs, tools/FrameTheory.TimelineExportSmoke/Program.cs, docs/IMPLEMENTATION_STATUS.md
-Actual behavior and UI path: Video workspace export now has Cancel export and Retry last export controls. The shared queue completes cancellation deterministically, records job state/attempt/error history in memory, retries failed or canceled jobs using the original operation, and keeps the existing atomic exporter cleanup path.
-Commands executed + OS: Windows 11 x64; focused export queue/desktop tests, `dotnet format`, Release build with warnings as errors, full solution tests, `git diff --check`, and `FrameTheory.TimelineExportSmoke` with two synthetic H.264/AAC clips using .NET SDK 10.0.100 and FFmpeg/ffprobe 9.0.2.
-Test outputs / exit codes: Final full gate passed `dotnet format`, Release build with 0 warnings/0 errors, 116 unit tests and 2 golden tests, plus `git diff --check` (all exit 0). Real queue smoke passed a synthetic first-attempt failure, retried the actual FFmpeg export, and reported `attempts=2; history=2` (exit 0).
-Media fixtures and verification: `timeline-queue-retry.mp4` exported and ffprobe-verified as 16x8 Video with bt709 metadata; source clips remained unchanged and no API key or generated asset entered Git.
-Known limitations / blockers: The approved Frame Theory logo asset is absent from the repository, so branded watermark output is not verified and FT-803 stays partial. FT-602 desktop wiring and FT-706 desktop revision wiring are fake-HTTP verified, but live provider/key runs remain open. FT-804 queue history is process-local by design; macOS/Linux interruption acceptance is unverified. FT-006 remains partial pending MLT and second-OS evidence. Python is not installed, so `scripts/validate_repository.py` was not run locally. macOS/Linux analysis and desktop runs are unverified.
-Next unblocked task: FT-901 manual acceptance / FT-903 cross-platform traces / FT-602 live provider fixture
+Task / Epic: FT-903 / E09
+Git SHA: f92c57f
+Files changed: tools/FrameTheory.FrameDecodeSmoke/Program.cs, docs/PERFORMANCE.md
+Actual behavior and UI path: The existing frame-decode smoke accepts an optional sample count bounded to 120, repeats exact-frame FFmpeg seeks, and reports p50/p95 latency, decode throughput, bounded cache metrics and working-set bytes. The default single-frame cold/warm behavior remains compatible.
+Commands executed + OS: Windows 11 x64; targeted Release build with warnings as errors, format verification, `git diff --check`, and the smoke against the existing synthetic H.264 fixture using .NET SDK 10.0.100 and FFmpeg/ffprobe 9.0.2.
+Test outputs / exit codes: Targeted build and format checks passed. The real 12-sample trace passed and reported `cold_ms=133.904; warm_ms=0.423; seek_p50_ms=89.218; seek_p95_ms=96.135; decode_fps=12.234; cache_entries=8; working_set_bytes=32759808` (exit 0).
+Media fixtures and verification: The source clip remained unchanged; the repeated decoder path returned valid PPM frames and stayed within the eight-entry cache. No API key, user media or generated asset entered Git.
+Known limitations / blockers: This is a Windows trace only; macOS/Linux native decoder traces, interactive GUI acceptance, disk proxy validation, MLT evidence, live Gemini provider runs, approved logo bytes and installer/signing evidence remain open. Python is not installed, so `scripts/validate_repository.py` was not run locally.
+Next unblocked task: FT-901 manual acceptance / FT-902 view acceptance / FT-904 failure UX evidence
 ```
 
 ## Task execution record template
