@@ -76,6 +76,27 @@ public sealed class AudioSourcePreparerTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task CanceledExtractionDeletesPartialOutput()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-audio-source-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "clip.mp4");
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+            var runner = new StubProcessRunner { Failure = new OperationCanceledException() };
+
+            await Xunit.Assert.ThrowsAsync<OperationCanceledException>(() =>
+                new FfmpegAudioSourcePreparer(runner).PrepareAsync(new Uri(sourcePath), CancellationToken.None));
+
+            Xunit.Assert.False(File.Exists(runner.OutputPath));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private sealed class StubProcessRunner : IMediaProcessRunner
     {
         public int InvocationCount { get; private set; }
@@ -83,6 +104,8 @@ public sealed class AudioSourcePreparerTests
         public string Arguments { get; private set; } = string.Empty;
 
         public long OutputLength { get; init; } = 4;
+
+        public Exception? Failure { get; init; }
 
         public string OutputPath { get; private set; } = string.Empty;
 
@@ -93,6 +116,11 @@ public sealed class AudioSourcePreparerTests
             OutputPath = arguments[^1];
             using var output = File.Create(OutputPath);
             output.SetLength(OutputLength);
+            if (Failure is not null)
+            {
+                throw Failure;
+            }
+
             return Task.FromResult(new MediaProcessResult(0, string.Empty, string.Empty));
         }
     }
