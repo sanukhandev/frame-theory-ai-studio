@@ -13,4 +13,6 @@ public sealed record TimelineStabilizationSettings
     }
 
     public int SearchRadius { get; }
+
+    public int FfmpegSearchRadius => ((SearchRadius + 15) / 16) * 16;
 }

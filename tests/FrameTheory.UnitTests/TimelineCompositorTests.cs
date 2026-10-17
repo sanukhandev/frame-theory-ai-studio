@@ -55,7 +55,7 @@ public sealed class TimelineCompositorTests
             var graph = new TimelineFilterGraphBuilder().Build(plan);
 
             Xunit.Assert.Contains("setpts=(PTS-STARTPTS)/", graph.FilterComplex, StringComparison.Ordinal);
-            Xunit.Assert.Contains("deshake=rx=12:ry=12:edge=mirror:search=exhaustive", graph.FilterComplex, StringComparison.Ordinal);
+            Xunit.Assert.Contains("deshake=rx=16:ry=16:edge=mirror:search=exhaustive", graph.FilterComplex, StringComparison.Ordinal);
             Xunit.Assert.Contains("concat=n=2:v=1:a=0", graph.FilterComplex, StringComparison.Ordinal);
             Xunit.Assert.Contains("concat=n=2:v=0:a=1", graph.FilterComplex, StringComparison.Ordinal);
             Xunit.Assert.Contains("atempo=", graph.FilterComplex, StringComparison.Ordinal);
@@ -86,7 +86,7 @@ public sealed class TimelineCompositorTests
 
             var graph = new TimelineFilterGraphBuilder().Build(plan);
 
-            Xunit.Assert.Contains("deshake=rx=5:ry=5:edge=mirror:search=exhaustive", graph.FilterComplex, StringComparison.Ordinal);
+            Xunit.Assert.Contains("deshake=rx=16:ry=16:edge=mirror:search=exhaustive", graph.FilterComplex, StringComparison.Ordinal);
         }
         finally
         {

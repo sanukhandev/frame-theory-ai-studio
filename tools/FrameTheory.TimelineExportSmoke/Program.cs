@@ -50,7 +50,7 @@ if (reopenedStabilization?.SearchRadius != 5)
     throw new InvalidOperationException("Timeline project reopen did not preserve stabilization settings.");
 }
 
-Console.WriteLine($"project-roundtrip={projectPath}; media={reopenedProjectViewModel.ImportedMedia.Count}; stabilization={reopenedStabilization.SearchRadius}; status={reopenedProjectViewModel.TimelineProjectStatusText}");
+Console.WriteLine($"project-roundtrip={projectPath}; media={reopenedProjectViewModel.ImportedMedia.Count}; stabilization={reopenedStabilization.SearchRadius}; ffmpeg-stabilization={new TimelineStabilizationSettings(reopenedStabilization.SearchRadius).FfmpegSearchRadius}; status={reopenedProjectViewModel.TimelineProjectStatusText}");
 var proxyDirectory = Path.Combine(Path.GetDirectoryName(destination) ?? ".", "proxy-cache");
 var proxyService = new FfmpegPreviewProxyService(runner, proxyDirectory, maximumCacheBytes: 64L * 1024 * 1024);
 var sourceFingerprint = $"sha256:{Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(sourceA.LocalPath))).ToLowerInvariant()}";
@@ -277,7 +277,7 @@ var aiReceipt = await exporter.ExportAsync(
     new ExportPreset(importedSourceA.Metadata.Width, importedSourceA.Metadata.Height, frameRate, importedSourceA.Metadata.HasAudio),
     new Progress<ExportProgress>(update => Console.WriteLine($"ai-stage={update.Stage}; fraction={update.Fraction:0.0}")),
     CancellationToken.None);
-Console.WriteLine($"ai-output={aiReceipt.OutputPath}; bytes={aiReceipt.OutputBytes}; stabilization=5; color={aiReceipt.VerifiedMetadata.ColorProfile}");
+Console.WriteLine($"ai-output={aiReceipt.OutputPath}; bytes={aiReceipt.OutputBytes}; stabilization=5; ffmpeg-stabilization=16; color={aiReceipt.VerifiedMetadata.ColorProfile}");
 
 var roughCutEditor = new TimelineEditorViewModel(frameRate);
 roughCutEditor.AddMedia(importedSourceA.Metadata);
