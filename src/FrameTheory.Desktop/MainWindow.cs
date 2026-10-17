@@ -333,6 +333,8 @@ public sealed class MainWindow : Window
         validate.Click += (_, _) => viewModel.ValidateAiPlan(planJson.Text ?? string.Empty);
         var approve = new Button { Content = "Apply approved actions" };
         approve.Click += (_, _) => viewModel.ApplyApprovedAiPlan();
+        var undo = new Button { Content = "Undo last AI apply" };
+        undo.Click += (_, _) => viewModel.UndoLastAiEdit();
         var clear = new Button { Content = "Clear proposal" };
         clear.Click += (_, _) => viewModel.AiProposal.Clear();
         return new Border
@@ -348,7 +350,7 @@ public sealed class MainWindow : Window
                     new TextBlock { Text = "AI proposal review", FontWeight = FontWeight.SemiBold },
                     new TextBlock { Text = "Plans are untrusted data. Only checked actions are applied, atomically, through editable timeline operations; failures roll back the whole group.", TextWrapping = TextWrapping.Wrap },
                     planJson,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { validate, approve, clear } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { validate, approve, undo, clear } },
                     actions,
                     status
                 }

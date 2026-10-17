@@ -129,6 +129,13 @@ public sealed class AiProposalViewModel : INotifyPropertyChanged
         StatusText = "AI proposal cleared; no project mutation occurred.";
     }
 
+    public void SetUndoStatus(bool undone)
+    {
+        StatusText = undone
+            ? "The last AI change group was undone; the proposal remains available for review."
+            : "No AI change group is available to undo.";
+    }
+
     private void OnActionPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
         if (args.PropertyName == nameof(AiProposalActionViewModel.IsApproved))

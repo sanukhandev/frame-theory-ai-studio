@@ -132,6 +132,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         AiProposal.ApplyApproved(actions => AiEditPlanExecutor.Execute(actions, TimelineEditor, fonts, new Dictionary<string, FrameTheory.Color.ColorGrade>(StringComparer.Ordinal)));
     }
 
+    public void UndoLastAiEdit()
+    {
+        AiProposal.SetUndoStatus(TimelineEditor.UndoAiEdit());
+    }
+
     public int SelectedWorkspaceIndex
     {
         get => _selectedWorkspaceIndex;

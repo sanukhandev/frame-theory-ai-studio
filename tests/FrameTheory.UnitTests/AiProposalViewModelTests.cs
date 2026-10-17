@@ -55,4 +55,14 @@ public sealed class AiProposalViewModelTests
         Xunit.Assert.Empty(viewModel.Actions);
         Xunit.Assert.Contains("Plan rejected", viewModel.StatusText, StringComparison.Ordinal);
     }
+
+    [Xunit.Fact]
+    public void UndoStatusIsExplicitWhenNoTransactionExists()
+    {
+        var viewModel = new AiProposalViewModel();
+
+        viewModel.SetUndoStatus(false);
+
+        Xunit.Assert.Contains("No AI change group", viewModel.StatusText, StringComparison.Ordinal);
+    }
 }
