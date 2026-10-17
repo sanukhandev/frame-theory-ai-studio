@@ -81,7 +81,7 @@
 - [~] FT-1003 dependency inventory and external FFmpeg/native asset assessment are documented; license/CVE clearance and redistribution evidence remain open
 - [x] FT-1004 GitHub Actions verifies Windows/macOS/Linux restore/build/format/test/publish jobs and uploads per-OS SHA-256 manifests; optional signing/notarization is not part of this task claim
 - [~] FT-1005 framework-dependent Windows/macOS/Linux publish scripts and release matrix are documented; installers, native media bundling and signing remain open
-- [~] FT-1006 V1 acceptance audit is recorded with 46 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
+- [~] FT-1006 V1 acceptance audit is recorded with 47 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
 - [x] FT-401 FFmpeg-backed PNG/JPEG photo import, PPM preview and bounded canvas fit/100%/zoom/pan state
 - [x] FT-402 non-destructive PPM crop, 90° rotation, nearest-neighbor resize and undo-last operation stack
 - [x] FT-403 immutable photo adjustment layers with ordering, inspector state and undo/redo history

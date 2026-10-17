@@ -4,17 +4,16 @@ Audit checkpoint: 2026-10-17, commit `2858e59`, Windows 11 x64 plus hosted CI ru
 
 ## Evidence
 
-- GitHub task visibility: 46 implementation issues are closed; remaining implementation issues are partial, blocked, or future P1/P2 work; epic issues remain open until their aggregate gates pass.
+- GitHub task visibility: 47 implementation issues are closed; remaining implementation issues are partial, blocked, or future P1/P2 work; epic issues remain open until their aggregate gates pass.
 - Local Release gate: `dotnet format` exit 0, Release build exit 0 with 0 warnings/errors, 128 unit tests passed, 2 golden tests passed, and `git diff --check` passed. Focused FT-602 provider/preparer coverage passed 17 tests.
-- Hosted CI evidence: runs `39050810748`, `39051936860`, `39052895799` and `39053781388` passed docs/schema validation plus restore/build/format/test/publish/SHA-256 artifact jobs on Windows, macOS and Linux; `39051936860` and `39053781388` also passed the native FFmpeg media smoke on all three runners.
-- Real media evidence: Windows FFmpeg/ffprobe photo/video import, extracted transcription audio, color, timeline, audio, AI edit, Reel and queue-retry smoke outputs are recorded in the implementation checkpoint and E2E matrix. Hosted Windows/macOS/Linux native-media import, extracted-audio and repeated-seek smoke passed in `39051936860`.
+- Hosted CI evidence: runs `39050810748`, `39051936860`, `39052895799`, `39053781388` and `39055332326` passed docs/schema validation plus restore/build/format/test/publish/SHA-256 artifact jobs on Windows, macOS and Linux; `39051936860`, `39053781388` and `39055332326` also passed the native FFmpeg media smoke on all three runners.
+- Real media evidence: Windows FFmpeg/ffprobe photo/video import, extracted transcription audio, color, timeline, audio, AI edit, Reel and queue-retry smoke outputs are recorded in the implementation checkpoint and E2E matrix. Hosted Windows/macOS/Linux native-media import, extracted-audio, repeated-seek and deterministic two-video/two-audio timeline exports passed in `39055332326`, including AI and before/after Reel outputs.
 - Packaging evidence: framework-dependent per-OS publish artifacts and SHA-256 manifests are verified; no installer, native FFmpeg bundle, signed artifact or notarized artifact is claimed.
 
 ## P0 blockers before V1
 
 | Area | Open task(s) | Reason V1 cannot be tagged |
 |---|---|---|
-| Native playback decision | FT-006 | MLT and a native second-OS playback/seek proof are not available |
 | Source-grounded transcription | FT-602 | Desktop/provider adapter, safe video-audio extraction, resumable Files API cleanup and fake-HTTP coverage exist; live approved-key/spoken-fixture verification and local ASR fallback remain open |
 | Gemini production loop | FT-706 | Desktop revision validation, retries, usage and redacted history exist; live provider-to-plan execution remains unverified |
 | Creator Reel/export | FT-803 | Multi-clip Reel, social photo dimensions and queue retry are verified; approved Frame Theory watermark asset/branded export remains unavailable |

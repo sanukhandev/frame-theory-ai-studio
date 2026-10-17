@@ -13,14 +13,14 @@
 - Source decoding respects orientation, sample aspect, interlacing and source color metadata; unsupported content fails visibly.
 
 ## Playback architecture choice
-Prototype MLT/native binding and independent FFmpeg preview sample. Record in an ADR:
+The FT-006 spike selected the existing interface-backed FFmpeg decoder, transport model and deterministic timeline compositor as the current engine path; MLT was not adopted. Record or revisit in [ADR-0004](adr/0004-ffmpeg-spike.md):
 1. Seek latency (cold/warm), transport latency and frame stepping accuracy.
 2. Audio/video sync and gap/overlap behavior.
 3. Memory/CPU/GPU impact for 1080p 30fps and 4K proxy workflows.
 4. Multi-platform native installation and licensing compatibility.
 5. Comparison between actual preview frame and exported same-frame pixel sample.
 
-Never confuse a rendered bitmap slideshow or pre-rendered MP4 with interactive multitrack playback.
+The hosted smoke proves real decode, seek, multitrack composition, audio mixing and export on three OS runners. It does not replace the separate interactive desktop playback acceptance. Never confuse a rendered bitmap slideshow or pre-rendered MP4 with interactive multitrack playback.
 
 ## Color and effects
 Both preview and export must consume a canonical effect graph and color pipeline. When CPU preview differs from export, golden tests enforce tolerances and UI discloses hardware-quality tradeoffs.
