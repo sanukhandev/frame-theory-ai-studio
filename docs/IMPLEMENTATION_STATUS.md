@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Current status: AI PLAN VALIDATION COMPLETE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405, FT-501 through FT-506, FT-601, FT-603 through FT-605, FT-701 through FT-703 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-602 has a strict source-bound provider contract and JSON fixture adapter, but real local ASR/Gemini transcription is not connected. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
+**Current status: AI PROPOSAL REVIEW COMPLETE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405, FT-501 through FT-506, FT-601, FT-603 through FT-605, and FT-701 through FT-704 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-602 has a strict source-bound provider contract and JSON fixture adapter, but real local ASR/Gemini transcription is not connected. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
 
 ## Completed
 - [x] Product README and Codex agent operating contract
@@ -45,6 +45,7 @@
 - [x] FT-701 offline-safe Gemini settings, built-in supported model catalog, OS credential storage and no-key manual editing path
 - [x] FT-702 explicit video-frame/audio-waveform/photo-preview scope selector, local bounded sampler, upload-consent disclosure and cancellation
 - [x] FT-703 bounded JSON edit-plan parser, semantic project validation and allowlisted operation catalog
+- [x] FT-704 AI proposal review panel with action summaries, per-action approval state and no-mutation-before-approval behavior
 - [x] FT-401 FFmpeg-backed PNG/JPEG photo import, PPM preview and bounded canvas fit/100%/zoom/pan state
 - [x] FT-402 non-destructive PPM crop, 90° rotation, nearest-neighbor resize and undo-last operation stack
 - [x] FT-403 immutable photo adjustment layers with ordering, inspector state and undo/redo history
@@ -52,22 +53,22 @@
 - [x] FT-405 photo project autosave recovery, missing-media relink and corrupt-input UI status paths
 
 ## Next tasks
-1. FT-704 proposal UI with action diff, per-action approval and no mutation before approval.
+1. FT-705 transactional execution of approved allowlisted edits with undoable project commands.
 2. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
 3. Iterate per docs/EPICS_AND_TASKS.md; update this checkpoint **after every tested commit**.
 
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
-Task / Epic: FT-703 / E07
-Git SHA: 36806dd
-Files changed: src/FrameTheory.AI/AiEditPlan.cs, tests/FrameTheory.UnitTests/AiEditPlanTests.cs
-Actual behavior and UI path: `AiEditPlanParser` accepts only bounded schema v1 JSON with exact top-level/action properties, allowlisted operation types, bounded IDs/ranges, unique action IDs and cloned parameter values. `AiEditPlanValidator` checks project targets/ranges, operation-specific numeric/string/enumeration bounds, approved font/preset IDs and transcript/authored caption provenance; it never executes plan content or accepts paths/shell commands.
+Task / Epic: FT-704 / E07
+Git SHA: c25a70e
+Files changed: src/FrameTheory.Desktop/AiProposalViewModel.cs, src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, tests/FrameTheory.UnitTests/AiProposalViewModelTests.cs
+Actual behavior and UI path: AI workspace accepts a pasted schema-v1 plan, validates it against imported targets and timeline bounds, then displays each allowlisted action with exact target/frame/parameter summaries and an independent approval checkbox. Approval is recorded only as review state; no project or media mutation occurs, and invalid plans clear the previous proposal.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet test FrameTheory.sln --no-build --configuration Release --logger console\;verbosity=minimal; git diff --check.
-Test outputs / exit codes: format 0; build 0 with 0 warnings/0 errors; 84 unit tests and 2 golden tests passed. Focused parser/validator tests cover valid plans, duplicate/unknown fields, unsupported operations, unknown targets, frame overflow, unsafe font paths and missing caption provenance.
-Media fixtures and verification: No provider request, media upload or project mutation occurs in this adapter slice; plans are validated as data only.
-Known limitations / blockers: FT-704 must add proposal diff/review UI and keep validated plans unapplied until approval. Gemini transport, structured-output request, usage handling and execution remain unconnected. FT-602 remains a contract/fixture adapter pending a real local ASR or consented Gemini provider. FT-006 remains partial pending MLT and second-OS evidence. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux analysis and desktop runs are unverified.
-Next unblocked task: FT-704
+Test outputs / exit codes: format 0; build 0 with 0 warnings/0 errors; 87 unit tests and 2 golden tests passed. Focused proposal tests cover unapproved validation, explicit approval recording and invalid-plan clearing; parser/validator tests cover valid plans, duplicate/unknown fields, unsupported operations, unknown targets, frame overflow, unsafe font paths and missing caption provenance.
+Media fixtures and verification: No provider request, media upload or project mutation occurs in this review slice; existing synthetic timeline/photo/media smoke coverage remains green.
+Known limitations / blockers: FT-705 must connect approved actions to transactional editable commands; current approval recording intentionally cannot execute. Gemini transport, structured-output request, usage handling and execution remain unconnected. FT-602 remains a contract/fixture adapter pending a real local ASR or consented Gemini provider. FT-006 remains partial pending MLT and second-OS evidence. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux analysis and desktop runs are unverified.
+Next unblocked task: FT-705
 ```
 
 ## Task execution record template
@@ -85,7 +86,7 @@ Next unblocked task:
 ```
 
 ## Release verification status
-Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601/FT-603/FT-604/FT-605/FT-701/FT-702/FT-703 built/tested; FT-602 contract/fixture tested only; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini provider: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
+Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601/FT-603/FT-604/FT-605/FT-701/FT-702/FT-703/FT-704 built/tested; FT-602 contract/fixture tested only; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini provider: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
 
 ## Honest reporting
 Codex should not mark a task complete for a mock UI, TODO, downloaded asset, simulated exporter, docs-only passing CI, or speculative integration. If execution is interrupted, preserve status and resume from first unblocked task on next run.
