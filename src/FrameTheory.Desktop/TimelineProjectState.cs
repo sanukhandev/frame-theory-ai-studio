@@ -118,6 +118,13 @@ public sealed class TimelineVideoSettingsProjectState
     public TimelineAnimationProjectState? Animation { get; set; }
 
     public TimelineSpeedRampProjectState? SpeedRamp { get; set; }
+
+    public TimelineStabilizationProjectState? Stabilization { get; set; }
+}
+
+public sealed class TimelineStabilizationProjectState
+{
+    public int SearchRadius { get; set; }
 }
 
 public sealed class TimelineSpeedRampProjectState
@@ -277,6 +284,12 @@ public static class TimelineProjectStateJson
             (settings.Animation.Keyframes is null || settings.Animation.Keyframes.Any(keyframe => keyframe is null || keyframe.Value is null))))
         {
             throw new InvalidDataException("The timeline animation state is incomplete.");
+        }
+
+        if (state.VideoSettings.Any(settings => settings.Stabilization is not null &&
+            settings.Stabilization.SearchRadius is < 1 or > 64))
+        {
+            throw new InvalidDataException("The timeline stabilization state is invalid.");
         }
     }
 }

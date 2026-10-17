@@ -952,6 +952,23 @@ public sealed class MainWindow : Window
         var clearSpeedRamp = new Button { Content = "Clear speed ramp" };
         AutomationProperties.SetName(clearSpeedRamp, "Clear speed ramp");
         clearSpeedRamp.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedSpeedRamp);
+        var stabilizationRadius = new TextBox { Text = "8", Width = 55 };
+        AutomationProperties.SetName(stabilizationRadius, "Stabilization search radius");
+        var applyStabilization = new Button { Content = "Apply stabilization" };
+        AutomationProperties.SetName(applyStabilization, "Apply stabilization");
+        applyStabilization.Click += (_, _) =>
+        {
+            if (!int.TryParse(stabilizationRadius.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var radius))
+            {
+                operationStatus.Text = "Enter a stabilization radius from 1 to 64.";
+                return;
+            }
+
+            RunTimelineAction(() => timeline.ApplyStabilizationToSelected(radius));
+        };
+        var clearStabilization = new Button { Content = "Clear stabilization" };
+        AutomationProperties.SetName(clearStabilization, "Clear stabilization");
+        clearStabilization.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedStabilization);
         var muteAudio = new Button { Content = "Mute audio" };
         muteAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioSettingsToSelected(0, muted: true));
         var gainAudio = new Button { Content = "Audio +3 dB" };
@@ -1231,6 +1248,7 @@ public sealed class MainWindow : Window
                     operationStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { fadeIn, pushIn, clearAnimation } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { new TextBlock { Text = "Speed" }, speedRampStart, new TextBlock { Text = "to" }, speedRampEnd, applySpeedRamp, clearSpeedRamp } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { new TextBlock { Text = "Stabilization radius" }, stabilizationRadius, applyStabilization, clearStabilization } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { muteAudio, gainAudio, fadeAudio, duckAudio, clearDucking, clearAudio } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { titleText, addTitle, fadeTitle, pushTitle } },
                     titleAnimationStatus,

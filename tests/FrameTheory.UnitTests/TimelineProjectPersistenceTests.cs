@@ -106,6 +106,33 @@ public sealed class TimelineProjectPersistenceTests
     }
 
     [Xunit.Fact]
+    public void TimelineStateRoundTripPreservesStabilization()
+    {
+        var mediaId = MediaId.Parse(new string('f', 64));
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(new MediaSourceMetadata(
+            mediaId,
+            new Uri(Path.GetFullPath("stabilization.mp4")),
+            MediaKind.Video,
+            16,
+            9,
+            new RationalFrameRate(30, 1),
+            30,
+            TimeSpan.FromSeconds(1),
+            hasAudio: false));
+        editor.SelectFirst(TimelineTrackKind.Video);
+        editor.ApplyStabilizationToSelected(12);
+
+        var restored = new TimelineEditorViewModel();
+        restored.RestoreProjectState(TimelineProjectStateJson.Deserialize(TimelineProjectStateJson.Serialize(editor.CaptureProjectState())));
+
+        var stabilization = restored.BuildRenderPlan(16, 9, new Dictionary<MediaId, Uri> { [mediaId] = new Uri(Path.GetFullPath("stabilization.mp4")) })
+            .Layers.Single().Segments.Single().Stabilization;
+        Xunit.Assert.NotNull(stabilization);
+        Xunit.Assert.Equal(12, stabilization!.SearchRadius);
+    }
+
+    [Xunit.Fact]
     public async Task DesktopProjectSaveAndOpenReimportsRelativeMediaAndRestoresTimeline()
     {
         var directory = Path.Combine(Path.GetTempPath(), $"frame-theory-project-{Guid.NewGuid():N}");

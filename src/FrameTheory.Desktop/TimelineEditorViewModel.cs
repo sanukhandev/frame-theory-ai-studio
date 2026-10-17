@@ -50,6 +50,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private readonly Dictionary<TimelineClip, TimelineTransitionSettings> _transitions = [];
     private readonly Dictionary<TimelineClip, TimelineVideoTransform> _staticTransforms = [];
     private readonly Dictionary<TimelineClip, TimelineSpeedRamp> _speedRamps = [];
+    private readonly Dictionary<TimelineClip, TimelineStabilizationSettings> _stabilization = [];
     private readonly Dictionary<MediaId, ColorGrade> _colorGrades = [];
     private readonly List<TimelineTitle> _titles = [];
     private IReadOnlyList<TimedCaption> _captions = [];
@@ -306,7 +307,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
                 transition: _transitions.TryGetValue(clip, out var transition) ? transition.Kind : null,
                 transitionDurationFrames: _transitions.TryGetValue(clip, out transition) ? transition.DurationFrames : 0,
                 animation: _animations.TryGetValue(clip, out var animation) ? animation : null,
-                speedRamp: _speedRamps.TryGetValue(clip, out var speedRamp) ? speedRamp : null)))],
+                speedRamp: _speedRamps.TryGetValue(clip, out var speedRamp) ? speedRamp : null,
+                stabilization: _stabilization.TryGetValue(clip, out var stabilization) ? stabilization : null)))],
             audioLayers,
             _titles,
             _captions,
@@ -327,6 +329,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             .Concat(_transitions.Keys)
             .Concat(_staticTransforms.Keys)
             .Concat(_speedRamps.Keys)
+            .Concat(_stabilization.Keys)
             .Distinct()
             .Select(clip => new TimelineVideoSettingsProjectState
             {
@@ -335,7 +338,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
                 Transition = _transitions.TryGetValue(clip, out var transition) ? transition.Kind : null,
                 TransitionDurationFrames = _transitions.TryGetValue(clip, out transition) ? transition.DurationFrames : 0,
                 Animation = _animations.TryGetValue(clip, out var animation) ? ToProjectState(animation) : null,
-                SpeedRamp = _speedRamps.TryGetValue(clip, out var speedRamp) ? ToProjectState(speedRamp) : null
+                SpeedRamp = _speedRamps.TryGetValue(clip, out var speedRamp) ? ToProjectState(speedRamp) : null,
+                Stabilization = _stabilization.TryGetValue(clip, out var stabilization) ? ToProjectState(stabilization) : null
             })
             .ToList(),
         AudioSettings = _audioSettings.Values.Select(settings => new TimelineAudioSettingsProjectState
@@ -462,6 +466,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         var restoredTransitions = new Dictionary<TimelineClip, TimelineTransitionSettings>();
         var restoredStaticTransforms = new Dictionary<TimelineClip, TimelineVideoTransform>();
         var restoredSpeedRamps = new Dictionary<TimelineClip, TimelineSpeedRamp>();
+        var restoredStabilization = new Dictionary<TimelineClip, TimelineStabilizationSettings>();
         foreach (var settings in videoSettings)
         {
             if (settings.Value.Animation is not null)
@@ -489,6 +494,11 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             if (settings.Value.SpeedRamp is not null)
             {
                 restoredSpeedRamps[settings.Key] = FromProjectState(settings.Value.SpeedRamp, settings.Key);
+            }
+
+            if (settings.Value.Stabilization is not null)
+            {
+                restoredStabilization[settings.Key] = FromProjectState(settings.Value.Stabilization);
             }
         }
 
@@ -547,6 +557,12 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         foreach (var settings in restoredSpeedRamps)
         {
             _speedRamps[settings.Key] = settings.Value;
+        }
+
+        _stabilization.Clear();
+        foreach (var settings in restoredStabilization)
+        {
+            _stabilization[settings.Key] = settings.Value;
         }
 
         _audioSettings.Clear();
@@ -740,6 +756,23 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         ]);
     }
 
+    public void ApplyStabilizationToSelected(int searchRadius = 8)
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        if (!selected.Clip.IsVideo)
+        {
+            throw new InvalidOperationException("Stabilization requires a video clip.");
+        }
+
+        _stabilization[selected.Clip] = new TimelineStabilizationSettings(searchRadius);
+    }
+
+    public void ClearSelectedStabilization()
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        _stabilization.Remove(selected.Clip);
+    }
+
     public void ApplyRoughCut(RoughCutPlan plan)
     {
         ArgumentNullException.ThrowIfNull(plan);
@@ -774,6 +807,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             _animations.Clear();
             _staticTransforms.Clear();
             _speedRamps.Clear();
+            _stabilization.Clear();
             _transitions.Clear();
             _audioSettings.Clear();
             for (var segmentIndex = 0; segmentIndex < plan.Segments.Count; segmentIndex++)
@@ -795,6 +829,11 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
                 if (before.SpeedRamps.TryGetValue(oldVideoClip, out var speedRamp))
                 {
                     _speedRamps[videoClip] = TranslateSpeedRamp(speedRamp, frameOffset);
+                }
+
+                if (before.Stabilization.TryGetValue(oldVideoClip, out var stabilization))
+                {
+                    _stabilization[videoClip] = stabilization;
                 }
 
                 if (segmentIndex > 0 && before.Transitions.TryGetValue(oldVideoClip, out var transition) && transition.DurationFrames < videoClip.TimelineRange.Length)
@@ -869,6 +908,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         new Dictionary<TimelineClip, TimelineTransitionSettings>(_transitions),
         new Dictionary<TimelineClip, TimelineVideoTransform>(_staticTransforms),
         new Dictionary<TimelineClip, TimelineSpeedRamp>(_speedRamps),
+        new Dictionary<TimelineClip, TimelineStabilizationSettings>(_stabilization),
         new Dictionary<MediaId, ColorGrade>(_colorGrades),
         _beforeAfterStyle,
         _watermark,
@@ -923,6 +963,12 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         foreach (var item in state.SpeedRamps)
         {
             _speedRamps[item.Key] = item.Value;
+        }
+
+        _stabilization.Clear();
+        foreach (var item in state.Stabilization)
+        {
+            _stabilization[item.Key] = item.Value;
         }
 
         _colorGrades.Clear();
@@ -1478,6 +1524,11 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         }).ToList()
     };
 
+    private static TimelineStabilizationProjectState ToProjectState(TimelineStabilizationSettings stabilization) => new()
+    {
+        SearchRadius = stabilization.SearchRadius
+    };
+
     private static TimelineTitleProjectState ToProjectState(TimelineTitle title) => new()
     {
         Text = title.Text,
@@ -1535,6 +1586,9 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
         return ramp;
     }
+
+    private static TimelineStabilizationSettings FromProjectState(TimelineStabilizationProjectState state) =>
+        new(state.SearchRadius);
 
     private static TimelineTitle FromProjectState(TimelineTitleProjectState state) =>
         new(
@@ -1610,6 +1664,7 @@ internal sealed record TimelineEditorState(
     IReadOnlyDictionary<TimelineClip, TimelineTransitionSettings> Transitions,
     IReadOnlyDictionary<TimelineClip, TimelineVideoTransform> StaticTransforms,
     IReadOnlyDictionary<TimelineClip, TimelineSpeedRamp> SpeedRamps,
+    IReadOnlyDictionary<TimelineClip, TimelineStabilizationSettings> Stabilization,
     IReadOnlyDictionary<MediaId, ColorGrade> ColorGrades,
     TimelineRevealStyle? BeforeAfterStyle,
     TimelineWatermark? Watermark,

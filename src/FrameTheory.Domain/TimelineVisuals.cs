@@ -48,7 +48,8 @@ public sealed record TimelineVideoSegment
         TimelineTransitionKind? transition = null,
         long transitionDurationFrames = 0,
         TimelineTransformKeyframes? animation = null,
-        TimelineSpeedRamp? speedRamp = null)
+        TimelineSpeedRamp? speedRamp = null,
+        TimelineStabilizationSettings? stabilization = null)
     {
         ArgumentNullException.ThrowIfNull(clip);
         if (!clip.IsVideo)
@@ -86,6 +87,7 @@ public sealed record TimelineVideoSegment
 
         Animation = animation;
         SpeedRamp = speedRamp;
+        Stabilization = stabilization;
     }
 
     public TimelineClip Clip { get; }
@@ -99,6 +101,8 @@ public sealed record TimelineVideoSegment
     public TimelineTransformKeyframes? Animation { get; }
 
     public TimelineSpeedRamp? SpeedRamp { get; }
+
+    public TimelineStabilizationSettings? Stabilization { get; }
 }
 
 public sealed record TimelineVideoLayer

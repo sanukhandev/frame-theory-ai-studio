@@ -49,15 +49,44 @@ public sealed class TimelineCompositorTests
                 8,
                 30,
                 new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
-                [new TimelineVideoLayer("video", 0, [new TimelineVideoSegment(videoClip, speedRamp: speedRamp)])],
+                [new TimelineVideoLayer("video", 0, [new TimelineVideoSegment(videoClip, speedRamp: speedRamp, stabilization: new TimelineStabilizationSettings(12))])],
                 [new TimelineAudioLayer("audio", 0, [new TimelineAudioSegment(audioClip)])]);
 
             var graph = new TimelineFilterGraphBuilder().Build(plan);
 
             Xunit.Assert.Contains("setpts=(PTS-STARTPTS)/", graph.FilterComplex, StringComparison.Ordinal);
+            Xunit.Assert.Contains("deshake=rx=12:ry=12:edge=mirror:search=exhaustive", graph.FilterComplex, StringComparison.Ordinal);
             Xunit.Assert.Contains("concat=n=2:v=1:a=0", graph.FilterComplex, StringComparison.Ordinal);
             Xunit.Assert.Contains("concat=n=2:v=0:a=1", graph.FilterComplex, StringComparison.Ordinal);
             Xunit.Assert.Contains("atempo=", graph.FilterComplex, StringComparison.Ordinal);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
+    public void StabilizationGraphUsesTheConfiguredSearchRadius()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-stabilization-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            File.WriteAllText(sourcePath, "source");
+            var mediaId = MediaId.Create(new Uri(sourcePath), "stabilization-test");
+            var clip = TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1));
+            var plan = new TimelineVideoRenderPlan(
+                new RationalFrameRate(30, 1),
+                16,
+                8,
+                30,
+                new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
+                [new TimelineVideoLayer("video", 0, [new TimelineVideoSegment(clip, stabilization: new TimelineStabilizationSettings(5))])]);
+
+            var graph = new TimelineFilterGraphBuilder().Build(plan);
+
+            Xunit.Assert.Contains("deshake=rx=5:ry=5:edge=mirror:search=exhaustive", graph.FilterComplex, StringComparison.Ordinal);
         }
         finally
         {

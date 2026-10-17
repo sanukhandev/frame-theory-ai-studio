@@ -502,7 +502,10 @@ public sealed class TimelineFilterGraphBuilder
         var alpha = segment.Animation is null
             ? $"colorchannelmixer=aa={opacity}"
             : $"geq=r='r(X\\,Y)':g='g(X\\,Y)':b='b(X\\,Y)':a='alpha(X\\,Y)*({opacity})'";
-        var filter = $"[{input}:v:0]trim=start_frame={clip.SourceStartUnit}:end_frame={sourceEnd},setpts=PTS-STARTPTS,fps={Rate(plan.FrameRate)},scale=trunc(iw*{scale}/2)*2:trunc(ih*{scale}/2)*2:eval=frame,format=yuva420p";
+        var stabilization = segment.Stabilization is null
+            ? string.Empty
+            : $",deshake=rx={segment.Stabilization.SearchRadius}:ry={segment.Stabilization.SearchRadius}:edge=mirror:search=exhaustive";
+        var filter = $"[{input}:v:0]trim=start_frame={clip.SourceStartUnit}:end_frame={sourceEnd},setpts=PTS-STARTPTS{stabilization},fps={Rate(plan.FrameRate)},scale=trunc(iw*{scale}/2)*2:trunc(ih*{scale}/2)*2:eval=frame,format=yuva420p";
         if (applyGrade && plan.ColorGrades.TryGetValue(clip.MediaId, out var grade))
         {
             filter += $",eq=brightness={Format((Math.Pow(2, grade.ExposureEV) - 1) * 0.5)}:contrast={Format(1 + grade.Contrast)}:saturation={Format(1 + grade.Saturation)}";
@@ -558,7 +561,10 @@ public sealed class TimelineFilterGraphBuilder
             var alpha = segment.Animation is null
                 ? $"colorchannelmixer=aa={EscapeFilterExpression(opacity)}"
                 : $"geq=r='r(X\\,Y)':g='g(X\\,Y)':b='b(X\\,Y)':a='alpha(X\\,Y)*({EscapeFilterExpression(opacity)})'";
-            var filter = $"[{input}:v:0]trim=start_frame={sourceCursor}:end_frame={partEnd},setpts=(PTS-STARTPTS)/{Format(speed)},fps={Rate(plan.FrameRate)},scale=trunc(iw*{EscapeFilterExpression(scale)}/2)*2:trunc(ih*{EscapeFilterExpression(scale)}/2)*2:eval=frame,format=yuva420p";
+            var stabilization = segment.Stabilization is null
+                ? string.Empty
+                : $",deshake=rx={segment.Stabilization.SearchRadius}:ry={segment.Stabilization.SearchRadius}:edge=mirror:search=exhaustive";
+            var filter = $"[{input}:v:0]trim=start_frame={sourceCursor}:end_frame={partEnd},setpts=(PTS-STARTPTS)/{Format(speed)}{stabilization},fps={Rate(plan.FrameRate)},scale=trunc(iw*{EscapeFilterExpression(scale)}/2)*2:trunc(ih*{EscapeFilterExpression(scale)}/2)*2:eval=frame,format=yuva420p";
             if (applyGrade && plan.ColorGrades.TryGetValue(clip.MediaId, out var grade))
             {
                 filter += $",eq=brightness={Format((Math.Pow(2, grade.ExposureEV) - 1) * 0.5)}:contrast={Format(1 + grade.Contrast)}:saturation={Format(1 + grade.Saturation)}";
