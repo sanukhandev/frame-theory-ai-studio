@@ -82,6 +82,28 @@ public sealed class TimelineProjectPersistenceTests
         Xunit.Assert.Throws<InvalidDataException>(() => TimelineProjectStateJson.Deserialize("{\"videoClips\":null}"));
     }
 
+    [Xunit.Fact]
+    public void InvalidRestoredGradeDoesNotPartiallyMutateTheCurrentTimeline()
+    {
+        var mediaId = MediaId.Parse(new string('c', 64));
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(new MediaSourceMetadata(
+            mediaId,
+            new Uri(Path.GetFullPath("clip.mp4")),
+            MediaKind.Video,
+            16,
+            9,
+            new RationalFrameRate(30, 1),
+            30,
+            TimeSpan.FromSeconds(1)));
+        var before = editor.TrackRows;
+        var invalidState = editor.CaptureProjectState();
+        invalidState.ColorGrades.Add(new TimelineColorGradeProjectState { MediaId = "not-a-media-id" });
+
+        Xunit.Assert.Throws<ArgumentException>(() => editor.RestoreProjectState(invalidState));
+        Xunit.Assert.Equal(before, editor.TrackRows);
+    }
+
     private static MainWindowViewModel CreateViewModel() => new(
         new WorkspaceCatalog(),
         new StubCapabilityDetector(),

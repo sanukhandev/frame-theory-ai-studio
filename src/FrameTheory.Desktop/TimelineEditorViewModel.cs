@@ -419,38 +419,45 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         var watermark = state.Watermark is null
             ? null
             : new TimelineWatermark(state.Watermark.SourcePath, state.Watermark.Opacity, state.Watermark.Margin);
+        if (!Enum.IsDefined(state.BeatDetectionMode) ||
+            (state.BeforeAfterStyle is { } beforeAfterStyle && !Enum.IsDefined(beforeAfterStyle)) ||
+            double.IsNaN(state.FramesPerPixel) || double.IsInfinity(state.FramesPerPixel) || state.FramesPerPixel <= 0)
+        {
+            throw new InvalidDataException("The timeline view or composition state is invalid.");
+        }
 
-        _videoClips.Clear();
-        _videoClips.AddRange(videoClips);
-        _audioClips.Clear();
-        _audioClips.AddRange(audioClips);
-        _animations.Clear();
-        _transitions.Clear();
-        _staticTransforms.Clear();
+        var restoredAnimations = new Dictionary<TimelineClip, TimelineTransformKeyframes>();
+        var restoredTransitions = new Dictionary<TimelineClip, TimelineTransitionSettings>();
+        var restoredStaticTransforms = new Dictionary<TimelineClip, TimelineVideoTransform>();
         foreach (var settings in videoSettings)
         {
             if (settings.Value.Animation is not null)
             {
-                _animations[settings.Key] = FromProjectState(settings.Value.Animation);
+                restoredAnimations[settings.Key] = FromProjectState(settings.Value.Animation);
             }
 
             if (settings.Value.Transition is not null)
             {
-                _transitions[settings.Key] = new TimelineTransitionSettings(
+                if (!Enum.IsDefined(settings.Value.Transition.Value))
+                {
+                    throw new InvalidDataException("The timeline transition state is invalid.");
+                }
+
+                restoredTransitions[settings.Key] = new TimelineTransitionSettings(
                     settings.Value.Transition.Value,
                     settings.Value.TransitionDurationFrames);
             }
 
             if (settings.Value.Transform is not null)
             {
-                _staticTransforms[settings.Key] = FromProjectState(settings.Value.Transform);
+                restoredStaticTransforms[settings.Key] = FromProjectState(settings.Value.Transform);
             }
         }
 
-        _audioSettings.Clear();
+        var restoredAudioSettings = new Dictionary<TimelineClip, TimelineAudioSegment>();
         foreach (var settings in audioSettings)
         {
-            _audioSettings[settings.Key] = new TimelineAudioSegment(
+            restoredAudioSettings[settings.Key] = new TimelineAudioSegment(
                 settings.Key,
                 settings.Value.GainDb,
                 settings.Value.Muted,
@@ -459,15 +466,55 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
                 settings.Value.DuckingDb);
         }
 
-        _colorGrades.Clear();
+        var restoredColorGrades = new Dictionary<MediaId, ColorGrade>();
         foreach (var grade in state.ColorGrades)
         {
-            _colorGrades[MapMediaId(grade.MediaId, mediaIdMap)] = new ColorGrade(
+            restoredColorGrades[MapMediaId(grade.MediaId, mediaIdMap)] = new ColorGrade(
                 grade.ExposureEV,
                 grade.Contrast,
                 grade.Saturation,
                 grade.Temperature,
                 grade.Tint);
+        }
+
+        _ = new TimelineTrack("Video 1", TimelineTrackKind.Video, videoClips);
+        _ = new TimelineTrack("Audio 1", TimelineTrackKind.Audio, audioClips);
+        MediaId? restoredBeatMarkerMediaId = state.BeatMarkerMediaId is null
+            ? null
+            : MapMediaId(state.BeatMarkerMediaId, mediaIdMap);
+
+        _videoClips.Clear();
+        _videoClips.AddRange(videoClips);
+        _audioClips.Clear();
+        _audioClips.AddRange(audioClips);
+        _animations.Clear();
+        foreach (var settings in restoredAnimations)
+        {
+            _animations[settings.Key] = settings.Value;
+        }
+
+        _transitions.Clear();
+        foreach (var settings in restoredTransitions)
+        {
+            _transitions[settings.Key] = settings.Value;
+        }
+
+        _staticTransforms.Clear();
+        foreach (var settings in restoredStaticTransforms)
+        {
+            _staticTransforms[settings.Key] = settings.Value;
+        }
+
+        _audioSettings.Clear();
+        foreach (var settings in restoredAudioSettings)
+        {
+            _audioSettings[settings.Key] = settings.Value;
+        }
+
+        _colorGrades.Clear();
+        foreach (var grade in restoredColorGrades)
+        {
+            _colorGrades[grade.Key] = grade.Value;
         }
 
         _titles.Clear();
@@ -483,9 +530,9 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _mediaIds.UnionWith(videoClips.Concat(audioClips).Select(clip => clip.MediaId));
         _beatMarkers.Clear();
         _beatMarkers.AddRange(state.BeatMarkers);
-        _beatMarkerMediaId = state.BeatMarkerMediaId is null ? null : MediaId.Parse(MapMediaId(state.BeatMarkerMediaId, mediaIdMap).Value);
+        _beatMarkerMediaId = restoredBeatMarkerMediaId;
         _beatMarkerWaveform = state.BeatMarkerWaveform.ToArray();
-        BeatDetectionMode = state.BeatDetectionMode;
+        _beatDetectionMode = state.BeatDetectionMode;
         SnapEnabled = state.SnapEnabled;
         SetZoom(state.FramesPerPixel);
         _aiUndo.Clear();
