@@ -39,6 +39,19 @@ public sealed class FfmpegFrameDecoder : IPreviewFrameDecoder, IRgbaPreviewFrame
         _maximumCacheEntries = maximumCacheEntries;
     }
 
+    public int MaximumCacheEntries => _maximumCacheEntries;
+
+    public int CacheEntryCount
+    {
+        get
+        {
+            lock (_cacheLock)
+            {
+                return _cache.Count;
+            }
+        }
+    }
+
     public async Task<byte[]> DecodeFrameAsync(
         Uri file,
         RationalFrameRate frameRate,

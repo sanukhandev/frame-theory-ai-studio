@@ -25,6 +25,8 @@ public sealed class FrameDecoderTests
 
             Xunit.Assert.Equal(first, cached);
             Xunit.Assert.Equal(3, runner.InvocationCount);
+            Xunit.Assert.Equal(1, decoder.MaximumCacheEntries);
+            Xunit.Assert.Equal(1, decoder.CacheEntryCount);
             Xunit.Assert.Contains("select=eq(n\\,1)", runner.ArgumentsSeen[0]);
         }
         finally
