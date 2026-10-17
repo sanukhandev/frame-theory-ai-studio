@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Current status: TIMELINE TITLES COMPLETE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405 and FT-501 through FT-506 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
+**Current status: CAPTION SRT COMPLETE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405, FT-501 through FT-506 and FT-601 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
 
 ## Completed
 - [x] Product README and Codex agent operating contract
@@ -37,6 +37,7 @@
 - [x] FT-504 opacity/position/scale keyframe interpolation, easing, fade/push presets, animated FFmpeg export and selected-clip Video workspace controls
 - [x] FT-505 synchronized audio segments with gain, mute, fades, waveform-backed import and AAC timeline mix/export controls
 - [x] FT-506 validated title overlays with user-supplied font paths, safe-area placement, z-order and real FFmpeg drawtext export
+- [x] FT-601 bounded timed-caption model with imported-subtitle provenance, timezone-independent SRT import/export and Video workspace actions
 - [x] FT-401 FFmpeg-backed PNG/JPEG photo import, PPM preview and bounded canvas fit/100%/zoom/pan state
 - [x] FT-402 non-destructive PPM crop, 90° rotation, nearest-neighbor resize and undo-last operation stack
 - [x] FT-403 immutable photo adjustment layers with ordering, inspector state and undo/redo history
@@ -44,22 +45,22 @@
 - [x] FT-405 photo project autosave recovery, missing-media relink and corrupt-input UI status paths
 
 ## Next tasks
-1. FT-601 timed caption model, text inspector and SRT import/export.
+1. FT-602 transcription provider interface and source-grounded word timings.
 2. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
 3. Iterate per docs/EPICS_AND_TASKS.md; update this checkpoint **after every tested commit**.
 
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
-Task / Epic: FT-506 / E05
-Git SHA: 9853d83
-Files changed: src/FrameTheory.Domain/TimelineTitles.cs, src/FrameTheory.Media/TimelineCompositor.cs, src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/TimelineEditorViewModel.cs, tests/FrameTheory.UnitTests/TimelineTitleTests.cs, tests/FrameTheory.UnitTests/TimelineEditorTests.cs, tools/FrameTheory.TimelineExportSmoke/Program.cs
-Actual behavior and UI path: In the Video workspace enter title text, choose an explicit local `.ttf` or `.otf` font, and select Add title; Export composite MP4 renders the title at a validated safe-area position and z-order. Text is escaped before entering the FFmpeg filter graph, and source fonts are never bundled or followed through symlinks.
-Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check; managed desktop launch smoke for 3 seconds; synthetic red/blue 16x8 FFmpeg video+sine-audio animated title export, ffmpeg decode and ffprobe audio-stream verification
-Test outputs / exit codes: format 0; build 0 with 0 warnings/0 errors; 65 unit tests and 2 golden tests passed; title+A/V smoke completed and ffprobe verified AAC 48 kHz stereo plus Video 16x8 bt709/bt709/bt709/tv; desktop process remained alive during launch smoke.
+Task / Epic: FT-601 / E06
+Git SHA: 35c5e74
+Files changed: src/FrameTheory.Captions/TimedCaptions.cs, src/FrameTheory.Desktop/FrameTheory.Desktop.csproj, src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/TimelineEditorViewModel.cs, tests/FrameTheory.UnitTests/TimedCaptionTests.cs
+Actual behavior and UI path: The Video workspace exposes Import SRT and Export SRT. Imported cues preserve exact millisecond `TimeSpan` timing and are labeled `ImportedSubtitle`; parser bounds, malformed timestamps, overlap, text size and cue count are validated. Caption text is not treated as recognized speech.
+Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check; managed desktop launch smoke for 3 seconds
+Test outputs / exit codes: format 0; build 0 with 0 warnings/0 errors; 67 unit tests and 2 golden tests passed; SRT round-trip/error tests passed; desktop process remained alive during launch smoke.
 Media fixtures and verification: Synthetic rational-rate video/audio metadata only; actual media import continues to feed the timeline through the existing FFmpeg importer; no media binary committed.
 Known limitations / blockers: FT-006 remains partial pending MLT and second-OS evidence. Timeline mutations, playback clock and rendered timeline export remain later tasks. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux photo and timeline runs are unverified.
-Next unblocked task: FT-601
+Next unblocked task: FT-602
 ```
 
 ## Task execution record template
@@ -77,7 +78,7 @@ Next unblocked task:
 ```
 
 ## Release verification status
-Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506 built/tested; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
+Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601 built/tested; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
 
 ## Honest reporting
 Codex should not mark a task complete for a mock UI, TODO, downloaded asset, simulated exporter, docs-only passing CI, or speculative integration. If execution is interrupted, preserve status and resume from first unblocked task on next run.
