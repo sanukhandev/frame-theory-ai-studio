@@ -5,6 +5,7 @@
     <RootNamespace>FrameTheory.TimelineExportSmoke</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\FrameTheory.AI\FrameTheory.AI.csproj" />
     <ProjectReference Include="..\..\src\FrameTheory.Captions\FrameTheory.Captions.csproj" />
     <ProjectReference Include="..\..\src\FrameTheory.Domain\FrameTheory.Domain.csproj" />
     <ProjectReference Include="..\..\src\FrameTheory.Media\FrameTheory.Media.csproj" />

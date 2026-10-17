@@ -6,5 +6,6 @@
   <ItemGroup>
     <ProjectReference Include="..\FrameTheory.Application\FrameTheory.Application.csproj" />
     <ProjectReference Include="..\FrameTheory.Domain\FrameTheory.Domain.csproj" />
+    <ProjectReference Include="..\FrameTheory.Media\FrameTheory.Media.csproj" />
   </ItemGroup>
 </Project>

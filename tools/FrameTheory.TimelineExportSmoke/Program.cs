@@ -1,5 +1,6 @@
 using FrameTheory.Captions;
 using FrameTheory.Domain;
+using FrameTheory.AI;
 using FrameTheory.Media;
 
 if (args.Length is < 3 or > 4)
@@ -10,6 +11,15 @@ if (args.Length is < 3 or > 4)
 var sourceA = new Uri(Path.GetFullPath(args[0]));
 var sourceB = new Uri(Path.GetFullPath(args[1]));
 var destination = Path.GetFullPath(args[2]);
+var runner = new FfmpegProcessRunner();
+var decoder = new FfmpegFrameDecoder(runner);
+var importer = new FfmpegMediaImporter(new FfprobeMediaProbe(runner), decoder, runner);
+var importedSourceA = await importer.ImportAsync(sourceA, CancellationToken.None);
+var analysis = await new LocalAnalysisSampler(decoder).PrepareAsync(
+    new GeminiAnalysisRequest([importedSourceA], GeminiAnalysisScope.VideoFrames | GeminiAnalysisScope.AudioWaveform, uploadConsent: false),
+    new Progress<LocalAnalysisProgress>(update => Console.WriteLine($"analysis={update.Stage}; fraction={update.Fraction:0.0}")),
+    CancellationToken.None);
+Console.WriteLine($"analysis-samples={analysis.Samples.Count}; bytes={analysis.EstimatedUploadBytes}; upload-consent={analysis.UploadConsent}");
 var frameRate = new RationalFrameRate(30, 1);
 var idA = MediaId.Create(sourceA, "timeline-smoke-a");
 var idB = MediaId.Create(sourceB, "timeline-smoke-b");
@@ -74,7 +84,6 @@ var plan = new TimelineVideoRenderPlan(
     captions,
     captionStyle
     );
-var runner = new FfmpegProcessRunner();
 var exporter = new FfmpegTimelineVideoExporter(runner, new FfprobeMediaProbe(runner));
 var receipt = await exporter.ExportAsync(
     plan,

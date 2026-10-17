@@ -8,6 +8,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
+using FrameTheory.AI;
 using FrameTheory.Domain;
 using System.Runtime.InteropServices;
 using FrameTheory.Photo;
@@ -236,6 +237,33 @@ public sealed class MainWindow : Window
         };
         var clear = new Button { Content = "Remove Gemini key" };
         clear.Click += async (_, _) => await settings.ClearAsync(CancellationToken.None);
+        var videoFrames = new CheckBox { Content = "Video frames", IsChecked = true };
+        var audioWaveform = new CheckBox { Content = "Audio waveform" };
+        var photoPreview = new CheckBox { Content = "Photo preview" };
+        var uploadConsent = new CheckBox { Content = "I approve uploading this exact sample scope to Gemini" };
+        var prepareAnalysis = new Button { Content = "Prepare local analysis samples" };
+        prepareAnalysis.Click += async (_, _) =>
+        {
+            var scopes = GeminiAnalysisScope.None;
+            if (videoFrames.IsChecked == true)
+            {
+                scopes |= GeminiAnalysisScope.VideoFrames;
+            }
+
+            if (audioWaveform.IsChecked == true)
+            {
+                scopes |= GeminiAnalysisScope.AudioWaveform;
+            }
+
+            if (photoPreview.IsChecked == true)
+            {
+                scopes |= GeminiAnalysisScope.PhotoPreview;
+            }
+
+            await viewModel.PrepareLocalAnalysisAsync(scopes, uploadConsent.IsChecked == true, CancellationToken.None);
+        };
+        var analysisStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        analysisStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AnalysisStatusText)));
         _ = settings.LoadAsync(CancellationToken.None);
         return new Border
         {
@@ -252,7 +280,12 @@ public sealed class MainWindow : Window
                     model,
                     apiKey,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { save, clear } },
-                    status
+                    status,
+                    new TextBlock { Text = "Analysis scope (prepared locally; no upload occurs here):", FontWeight = FontWeight.SemiBold },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { videoFrames, audioWaveform, photoPreview } },
+                    uploadConsent,
+                    prepareAnalysis,
+                    analysisStatus
                 }
             }
         };

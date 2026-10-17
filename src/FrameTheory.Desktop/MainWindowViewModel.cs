@@ -42,8 +42,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _mediaImportStatusText = "Drop local media files into the window to import previews.";
     private string _timelineExportStatusText = "Timeline export is available after importing video.";
     private string _captionStatusText = "No captions imported.";
+    private string _analysisStatusText = "No local AI analysis prepared.";
     private readonly Dictionary<MediaId, Uri> _mediaSources = [];
+    private readonly Dictionary<MediaId, ImportedMedia> _analysisAssets = [];
     private ITimelineVideoExporter? _timelineExporter;
+    private readonly ILocalAnalysisSampler? _analysisSampler;
     private int _videoWidth;
     private int _videoHeight;
 
@@ -55,7 +58,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ColorGradeInspectorViewModel? colorInspector = null,
         TimelineEditorViewModel? timelineEditor = null,
         ITimelineVideoExporter? timelineExporter = null,
-        GeminiSettingsViewModel? geminiSettings = null)
+        GeminiSettingsViewModel? geminiSettings = null,
+        ILocalAnalysisSampler? analysisSampler = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
@@ -67,6 +71,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         TimelineEditor = timelineEditor ?? new TimelineEditorViewModel();
         GeminiSettings = geminiSettings ?? new GeminiSettingsViewModel(new GeminiConfigurationService(new OperatingSystemSecretStore()));
         _timelineExporter = timelineExporter;
+        _analysisSampler = analysisSampler;
         if (Workspaces.Count == 0)
         {
             throw new InvalidOperationException("At least one workspace is required.");
@@ -84,6 +89,23 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public TimelineEditorViewModel TimelineEditor { get; }
 
     public GeminiSettingsViewModel GeminiSettings { get; }
+
+    public string AnalysisStatusText
+    {
+        get => _analysisStatusText;
+        private set
+        {
+            if (value == _analysisStatusText)
+            {
+                return;
+            }
+
+            _analysisStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public LocalMediaAnalysisReport? LastLocalAnalysisReport { get; private set; }
 
     public int SelectedWorkspaceIndex
     {
@@ -186,6 +208,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                     $"{media.Metadata.Kind}; {media.Metadata.Width}x{media.Metadata.Height}; thumbnail {media.ThumbnailPpm?.Length ?? 0} bytes; waveform {media.WaveformPeaks.Count} peaks",
                     media.ThumbnailPpm));
                 _mediaSources[media.Metadata.Id] = new Uri(fullPath);
+                _analysisAssets[media.Metadata.Id] = media;
                 if (media.Metadata.Kind == MediaKind.Video && _videoWidth == 0)
                 {
                     _videoWidth = media.Metadata.Width;
@@ -208,6 +231,43 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         MediaImportStatusText = imported.Count == 0 && failures.Count == 0
             ? "No local media files were dropped."
             : $"Imported {imported.Count} file(s)." + (failures.Count == 0 ? string.Empty : $" Failed: {string.Join(", ", failures)}");
+    }
+
+    public async Task<bool> PrepareLocalAnalysisAsync(GeminiAnalysisScope scopes, bool uploadConsent, CancellationToken cancellationToken)
+    {
+        if (_analysisSampler is null)
+        {
+            AnalysisStatusText = "Local analysis is unavailable; manual editing remains available.";
+            return false;
+        }
+
+        if (_analysisAssets.Count == 0)
+        {
+            AnalysisStatusText = "Import local media before preparing AI analysis samples.";
+            return false;
+        }
+
+        try
+        {
+            var request = new GeminiAnalysisRequest(_analysisAssets.Values.ToArray(), scopes, uploadConsent);
+            LastLocalAnalysisReport = await _analysisSampler.PrepareAsync(
+                request,
+                new Progress<LocalAnalysisProgress>(update => AnalysisStatusText = $"{update.Stage} ({update.Fraction:P0})"),
+                cancellationToken);
+            OnPropertyChanged(nameof(LastLocalAnalysisReport));
+            AnalysisStatusText = LastLocalAnalysisReport.Disclosure;
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            AnalysisStatusText = "Local AI analysis preparation canceled; no upload occurred.";
+            return false;
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidDataException or InvalidOperationException or MediaDecodeException)
+        {
+            AnalysisStatusText = $"Local AI analysis preparation failed: {exception.Message}";
+            return false;
+        }
     }
 
     public async Task<bool> ExportTimelineAsync(string destinationPath, CancellationToken cancellationToken)
@@ -313,9 +373,10 @@ public sealed class DesktopServices
     public MainWindowViewModel CreateMainWindowViewModel()
     {
         var processRunner = new FfmpegProcessRunner();
+        var decoder = new FfmpegFrameDecoder(processRunner);
         var importer = new FfmpegMediaImporter(
             new FfprobeMediaProbe(processRunner),
-            new FfmpegFrameDecoder(processRunner),
+            decoder,
             processRunner);
         var repository = new JsonProjectRepository();
         return new(
@@ -323,6 +384,7 @@ public sealed class DesktopServices
             new FrameTheory.Platform.SystemCapabilityDetector(),
             importer,
             new PhotoRecoveryViewModel(new ProjectRecoveryService(repository), repository),
-            timelineExporter: new FfmpegTimelineVideoExporter(processRunner, new FfprobeMediaProbe(processRunner)));
+            timelineExporter: new FfmpegTimelineVideoExporter(processRunner, new FfprobeMediaProbe(processRunner)),
+            analysisSampler: new LocalAnalysisSampler(decoder));
     }
 }
