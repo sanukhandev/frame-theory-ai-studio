@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using FrameTheory.Application;
 
 namespace FrameTheory.Desktop;
 
@@ -23,11 +24,14 @@ public sealed class WorkspaceCatalog : IWorkspaceCatalog
 
 public sealed class MainWindowViewModel : INotifyPropertyChanged
 {
+    private readonly ICapabilityDetector _capabilityDetector;
     private int _selectedWorkspaceIndex;
+    private string _capabilityStatusText = "Checking local capabilities...";
 
-    public MainWindowViewModel(IWorkspaceCatalog workspaceCatalog)
+    public MainWindowViewModel(IWorkspaceCatalog workspaceCatalog, ICapabilityDetector capabilityDetector)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
+        _capabilityDetector = capabilityDetector;
         if (Workspaces.Count == 0)
         {
             throw new InvalidOperationException("At least one workspace is required.");
@@ -54,6 +58,38 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public WorkspaceViewModel SelectedWorkspace => Workspaces[SelectedWorkspaceIndex];
 
+    public string CapabilityStatusText
+    {
+        get => _capabilityStatusText;
+        private set
+        {
+            if (value == _capabilityStatusText)
+            {
+                return;
+            }
+
+            _capabilityStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public async Task RefreshCapabilitiesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            var report = await Task.Run(() => _capabilityDetector.DetectAsync(cancellationToken), cancellationToken);
+            CapabilityStatusText = report.Summary;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            CapabilityStatusText = "Capability check canceled.";
+        }
+        catch (Exception exception)
+        {
+            CapabilityStatusText = $"Capability check failed: {exception.GetType().Name}.";
+        }
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
@@ -63,5 +99,5 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 public sealed class DesktopServices
 {
     public MainWindowViewModel CreateMainWindowViewModel() =>
-        new(new WorkspaceCatalog());
+        new(new WorkspaceCatalog(), new FrameTheory.Platform.SystemCapabilityDetector());
 }

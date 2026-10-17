@@ -3,7 +3,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 
 namespace FrameTheory.Desktop;
 
-public sealed class App : Application
+public sealed class App : Avalonia.Application
 {
     public App()
     {
@@ -15,7 +15,9 @@ public sealed class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var services = new DesktopServices();
-            desktop.MainWindow = new MainWindow(services.CreateMainWindowViewModel());
+            var viewModel = services.CreateMainWindowViewModel();
+            desktop.MainWindow = new MainWindow(viewModel);
+            _ = viewModel.RefreshCapabilitiesAsync(CancellationToken.None);
         }
 
         base.OnFrameworkInitializationCompleted();

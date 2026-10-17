@@ -59,15 +59,32 @@ public sealed class MainWindow : Window
 
         var layout = new Grid
         {
-            RowDefinitions = new RowDefinitions("Auto,*"),
+            RowDefinitions = new RowDefinitions("Auto,*,Auto"),
             Children =
             {
                 header,
-                tabs
+                tabs,
+                CreateStatusBar(viewModel)
             }
         };
         Grid.SetRow(tabs, 1);
+        Grid.SetRow(layout.Children[2], 2);
         Content = layout;
+    }
+
+    private static Control CreateStatusBar(MainWindowViewModel viewModel)
+    {
+        var status = new TextBlock
+        {
+            Margin = new Thickness(16, 8),
+            Foreground = Brushes.LightGray
+        };
+        status.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CapabilityStatusText)));
+        return new Border
+        {
+            Background = Brushes.Black,
+            Child = status
+        };
     }
 
     private static Control CreateWorkspaceContent(WorkspaceViewModel workspace) => new Border
