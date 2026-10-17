@@ -14,7 +14,20 @@ public sealed record CapabilityReport(string Platform, string Architecture, IRea
     public string Summary =>
         $"{Platform} {Architecture} · " +
         string.Join(" · ", Entries.Where(entry => entry.Name is "FFmpeg" or "ffprobe" or "Storage")
-            .Select(entry => $"{entry.Name}: {entry.State.ToString().ToLowerInvariant()}"));
+            .Select(entry => Format(entry)));
+
+    private static string Format(CapabilityStatus entry)
+    {
+        if (entry.State != CapabilityState.Missing)
+        {
+            return $"{entry.Name}: {entry.State.ToString().ToLowerInvariant()}";
+        }
+
+        var guidance = entry.Name is "FFmpeg" or "ffprobe"
+            ? "install FFmpeg and add it to PATH"
+            : "check writable local storage";
+        return $"{entry.Name}: missing ({guidance})";
+    }
 }
 
 public interface ICapabilityDetector

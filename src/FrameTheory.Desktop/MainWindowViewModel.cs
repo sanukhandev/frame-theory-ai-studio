@@ -48,6 +48,7 @@ public sealed class WorkspaceCatalog : IWorkspaceCatalog
 public sealed class MainWindowViewModel : INotifyPropertyChanged
 {
     private readonly ICapabilityDetector _capabilityDetector;
+    private readonly IDiagnosticsLog _diagnosticsLog;
     private readonly IMediaImporter? _mediaImporter;
     private int _selectedWorkspaceIndex;
     private string _capabilityStatusText = "Checking local capabilities...";
@@ -75,10 +76,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ITimelineVideoExporter? timelineExporter = null,
         GeminiSettingsViewModel? geminiSettings = null,
         ILocalAnalysisSampler? analysisSampler = null,
-        ExportQueueService? exportQueue = null)
+        ExportQueueService? exportQueue = null,
+        IDiagnosticsLog? diagnosticsLog = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
+        _diagnosticsLog = diagnosticsLog ?? new FileDiagnosticsLog();
         _mediaImporter = mediaImporter;
         PhotoRecovery = photoRecovery ?? new PhotoRecoveryViewModel(
             new ProjectRecoveryService(new JsonProjectRepository()),
@@ -219,6 +222,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    public string DiagnosticsStatusText => $"Local diagnostics: {_diagnosticsLog.LogPath}";
+
     public string MediaImportStatusText
     {
         get => _mediaImportStatusText;
@@ -269,6 +274,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ArgumentNullException.ThrowIfNull(paths);
         if (_mediaImporter is null)
         {
+            _diagnosticsLog.Record("media-import-unavailable");
             MediaImportStatusText = "Media import is unavailable.";
             return;
         }
@@ -302,6 +308,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
             catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException)
             {
+                _diagnosticsLog.Record("media-import-failed", exception);
                 failures.Add($"{Path.GetFileName(path)} ({exception.Message})");
             }
         }
@@ -345,6 +352,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidDataException or InvalidOperationException or MediaDecodeException)
         {
+            _diagnosticsLog.Record("local-analysis-failed", exception);
             AnalysisStatusText = $"Local AI analysis preparation failed: {exception.Message}";
             return false;
         }
@@ -389,6 +397,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
         catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaExportException or MediaProbeException)
         {
+            _diagnosticsLog.Record("timeline-export-failed", exception);
             TimelineExportStatusText = $"Timeline export failed: {exception.Message}";
             return false;
         }
@@ -426,6 +435,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
         catch (Exception exception) when (exception is IOException or InvalidDataException or ArgumentException)
         {
+            _diagnosticsLog.Record("caption-import-failed", exception);
             CaptionStatusText = $"Caption import failed: {exception.Message}";
             return false;
         }
@@ -447,6 +457,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
         catch (Exception exception) when (exception is IOException or InvalidDataException)
         {
+            _diagnosticsLog.Record("caption-export-failed", exception);
             CaptionStatusText = $"Caption export failed: {exception.Message}";
             return false;
         }
@@ -465,6 +476,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
         catch (Exception exception)
         {
+            _diagnosticsLog.Record("capability-check-failed", exception);
             CapabilityStatusText = $"Capability check failed: {exception.GetType().Name}.";
         }
     }
@@ -477,6 +489,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
 public sealed class DesktopServices
 {
+    private readonly IDiagnosticsLog _diagnosticsLog;
+
+    public DesktopServices(IDiagnosticsLog? diagnosticsLog = null) => _diagnosticsLog = diagnosticsLog ?? new FileDiagnosticsLog();
+
     public MainWindowViewModel CreateMainWindowViewModel()
     {
         var processRunner = new FfmpegProcessRunner();
@@ -494,6 +510,7 @@ public sealed class DesktopServices
             new PhotoRecoveryViewModel(new ProjectRecoveryService(repository), repository),
             new PhotoEditorViewModel(new PhotoImporter(probe, decoder), new PhotoExporter(processRunner, probe)),
             timelineExporter: new FfmpegTimelineVideoExporter(processRunner, new FfprobeMediaProbe(processRunner)),
-            analysisSampler: new LocalAnalysisSampler(decoder));
+            analysisSampler: new LocalAnalysisSampler(decoder),
+            diagnosticsLog: _diagnosticsLog);
     }
 }

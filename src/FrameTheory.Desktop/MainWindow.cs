@@ -146,10 +146,17 @@ public sealed class MainWindow : Window
             Foreground = Brushes.LightGray
         };
         status.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CapabilityStatusText)));
+        var diagnostics = new TextBlock
+        {
+            Margin = new Thickness(16, 0, 16, 8),
+            Foreground = Brushes.Gray,
+            TextWrapping = TextWrapping.Wrap
+        };
+        diagnostics.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.DiagnosticsStatusText)));
         return new Border
         {
             Background = Brushes.Black,
-            Child = status
+            Child = new StackPanel { Children = { status, diagnostics } }
         };
     }
 

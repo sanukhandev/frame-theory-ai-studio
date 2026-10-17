@@ -67,6 +67,20 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public void CapabilitySummaryProvidesActionableMediaDependencyGuidance()
+    {
+        var report = new CapabilityReport("Test", "x64",
+        [
+            new("FFmpeg", CapabilityState.Missing, "Not found on PATH."),
+            new("ffprobe", CapabilityState.Missing, "Not found on PATH."),
+            new("Storage", CapabilityState.Available, "ready")
+        ]);
+
+        Xunit.Assert.Contains("install FFmpeg and add it to PATH", report.Summary, StringComparison.Ordinal);
+        Xunit.Assert.Contains("ffprobe: missing", report.Summary, StringComparison.Ordinal);
+    }
+
+    [Xunit.Fact]
     public async Task CapabilityDetectorReportsHostAndHonorsCancellation()
     {
         var detector = new FrameTheory.Platform.SystemCapabilityDetector();

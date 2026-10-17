@@ -6,6 +6,7 @@ Editing is local. Gemini is an **optional online service** that requires a user-
 ## Assets, authentication, storage
 - Never hardcode API keys in source, tests, screenshots, settings JSON or logs. Use DPAPI/Credential Manager on Windows, macOS Keychain, and a supported Linux secret service via a tested `ISecretStore` adapter.
 - Never include secrets in telemetry, crash dumps or environment diagnostics; redact known tokens and file URLs.
+- Local diagnostics are written only to the per-user application-data log, redact known Gemini token shapes, and never send reports over the network.
 - Project saves include media references and edit metadata but no raw API keys and by default no duplicated source media.
 - Separate private per-user cache and thumbnail/transcription directories; user-configurable retention and deletion.
 - Reject path traversal and symlink escapes; never let Gemini choose absolute paths, executable names or file/network actions.
