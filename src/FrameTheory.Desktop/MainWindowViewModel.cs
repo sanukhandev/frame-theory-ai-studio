@@ -26,6 +26,8 @@ public enum EditorShortcut
 
 public sealed record ImportedMediaViewModel(string Name, string Summary, byte[]? ThumbnailPpm = null)
 {
+    public MediaId? Id { get; init; }
+
     public override string ToString() => $"{Name} — {Summary}";
 }
 
@@ -537,7 +539,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             return;
         }
 
-        var imported = new List<ImportedMediaViewModel>();
+        var imported = ImportedMedia.ToList();
+        var newlyImported = 0;
         var failures = new List<string>();
         foreach (var path in paths.Where(path => !string.IsNullOrWhiteSpace(path)).Distinct(StringComparer.OrdinalIgnoreCase))
         {
@@ -546,10 +549,17 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             {
                 var fullPath = Path.GetFullPath(path);
                 var media = await _mediaImporter.ImportAsync(new Uri(fullPath), cancellationToken);
-                imported.Add(new ImportedMediaViewModel(
+                if (imported.All(item => item.Id != media.Metadata.Id))
+                {
+                    imported.Add(new ImportedMediaViewModel(
                     Path.GetFileName(fullPath),
                     $"{media.Metadata.Kind}; {media.Metadata.Width}x{media.Metadata.Height}; thumbnail {media.ThumbnailPpm?.Length ?? 0} bytes; waveform {media.WaveformPeaks.Count} peaks",
-                    media.ThumbnailPpm));
+                    media.ThumbnailPpm)
+                    {
+                        Id = media.Metadata.Id
+                    });
+                    newlyImported++;
+                }
                 _mediaSources[media.Metadata.Id] = new Uri(fullPath);
                 _analysisAssets[media.Metadata.Id] = media;
                 if (media.Metadata.Kind == MediaKind.Video && _videoWidth == 0)
@@ -573,9 +583,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         ImportedMedia = imported;
         OnPropertyChanged(nameof(ImportedMedia));
-        MediaImportStatusText = imported.Count == 0 && failures.Count == 0
+        MediaImportStatusText = newlyImported == 0 && failures.Count == 0
             ? "No local media files were dropped."
-            : $"Imported {imported.Count} file(s)." + (failures.Count == 0 ? string.Empty : $" Failed: {string.Join(", ", failures)}");
+            : $"Imported {newlyImported} file(s); {imported.Count} file(s) available." + (failures.Count == 0 ? string.Empty : $" Failed: {string.Join(", ", failures)}");
     }
 
     public async Task<bool> PreviewCurrentTimelineFrameAsync(CancellationToken cancellationToken)
@@ -803,7 +813,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 importedViewModels.Add(new ImportedMediaViewModel(
                     Path.GetFileName(item.Source.LocalPath),
                     $"{item.Media.Metadata.Kind}; {item.Media.Metadata.Width}x{item.Media.Metadata.Height}; thumbnail {item.Media.ThumbnailPpm?.Length ?? 0} bytes; waveform {item.Media.WaveformPeaks.Count} peaks",
-                    item.Media.ThumbnailPpm));
+                    item.Media.ThumbnailPpm)
+                {
+                    Id = item.Media.Metadata.Id
+                });
             }
 
             ImportedMedia = importedViewModels;

@@ -22,6 +22,22 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task ImportingInBatchesKeepsEarlierMediaVisibleWithoutDuplicatingIt()
+    {
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new BatchImporter());
+
+        await viewModel.ImportFilesAsync(["first.mp4"], CancellationToken.None);
+        await viewModel.ImportFilesAsync(["second.mp4", "first.mp4"], CancellationToken.None);
+
+        Xunit.Assert.Equal(2, viewModel.ImportedMedia.Count);
+        Xunit.Assert.Equal(2, viewModel.TimelineEditor.TrackRows.Single(track => track.Kind == TimelineTrackKind.Video).Clips.Count);
+        Xunit.Assert.Contains("2 file(s) available", viewModel.MediaImportStatusText, StringComparison.Ordinal);
+    }
+
+    [Xunit.Fact]
     public async Task TimelinePreviewDecodesTheCurrentVideoSample()
     {
         var decoder = new StubPreviewDecoder();
@@ -137,6 +153,23 @@ public sealed class DesktopImportTests
         {
             var metadata = new MediaSourceMetadata(
                 MediaId.Create(file, "preview-test"),
+                file,
+                MediaKind.Video,
+                16,
+                9,
+                new RationalFrameRate(30, 1),
+                30,
+                TimeSpan.FromSeconds(1));
+            return Task.FromResult(new ImportedMedia(metadata, null, []));
+        }
+    }
+
+    private sealed class BatchImporter : IMediaImporter
+    {
+        public Task<ImportedMedia> ImportAsync(Uri file, CancellationToken cancellationToken)
+        {
+            var metadata = new MediaSourceMetadata(
+                MediaId.Create(file, "batch-test"),
                 file,
                 MediaKind.Video,
                 16,
