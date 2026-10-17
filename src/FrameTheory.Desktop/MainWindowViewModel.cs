@@ -13,6 +13,17 @@ namespace FrameTheory.Desktop;
 
 public sealed record WorkspaceViewModel(string Name, string Description, string OfflineMessage);
 
+public enum EditorShortcut
+{
+    VideoWorkspace,
+    PhotoWorkspace,
+    ColorWorkspace,
+    AiWorkspace,
+    PreviousFrame,
+    NextFrame,
+    UndoAiEdit
+}
+
 public sealed record ImportedMediaViewModel(string Name, string Summary, byte[]? ThumbnailPpm = null)
 {
     public override string ToString() => $"{Name} — {Summary}";
@@ -72,12 +83,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         PhotoRecovery = photoRecovery ?? new PhotoRecoveryViewModel(
             new ProjectRecoveryService(new JsonProjectRepository()),
             new JsonProjectRepository());
-        PhotoEditor = photoEditor;
-        ColorInspector = colorInspector ?? new ColorGradeInspectorViewModel();
-        TimelineEditor = timelineEditor ?? new TimelineEditorViewModel();
-        PhotoEditor = new PhotoEditorViewModel(
+        PhotoEditor = photoEditor ?? new PhotoEditorViewModel(
             new PhotoImporter(new FfprobeMediaProbe(new FfmpegProcessRunner()), new FfmpegFrameDecoder(new FfmpegProcessRunner())),
             new PhotoExporter(new FfmpegProcessRunner(), new FfprobeMediaProbe(new FfmpegProcessRunner())));
+        ColorInspector = colorInspector ?? new ColorGradeInspectorViewModel();
+        TimelineEditor = timelineEditor ?? new TimelineEditorViewModel();
         GeminiSettings = geminiSettings ?? new GeminiSettingsViewModel(new GeminiConfigurationService(new OperatingSystemSecretStore()));
         _timelineExporter = timelineExporter;
         _exportQueue = exportQueue ?? new ExportQueueService();
@@ -140,9 +150,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         AiProposal.ApplyApproved(actions => AiEditPlanExecutor.Execute(actions, TimelineEditor, fonts, new Dictionary<string, FrameTheory.Color.ColorGrade>(StringComparer.Ordinal)));
     }
 
-    public void UndoLastAiEdit()
+    public bool UndoLastAiEdit()
     {
-        AiProposal.SetUndoStatus(TimelineEditor.UndoAiEdit());
+        var undone = TimelineEditor.UndoAiEdit();
+        AiProposal.SetUndoStatus(undone);
+        return undone;
     }
 
     public int SelectedWorkspaceIndex
@@ -162,6 +174,35 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     }
 
     public WorkspaceViewModel SelectedWorkspace => Workspaces[SelectedWorkspaceIndex];
+
+    public bool HandleShortcut(EditorShortcut shortcut) => shortcut switch
+    {
+        EditorShortcut.VideoWorkspace => SelectWorkspace(0),
+        EditorShortcut.PhotoWorkspace => SelectWorkspace(1),
+        EditorShortcut.ColorWorkspace => SelectWorkspace(2),
+        EditorShortcut.AiWorkspace => SelectWorkspace(3),
+        EditorShortcut.PreviousFrame when SelectedWorkspaceIndex == 0 => MoveTimelineFrame(-1),
+        EditorShortcut.NextFrame when SelectedWorkspaceIndex == 0 => MoveTimelineFrame(1),
+        EditorShortcut.UndoAiEdit => UndoLastAiEdit(),
+        _ => false
+    };
+
+    private bool SelectWorkspace(int index)
+    {
+        if (index < 0 || index >= Workspaces.Count)
+        {
+            return false;
+        }
+
+        SelectedWorkspaceIndex = index;
+        return true;
+    }
+
+    private bool MoveTimelineFrame(int delta)
+    {
+        TimelineEditor.Step(delta);
+        return true;
+    }
 
     public string CapabilityStatusText
     {

@@ -52,6 +52,21 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public void DesktopKeyboardShortcutsSwitchWorkspacesAndStepTimeline()
+    {
+        var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
+            new FrameTheory.Desktop.WorkspaceCatalog(),
+            new TestCapabilityDetector());
+
+        Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.AiWorkspace));
+        Xunit.Assert.Equal("AI", viewModel.SelectedWorkspace.Name);
+        Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.VideoWorkspace));
+        Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.NextFrame));
+        Xunit.Assert.Equal(0, viewModel.TimelineEditor.CurrentFrame);
+        Xunit.Assert.False(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.UndoAiEdit));
+    }
+
+    [Xunit.Fact]
     public async Task CapabilityDetectorReportsHostAndHonorsCancellation()
     {
         var detector = new FrameTheory.Platform.SystemCapabilityDetector();

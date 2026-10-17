@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
@@ -23,6 +24,8 @@ public sealed class MainWindow : Window
         DataContext = viewModel;
         DragDrop.SetAllowDrop(this, true);
         DragDrop.AddDropHandler(this, OnDrop);
+        KeyDown += OnKeyDown;
+        Focusable = true;
         Title = "Frame Theory Studio AI";
         Width = 1280;
         Height = 800;
@@ -63,6 +66,12 @@ public sealed class MainWindow : Window
                     {
                         Text = "Offline-first creative editing",
                         Foreground = Brushes.LightGray
+                    },
+                    new TextBlock
+                    {
+                        Text = "Shortcuts: Ctrl/⌘+1–4 workspaces · Left/Right step video frames · Ctrl/⌘+Z undo AI apply",
+                        Foreground = Brushes.LightGray,
+                        TextWrapping = TextWrapping.Wrap
                     }
                 }
             }
@@ -81,6 +90,39 @@ public sealed class MainWindow : Window
         Grid.SetRow(tabs, 1);
         Grid.SetRow(layout.Children[2], 2);
         Content = layout;
+    }
+
+    private void OnKeyDown(object? sender, KeyEventArgs args)
+    {
+        if (args.Source is TextBox || DataContext is not MainWindowViewModel viewModel)
+        {
+            return;
+        }
+
+        var commandModifier = (args.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Meta)) != 0;
+        var shortcut = commandModifier
+            ? args.Key switch
+            {
+                Key.D1 => EditorShortcut.VideoWorkspace,
+                Key.D2 => EditorShortcut.PhotoWorkspace,
+                Key.D3 => EditorShortcut.ColorWorkspace,
+                Key.D4 => EditorShortcut.AiWorkspace,
+                Key.Z => EditorShortcut.UndoAiEdit,
+                _ => (EditorShortcut?)null
+            }
+            : viewModel.SelectedWorkspaceIndex == 0
+                ? args.Key switch
+                {
+                    Key.Left => EditorShortcut.PreviousFrame,
+                    Key.Right => EditorShortcut.NextFrame,
+                    _ => (EditorShortcut?)null
+                }
+                : null;
+
+        if (shortcut is not null && viewModel.HandleShortcut(shortcut.Value))
+        {
+            args.Handled = true;
+        }
     }
 
     private async void OnDrop(object? sender, DragEventArgs args)
@@ -116,6 +158,7 @@ public sealed class MainWindow : Window
         var importStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         importStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.MediaImportStatusText)));
         var importedList = new ListBox { Height = 140 };
+        AutomationProperties.SetName(importedList, "Imported media");
         importedList.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(MainWindowViewModel.ImportedMedia)));
         var children = new List<Control>
         {
@@ -174,13 +217,16 @@ public sealed class MainWindow : Window
 
         var stack = new StackPanel { Spacing = 12 };
         stack.Children.AddRange(children);
-        return new Border
+        return new ScrollViewer
         {
-            Margin = new Thickness(24),
-            Padding = new Thickness(24),
-            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(35, 35, 35)),
-            CornerRadius = new CornerRadius(8),
-            Child = stack
+            Content = new Border
+            {
+                Margin = new Thickness(24),
+                Padding = new Thickness(24),
+                Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(35, 35, 35)),
+                CornerRadius = new CornerRadius(8),
+                Child = stack
+            }
         };
     }
 
@@ -502,6 +548,7 @@ public sealed class MainWindow : Window
     {
         var timeline = viewModel.TimelineEditor;
         var playhead = new Slider { Minimum = 0, Maximum = Math.Max(1, timeline.TotalFrames - 1), Value = timeline.CurrentFrame };
+        AutomationProperties.SetName(playhead, "Timeline playhead frame");
         playhead.ValueChanged += (_, args) => timeline.SeekFrame((long)Math.Round(args.NewValue, MidpointRounding.AwayFromZero));
         timeline.PropertyChanged += (_, args) =>
         {
@@ -518,12 +565,14 @@ public sealed class MainWindow : Window
         var ruler = new TextBlock { TextWrapping = TextWrapping.Wrap };
         ruler.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.RulerText"));
         var tracks = new ListBox { Height = 100 };
+        AutomationProperties.SetName(tracks, "Timeline tracks");
         tracks.Bind(ItemsControl.ItemsSourceProperty, new Binding("TimelineEditor.TrackRows"));
         var beatMarkers = new TextBlock { TextWrapping = TextWrapping.Wrap };
         beatMarkers.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.BeatMarkersText"));
         var snap = new CheckBox { Content = "Snap to clip boundaries" };
         snap.Bind(ToggleButton.IsCheckedProperty, new Binding("TimelineEditor.SnapEnabled") { Mode = BindingMode.TwoWay });
         var zoom = new Slider { Minimum = 0.05, Maximum = 20, Value = timeline.FramesPerPixel };
+        AutomationProperties.SetName(zoom, "Timeline zoom");
         zoom.ValueChanged += (_, args) => timeline.SetZoom(args.NewValue);
         var back = new Button { Content = "◀ Frame" };
         back.Click += (_, _) => timeline.Step(-1);
@@ -697,6 +746,7 @@ public sealed class MainWindow : Window
         var cancelExport = new Button { Content = "Cancel export" };
         cancelExport.Click += (_, _) => viewModel.CancelTimelineExport();
         var aspectRatio = new ComboBox { ItemsSource = new[] { "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
+        AutomationProperties.SetName(aspectRatio, "Video export aspect ratio");
         export.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(export);
@@ -765,6 +815,7 @@ public sealed class MainWindow : Window
     private static Control CreateGradeControl(string label, double minimum, double maximum, float value, Action<float> setter)
     {
         var slider = new Slider { Minimum = minimum, Maximum = maximum, Value = value };
+        AutomationProperties.SetName(slider, label);
         slider.ValueChanged += (_, args) => setter((float)args.NewValue);
         return new StackPanel
         {

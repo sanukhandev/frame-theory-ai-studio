@@ -44,6 +44,19 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void TimelineRulerRemainsBoundedForDenseHiDpiViewport()
+    {
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(Metadata(new Uri("file:///long-clip.mp4"), "long", 1_000_000, hasAudio: false));
+        editor.SetZoom(0.05);
+
+        var ticks = editor.BuildRulerTicks(1280 * 2);
+
+        Xunit.Assert.InRange(ticks.Count, 1, 2560);
+        Xunit.Assert.Equal(0, ticks[0].Frame);
+    }
+
+    [Xunit.Fact]
     public void TimelineEditorSupportsCopyPasteSplitTrimRippleDeleteAndOverlapProtection()
     {
         var mediaId = MediaId.Parse(new string('d', 64));

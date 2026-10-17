@@ -29,6 +29,8 @@ Top chrome: project title, save state, undo/redo, workspace selector `Video | Ph
 ## Accessibility and resilience
 Keyboard navigation for every essential control; accessible labels/focus ring; high-DPI, macOS Retina and Linux scales; reduced-motion preference; resizable viewport; 1280x800 minimum useful layout; user-friendly error details and logs copy.
 
+The desktop shell provides `Ctrl/⌘+1..4` workspace switching, `Left/Right` frame stepping in Video, and `Ctrl/⌘+Z` undo for the last approved AI transaction. Dense workspace content is scrollable rather than clipped, and timeline/playhead, track, zoom, export-ratio and grade-slider controls expose automation names.
+
 ## Important screens / flows
 1. Welcome/project: new/open/recent, sample project, project settings.
 2. Media import and relink: metadata errors, unsupported formats, permission handling.
