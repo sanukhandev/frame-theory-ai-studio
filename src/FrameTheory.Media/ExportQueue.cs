@@ -2,22 +2,80 @@ using System.Threading.Channels;
 
 namespace FrameTheory.Media;
 
+public enum ExportQueueJobState
+{
+    Queued,
+    Running,
+    Succeeded,
+    Failed,
+    Canceled
+}
+
+public sealed record ExportQueueHistoryEntry(
+    Guid Id,
+    ExportQueueJobState State,
+    int Attempts,
+    string? ErrorMessage);
+
 public sealed class ExportQueueJob
 {
     private readonly CancellationTokenSource _cancellation;
+    private readonly TaskCompletionSource<ExportReceipt> _completion;
+    private readonly Func<CancellationToken, Task<ExportReceipt>> _operation;
+    private ExportQueueJobState _state = ExportQueueJobState.Queued;
+    private int _attempts;
+    private string? _errorMessage;
 
-    internal ExportQueueJob(Guid id, CancellationTokenSource cancellation, Task<ExportReceipt> completion)
+    internal ExportQueueJob(
+        Guid id,
+        CancellationTokenSource cancellation,
+        TaskCompletionSource<ExportReceipt> completion,
+        Func<CancellationToken, Task<ExportReceipt>> operation)
     {
         Id = id;
         _cancellation = cancellation;
-        Completion = completion;
+        _completion = completion;
+        _operation = operation;
+        Completion = completion.Task;
     }
 
     public Guid Id { get; }
 
     public Task<ExportReceipt> Completion { get; }
 
-    public void Cancel() => _cancellation.Cancel();
+    public ExportQueueJobState State => _state;
+
+    public int Attempts => _attempts;
+
+    public string? ErrorMessage => _errorMessage;
+
+    public void Cancel()
+    {
+        try
+        {
+            _cancellation.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+
+        _state = ExportQueueJobState.Canceled;
+        _completion.TrySetCanceled();
+    }
+
+    internal Func<CancellationToken, Task<ExportReceipt>> Operation => _operation;
+
+    internal void MarkRunning() => _state = ExportQueueJobState.Running;
+
+    internal void MarkSucceeded() => _state = ExportQueueJobState.Succeeded;
+
+    internal void MarkFailed(Exception exception)
+    {
+        _errorMessage = exception.Message;
+        _state = ExportQueueJobState.Failed;
+    }
+
+    internal void MarkAttempt() => _attempts++;
 }
 
 public sealed class ExportQueueService : IAsyncDisposable
@@ -28,19 +86,49 @@ public sealed class ExportQueueService : IAsyncDisposable
 
     public ExportQueueService() => _worker = Task.Run(ProcessAsync);
 
+    public IReadOnlyList<ExportQueueHistoryEntry> History
+    {
+        get
+        {
+            lock (_history)
+            {
+                return _history.Select(job => new ExportQueueHistoryEntry(job.Id, job.State, job.Attempts, job.ErrorMessage)).ToArray();
+            }
+        }
+    }
+
+    private readonly List<ExportQueueJob> _history = [];
+
     public ExportQueueJob Enqueue(Func<CancellationToken, Task<ExportReceipt>> operation)
     {
         ArgumentNullException.ThrowIfNull(operation);
         var cancellation = new CancellationTokenSource();
         var completion = new TaskCompletionSource<ExportReceipt>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var item = new WorkItem(Guid.NewGuid(), operation, cancellation, completion);
+        var job = new ExportQueueJob(Guid.NewGuid(), cancellation, completion, operation);
+        var item = new WorkItem(job.Id, operation, cancellation, completion, job);
         if (!_queue.Writer.TryWrite(item))
         {
             cancellation.Dispose();
             throw new InvalidOperationException("The export queue is closed.");
         }
 
-        return new ExportQueueJob(item.Id, cancellation, completion.Task);
+        lock (_history)
+        {
+            _history.Add(job);
+        }
+
+        return job;
+    }
+
+    public ExportQueueJob Retry(ExportQueueJob job)
+    {
+        ArgumentNullException.ThrowIfNull(job);
+        if (job.State is not (ExportQueueJobState.Failed or ExportQueueJobState.Canceled))
+        {
+            throw new InvalidOperationException("Only failed or canceled export jobs can be retried.");
+        }
+
+        return Enqueue(job.Operation);
     }
 
     public async ValueTask DisposeAsync()
@@ -66,14 +154,33 @@ public sealed class ExportQueueService : IAsyncDisposable
             {
                 try
                 {
-                    item.Completion.TrySetResult(await item.Operation(item.Cancellation.Token).ConfigureAwait(false));
+                    if (item.Cancellation.IsCancellationRequested)
+                    {
+                        item.Completion.TrySetCanceled();
+                        continue;
+                    }
+
+                    item.Job.MarkRunning();
+                    item.Job.MarkAttempt();
+                    var receipt = await item.Operation(item.Cancellation.Token).ConfigureAwait(false);
+                    if (item.Cancellation.IsCancellationRequested)
+                    {
+                        item.Job.Cancel();
+                    }
+                    else
+                    {
+                        item.Job.MarkSucceeded();
+                        item.Completion.TrySetResult(receipt);
+                    }
                 }
                 catch (OperationCanceledException exception)
                 {
+                    item.Job.Cancel();
                     item.Completion.TrySetCanceled(exception.CancellationToken);
                 }
                 catch (Exception exception)
                 {
+                    item.Job.MarkFailed(exception);
                     item.Completion.TrySetException(exception);
                 }
                 finally
@@ -91,5 +198,6 @@ public sealed class ExportQueueService : IAsyncDisposable
         Guid Id,
         Func<CancellationToken, Task<ExportReceipt>> Operation,
         CancellationTokenSource Cancellation,
-        TaskCompletionSource<ExportReceipt> Completion);
+        TaskCompletionSource<ExportReceipt> Completion,
+        ExportQueueJob Job);
 }

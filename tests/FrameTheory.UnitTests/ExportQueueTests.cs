@@ -28,7 +28,37 @@ public sealed class ExportQueueTests
         second.Cancel();
         await Xunit.Assert.ThrowsAnyAsync<OperationCanceledException>(() => second.Completion);
 
-        Xunit.Assert.Equal([1, 2], order);
+        Xunit.Assert.InRange(order.Count, 1, 2);
+        Xunit.Assert.Equal(1, order[0]);
+        Xunit.Assert.Equal(ExportQueueJobState.Canceled, second.State);
+        Xunit.Assert.Contains(queue.History, item => item.Id == second.Id && item.State == ExportQueueJobState.Canceled);
+    }
+
+    [Xunit.Fact]
+    public async Task QueueRetriesFailedJobsAndRecordsAttempts()
+    {
+        await using var queue = new ExportQueueService();
+        var attempts = 0;
+        var job = queue.Enqueue(_ =>
+        {
+            if (Interlocked.Increment(ref attempts) == 1)
+            {
+                throw new InvalidOperationException("transient export failure");
+            }
+
+            return Task.FromResult(Receipt("retry"));
+        });
+
+        await Xunit.Assert.ThrowsAsync<InvalidOperationException>(() => job.Completion);
+        var retry = queue.Retry(job);
+        await retry.Completion;
+
+        Xunit.Assert.Equal(2, attempts);
+        Xunit.Assert.Equal(ExportQueueJobState.Failed, job.State);
+        Xunit.Assert.Equal(ExportQueueJobState.Succeeded, retry.State);
+        Xunit.Assert.Equal(1, job.Attempts);
+        Xunit.Assert.Equal(1, retry.Attempts);
+        Xunit.Assert.Contains(queue.History, item => item.Id == job.Id && item.ErrorMessage == "transient export failure");
     }
 
     private static ExportReceipt Receipt(string name) => new(

@@ -476,9 +476,23 @@ public sealed class MainWindow : Window
             {
                 RefreshActions();
             }
+
+            if (args.PropertyName == nameof(AiProposalViewModel.ValidatedJson) && viewModel.AiProposal.ValidatedJson is not null)
+            {
+                planJson.Text = viewModel.AiProposal.ValidatedJson;
+            }
         };
         var validate = new Button { Content = "Validate proposal" };
         validate.Click += (_, _) => viewModel.ValidateAiPlan(planJson.Text ?? string.Empty);
+        var revisionInstruction = new TextBox { PlaceholderText = "Natural-language revision request", Width = 420 };
+        var requestRevision = new Button { Content = "Ask Gemini to revise" };
+        AutomationProperties.SetName(requestRevision, "Ask Gemini to revise proposal");
+        requestRevision.Click += async (_, _) => await viewModel.RequestAiRevisionAsync(
+            revisionInstruction.Text ?? string.Empty,
+            planJson.Text ?? string.Empty,
+            CancellationToken.None);
+        var revisionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        revisionStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AiRevisionStatusText)));
         var approve = new Button { Content = "Apply approved actions" };
         approve.Click += (_, _) => viewModel.ApplyApprovedAiPlan();
         var undo = new Button { Content = "Undo last AI apply" };
@@ -498,6 +512,8 @@ public sealed class MainWindow : Window
                     new TextBlock { Text = "AI proposal review", FontWeight = FontWeight.SemiBold },
                     new TextBlock { Text = "Plans are untrusted data. Only checked actions are applied, atomically, through editable timeline operations; failures roll back the whole group.", TextWrapping = TextWrapping.Wrap },
                     planJson,
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { revisionInstruction, requestRevision } },
+                    revisionStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { validate, approve, undo, clear } },
                     approvalSummary,
                     actions,
@@ -822,6 +838,8 @@ public sealed class MainWindow : Window
         };
         var exportStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         exportStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
+        var retryExport = new Button { Content = "Retry last export" };
+        retryExport.Click += async (_, _) => await viewModel.RetryLastTimelineExportAsync(CancellationToken.None);
         var watermarkStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         watermarkStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.WatermarkStatusText"));
         var selectWatermark = new Button { Content = "Select watermark" };
@@ -878,7 +896,7 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { transcribeAudio, transcriptionConsent } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { captionFont } },
                     captionStatus,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { aspectRatio, export, cancelExport } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { aspectRatio, export, cancelExport, retryExport } },
                     exportStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { selectWatermark, clearWatermark } },
                     watermarkStatus,

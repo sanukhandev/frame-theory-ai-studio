@@ -56,12 +56,17 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _timelineExportStatusText = "Timeline export is available after importing video.";
     private string _captionStatusText = "No captions imported.";
     private string _analysisStatusText = "No local AI analysis prepared.";
+    private string _aiRevisionStatusText = "No Gemini revision requested.";
     private readonly Dictionary<MediaId, Uri> _mediaSources = [];
     private readonly Dictionary<MediaId, ImportedMedia> _analysisAssets = [];
     private ITimelineVideoExporter? _timelineExporter;
     private readonly ExportQueueService _exportQueue;
     private readonly HttpClient _transcriptionHttpClient;
+    private readonly IGeminiInteractionHistory _geminiInteractionHistory;
+    private string? _lastGeminiInteractionId;
     private ExportQueueJob? _activeExport;
+    private ExportQueueJob? _lastTimelineExport;
+    private TimelineExportRequest? _lastTimelineExportRequest;
     private readonly ILocalAnalysisSampler? _analysisSampler;
     private int _videoWidth;
     private int _videoHeight;
@@ -79,12 +84,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ILocalAnalysisSampler? analysisSampler = null,
         ExportQueueService? exportQueue = null,
         IDiagnosticsLog? diagnosticsLog = null,
-        HttpClient? transcriptionHttpClient = null)
+        HttpClient? transcriptionHttpClient = null,
+        IGeminiInteractionHistory? geminiInteractionHistory = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
         _diagnosticsLog = diagnosticsLog ?? new FileDiagnosticsLog();
         _transcriptionHttpClient = transcriptionHttpClient ?? new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
+        _geminiInteractionHistory = geminiInteractionHistory ?? new FileGeminiInteractionHistory();
         _mediaImporter = mediaImporter;
         _exportQueue = exportQueue ?? new ExportQueueService();
         PhotoRecovery = photoRecovery ?? new PhotoRecoveryViewModel(
@@ -121,6 +128,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public AiProposalViewModel AiProposal { get; } = new();
 
+    public string AiRevisionStatusText
+    {
+        get => _aiRevisionStatusText;
+        private set
+        {
+            if (value == _aiRevisionStatusText)
+            {
+                return;
+            }
+
+            _aiRevisionStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
     public string AnalysisStatusText
     {
         get => _analysisStatusText;
@@ -155,6 +177,53 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
 
         AiProposal.ApplyApproved(actions => AiEditPlanExecutor.Execute(actions, TimelineEditor, fonts, new Dictionary<string, FrameTheory.Color.ColorGrade>(StringComparer.Ordinal)));
+    }
+
+    public async Task<bool> RequestAiRevisionAsync(string instruction, string currentPlanJson, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(instruction))
+        {
+            AiRevisionStatusText = "Enter a revision request first.";
+            return false;
+        }
+
+        try
+        {
+            var apiKey = await GeminiSettings.ReadApiKeyAsync(cancellationToken);
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                AiRevisionStatusText = "Gemini revision requires a stored key; manual proposal validation remains available offline.";
+                return false;
+            }
+
+            var prompt = string.IsNullOrWhiteSpace(currentPlanJson)
+                ? $"Return only a schema v1 JSON edit plan for this request: {instruction.Trim()}"
+                : $"Return only a schema v1 JSON edit plan. Revise this current plan according to the request. Current plan: {currentPlanJson.Trim()} Request: {instruction.Trim()}";
+            var client = new GeminiInteractionsClient(
+                _transcriptionHttpClient,
+                new GeminiClientOptions(apiKey, GeminiSettings.SelectedModelId, TimeSpan.FromMinutes(2), 3, TimeSpan.FromSeconds(1)),
+                _geminiInteractionHistory,
+                _diagnosticsLog);
+            AiRevisionStatusText = "Requesting a bounded Gemini revision...";
+            var result = await client.CreateFollowUpAsync(prompt, _lastGeminiInteractionId, cancellationToken);
+            _lastGeminiInteractionId = result.InteractionId;
+            ValidateAiPlan(result.OutputText);
+            AiRevisionStatusText = AiProposal.Actions.Count == 0
+                ? "Gemini returned a response that failed local plan validation; no mutation occurred."
+                : $"Validated Gemini revision {result.InteractionId}; review and approve actions before applying.";
+            return AiProposal.Actions.Count > 0;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            AiRevisionStatusText = "Gemini revision canceled; no mutation occurred.";
+            return false;
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or HttpRequestException)
+        {
+            _diagnosticsLog.Record("gemini-revision-failed", exception);
+            AiRevisionStatusText = $"Gemini revision failed: {exception.Message}";
+            return false;
+        }
     }
 
     public bool UndoLastAiEdit()
@@ -376,23 +445,56 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 ? TimelineEditor.BuildRenderPlan(_videoWidth, _videoHeight, _mediaSources)
                 : TimelineEditor.BuildRenderPlan(SocialVideoExportPreset.Create(aspectRatio.Value).Width, SocialVideoExportPreset.Create(aspectRatio.Value).Height, _mediaSources);
             var preset = new ExportPreset(plan.Width, plan.Height, plan.FrameRate, includeAudio: plan.AudioLayers.Count > 0);
-            var job = _exportQueue.Enqueue(queueCancellation => _timelineExporter.ExportAsync(
-                plan,
-                destinationPath,
-                preset,
-                new Progress<ExportProgress>(update => TimelineExportStatusText = $"{update.Stage} ({update.Fraction:P0})"),
-                queueCancellation));
+            _lastTimelineExportRequest = new TimelineExportRequest(plan, destinationPath, preset);
+            return await RunTimelineExportAsync(_lastTimelineExportRequest, retryOf: null, cancellationToken);
+        }
+        catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaExportException or MediaProbeException)
+        {
+            _diagnosticsLog.Record("timeline-export-failed", exception);
+            TimelineExportStatusText = $"Timeline export failed: {exception.Message}";
+            return false;
+        }
+    }
+
+    public async Task<bool> RetryLastTimelineExportAsync(CancellationToken cancellationToken)
+    {
+        if (_timelineExporter is null || _lastTimelineExportRequest is null || _lastTimelineExport is null)
+        {
+            TimelineExportStatusText = "No failed or canceled timeline export is available to retry.";
+            return false;
+        }
+
+        if (_lastTimelineExport.State is not (ExportQueueJobState.Failed or ExportQueueJobState.Canceled))
+        {
+            TimelineExportStatusText = "Only a failed or canceled timeline export can be retried.";
+            return false;
+        }
+
+        return await RunTimelineExportAsync(_lastTimelineExportRequest, _lastTimelineExport, cancellationToken);
+    }
+
+    private async Task<bool> RunTimelineExportAsync(
+        TimelineExportRequest request,
+        ExportQueueJob? retryOf,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var job = retryOf is null
+                ? _exportQueue.Enqueue(queueCancellation => _timelineExporter!.ExportAsync(
+                    request.Plan,
+                    request.DestinationPath,
+                    request.Preset,
+                    new Progress<ExportProgress>(update => TimelineExportStatusText = $"{update.Stage} ({update.Fraction:P0})"),
+                    queueCancellation))
+                : _exportQueue.Retry(retryOf);
+            _lastTimelineExport = job;
             _activeExport = job;
             TimelineExportStatusText = $"Queued export {job.Id:N}.";
             using var cancellationRegistration = cancellationToken.Register(job.Cancel);
             var receipt = await job.Completion.WaitAsync(cancellationToken);
             TimelineExportStatusText = $"Exported {Path.GetFileName(receipt.OutputPath)} ({receipt.OutputBytes} bytes).";
             return true;
-        }
-        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-        {
-            TimelineExportStatusText = "Timeline export canceled.";
-            return false;
         }
         catch (OperationCanceledException)
         {
@@ -543,6 +645,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }
+
+internal sealed record TimelineExportRequest(
+    TimelineVideoRenderPlan Plan,
+    string DestinationPath,
+    ExportPreset Preset);
 
 public sealed class DesktopServices
 {

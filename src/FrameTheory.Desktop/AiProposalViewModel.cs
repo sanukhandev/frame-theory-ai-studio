@@ -41,6 +41,7 @@ public sealed class AiProposalViewModel : INotifyPropertyChanged
 {
     private string _statusText = "No AI edit plan has been reviewed.";
     private IReadOnlyList<AiProposalActionViewModel> _actions = [];
+    private string? _validatedJson;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -72,6 +73,8 @@ public sealed class AiProposalViewModel : INotifyPropertyChanged
         ? "No proposal actions to approve."
         : $"{ApprovedCount} of {Actions.Count} proposal action(s) approved.";
 
+    public string? ValidatedJson => _validatedJson;
+
     public string StatusText
     {
         get => _statusText;
@@ -96,16 +99,22 @@ public sealed class AiProposalViewModel : INotifyPropertyChanged
             if (!validation.IsValid)
             {
                 Actions = [];
+                _validatedJson = null;
+                OnPropertyChanged(nameof(ValidatedJson));
                 StatusText = $"Plan rejected: {string.Join(" ", validation.Errors)}";
                 return;
             }
 
             Actions = plan.Actions.Select(action => new AiProposalActionViewModel(action)).ToArray();
+            _validatedJson = json;
+            OnPropertyChanged(nameof(ValidatedJson));
             StatusText = $"Validated {Actions.Count} action(s). No project mutation occurred; review each action before approval.";
         }
         catch (AiPlanFormatException exception)
         {
             Actions = [];
+            _validatedJson = null;
+            OnPropertyChanged(nameof(ValidatedJson));
             StatusText = $"Plan rejected: {exception.Message}";
         }
     }
@@ -131,6 +140,8 @@ public sealed class AiProposalViewModel : INotifyPropertyChanged
     public void Clear()
     {
         Actions = [];
+        _validatedJson = null;
+        OnPropertyChanged(nameof(ValidatedJson));
         StatusText = "AI proposal cleared; no project mutation occurred.";
     }
 
