@@ -96,6 +96,20 @@
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
+Task / Epic: FT-006 / E00 timeline engine spike
+Git SHA: 2f8042b
+Files changed: .github/workflows/ci.yml, docs/adr/0004-ffmpeg-spike.md, docs/DECISIONS.md, docs/IMPLEMENTATION_STATUS.md
+Actual behavior and UI path: CI now runs the existing real FFmpeg timeline smoke after installing host FFmpeg. It imports two distinct local source paths, exercises the seek/transport path, builds two video layers and two audio layers with transition, animation, gain and fades, verifies a real timeline MP4, retries a failed export, executes approved AI edits and exports an editable before/after Reel. The selected path remains the existing FFmpeg decoder/compositor; no MLT dependency was added.
+Commands executed + OS: Hosted GitHub Actions run `39055332326` on Windows, macOS and Linux; native FFmpeg/ffprobe installation, generated H.264/AAC fixture creation and `FrameTheory.TimelineExportSmoke`.
+Test outputs / exit codes: Run `39055332326` passed documentation/schema, restore/build, native import/extraction/seek smoke, timeline export, queue retry, AI export, Reel export, formatting, tests, publish and checksum verification on all three OS runners. Earlier run `39055092338` failed because both smoke arguments used the same URI and the editor correctly deduplicated the media; `b06a406` changed the second fixture path and the rerun passed.
+Media fixtures and verification: Only generated 16x8 H.264/AAC media was used. Timeline, queue-retry, AI and Reel outputs were real 16x8 BT.709 MP4s and were ffprobe-verified; no user media or network service was used.
+Known limitations / blockers: MLT was not installed or adopted; interactive GUI/playback parity, native FFmpeg redistribution, licensing, installers and signing remain separate release gates.
+Next unblocked task: Continue FT-602 live provider evidence and FT-901..FT-904 / FT-1002..FT-1006 release acceptance.
+```
+
+## Previous execution record
+```text
+Date/time: 2026-10-17
 Task / Epic: FT-1005 / E10 packaging validation
 Git SHA: a4affa2 (packaging), 3808988 (CI syntax gate)
 Files changed: scripts/package.ps1, scripts/package.sh, docs/RELEASE.md, docs/IMPLEMENTATION_STATUS.md
@@ -164,7 +178,7 @@ Next unblocked task:
 ```
 
 ## Release verification status
-Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601/FT-603/FT-604/FT-605/FT-701/FT-702/FT-703/FT-704/FT-705/FT-801/FT-802, FT-803, FT-804 and FT-706 undo paths built/tested; FT-1001 core suite and FT-1004 hosted CI artifacts verified; FT-803 watermark/spectral-marker, FT-602 live provider fixture and FT-706 live provider scope remain partial; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: hosted CI restore/build/test/publish verified by run 39050810748; native FFmpeg/media smoke and interactive desktop acceptance unverified. Linux: hosted CI restore/build/test/publish verified by run 39050810748; native FFmpeg/media smoke and interactive desktop acceptance unverified. Gemini provider: headless adapter contract tested; no live key/media upload run. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
+Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-006/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601/FT-603/FT-604/FT-605/FT-701/FT-702/FT-703/FT-704/FT-705/FT-801/FT-802, FT-803, FT-804 and FT-706 undo paths built/tested; FT-1001 core suite and FT-1004 hosted CI artifacts verified; FT-803 watermark/spectral-marker, FT-602 live provider fixture and FT-706 live provider scope remain partial; packaged UI unverified. macOS: hosted CI restore/build/test/publish, native FFmpeg/media smoke and deterministic timeline export verified by run 39055332326; interactive desktop acceptance remains unverified. Linux: hosted CI restore/build/test/publish, native FFmpeg/media smoke and deterministic timeline export verified by run 39055332326; interactive desktop acceptance remains unverified. Gemini provider: headless adapter contract tested; no live key/media upload run. Logo: source provided outside GitHub repository, not yet committed. MLT: not adopted. Release native media: not approved or bundled.
 
 ## Honest reporting
 Codex should not mark a task complete for a mock UI, TODO, downloaded asset, simulated exporter, docs-only passing CI, or speculative integration. If execution is interrupted, preserve status and resume from first unblocked task on next run.
