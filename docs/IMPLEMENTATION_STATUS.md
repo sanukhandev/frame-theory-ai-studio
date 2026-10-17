@@ -1,8 +1,10 @@
 # Implementation Status — Resume Checkpoint
 
-**Current implementation note:** FT-006 now has a hosted three-OS FFmpeg deterministic timeline spike covering seek, two video layers, two audio layers, transitions, AI-applied edits, queue retry and Reel export; MLT was not adopted and interactive GUI parity remains a separate gate. FT-602 now has consented desktop transcription wiring with source-timed caption import, reparse-point rejection, FFmpeg extraction of the first audio track from local video and a resumable Gemini Files API path for approved audio over 20 MiB; live user-key/spoken-fixture verification and local ASR remain pending. FT-706 now has a desktop natural-language revision flow that validates provider output before proposal display, chains interaction IDs, records redacted local history and preserves transactional undo; live provider-to-plan verification remains pending. FT-902 now exposes a real “Preview current frame” action that resolves the current video timeline sample and decodes it through the shared FFmpeg preview decoder; interactive workspace acceptance remains pending. FT-903 now has bounded repeatable seek traces with p50/p95 latency and decode-throughput output plus an optional content-fingerprint-keyed disk proxy with atomic creation, budgeted eviction and hosted native-media validation on Windows, macOS and Linux; interactive GUI acceptance remains pending. FT-904 now distinguishes missing executables from nonzero probe failures, captures version output from either stdout or stderr and exposes bounded actionable unknown-state details; hosted validation passes while cross-platform interactive failure UX remains pending. FT-1003 now has a reproducible CI/local NuGet advisory scan plus per-run NuGet and FFmpeg/ffprobe evidence artifacts; licensing, codec and native redistribution clearance remain pending. FT-1005 now supports opt-in self-contained publishes in addition to framework-dependent validation packages; installers, native media bundling and signing remain pending.
+**Current implementation note:** FT-006 now has a hosted three-OS FFmpeg deterministic timeline spike covering seek, two video layers, two audio layers, transitions, AI-applied edits, queue retry and Reel export; MLT was not adopted and interactive GUI parity remains a separate gate. FT-602 now has consented desktop transcription wiring with source-timed caption import, reparse-point rejection, FFmpeg extraction of the first audio track from local video and a resumable Gemini Files API path for approved audio over 20 MiB; live user-key/spoken-fixture verification and local ASR remain pending. FT-706 now has a desktop natural-language revision flow that validates provider output before proposal display, chains interaction IDs, records redacted local history and preserves transactional undo; live provider-to-plan verification remains pending. FT-902 now exposes a real “Preview current frame” action that resolves the current video timeline sample and decodes it through the shared FFmpeg preview decoder; interactive workspace acceptance remains pending. FT-903 now has bounded repeatable seek traces with p50/p95 latency and decode-throughput output plus an optional content-fingerprint-keyed disk proxy with atomic creation, budgeted eviction and hosted native-media validation on Windows, macOS and Linux; interactive GUI acceptance remains pending. FT-904 now distinguishes missing executables from nonzero probe failures, captures version output from either stdout or stderr and exposes bounded actionable unknown-state details; hosted validation passes while cross-platform interactive failure UX remains pending. FT-1003 now has a reproducible CI/local NuGet advisory scan plus per-run NuGet and FFmpeg/ffprobe evidence artifacts; licensing, codec and native redistribution clearance remain pending. FT-1005 now supports opt-in self-contained publishes in addition to framework-dependent validation packages; installers, native media bundling and signing remain pending. The desktop Video workspace now saves and reopens versioned `.ftstudio` projects with atomic JSON, editable timeline operations, relative media references and media-ID remapping.
 
 **Local media checkpoint (2026-10-17):** With .NET SDK 10.0.402 and FFmpeg/ffprobe 9.0.2 installed outside the repository, the Windows native smoke passed synthetic H.264/AAC import, 128-point waveform extraction, first-audio-track WAV preparation, an 8x4 preview proxy with cache reuse, local analysis without upload consent, two-video/two-audio timeline export, queue retry, AI grade/transition export and before/after Reel export. The final timeline output was a real 16x8 BT.709 MP4 with video and audio streams and a 2-second duration. No fixture or binary was added to Git.
+
+**Timeline project checkpoint (2026-10-17):** The Video workspace now exposes Save/Open timeline project actions. Save serializes validated editable clips, audio settings, keyframes, transitions, grades, titles, captions, watermark settings, beat markers, playhead and view state into the existing atomic project JSON; open reimports relative local media, maps saved media IDs to current probe IDs, restores the editable state and leaves the current project unchanged on cancellation or import failure. Focused round-trip and malformed-state tests pass.
 
 **FT-801 checkpoint:** Before/after now composes an editable multi-clip base layer twice—unaltered and graded—and the split/wipe/timed-reveal output is covered by graph tests plus a real two-clip FFmpeg smoke.
 
@@ -38,7 +40,7 @@
 - [x] FT-005 deterministic PPM/WAV/frame-counter fixture CLI and golden-byte comparison tests
 - [x] FT-006 FFmpeg process adapter and deterministic timeline compositor; hosted Windows/macOS/Linux seek, multitrack, audio-mix, AI-edit and Reel smoke passed; MLT was not adopted
 - [x] FT-101 normalized rational frame rates, frame ranges, stable media IDs and validated source metadata
-- [x] FT-102 versioned project JSON, relative media references, legacy migration and atomic save/load
+- [x] FT-102 versioned project JSON, relative media references, legacy migration, atomic save/load and editable timeline-state persistence
 - [x] FT-103 immutable commands, inverse operations, named transactions and bounded undo/redo
 - [x] FT-104 autosave/recovery, missing-media inspection/relink and persistent bounded cache index
 - [x] FT-105 corruption/fuzz handling, oversize guards, typed upgrade errors and symlink containment checks
@@ -73,6 +75,7 @@
 - [x] FT-802 real MP4 and Photo social aspect presets for 16:9, 1:1 and 9:16, PNG/JPEG quality export, exact-dimension verification and shared cancellable queue path
 - [~] FT-803 imported user audio, waveform-derived amplitude/energy beat markers and existing creative title/caption slots; approved watermark asset verification remains open
 - [x] FT-804 single-worker cancellable background export queue with Video workspace cancellation, retry, in-memory job history and real FFmpeg retry smoke; macOS/Linux interruption acceptance remains unverified
+- [x] Timeline project save/open preserves editable timeline state, reimports relative media and remaps media IDs without mutating the current project on failed open
 - [~] FT-706 AI transaction undo control, bounded Gemini follow-up transport, typed retry/timeout/cancellation failures, usage accounting, prompt/secret-redacted local history and desktop revision-to-validator wiring are implemented; live provider-to-plan verification remains open
 - [~] FT-901 keyboard workspace/frame shortcuts, scroll-safe layout and automation labels are implemented; interactive 1280x800/HiDPI acceptance remains unverified
 - [~] FT-902 synchronized selected-clip/playhead context, real current-frame FFmpeg preview and AI approval summary are implemented; full manual workspace acceptance remains open
@@ -91,12 +94,27 @@
 - [x] FT-405 photo project autosave recovery, missing-media relink and corrupt-input UI status paths
 
 ## Next tasks
-1. Obtain approved live Gemini spoken-fixture/provider evidence and decide whether a local ASR adapter is required for FT-602.
-2. Finish manual/cross-platform FT-901..FT-904 acceptance and hosted FT-1001..FT-1005 gates; the current CUA session exposes no native app surface, so those manual runs remain unverified.
-3. Resolve approved logo, licensing/native redistribution, installer/signing, and live Gemini prerequisites before closing their GitHub tasks.
-4. Keep MLT deferred unless interactive playback parity or a release licensing decision requires a new native engine spike.
+1. Exercise timeline save/open through the Avalonia UI on Windows, macOS and Linux, including missing-media and moved-project recovery; the current CUA session exposes no native app surface.
+2. Obtain approved live Gemini spoken-fixture/provider evidence and decide whether a local ASR adapter is required for FT-602.
+3. Finish manual/cross-platform FT-901..FT-904 acceptance and hosted FT-1001..FT-1005 gates.
+4. Resolve approved logo, licensing/native redistribution, installer/signing, and live Gemini prerequisites before closing their GitHub tasks.
+5. Keep MLT deferred unless interactive playback parity or a release licensing decision requires a new native engine spike.
 
 ## Latest execution record
+```text
+Date/time: 2026-10-17
+Task / Epic: FT-102 / project timeline persistence
+Git SHA: 9dff007
+Files changed: src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/TimelineEditorViewModel.cs, src/FrameTheory.Desktop/TimelineProjectState.cs, src/FrameTheory.Domain/Project.cs, src/FrameTheory.Storage/JsonProjectRepository.cs, tests/FrameTheory.UnitTests/TimelineProjectPersistenceTests.cs
+Actual behavior and UI path: The Video workspace now provides Save timeline project and Open timeline project actions. Saved state includes editable clips, audio settings, keyframes, transitions, grades, titles, captions, watermark, beat markers, playhead and view state. Open validates bounded JSON, reimports relative local media and remaps media IDs before restoring the timeline; failed or canceled imports leave the current project loaded.
+Commands executed + OS: .NET SDK 10.0.402 Release build, focused persistence tests, 136 unit tests, 2 golden tests and diff checks on Windows 11 x64; hosted quality gate run 39061301468 is pending at checkpoint creation.
+Test outputs / exit codes: Focused persistence tests passed 3/3; full unit tests passed 136/136; golden tests passed 2/2; Release build passed with 0 warnings/errors.
+Media fixtures and verification: The round-trip test uses a temporary local media file and a deterministic importer; no user media, API key, generated fixture or binary entered Git.
+Known limitations / blockers: Project media references must remain inside the project directory because the existing portable project contract rejects path traversal; font and watermark paths are preserved as local paths and still require relinking if moved. Interactive cross-platform GUI acceptance remains open.
+Next unblocked task: Wait for hosted run 39061301468, then exercise manual save/open and missing-media recovery when a native UI surface is available.
+```
+
+## Previous execution record
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-006 / FT-1002 native Windows media smoke
