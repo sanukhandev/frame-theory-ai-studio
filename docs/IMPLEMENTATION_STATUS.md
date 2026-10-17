@@ -45,7 +45,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-305 / E03
-Git SHA: pending commit
+Git SHA: 6041201
 Files changed: src/FrameTheory.Desktop/FrameTheory.Desktop.csproj, src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/ColorGradeInspectorViewModel.cs, src/FrameTheory.Photo/PhotoCanvas.cs, tests/FrameTheory.UnitTests/ColorInspectorTests.cs, tests/FrameTheory.GoldenTests/ColorPreviewGoldenTests.cs, tests/FrameTheory.GoldenTests/FrameTheory.GoldenTests.csproj, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: Imported real thumbnails feed `ColorGradeInspectorViewModel`. The Color workspace displays actual before/after `WriteableBitmap` previews, mean-pixel summaries and functional exposure, contrast, saturation, temperature, tint and reset controls. Both previews use the shared linear-light `PpmRaster.Apply` path; a deterministic golden test checks the same bytes used for export.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
