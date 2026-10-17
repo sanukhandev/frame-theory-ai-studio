@@ -107,7 +107,20 @@ public sealed class AiProposalViewModel : INotifyPropertyChanged
 
     public void RecordApprovals()
     {
-        StatusText = $"Recorded approval for {ApprovedCount} of {Actions.Count} action(s). Execution is unavailable until the transactional executor is implemented.";
+        StatusText = $"Recorded approval for {ApprovedCount} of {Actions.Count} action(s). No project mutation occurred.";
+    }
+
+    public void ApplyApproved(Func<IReadOnlyList<AiEditAction>, AiPlanExecutionResult> executor)
+    {
+        ArgumentNullException.ThrowIfNull(executor);
+        if (Actions.Count == 0)
+        {
+            StatusText = "No validated actions are available to apply.";
+            return;
+        }
+
+        var result = executor(Actions.Where(action => action.IsApproved).Select(action => action.Action).ToArray());
+        StatusText = result.Message;
     }
 
     public void Clear()

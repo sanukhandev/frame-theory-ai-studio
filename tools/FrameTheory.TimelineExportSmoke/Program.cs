@@ -1,7 +1,9 @@
 using FrameTheory.Captions;
 using FrameTheory.Domain;
 using FrameTheory.AI;
+using FrameTheory.Desktop;
 using FrameTheory.Media;
+using System.Text.Json;
 
 if (args.Length is < 3 or > 4)
 {
@@ -92,3 +94,42 @@ var receipt = await exporter.ExportAsync(
     new Progress<ExportProgress>(update => Console.WriteLine($"stage={update.Stage}; fraction={update.Fraction:0.0}")),
     CancellationToken.None);
 Console.WriteLine($"output={receipt.OutputPath}; bytes={receipt.OutputBytes}; kind={receipt.VerifiedMetadata.Kind}; size={receipt.VerifiedMetadata.Width}x{receipt.VerifiedMetadata.Height}; color={receipt.VerifiedMetadata.ColorProfile}");
+
+var aiEditor = new TimelineEditorViewModel(frameRate);
+aiEditor.AddMedia(importedSourceA.Metadata);
+var aiAction = new AiEditAction(
+    "ai-grade",
+    "color.adjust",
+    importedSourceA.Metadata.Id.Value,
+    0,
+    Math.Max(1, importedSourceA.Metadata.DurationFrames),
+    new Dictionary<string, JsonElement>
+    {
+        ["exposureEV"] = JsonDocument.Parse("0.5").RootElement.Clone(),
+        ["contrast"] = JsonDocument.Parse("0.1").RootElement.Clone(),
+        ["saturation"] = JsonDocument.Parse("0").RootElement.Clone(),
+        ["temperature"] = JsonDocument.Parse("0").RootElement.Clone(),
+        ["tint"] = JsonDocument.Parse("0").RootElement.Clone()
+    });
+var aiResult = AiEditPlanExecutor.Execute(
+    [aiAction],
+    aiEditor,
+    new Dictionary<string, string>(),
+    new Dictionary<string, FrameTheory.Color.ColorGrade>());
+if (!aiResult.IsApplied)
+{
+    throw new InvalidOperationException(aiResult.Message);
+}
+
+var aiOutput = Path.Combine(Path.GetDirectoryName(destination) ?? ".", $"{Path.GetFileNameWithoutExtension(destination)}-ai.mp4");
+var aiPlan = aiEditor.BuildRenderPlan(
+    importedSourceA.Metadata.Width,
+    importedSourceA.Metadata.Height,
+    new Dictionary<MediaId, Uri> { [importedSourceA.Metadata.Id] = sourceA });
+var aiReceipt = await exporter.ExportAsync(
+    aiPlan,
+    aiOutput,
+    new ExportPreset(importedSourceA.Metadata.Width, importedSourceA.Metadata.Height, frameRate, importedSourceA.Metadata.HasAudio),
+    new Progress<ExportProgress>(update => Console.WriteLine($"ai-stage={update.Stage}; fraction={update.Fraction:0.0}")),
+    CancellationToken.None);
+Console.WriteLine($"ai-output={aiReceipt.OutputPath}; bytes={aiReceipt.OutputBytes}; color={aiReceipt.VerifiedMetadata.ColorProfile}");

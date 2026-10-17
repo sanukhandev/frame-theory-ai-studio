@@ -1,5 +1,6 @@
 using System.Globalization;
 using FrameTheory.Captions;
+using FrameTheory.Color;
 using FrameTheory.Domain;
 
 namespace FrameTheory.Media;
@@ -16,7 +17,8 @@ public sealed record TimelineVideoRenderPlan
         IReadOnlyList<TimelineAudioLayer>? audioLayers = null,
         IReadOnlyList<TimelineTitle>? titles = null,
         IReadOnlyList<TimedCaption>? captions = null,
-        TimelineCaptionStyle? captionStyle = null)
+        TimelineCaptionStyle? captionStyle = null,
+        IReadOnlyDictionary<MediaId, ColorGrade>? colorGrades = null)
     {
         if (width <= 0 || height <= 0 || durationFrames <= 0)
         {
@@ -35,6 +37,9 @@ public sealed record TimelineVideoRenderPlan
         Titles = (titles ?? []).OrderBy(title => title.Order).ToArray();
         Captions = (captions ?? []).OrderBy(caption => caption.Start).ToArray();
         CaptionStyle = captionStyle;
+        ColorGrades = colorGrades is null
+            ? new Dictionary<MediaId, ColorGrade>()
+            : new Dictionary<MediaId, ColorGrade>(colorGrades);
     }
 
     public RationalFrameRate FrameRate { get; }
@@ -56,6 +61,8 @@ public sealed record TimelineVideoRenderPlan
     public IReadOnlyList<TimedCaption> Captions { get; }
 
     public TimelineCaptionStyle? CaptionStyle { get; }
+
+    public IReadOnlyDictionary<MediaId, ColorGrade> ColorGrades { get; }
 }
 
 public sealed record TimelineFilterGraph(string FilterComplex, IReadOnlyList<Uri> Inputs, string OutputLabel, string? AudioOutputLabel);
@@ -320,6 +327,12 @@ public sealed class TimelineFilterGraphBuilder
             ? $"colorchannelmixer=aa={opacity}"
             : $"geq=r='r(X\\,Y)':g='g(X\\,Y)':b='b(X\\,Y)':a='alpha(X\\,Y)*({opacity})'";
         var filter = $"[{input}:v:0]trim=start_frame={clip.SourceStartUnit}:end_frame={sourceEnd},setpts=PTS-STARTPTS,fps={Rate(plan.FrameRate)},scale=trunc(iw*{scale}/2)*2:trunc(ih*{scale}/2)*2:eval=frame,format=yuva420p";
+        if (plan.ColorGrades.TryGetValue(clip.MediaId, out var grade))
+        {
+            filter += $",eq=brightness={Format((Math.Pow(2, grade.ExposureEV) - 1) * 0.5)}:contrast={Format(1 + grade.Contrast)}:saturation={Format(1 + grade.Saturation)}";
+            filter += $",colorbalance=rs={Format(grade.Temperature * 0.1)}:bs={Format(-grade.Temperature * 0.1)}:gs={Format(-grade.Tint * 0.1)}";
+        }
+
         if (padToCanvas)
         {
             filter += $",pad={plan.Width}:{plan.Height}:{transform.OffsetX}:{transform.OffsetY}:color=black@0:eval=frame";

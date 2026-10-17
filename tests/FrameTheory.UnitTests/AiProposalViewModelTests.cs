@@ -37,7 +37,7 @@ public sealed class AiProposalViewModelTests
 
         viewModel.RecordApprovals();
 
-        Xunit.Assert.Contains("Execution is unavailable", viewModel.StatusText, StringComparison.Ordinal);
+        Xunit.Assert.Contains("No project mutation occurred", viewModel.StatusText, StringComparison.Ordinal);
     }
 
     [Xunit.Fact]

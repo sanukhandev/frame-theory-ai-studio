@@ -116,6 +116,18 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         AiProposal.Validate(json, new AiPlanValidationContext("active-project", targetIds, Math.Max(1, TimelineEditor.TotalFrames)));
     }
 
+    public void ApplyApprovedAiPlan()
+    {
+        var fonts = new Dictionary<string, string>(StringComparer.Ordinal);
+        var brandFontPath = Environment.GetEnvironmentVariable("FRAME_THEORY_BRAND_FONT_PATH");
+        if (!string.IsNullOrWhiteSpace(brandFontPath) && File.Exists(brandFontPath))
+        {
+            fonts["brand-sans"] = Path.GetFullPath(brandFontPath);
+        }
+
+        AiProposal.ApplyApproved(actions => AiEditPlanExecutor.Execute(actions, TimelineEditor, fonts, new Dictionary<string, FrameTheory.Color.ColorGrade>(StringComparer.Ordinal)));
+    }
+
     public int SelectedWorkspaceIndex
     {
         get => _selectedWorkspaceIndex;

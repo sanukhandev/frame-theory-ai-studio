@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using FrameTheory.Captions;
+using FrameTheory.Color;
 using FrameTheory.Domain;
 using FrameTheory.Media;
 
@@ -39,6 +40,9 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private readonly List<TimelineClip> _audioClips = [];
     private readonly Dictionary<TimelineClip, TimelineTransformKeyframes> _animations = [];
     private readonly Dictionary<TimelineClip, TimelineAudioSegment> _audioSettings = [];
+    private readonly Dictionary<TimelineClip, TimelineTransitionSettings> _transitions = [];
+    private readonly Dictionary<TimelineClip, TimelineVideoTransform> _staticTransforms = [];
+    private readonly Dictionary<MediaId, ColorGrade> _colorGrades = [];
     private readonly List<TimelineTitle> _titles = [];
     private IReadOnlyList<TimedCaption> _captions = [];
     private string? _captionFontPath;
@@ -50,6 +54,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private double _framesPerPixel = 1;
     private long _scrollFrame;
     private bool _snapEnabled = true;
+    private readonly Stack<TimelineEditorState> _aiUndo = [];
 
     public TimelineEditorViewModel(RationalFrameRate? projectFrameRate = null)
     {
@@ -182,11 +187,220 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             sources,
             [new TimelineVideoLayer("Video 1", 0, _videoClips.Select(clip => new TimelineVideoSegment(
                 clip,
+                transform: _staticTransforms.TryGetValue(clip, out var transform) ? transform : null,
+                transition: _transitions.TryGetValue(clip, out var transition) ? transition.Kind : null,
+                transitionDurationFrames: _transitions.TryGetValue(clip, out transition) ? transition.DurationFrames : 0,
                 animation: _animations.TryGetValue(clip, out var animation) ? animation : null)))],
             audioLayers,
             _titles,
             _captions,
-            _captionFontPath is null ? null : new TimelineCaptionStyle(_captionFontPath));
+            _captionFontPath is null ? null : new TimelineCaptionStyle(_captionFontPath),
+            _colorGrades);
+    }
+
+    public bool SelectMedia(string mediaId, TimelineTrackKind kind)
+    {
+        var trackId = TrackId(kind);
+        var track = _graph.Tracks.SingleOrDefault(candidate => string.Equals(candidate.Id, trackId, StringComparison.OrdinalIgnoreCase));
+        var clip = track?.Clips.FirstOrDefault(candidate => string.Equals(candidate.MediaId.Value, mediaId, StringComparison.Ordinal));
+        if (clip is null)
+        {
+            return false;
+        }
+
+        _selectedTrackId = trackId;
+        _selectedClipStart = clip.TimelineRange.StartFrame;
+        RefreshRows();
+        return true;
+    }
+
+    public bool SelectFirst(TimelineTrackKind kind)
+    {
+        var trackId = TrackId(kind);
+        var clip = _graph.Tracks.SingleOrDefault(candidate => string.Equals(candidate.Id, trackId, StringComparison.OrdinalIgnoreCase))?.Clips.FirstOrDefault();
+        return clip is not null && SelectMedia(clip.MediaId.Value, kind);
+    }
+
+    public void AddTitleAt(string text, string fontPath, long startFrame, long durationFrames, TimelineAnimationPreset? preset = null)
+    {
+        if (_videoClips.Count == 0 || startFrame < 0 || durationFrames <= 0 || checked(startFrame + durationFrames) > TotalFrames)
+        {
+            throw new ArgumentOutOfRangeException(nameof(startFrame), "The title range must fit within the video timeline.");
+        }
+
+        _titles.Add(new TimelineTitle(text, fontPath, startFrame, durationFrames, order: _titles.Count));
+        if (preset is not null)
+        {
+            ApplyAnimationPresetToLastTitle(preset.Value);
+        }
+
+        OnPropertyChanged(nameof(TitleAnimationStatus));
+    }
+
+    public void AddCaptionAt(string text, CaptionProvenance provenance, long startFrame, long durationFrames, string fontPath)
+    {
+        if (startFrame < 0 || durationFrames <= 0 || startFrame + durationFrames > TotalFrames)
+        {
+            throw new ArgumentOutOfRangeException(nameof(startFrame));
+        }
+
+        SetCaptionFontPath(fontPath);
+        var caption = new TimedCaption(
+            _captions.Count + 1,
+            _projectFrameRate.TimeAtFrame(startFrame),
+            _projectFrameRate.TimeAtFrame(startFrame + durationFrames),
+            text,
+            provenance);
+        if (_captions.Any(existing => existing.End > caption.Start && caption.End > existing.Start))
+        {
+            throw new InvalidOperationException("AI caption actions cannot overlap existing captions.");
+        }
+
+        _captions = _captions.Append(caption).OrderBy(existing => existing.Start).ToArray();
+        OnPropertyChanged(nameof(Captions));
+    }
+
+    public void ApplyStaticTransformToSelected(double scale, double offsetX, double offsetY, double rotation)
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        if (!selected.Clip.IsVideo || rotation != 0)
+        {
+            throw new InvalidOperationException("Only video scale and non-negative pixel offsets are supported by this executor.");
+        }
+
+        var transform = new TimelineVideoTransform(1, scale, checked((int)Math.Round(offsetX)), checked((int)Math.Round(offsetY)));
+        _animations.Remove(selected.Clip);
+        _transitions.Remove(selected.Clip);
+        _staticTransforms[selected.Clip] = transform;
+    }
+
+    public void ApplyKeyframesToSelected(TimelineTransformKeyframes keyframes)
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        if (!selected.Clip.IsVideo)
+        {
+            throw new InvalidOperationException("Keyframes require a video clip.");
+        }
+
+        if (keyframes.Keyframes[0].Frame < selected.Clip.TimelineRange.StartFrame ||
+            keyframes.Keyframes[^1].Frame >= selected.Clip.TimelineRange.EndFrameExclusive)
+        {
+            throw new ArgumentOutOfRangeException(nameof(keyframes), "Keyframes must fit inside the selected clip.");
+        }
+
+        _animations[selected.Clip] = keyframes;
+    }
+
+    public void ApplyTransitionToSelected(TimelineTransitionKind kind, long durationFrames)
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        if (!selected.Clip.IsVideo || selected.Clip.TimelineRange.StartFrame == 0)
+        {
+            throw new InvalidOperationException("Transitions require a non-first video clip.");
+        }
+
+        if (durationFrames <= 0 || durationFrames >= selected.Clip.TimelineRange.Length)
+        {
+            throw new ArgumentOutOfRangeException(nameof(durationFrames), "The transition duration must be shorter than the selected clip.");
+        }
+
+        _transitions[selected.Clip] = new TimelineTransitionSettings(kind, durationFrames);
+    }
+
+    public void MoveSelectedBy(long offsetFrames)
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        MoveSelected(checked(selected.Clip.TimelineRange.StartFrame + offsetFrames));
+    }
+
+    public void ApplyColorGradeToMedia(string mediaId, ColorGrade grade)
+    {
+        ArgumentNullException.ThrowIfNull(grade);
+        if (!_videoClips.Any(clip => clip.MediaId.Value == mediaId))
+        {
+            throw new InvalidOperationException($"The video media '{mediaId}' is not on the timeline.");
+        }
+
+        _colorGrades[MediaId.Parse(mediaId)] = grade;
+    }
+
+    internal TimelineEditorState CaptureAiState() => new(
+        _videoClips.ToArray(),
+        _audioClips.ToArray(),
+        new Dictionary<TimelineClip, TimelineTransformKeyframes>(_animations),
+        new Dictionary<TimelineClip, TimelineAudioSegment>(_audioSettings),
+        new Dictionary<TimelineClip, TimelineTransitionSettings>(_transitions),
+        new Dictionary<TimelineClip, TimelineVideoTransform>(_staticTransforms),
+        new Dictionary<MediaId, ColorGrade>(_colorGrades),
+        _titles.ToArray(),
+        _captions.ToArray(),
+        _captionFontPath,
+        _mediaIds.ToHashSet(),
+        _selectedTrackId,
+        _selectedClipStart,
+        CurrentFrame);
+
+    internal void CommitAiState(TimelineEditorState state) => _aiUndo.Push(state);
+
+    internal void RestoreAiStateForAi(TimelineEditorState state) => RestoreAiState(state);
+
+    private void RestoreAiState(TimelineEditorState state)
+    {
+        _videoClips.Clear();
+        _videoClips.AddRange(state.VideoClips);
+        _audioClips.Clear();
+        _audioClips.AddRange(state.AudioClips);
+        _animations.Clear();
+        foreach (var item in state.Animations)
+        {
+            _animations[item.Key] = item.Value;
+        }
+
+        _audioSettings.Clear();
+        foreach (var item in state.AudioSettings)
+        {
+            _audioSettings[item.Key] = item.Value;
+        }
+
+        _transitions.Clear();
+        foreach (var item in state.Transitions)
+        {
+            _transitions[item.Key] = item.Value;
+        }
+
+        _staticTransforms.Clear();
+        foreach (var item in state.StaticTransforms)
+        {
+            _staticTransforms[item.Key] = item.Value;
+        }
+
+        _colorGrades.Clear();
+        foreach (var item in state.ColorGrades)
+        {
+            _colorGrades[item.Key] = item.Value;
+        }
+
+        _titles.Clear();
+        _titles.AddRange(state.Titles);
+        _captions = state.Captions;
+        _captionFontPath = state.CaptionFontPath;
+        _mediaIds.Clear();
+        _mediaIds.UnionWith(state.MediaIds);
+        _selectedTrackId = state.SelectedTrackId;
+        _selectedClipStart = state.SelectedClipStart;
+        Refresh();
+        SeekFrame(state.CurrentFrame);
+    }
+
+    public bool UndoAiEdit()
+    {
+        if (_aiUndo.Count == 0)
+        {
+            return false;
+        }
+
+        RestoreAiState(_aiUndo.Pop());
+        return true;
     }
 
     public void AddTitle(string text, string fontPath)
@@ -645,3 +859,21 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     private static string TrackId(TimelineTrackKind kind) => kind == TimelineTrackKind.Video ? "Video 1" : "Audio 1";
 }
+
+internal sealed record TimelineTransitionSettings(TimelineTransitionKind Kind, long DurationFrames);
+
+internal sealed record TimelineEditorState(
+    IReadOnlyList<TimelineClip> VideoClips,
+    IReadOnlyList<TimelineClip> AudioClips,
+    IReadOnlyDictionary<TimelineClip, TimelineTransformKeyframes> Animations,
+    IReadOnlyDictionary<TimelineClip, TimelineAudioSegment> AudioSettings,
+    IReadOnlyDictionary<TimelineClip, TimelineTransitionSettings> Transitions,
+    IReadOnlyDictionary<TimelineClip, TimelineVideoTransform> StaticTransforms,
+    IReadOnlyDictionary<MediaId, ColorGrade> ColorGrades,
+    IReadOnlyList<TimelineTitle> Titles,
+    IReadOnlyList<TimedCaption> Captions,
+    string? CaptionFontPath,
+    IReadOnlySet<MediaId> MediaIds,
+    string? SelectedTrackId,
+    long? SelectedClipStart,
+    long CurrentFrame);

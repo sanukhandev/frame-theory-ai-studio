@@ -330,8 +330,8 @@ public sealed class MainWindow : Window
         };
         var validate = new Button { Content = "Validate proposal" };
         validate.Click += (_, _) => viewModel.ValidateAiPlan(planJson.Text ?? string.Empty);
-        var approve = new Button { Content = "Record selected approvals" };
-        approve.Click += (_, _) => viewModel.AiProposal.RecordApprovals();
+        var approve = new Button { Content = "Apply approved actions" };
+        approve.Click += (_, _) => viewModel.ApplyApprovedAiPlan();
         var clear = new Button { Content = "Clear proposal" };
         clear.Click += (_, _) => viewModel.AiProposal.Clear();
         return new Border
@@ -345,7 +345,7 @@ public sealed class MainWindow : Window
                 Children =
                 {
                     new TextBlock { Text = "AI proposal review", FontWeight = FontWeight.SemiBold },
-                    new TextBlock { Text = "Plans are treated as untrusted data. Validation and approval never mutate the project in this slice.", TextWrapping = TextWrapping.Wrap },
+                    new TextBlock { Text = "Plans are untrusted data. Only checked actions are applied, atomically, through editable timeline operations; failures roll back the whole group.", TextWrapping = TextWrapping.Wrap },
                     planJson,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { validate, approve, clear } },
                     actions,
