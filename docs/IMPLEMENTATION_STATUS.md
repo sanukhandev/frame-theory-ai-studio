@@ -37,7 +37,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-302 / E03
-Git SHA: pending commit
+Git SHA: ac35708
 Files changed: src/FrameTheory.Color/ColorGrade.cs, src/FrameTheory.Color/ColorGraph.cs, tests/FrameTheory.UnitTests/ColorGraphTests.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: `ColorPipeline` applies bounded exposure, temperature/tint, contrast and saturation operators in linear working space, clamps output channels and preserves alpha. `ColorGrade` rejects non-finite or out-of-range values before transformation.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
