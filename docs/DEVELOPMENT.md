@@ -20,6 +20,7 @@ dotnet run --project src/FrameTheory.Desktop
 dotnet run --project tools/FrameTheory.Fixtures -- tools/fixtures/generated
 dotnet tools/FrameTheory.MediaProbeSmoke/bin/Release/net10.0/FrameTheory.MediaProbeSmoke.dll <media-path>
 dotnet tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll <media-path>
+dotnet tools/FrameTheory.PhotoImportSmoke/bin/Release/net10.0/FrameTheory.PhotoImportSmoke.dll <image-path>
 ```
 The solution targets .NET 10. The desktop shell uses Avalonia 12.1.2 with code-only controls and the Fluent theme; media tasks beginning with FT-003/FT-006 still require FFmpeg/ffprobe.
 

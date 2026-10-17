@@ -77,10 +77,11 @@ public sealed class FfprobeMediaProbe : IMediaProbe
         var video = streams.FirstOrDefault(stream => GetString(stream, "codec_type") == "video");
         var audio = streams.Any(stream => GetString(stream, "codec_type") == "audio");
         var hasVideo = video.ValueKind != JsonValueKind.Undefined;
-        var kind = hasVideo ? MediaKind.Video : audio ? MediaKind.Audio : MediaKind.Image;
-        var frameRate = hasVideo ? ParseFrameRate(GetString(video, "r_frame_rate")) : null;
+        var isStillImage = hasVideo && IsStillImage(sourceUri);
+        var kind = isStillImage ? MediaKind.Image : hasVideo ? MediaKind.Video : audio ? MediaKind.Audio : MediaKind.Image;
+        var frameRate = hasVideo && !isStillImage ? ParseFrameRate(GetString(video, "r_frame_rate")) : null;
         var duration = ParseDuration(root, streams);
-        var durationFrames = hasVideo
+        var durationFrames = hasVideo && !isStillImage
             ? ParseFrameCount(video, frameRate, duration)
             : 0;
         var width = hasVideo ? GetInt(video, "width") : 0;
@@ -166,6 +167,15 @@ public sealed class FfprobeMediaProbe : IMediaProbe
         var profile = string.Join('/', values);
         return profile.Length == 0 ? null : profile;
     }
+
+    private static bool IsStillImage(Uri sourceUri) =>
+        sourceUri.AbsolutePath.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+        sourceUri.AbsolutePath.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+        sourceUri.AbsolutePath.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+        sourceUri.AbsolutePath.EndsWith(".webp", StringComparison.OrdinalIgnoreCase) ||
+        sourceUri.AbsolutePath.EndsWith(".bmp", StringComparison.OrdinalIgnoreCase) ||
+        sourceUri.AbsolutePath.EndsWith(".tif", StringComparison.OrdinalIgnoreCase) ||
+        sourceUri.AbsolutePath.EndsWith(".tiff", StringComparison.OrdinalIgnoreCase);
 
     private static string? GetString(JsonElement element, string propertyName)
     {

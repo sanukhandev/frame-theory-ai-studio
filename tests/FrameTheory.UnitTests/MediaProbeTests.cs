@@ -63,6 +63,32 @@ public sealed class MediaProbeTests
             probe.ProbeAsync(new Uri("file:///missing/clip.mp4"), CancellationToken.None));
     }
 
+    [Xunit.Fact]
+    public async Task FfprobeAdapterClassifiesStillImageExtensionAsImage()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-probe-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "photo.png");
+            await File.WriteAllTextAsync(path, "synthetic placeholder");
+            var runner = new StubProcessRunner("""
+                {
+                  "streams": [{ "codec_type": "video", "width": 16, "height": 8, "r_frame_rate": "25/1" }],
+                  "format": { "duration": "0.04" }
+                }
+                """);
+            var metadata = await new FfprobeMediaProbe(runner).ProbeAsync(new Uri(path), CancellationToken.None);
+
+            Xunit.Assert.Equal(MediaKind.Image, metadata.Kind);
+            Xunit.Assert.Null(metadata.FrameRate);
+            Xunit.Assert.Equal(0, metadata.DurationFrames);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private sealed class StubProcessRunner(string standardOutput) : IMediaProcessRunner
     {
         public string? Executable { get; private set; }
