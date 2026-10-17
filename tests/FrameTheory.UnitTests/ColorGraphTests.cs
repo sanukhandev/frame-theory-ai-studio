@@ -35,4 +35,35 @@ public sealed class ColorGraphTests
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new RgbColor(-0.01f, 0, 0));
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new RgbColor(0, 0, float.NaN));
     }
+
+    [Xunit.Fact]
+    public void GradeAppliesExposureContrastSaturationAndWhiteBalanceInLinearSpace()
+    {
+        var pipeline = new ColorPipeline(ColorGraph.ForSrgb());
+        var input = new RgbColor(0.4f, 0.2f, 0.1f);
+        var graded = pipeline.Transform(input, new ColorGrade(
+            exposureEV: 1,
+            contrast: 0.25f,
+            saturation: -0.5f,
+            temperature: 0.5f,
+            tint: -0.5f));
+
+        Xunit.Assert.NotEqual(input, graded);
+        Xunit.Assert.InRange(graded.Red, 0, 1);
+        Xunit.Assert.InRange(graded.Green, 0, 1);
+        Xunit.Assert.InRange(graded.Blue, 0, 1);
+    }
+
+    [Xunit.Fact]
+    public void GradeClipsHighlightsAndRejectsOutOfRangeValues()
+    {
+        var pipeline = new ColorPipeline(ColorGraph.ForSrgb());
+        var clipped = pipeline.Transform(new RgbColor(1, 1, 1), new ColorGrade(exposureEV: 8));
+
+        Xunit.Assert.Equal(1, clipped.Red);
+        Xunit.Assert.Equal(1, clipped.Green);
+        Xunit.Assert.Equal(1, clipped.Blue);
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ColorGrade(exposureEV: 9));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ColorGrade(temperature: -2));
+    }
 }

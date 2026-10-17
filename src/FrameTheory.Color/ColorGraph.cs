@@ -107,17 +107,47 @@ public sealed class ColorPipeline
 
     public ColorPipeline(ColorGraph graph) => _graph = graph ?? throw new ArgumentNullException(nameof(graph));
 
-    public RgbColor Transform(RgbColor encodedColor)
+    public RgbColor Transform(RgbColor encodedColor) => Transform(encodedColor, new ColorGrade());
+
+    public RgbColor Transform(RgbColor encodedColor, ColorGrade grade)
     {
+        ArgumentNullException.ThrowIfNull(grade);
         var linearRed = Decode(_graph.InputProfile.Transfer, encodedColor.Red);
         var linearGreen = Decode(_graph.InputProfile.Transfer, encodedColor.Green);
         var linearBlue = Decode(_graph.InputProfile.Transfer, encodedColor.Blue);
+        (linearRed, linearGreen, linearBlue) = ApplyGrade(linearRed, linearGreen, linearBlue, grade);
         return new RgbColor(
-            Encode(_graph.OutputProfile.Transfer, linearRed),
-            Encode(_graph.OutputProfile.Transfer, linearGreen),
-            Encode(_graph.OutputProfile.Transfer, linearBlue),
+            Clamp(Encode(_graph.OutputProfile.Transfer, linearRed)),
+            Clamp(Encode(_graph.OutputProfile.Transfer, linearGreen)),
+            Clamp(Encode(_graph.OutputProfile.Transfer, linearBlue)),
             encodedColor.Alpha);
     }
+
+    private static (float Red, float Green, float Blue) ApplyGrade(float red, float green, float blue, ColorGrade grade)
+    {
+        var exposure = MathF.Pow(2, grade.ExposureEV);
+        red *= exposure;
+        green *= exposure;
+        blue *= exposure;
+
+        red *= 1 + 0.1f * grade.Temperature;
+        blue *= 1 - 0.1f * grade.Temperature;
+        green *= 1 - 0.1f * grade.Tint;
+
+        var contrastScale = 1 + grade.Contrast;
+        red = (red - 0.18f) * contrastScale + 0.18f;
+        green = (green - 0.18f) * contrastScale + 0.18f;
+        blue = (blue - 0.18f) * contrastScale + 0.18f;
+
+        var luminance = 0.2126f * red + 0.7152f * green + 0.0722f * blue;
+        var saturationScale = 1 + grade.Saturation;
+        return (
+            luminance + (red - luminance) * saturationScale,
+            luminance + (green - luminance) * saturationScale,
+            luminance + (blue - luminance) * saturationScale);
+    }
+
+    private static float Clamp(float value) => Math.Clamp(value, 0, 1);
 
     private static float Decode(ColorTransfer transfer, float value) => transfer switch
     {
