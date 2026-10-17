@@ -46,6 +46,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private readonly Dictionary<MediaId, Uri> _mediaSources = [];
     private readonly Dictionary<MediaId, ImportedMedia> _analysisAssets = [];
     private ITimelineVideoExporter? _timelineExporter;
+    private readonly ExportQueueService _exportQueue;
+    private ExportQueueJob? _activeExport;
     private readonly ILocalAnalysisSampler? _analysisSampler;
     private int _videoWidth;
     private int _videoHeight;
@@ -59,7 +61,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         TimelineEditorViewModel? timelineEditor = null,
         ITimelineVideoExporter? timelineExporter = null,
         GeminiSettingsViewModel? geminiSettings = null,
-        ILocalAnalysisSampler? analysisSampler = null)
+        ILocalAnalysisSampler? analysisSampler = null,
+        ExportQueueService? exportQueue = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
@@ -71,6 +74,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         TimelineEditor = timelineEditor ?? new TimelineEditorViewModel();
         GeminiSettings = geminiSettings ?? new GeminiSettingsViewModel(new GeminiConfigurationService(new OperatingSystemSecretStore()));
         _timelineExporter = timelineExporter;
+        _exportQueue = exportQueue ?? new ExportQueueService();
         _analysisSampler = analysisSampler;
         if (Workspaces.Count == 0)
         {
@@ -306,16 +310,25 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 ? TimelineEditor.BuildRenderPlan(_videoWidth, _videoHeight, _mediaSources)
                 : TimelineEditor.BuildRenderPlan(SocialVideoExportPreset.Create(aspectRatio.Value).Width, SocialVideoExportPreset.Create(aspectRatio.Value).Height, _mediaSources);
             var preset = new ExportPreset(plan.Width, plan.Height, plan.FrameRate, includeAudio: plan.AudioLayers.Count > 0);
-            var receipt = await _timelineExporter.ExportAsync(
+            var job = _exportQueue.Enqueue(queueCancellation => _timelineExporter.ExportAsync(
                 plan,
                 destinationPath,
                 preset,
                 new Progress<ExportProgress>(update => TimelineExportStatusText = $"{update.Stage} ({update.Fraction:P0})"),
-                cancellationToken);
+                queueCancellation));
+            _activeExport = job;
+            TimelineExportStatusText = $"Queued export {job.Id:N}.";
+            using var cancellationRegistration = cancellationToken.Register(job.Cancel);
+            var receipt = await job.Completion.WaitAsync(cancellationToken);
             TimelineExportStatusText = $"Exported {Path.GetFileName(receipt.OutputPath)} ({receipt.OutputBytes} bytes).";
             return true;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            TimelineExportStatusText = "Timeline export canceled.";
+            return false;
+        }
+        catch (OperationCanceledException)
         {
             TimelineExportStatusText = "Timeline export canceled.";
             return false;
@@ -325,6 +338,22 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             TimelineExportStatusText = $"Timeline export failed: {exception.Message}";
             return false;
         }
+        finally
+        {
+            _activeExport = null;
+        }
+    }
+
+    public void CancelTimelineExport()
+    {
+        if (_activeExport is null)
+        {
+            TimelineExportStatusText = "No timeline export is active.";
+            return;
+        }
+
+        _activeExport.Cancel();
+        TimelineExportStatusText = "Timeline export cancellation requested.";
     }
 
     public async Task<bool> ImportCaptionsAsync(string sourcePath, CancellationToken cancellationToken)

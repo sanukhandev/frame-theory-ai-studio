@@ -608,6 +608,8 @@ public sealed class MainWindow : Window
             }
         };
         var export = new Button { Content = "Export composite MP4" };
+        var cancelExport = new Button { Content = "Cancel export" };
+        cancelExport.Click += (_, _) => viewModel.CancelTimelineExport();
         var aspectRatio = new ComboBox { ItemsSource = new[] { "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
         export.Click += async (_, _) =>
         {
@@ -666,7 +668,7 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { importCaptions, exportCaptions } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { captionFont } },
                     captionStatus,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { aspectRatio, export } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { aspectRatio, export, cancelExport } },
                     exportStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { snap, new TextBlock { Text = "Zoom" }, zoom } }
                 }
