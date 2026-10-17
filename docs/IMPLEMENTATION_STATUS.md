@@ -100,7 +100,7 @@
 - [x] FT-405 photo project autosave recovery, missing-media relink and corrupt-input UI status paths
 
 ## Next tasks
-1. Exercise timeline save/open through the Avalonia UI on Windows, macOS and Linux, including missing-media and moved-project recovery; the current CUA session exposes no native app surface.
+1. Exercise timeline playback/save/open through the Avalonia UI on Windows, macOS and Linux, including missing-media and moved-project recovery. A 2026-10-17 CUA inventory exposed browsers but no native Windows app surface, so this manual gate remains unverified rather than claimed complete.
 2. Obtain approved live Gemini spoken-fixture/provider evidence and decide whether a local ASR adapter is required for FT-602.
 3. Finish manual/cross-platform FT-901..FT-904 acceptance and hosted FT-1001..FT-1005 gates.
 4. Resolve approved logo, licensing/native redistribution, installer/signing, and live Gemini prerequisites before closing their GitHub tasks.
