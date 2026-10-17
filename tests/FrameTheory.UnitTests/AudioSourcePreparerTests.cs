@@ -5,6 +5,12 @@ namespace FrameTheory.UnitTests;
 public sealed class AudioSourcePreparerTests
 {
     [Xunit.Fact]
+    public void PreparedAudioSourceRejectsRemoteUri()
+    {
+        Xunit.Assert.Throws<ArgumentException>(() => new PreparedAudioSource(new Uri("https://example.test/audio.wav"), null));
+    }
+
+    [Xunit.Fact]
     public async Task VideoSourceIsExtractedToOwnedWavAndCleanedUp()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-audio-source-");
