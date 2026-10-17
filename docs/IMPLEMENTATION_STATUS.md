@@ -44,7 +44,7 @@
 
 **Photo source-integrity CI checkpoint:** Run `39066595061` passed the fingerprint guard and full quality matrix on Windows, macOS and Linux for `1f0d285`; hosted packaging remains framework-dependent and unsigned.
 
-**FT-904 capability retry validation:** Local Release unit tests pass 144/144 and the desktop Release build passes with 0 warnings and 0 errors for the capability-refresh UI increment; hosted CI remains the next validation step.
+**FT-904 capability retry validation:** Local Release unit tests pass 144/144 and the desktop Release build passes with 0 warnings and 0 errors for the capability-refresh UI increment. Hosted run `39067251130` passed documentation, restore, advisory, native-media, formatting, test, publish and checksum jobs on Windows, macOS and Linux for `3e003f4`; hosted packaging remains framework-dependent and unsigned.
 
 **E09 test checkpoint:** Added focused evidence for every keyboard workspace shortcut, validated-plan JSON synchronization/clearing, repeatable seek traces, cancellable frame playback and credential-assignment redaction. Hosted native media smoke now covers all three OS runners; these tests strengthen FT-901/FT-902/FT-903/FT-904 but do not replace the required interactive 1280x800/HiDPI manual acceptance.
 
