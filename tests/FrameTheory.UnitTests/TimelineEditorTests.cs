@@ -1,4 +1,5 @@
 using FrameTheory.Captions;
+using FrameTheory.AI;
 using FrameTheory.Domain;
 using FrameTheory.Desktop;
 
@@ -79,6 +80,43 @@ public sealed class TimelineEditorTests
             TimelineTrackKind.Video,
             TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1))));
         Xunit.Assert.Equal(120, editor.TotalFrames);
+    }
+
+    [Xunit.Fact]
+    public void TimelineEditorAppliesEditableRoughCutAndUndoKeepsAudioAndMarkersSynchronized()
+    {
+        var first = Metadata(new Uri("file:///rough-a.mp4"), "rough-a", 30);
+        var second = Metadata(new Uri("file:///rough-b.mp4"), "rough-b", 20);
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(first);
+        editor.AddMedia(second);
+        editor.AddBeatMarkers(first.Id, [0.8f]);
+        editor.SelectAt(0, "Audio 1");
+        editor.ApplyAudioSettingsToSelected(3, muted: false);
+
+        var plan = RoughCutPlanner.Create([
+            new RoughCutSource(first.Id.Value, 0, 30, [0.1f]),
+            new RoughCutSource(second.Id.Value, 30, 20, [0.9f])
+        ]);
+        editor.ApplyRoughCut(plan);
+
+        var render = editor.BuildRenderPlan(16, 9, new Dictionary<MediaId, Uri>
+        {
+            [first.Id] = first.SourceUri,
+            [second.Id] = second.SourceUri
+        });
+        Xunit.Assert.Equal([second.Id, first.Id], render.Layers.Single().Segments.Select(segment => segment.Clip.MediaId));
+        Xunit.Assert.Equal([second.Id, first.Id], render.AudioLayers.Single().Segments.Select(segment => segment.Clip.MediaId));
+        Xunit.Assert.Equal(3, render.AudioLayers.Single().Segments.Single(segment => segment.Clip.MediaId == first.Id).GainDb);
+        Xunit.Assert.Equal([20L], editor.BeatMarkers);
+
+        Xunit.Assert.True(editor.UndoAiEdit());
+        Xunit.Assert.Equal([first.Id, second.Id], editor.BuildRenderPlan(16, 9, new Dictionary<MediaId, Uri>
+        {
+            [first.Id] = first.SourceUri,
+            [second.Id] = second.SourceUri
+        }).Layers.Single().Segments.Select(segment => segment.Clip.MediaId));
+        Xunit.Assert.Equal([0L], editor.BeatMarkers);
     }
 
     [Xunit.Fact]

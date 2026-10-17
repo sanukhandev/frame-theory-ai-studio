@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using FrameTheory.AI;
 using FrameTheory.Captions;
 using FrameTheory.Color;
 using FrameTheory.Domain;
@@ -739,6 +740,104 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         ]);
     }
 
+    public void ApplyRoughCut(RoughCutPlan plan)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        var before = CaptureAiState();
+        var beforeBeatMarkers = _beatMarkers.ToArray();
+        try
+        {
+            var oldVideo = _videoClips.ToDictionary(clip => clip.MediaId.Value, StringComparer.Ordinal);
+            var oldAudio = _audioClips.ToDictionary(clip => clip.MediaId.Value, StringComparer.Ordinal);
+            if (plan.Segments.Count != oldVideo.Count || plan.Segments.Any(segment => !oldVideo.ContainsKey(segment.MediaId)))
+            {
+                throw new InvalidOperationException("The rough-cut plan does not match the current video timeline.");
+            }
+
+            var newVideo = new Dictionary<string, TimelineClip>(StringComparer.Ordinal);
+            var newAudio = new Dictionary<string, TimelineClip>(StringComparer.Ordinal);
+            foreach (var segment in plan.Segments)
+            {
+                var video = RemapClip(oldVideo[segment.MediaId], segment.StartFrame, segment.DurationFrames);
+                newVideo.Add(segment.MediaId, video);
+                if (oldAudio.TryGetValue(segment.MediaId, out var audio))
+                {
+                    newAudio.Add(segment.MediaId, RemapClip(audio, segment.StartFrame, segment.DurationFrames));
+                }
+            }
+
+            if (newAudio.Count != oldAudio.Count)
+            {
+                throw new InvalidOperationException("The rough cut requires every audio clip to be linked to a planned video clip.");
+            }
+
+            _animations.Clear();
+            _staticTransforms.Clear();
+            _speedRamps.Clear();
+            _transitions.Clear();
+            _audioSettings.Clear();
+            for (var segmentIndex = 0; segmentIndex < plan.Segments.Count; segmentIndex++)
+            {
+                var segment = plan.Segments[segmentIndex];
+                var oldVideoClip = oldVideo[segment.MediaId];
+                var videoClip = newVideo[segment.MediaId];
+                var frameOffset = checked(videoClip.TimelineRange.StartFrame - oldVideoClip.TimelineRange.StartFrame);
+                if (before.Animations.TryGetValue(oldVideoClip, out var animation))
+                {
+                    _animations[videoClip] = TranslateAnimation(animation, frameOffset);
+                }
+
+                if (before.StaticTransforms.TryGetValue(oldVideoClip, out var transform))
+                {
+                    _staticTransforms[videoClip] = transform;
+                }
+
+                if (before.SpeedRamps.TryGetValue(oldVideoClip, out var speedRamp))
+                {
+                    _speedRamps[videoClip] = TranslateSpeedRamp(speedRamp, frameOffset);
+                }
+
+                if (segmentIndex > 0 && before.Transitions.TryGetValue(oldVideoClip, out var transition) && transition.DurationFrames < videoClip.TimelineRange.Length)
+                {
+                    _transitions[videoClip] = transition;
+                }
+
+                if (newAudio.TryGetValue(segment.MediaId, out var audioClip) && before.AudioSettings.TryGetValue(oldAudio[segment.MediaId], out var audioSettings))
+                {
+                    _audioSettings[audioClip] = new TimelineAudioSegment(
+                        audioClip,
+                        audioSettings.GainDb,
+                        audioSettings.Muted,
+                        Math.Min(audioSettings.FadeInFrames, audioClip.TimelineRange.Length - 1),
+                        Math.Min(audioSettings.FadeOutFrames, audioClip.TimelineRange.Length - 1),
+                        audioSettings.DuckingDb);
+                }
+            }
+
+            ApplyClips(
+                plan.Segments.Select(segment => newVideo[segment.MediaId]),
+                plan.Segments.Where(segment => newAudio.ContainsKey(segment.MediaId)).Select(segment => newAudio[segment.MediaId]));
+            if (_beatMarkerMediaId is { } beatMediaId && oldVideo.TryGetValue(beatMediaId.Value, out var oldBeatClip))
+            {
+                var newBeatClip = newVideo[beatMediaId.Value];
+                var offset = newBeatClip.TimelineRange.StartFrame - oldBeatClip.TimelineRange.StartFrame;
+                _beatMarkers.Clear();
+                _beatMarkers.AddRange(beforeBeatMarkers.Select(marker => checked(marker + offset)));
+            }
+
+            _selectedTrackId = null;
+            _selectedClipStart = null;
+            CommitAiState(before);
+        }
+        catch
+        {
+            _beatMarkers.Clear();
+            _beatMarkers.AddRange(beforeBeatMarkers);
+            RestoreAiStateForAi(before);
+            throw;
+        }
+    }
+
     public void ClearSelectedSpeedRamp()
     {
         var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
@@ -778,6 +877,10 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _transcriptSourceFingerprint,
         _captionFontPath,
         _mediaIds.ToHashSet(),
+        _beatMarkers.ToArray(),
+        _beatMarkerMediaId,
+        _beatMarkerWaveform.ToArray(),
+        _beatDetectionMode,
         _selectedTrackId,
         _selectedClipStart,
         CurrentFrame);
@@ -838,6 +941,11 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _captionFontPath = state.CaptionFontPath;
         _mediaIds.Clear();
         _mediaIds.UnionWith(state.MediaIds);
+        _beatMarkers.Clear();
+        _beatMarkers.AddRange(state.BeatMarkers);
+        _beatMarkerMediaId = state.BeatMarkerMediaId;
+        _beatMarkerWaveform = state.BeatMarkerWaveform.ToArray();
+        _beatDetectionMode = state.BeatDetectionMode;
         _selectedTrackId = state.SelectedTrackId;
         _selectedClipStart = state.SelectedClipStart;
         Refresh();
@@ -846,6 +954,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(WatermarkStatusText));
         OnPropertyChanged(nameof(Captions));
         OnPropertyChanged(nameof(TranscriptSourceFingerprint));
+        OnPropertyChanged(nameof(BeatMarkers));
+        OnPropertyChanged(nameof(BeatMarkersText));
     }
 
     public bool UndoAiEdit()
@@ -1461,6 +1571,32 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             ? TimelineClip.Video(clip.MediaId, sourceStart, sourceCount, timelineStartFrame, timelineDuration, clip.SourceFrameRate!.Value)
             : TimelineClip.Audio(clip.MediaId, sourceStart, sourceCount, timelineStartFrame, timelineDuration, clip.AudioSampleRate);
 
+    private TimelineClip RemapClip(TimelineClip clip, long timelineStartFrame, long timelineDuration)
+    {
+        if (timelineDuration <= 0 || timelineDuration > clip.TimelineRange.Length)
+        {
+            throw new ArgumentOutOfRangeException(nameof(timelineDuration));
+        }
+
+        var sourceCount = clip.SourceUnitCount;
+        if (timelineDuration < clip.TimelineRange.Length)
+        {
+            var sourceEnd = SourceUnitAt(clip, clip.TimelineRange.StartFrame + timelineDuration - 1);
+            sourceCount = Math.Max(1, sourceEnd - clip.SourceStartUnit + 1);
+        }
+
+        return CreateClip(clip, timelineStartFrame, timelineDuration, clip.SourceStartUnit, sourceCount);
+    }
+
+    private static TimelineTransformKeyframes TranslateAnimation(TimelineTransformKeyframes animation, long frameOffset) =>
+        new(animation.Keyframes.Select(keyframe => new TimelineTransformKeyframe(
+            checked(keyframe.Frame + frameOffset),
+            keyframe.Value,
+            keyframe.Easing)));
+
+    private static TimelineSpeedRamp TranslateSpeedRamp(TimelineSpeedRamp speedRamp, long frameOffset) =>
+        new(speedRamp.Points.Select(point => new TimelineSpeedPoint(checked(point.Frame + frameOffset), point.Speed)));
+
     private static string TrackId(TimelineTrackKind kind) => kind == TimelineTrackKind.Video ? "Video 1" : "Audio 1";
 }
 
@@ -1482,6 +1618,10 @@ internal sealed record TimelineEditorState(
     string? TranscriptSourceFingerprint,
     string? CaptionFontPath,
     IReadOnlySet<MediaId> MediaIds,
+    IReadOnlyList<long> BeatMarkers,
+    MediaId? BeatMarkerMediaId,
+    IReadOnlyList<float> BeatMarkerWaveform,
+    BeatDetectionMode BeatDetectionMode,
     string? SelectedTrackId,
     long? SelectedClipStart,
     long CurrentFrame);

@@ -56,6 +56,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _timelineExportStatusText = "Timeline export is available after importing video.";
     private string _captionStatusText = "No captions imported.";
     private string _analysisStatusText = "No local AI analysis prepared.";
+    private string _roughCutStatusText = "No rough-cut plan prepared.";
     private string _aiRevisionStatusText = "No Gemini revision requested.";
     private readonly Dictionary<MediaId, Uri> _mediaSources = [];
     private readonly Dictionary<MediaId, ImportedMedia> _analysisAssets = [];
@@ -267,6 +268,82 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     }
 
     public LocalMediaAnalysisReport? LastLocalAnalysisReport { get; private set; }
+
+    public RoughCutPlan? LastRoughCutPlan { get; private set; }
+
+    public string RoughCutStatusText
+    {
+        get => _roughCutStatusText;
+        private set
+        {
+            if (value == _roughCutStatusText)
+            {
+                return;
+            }
+
+            _roughCutStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool PrepareRoughCutPlan()
+    {
+        try
+        {
+            var videoTrack = TimelineEditor.TrackRows.SingleOrDefault(track => track.Kind == TimelineTrackKind.Video);
+            if (videoTrack is null)
+            {
+                RoughCutStatusText = "Import at least two video clips before planning a rough cut.";
+                return false;
+            }
+
+            var sources = videoTrack.Clips.Select(clip =>
+            {
+                var media = _analysisAssets
+                    .Where(item => string.Equals(item.Key.Value, clip.MediaId, StringComparison.Ordinal))
+                    .Select(item => item.Value)
+                    .FirstOrDefault();
+                if (media is null)
+                {
+                    throw new InvalidDataException($"Timeline media '{clip.MediaId}' has no imported analysis metadata.");
+                }
+
+                return new RoughCutSource(clip.MediaId, clip.StartFrame, clip.DurationFrames, media.WaveformPeaks);
+            }).ToArray();
+            LastRoughCutPlan = RoughCutPlanner.Create(sources);
+            OnPropertyChanged(nameof(LastRoughCutPlan));
+            RoughCutStatusText = LastRoughCutPlan.Summary + " Review before applying.";
+            return true;
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidDataException or InvalidOperationException)
+        {
+            _diagnosticsLog.Record("rough-cut-plan-failed", exception);
+            RoughCutStatusText = $"Rough-cut planning failed: {exception.Message}";
+            return false;
+        }
+    }
+
+    public bool ApplyRoughCutPlan()
+    {
+        if (LastRoughCutPlan is null)
+        {
+            RoughCutStatusText = "Prepare a rough-cut plan before applying it.";
+            return false;
+        }
+
+        try
+        {
+            TimelineEditor.ApplyRoughCut(LastRoughCutPlan);
+            RoughCutStatusText = "Applied the reviewed rough cut as one undoable timeline change.";
+            return true;
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
+        {
+            _diagnosticsLog.Record("rough-cut-apply-failed", exception);
+            RoughCutStatusText = $"Rough-cut apply failed: {exception.Message}";
+            return false;
+        }
+    }
 
     public void ValidateAiPlan(string json)
     {

@@ -772,6 +772,14 @@ public sealed class MainWindow : Window
         beatDetection.SelectionChanged += (_, _) => timeline.BeatDetectionMode = beatDetection.SelectedIndex == 1
             ? BeatDetectionMode.EnergyOnsets
             : BeatDetectionMode.AmplitudePeaks;
+        var prepareRoughCut = new Button { Content = "Plan activity rough cut" };
+        AutomationProperties.SetName(prepareRoughCut, "Plan waveform activity rough cut");
+        prepareRoughCut.Click += (_, _) => viewModel.PrepareRoughCutPlan();
+        var applyRoughCut = new Button { Content = "Apply reviewed rough cut" };
+        AutomationProperties.SetName(applyRoughCut, "Apply reviewed rough cut");
+        applyRoughCut.Click += (_, _) => viewModel.ApplyRoughCutPlan();
+        var roughCutStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        roughCutStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.RoughCutStatusText)));
         var snap = new CheckBox { Content = "Snap to clip boundaries" };
         snap.Bind(ToggleButton.IsCheckedProperty, new Binding("TimelineEditor.SnapEnabled") { Mode = BindingMode.TwoWay });
         var zoom = new Slider { Minimum = 0.05, Maximum = 20, Value = timeline.FramesPerPixel };
@@ -1127,6 +1135,8 @@ public sealed class MainWindow : Window
                     selectionContext,
                     tracks,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { beatDetection, beatMarkers } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { prepareRoughCut, applyRoughCut } },
+                    roughCutStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { back, forward, select, selectAudio, scrollBack, scrollForward } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { copy, paste, split, trim, move, rippleDelete } },
                     operationStatus,
