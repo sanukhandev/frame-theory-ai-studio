@@ -42,7 +42,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-403 / E04
-Git SHA: pending commit
+Git SHA: f71740a
 Files changed: src/FrameTheory.Photo/PhotoCanvas.cs, tests/FrameTheory.UnitTests/PhotoLayerTests.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: `PhotoLayerStack` stores immutable named adjustment layers with deterministic ordering and enabled state. `PhotoEditHistory` applies complete edit-state snapshots with undo/redo, and enabled layers render through the shared color pipeline into the actual PPM preview.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
