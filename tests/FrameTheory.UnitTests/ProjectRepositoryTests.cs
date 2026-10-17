@@ -107,4 +107,34 @@ public sealed class ProjectRepositoryTests
             directory.Delete(true);
         }
     }
+
+    [Xunit.Fact]
+    public async Task CorruptAndOversizedProjectInputsAreRejectedWithoutProcessFailure()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-project-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "project.ftstudio");
+            var repository = new JsonProjectRepository();
+            await File.WriteAllTextAsync(path, "{ not valid project json");
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => repository.LoadAsync(path, CancellationToken.None));
+
+            await File.WriteAllTextAsync(path, new string('x', 10 * 1024 * 1024 + 1));
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => repository.LoadAsync(path, CancellationToken.None));
+
+            var random = new Random(1729);
+            for (var iteration = 0; iteration < 32; iteration++)
+            {
+                var bytes = new byte[random.Next(1, 2048)];
+                random.NextBytes(bytes);
+                await File.WriteAllBytesAsync(path, bytes);
+                var exception = await Xunit.Record.ExceptionAsync(() => repository.LoadAsync(path, CancellationToken.None));
+                Xunit.Assert.IsType<InvalidDataException>(exception);
+            }
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
 }

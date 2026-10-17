@@ -37,7 +37,7 @@ public sealed class ProjectRecoveryService
     {
         var projectDirectory = GetProjectDirectory(projectPath);
         return snapshot.MediaReferences
-            .Where(reference => !File.Exists(ResolveRelativePath(projectDirectory, reference.RelativePath)))
+            .Where(reference => !File.Exists(ResolveContainedPath(projectDirectory, reference.RelativePath)))
             .ToArray();
     }
 
@@ -50,8 +50,8 @@ public sealed class ProjectRecoveryService
             throw new FileNotFoundException("The replacement media file was not found.", replacementFullPath);
         }
 
-        // shortcut: symlink containment checks remain in FT-105; upgrade before accepting untrusted relink roots.
-        var relativePath = Path.GetRelativePath(projectDirectory, replacementFullPath);
+        var containedReplacementPath = ResolveContainedPath(projectDirectory, Path.GetRelativePath(projectDirectory, replacementFullPath));
+        var relativePath = Path.GetRelativePath(projectDirectory, containedReplacementPath);
         var target = snapshot.MediaReferences.SingleOrDefault(reference => reference.Id == mediaId)
             ?? throw new InvalidOperationException("The media reference was not found.");
         var updated = snapshot.MediaReferences.Select(reference => reference.Id == mediaId
@@ -67,6 +67,25 @@ public sealed class ProjectRecoveryService
         Path.GetDirectoryName(Path.GetFullPath(projectPath))
         ?? throw new ArgumentException("A project directory is required.", nameof(projectPath));
 
-    private static string ResolveRelativePath(string projectDirectory, string relativePath) =>
-        Path.GetFullPath(Path.Combine(projectDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+    private static string ResolveContainedPath(string projectDirectory, string relativePath)
+    {
+        var projectRoot = Path.GetFullPath(projectDirectory).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
+        var candidate = Path.GetFullPath(Path.Combine(projectDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+        if (!candidate.StartsWith(projectRoot, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidDataException("A media path escapes the project directory.");
+        }
+
+        var fileInfo = new FileInfo(candidate);
+        if (fileInfo.Exists)
+        {
+            var finalTarget = fileInfo.ResolveLinkTarget(returnFinalTarget: true);
+            if (finalTarget is not null && !finalTarget.FullName.StartsWith(projectRoot, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidDataException("A media symlink escapes the project directory.");
+            }
+        }
+
+        return candidate;
+    }
 }

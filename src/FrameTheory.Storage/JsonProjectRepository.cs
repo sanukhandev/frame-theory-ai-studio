@@ -73,9 +73,20 @@ public sealed class JsonProjectRepository : IProjectRepository
             Share = FileShare.Read,
             Options = FileOptions.Asynchronous | FileOptions.SequentialScan
         });
-        var projectFile = await JsonSerializer.DeserializeAsync<ProjectFile>(stream, JsonOptions, cancellationToken)
-            ?? throw new InvalidDataException("The project file is empty.");
-        return projectFile.ToSnapshot();
+        try
+        {
+            var projectFile = await JsonSerializer.DeserializeAsync<ProjectFile>(stream, JsonOptions, cancellationToken)
+                ?? throw new InvalidDataException("The project file is empty.");
+            return projectFile.ToSnapshot();
+        }
+        catch (JsonException exception)
+        {
+            throw new InvalidDataException("The project JSON is malformed.", exception);
+        }
+        catch (NotSupportedException exception)
+        {
+            throw new InvalidDataException("The project JSON contains an unsupported value.", exception);
+        }
     }
 
     private static string GetFullPath(string path)

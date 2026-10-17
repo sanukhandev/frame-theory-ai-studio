@@ -55,6 +55,7 @@ public sealed class CacheIndex
 
 public sealed class JsonCacheIndexStore
 {
+    private const long MaximumIndexBytes = 5 * 1024 * 1024;
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -103,6 +104,11 @@ public sealed class JsonCacheIndexStore
             return new CacheIndex();
         }
 
+        if (new FileInfo(fullPath).Length > MaximumIndexBytes)
+        {
+            throw new InvalidDataException("The cache index exceeds the supported size limit.");
+        }
+
         await using var stream = new FileStream(fullPath, new FileStreamOptions
         {
             Access = FileAccess.Read,
@@ -110,13 +116,20 @@ public sealed class JsonCacheIndexStore
             Share = FileShare.Read,
             Options = FileOptions.Asynchronous | FileOptions.SequentialScan
         });
-        var entries = await JsonSerializer.DeserializeAsync<CacheIndexEntry[]>(stream, JsonOptions, cancellationToken) ?? [];
-        var index = new CacheIndex();
-        foreach (var entry in entries)
+        try
         {
-            index.Register(entry.Key, entry.RelativePath, entry.SizeBytes, entry.LastAccessUtc);
-        }
+            var entries = await JsonSerializer.DeserializeAsync<CacheIndexEntry[]>(stream, JsonOptions, cancellationToken) ?? [];
+            var index = new CacheIndex();
+            foreach (var entry in entries)
+            {
+                index.Register(entry.Key, entry.RelativePath, entry.SizeBytes, entry.LastAccessUtc);
+            }
 
-        return index;
+            return index;
+        }
+        catch (JsonException exception)
+        {
+            throw new InvalidDataException("The cache index JSON is malformed.", exception);
+        }
     }
 }
