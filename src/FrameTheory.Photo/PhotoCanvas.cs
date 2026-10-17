@@ -1,3 +1,4 @@
+using FrameTheory.Color;
 using FrameTheory.Domain;
 using FrameTheory.Media;
 
@@ -157,16 +158,22 @@ public sealed class PhotoEditState
 {
     private readonly IReadOnlyList<PhotoEditOperation> _operations;
 
-    public PhotoEditState(PhotoDocument source, IEnumerable<PhotoEditOperation>? operations = null)
+    public PhotoEditState(
+        PhotoDocument source,
+        IEnumerable<PhotoEditOperation>? operations = null,
+        PhotoLayerStack? layers = null)
     {
         Source = source ?? throw new ArgumentNullException(nameof(source));
         _operations = operations?.ToArray() ?? [];
+        Layers = layers ?? new PhotoLayerStack();
         RenderRaster();
     }
 
     public PhotoDocument Source { get; }
 
     public IReadOnlyList<PhotoEditOperation> Operations => _operations;
+
+    public PhotoLayerStack Layers { get; }
 
     public PhotoEditState Crop(int x, int y, int width, int height)
     {
@@ -201,13 +208,16 @@ public sealed class PhotoEditState
             return this;
         }
 
-        return new PhotoEditState(Source, _operations.Take(_operations.Count - 1));
+        return new PhotoEditState(Source, _operations.Take(_operations.Count - 1), Layers);
     }
 
     public byte[] RenderPreview() => RenderRaster().ToPpm();
 
+    public PhotoEditState WithLayers(PhotoLayerStack layers) =>
+        new(Source, _operations, layers);
+
     private PhotoEditState WithOperation(PhotoEditOperation operation) =>
-        new(Source, _operations.Append(operation));
+        new(Source, _operations.Append(operation), Layers);
 
     private PpmRaster RenderRaster()
     {
@@ -217,7 +227,7 @@ public sealed class PhotoEditState
             raster = ApplyOperation(raster, operation);
         }
 
-        return raster;
+        return Layers.Apply(raster);
     }
 
     private static PpmRaster ApplyOperation(PpmRaster raster, PhotoEditOperation operation) => operation.Kind switch
@@ -227,6 +237,152 @@ public sealed class PhotoEditState
         PhotoEditOperationKind.Resize => raster.Resize(operation.First, operation.Second),
         _ => throw new ArgumentOutOfRangeException(nameof(operation))
     };
+}
+
+public sealed class PhotoAdjustmentLayer
+{
+    public PhotoAdjustmentLayer(string name, ColorGrade grade, bool isEnabled = true)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("An adjustment layer name is required.", nameof(name));
+        }
+
+        Name = name.Trim();
+        Grade = grade ?? throw new ArgumentNullException(nameof(grade));
+        IsEnabled = isEnabled;
+    }
+
+    public string Name { get; }
+
+    public ColorGrade Grade { get; }
+
+    public bool IsEnabled { get; }
+
+    public PhotoAdjustmentLayer WithEnabled(bool isEnabled) => new(Name, Grade, isEnabled);
+}
+
+public sealed class PhotoLayerStack
+{
+    private readonly IReadOnlyList<PhotoAdjustmentLayer> _layers;
+
+    public PhotoLayerStack(IEnumerable<PhotoAdjustmentLayer>? layers = null)
+    {
+        _layers = layers?.ToArray() ?? [];
+        if (_layers.GroupBy(layer => layer.Name, StringComparer.OrdinalIgnoreCase).Any(group => group.Count() > 1))
+        {
+            throw new ArgumentException("Adjustment layer names must be unique.", nameof(layers));
+        }
+    }
+
+    public IReadOnlyList<PhotoAdjustmentLayer> Layers => _layers;
+
+    public IReadOnlyList<string> InspectorRows =>
+        _layers.Select(layer => $"{(layer.IsEnabled ? "On" : "Off")}: {layer.Name}").ToArray();
+
+    public PhotoLayerStack Add(PhotoAdjustmentLayer layer)
+    {
+        ArgumentNullException.ThrowIfNull(layer);
+        if (_layers.Any(existing => string.Equals(existing.Name, layer.Name, StringComparison.OrdinalIgnoreCase)))
+        {
+            throw new ArgumentException("An adjustment layer with that name already exists.", nameof(layer));
+        }
+
+        return new PhotoLayerStack(_layers.Append(layer));
+    }
+
+    public PhotoLayerStack Remove(string name) =>
+        new PhotoLayerStack(_layers.Where(layer => !string.Equals(layer.Name, name, StringComparison.OrdinalIgnoreCase)));
+
+    public PhotoLayerStack Move(int fromIndex, int toIndex)
+    {
+        if (fromIndex < 0 || fromIndex >= _layers.Count || toIndex < 0 || toIndex >= _layers.Count)
+        {
+            throw new ArgumentOutOfRangeException(nameof(fromIndex));
+        }
+
+        var reordered = _layers.ToList();
+        var layer = reordered[fromIndex];
+        reordered.RemoveAt(fromIndex);
+        reordered.Insert(toIndex, layer);
+        return new PhotoLayerStack(reordered);
+    }
+
+    public PhotoLayerStack SetEnabled(string name, bool isEnabled)
+    {
+        var found = false;
+        var updated = _layers.Select(layer =>
+        {
+            if (!string.Equals(layer.Name, name, StringComparison.OrdinalIgnoreCase))
+            {
+                return layer;
+            }
+
+            found = true;
+            return layer.WithEnabled(isEnabled);
+        }).ToArray();
+        if (!found)
+        {
+            throw new KeyNotFoundException($"Adjustment layer '{name}' was not found.");
+        }
+
+        return new PhotoLayerStack(updated);
+    }
+
+    public PpmRaster Apply(PpmRaster raster)
+    {
+        var result = raster;
+        foreach (var layer in _layers.Where(layer => layer.IsEnabled))
+        {
+            result = result.Apply(ColorGraph.ForSrgb(), layer.Grade);
+        }
+
+        return result;
+    }
+}
+
+public sealed class PhotoEditHistory
+{
+    private readonly List<PhotoEditState> _undo = [];
+    private readonly List<PhotoEditState> _redo = [];
+
+    public PhotoEditHistory(PhotoEditState initialState) => Current = initialState ?? throw new ArgumentNullException(nameof(initialState));
+
+    public PhotoEditState Current { get; private set; }
+
+    public void Execute(PhotoEditState nextState)
+    {
+        ArgumentNullException.ThrowIfNull(nextState);
+        _undo.Add(Current);
+        _redo.Clear();
+        Current = nextState;
+    }
+
+    public bool Undo()
+    {
+        if (_undo.Count == 0)
+        {
+            return false;
+        }
+
+        _redo.Add(Current);
+        Current = _undo[^1];
+        _undo.RemoveAt(_undo.Count - 1);
+        return true;
+    }
+
+    public bool Redo()
+    {
+        if (_redo.Count == 0)
+        {
+            return false;
+        }
+
+        _undo.Add(Current);
+        Current = _redo[^1];
+        _redo.RemoveAt(_redo.Count - 1);
+        return true;
+    }
 }
 
 public sealed class PpmRaster
@@ -331,6 +487,23 @@ public sealed class PpmRaster
         return new PpmRaster(width, height, output);
     }
 
+    public PpmRaster Apply(ColorGraph graph, ColorGrade grade)
+    {
+        var pipeline = new ColorPipeline(graph);
+        var output = RgbBytes.ToArray();
+        for (var index = 0; index < output.Length; index += 3)
+        {
+            var color = pipeline.Transform(
+                new RgbColor(output[index] / 255f, output[index + 1] / 255f, output[index + 2] / 255f),
+                grade);
+            output[index] = ToByte(color.Red);
+            output[index + 1] = ToByte(color.Green);
+            output[index + 2] = ToByte(color.Blue);
+        }
+
+        return new PpmRaster(Width, Height, output);
+    }
+
     public byte[] ToPpm()
     {
         var header = System.Text.Encoding.ASCII.GetBytes($"P6\n{Width} {Height}\n255\n");
@@ -358,6 +531,8 @@ public sealed class PpmRaster
 
         return new PpmRaster(Height, Width, output);
     }
+
+    private static byte ToByte(float value) => (byte)Math.Clamp((int)MathF.Round(value * 255), 0, 255);
 
     private static string ReadToken(byte[] bytes, ref int index)
     {
