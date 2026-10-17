@@ -91,7 +91,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-804 / E08
-Git SHA: ee4d4a5
+Git SHA: 46d0720
 Files changed: src/FrameTheory.Media/ExportQueue.cs, src/FrameTheory.Desktop/AiProposalViewModel.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/MainWindow.cs, tests/FrameTheory.UnitTests/ExportQueueTests.cs, tests/FrameTheory.UnitTests/DesktopAiRevisionTests.cs, tools/FrameTheory.TimelineExportSmoke/Program.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: Video workspace export now has Cancel export and Retry last export controls. The shared queue completes cancellation deterministically, records job state/attempt/error history in memory, retries failed or canceled jobs using the original operation, and keeps the existing atomic exporter cleanup path.
 Commands executed + OS: Windows 11 x64; focused export queue/desktop tests, `dotnet format`, Release build with warnings as errors, full solution tests, `git diff --check`, and `FrameTheory.TimelineExportSmoke` with two synthetic H.264/AAC clips using .NET SDK 10.0.100 and FFmpeg/ffprobe 9.0.2.
