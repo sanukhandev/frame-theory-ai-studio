@@ -107,11 +107,11 @@ Task / Epic: FT-102 / project timeline persistence
 Git SHA: 9dff007
 Files changed: src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/TimelineEditorViewModel.cs, src/FrameTheory.Desktop/TimelineProjectState.cs, src/FrameTheory.Domain/Project.cs, src/FrameTheory.Storage/JsonProjectRepository.cs, tests/FrameTheory.UnitTests/TimelineProjectPersistenceTests.cs
 Actual behavior and UI path: The Video workspace now provides Save timeline project and Open timeline project actions. Saved state includes editable clips, audio settings, keyframes, transitions, grades, titles, captions, watermark, beat markers, playhead and view state. Open validates bounded JSON, reimports relative local media and remaps media IDs before restoring the timeline; failed or canceled imports leave the current project loaded.
-Commands executed + OS: .NET SDK 10.0.402 Release build, focused persistence tests, 136 unit tests, 2 golden tests and diff checks on Windows 11 x64; hosted quality gate run 39061301468 is pending at checkpoint creation.
+Commands executed + OS: .NET SDK 10.0.402 Release build, focused persistence tests, 136 unit tests, 2 golden tests and diff checks on Windows 11 x64; hosted quality gate run 39061301468 passed on Windows, macOS and Linux.
 Test outputs / exit codes: Focused persistence tests passed 3/3; full unit tests passed 136/136; golden tests passed 2/2; Release build passed with 0 warnings/errors.
 Media fixtures and verification: The round-trip test uses a temporary local media file and a deterministic importer; no user media, API key, generated fixture or binary entered Git.
 Known limitations / blockers: Project media references must remain inside the project directory because the existing portable project contract rejects path traversal; font and watermark paths are preserved as local paths and still require relinking if moved. Interactive cross-platform GUI acceptance remains open.
-Next unblocked task: Wait for hosted run 39061301468, then exercise manual save/open and missing-media recovery when a native UI surface is available.
+Next unblocked task: Exercise manual save/open and missing-media recovery when a native UI surface is available.
 ```
 
 ## Previous execution record
