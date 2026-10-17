@@ -24,4 +24,25 @@ public sealed class DiagnosticsTests
             directory.Delete(true);
         }
     }
+
+    [Xunit.Fact]
+    public void LocalDiagnosticsRedactsCredentialAssignmentsAndBearerTokens()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-diagnostics-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "studio.log");
+            var diagnostics = new FileDiagnosticsLog(path);
+            diagnostics.Record("provider-failed", new InvalidOperationException("x-goog-api-key=test-secret Authorization: Bearer bearer-secret"));
+
+            var content = File.ReadAllText(path);
+            Xunit.Assert.DoesNotContain("test-secret", content, StringComparison.Ordinal);
+            Xunit.Assert.DoesNotContain("bearer-secret", content, StringComparison.Ordinal);
+            Xunit.Assert.Contains("[REDACTED]", content, StringComparison.Ordinal);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
 }

@@ -12,6 +12,7 @@ public interface IDiagnosticsLog
 public sealed class FileDiagnosticsLog : IDiagnosticsLog
 {
     private static readonly Regex SecretPattern = new("AIza[0-9A-Za-z_-]{20,}", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly Regex CredentialPattern = new(@"(?i)(?:api[-_ ]?key|authorization)\s*[:=]\s*(?:bearer\s+)?[^\s,;]+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
     private readonly object _sync = new();
 
     public FileDiagnosticsLog(string? logPath = null)
@@ -36,7 +37,7 @@ public sealed class FileDiagnosticsLog : IDiagnosticsLog
             Directory.CreateDirectory(directory);
             var message = exception is null
                 ? string.Empty
-                : $" type={exception.GetType().Name} message={SecretPattern.Replace(exception.Message, "[REDACTED]").Replace(Environment.NewLine, " ")}";
+                : $" type={exception.GetType().Name} message={CredentialPattern.Replace(SecretPattern.Replace(exception.Message, "[REDACTED]"), "[REDACTED]").Replace(Environment.NewLine, " ")}";
             lock (_sync)
             {
                 File.AppendAllText(LogPath, $"{DateTimeOffset.UtcNow:O} {eventName}{message}{Environment.NewLine}");
