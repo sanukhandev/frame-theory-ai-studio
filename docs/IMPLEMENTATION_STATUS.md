@@ -12,6 +12,8 @@
 
 **FT-903 preview proxy checkpoint (2026-10-17):** The Video workspace now exposes an opt-in bounded preview-proxy toggle. When enabled, current-frame preview and playback create or reuse an atomic FFmpeg proxy in the local cache, decode from that proxy, propagate cancellation and report cache usage without replacing the original media. Focused proxy/UI wiring coverage passes 5/5.
 
+**FT-402 photo project checkpoint (2026-10-18):** The Photo workspace now saves and reopens `.ftstudio` projects through the existing atomic repository. The persisted state includes crop/rotate/resize operations and adjustment layers, uses relative local media references with SHA-256 provenance, restores the editable state before replacing the current photo and preserves the current photo when open fails. Focused photo project coverage passes 3/3.
+
 **FT-801 checkpoint:** Before/after now composes an editable multi-clip base layer twice—unaltered and graded—and the split/wipe/timed-reveal output is covered by graph tests plus a real two-clip FFmpeg smoke.
 
 **FT-802 checkpoint:** Video and Photo workspaces expose the same 16:9, 1:1 and 9:16 presets. Photo exports cover-crop to exact dimensions, preserve metadata/source bytes, and use the shared cancellable export queue when hosted by the desktop view model.
@@ -29,6 +31,8 @@
 **CI checkpoint:** GitHub Actions run `39050810748` passed documentation/schema validation and .NET restore/build/format/test/publish/checksum jobs on Windows, macOS and Linux for `71b9bca`. Run `39051936860` also passed host-FFmpeg installation plus generated import/extracted-audio/repeated-seek assertions on Windows, macOS and Linux for `c37d112`. Run `39052895799` passed the same three-OS matrix with the NuGet advisory scan and published-artifact checksum verifier for `882c1c3`. Run `39053781388` passed the same three-OS matrix for `2858e59` after the FT-602 Files API implementation. Run `39054338193` passed the self-contained packaging/status checkpoint for `a4affa2`. Run `39054513784` passed the same three-OS matrix plus the new shell packaging syntax gate for `3808988`. Run `39055332326` passed the three-OS native-media matrix with the real multitrack timeline smoke for `b06a406`. Run `39056049489` passed the three-OS matrix with the generated NuGet dependency graph and FFmpeg/ffprobe version/build-configuration artifacts for `c2a67e2`. Run `39056614730` passed the three-OS native-media matrix with generated still-image conversion, photo import and PNG export for `dea377f`. Run `39057464353` passed the three-OS native-media matrix with preview proxy creation, ffprobe dimension checks and cache reuse for `d330d2e`; run `39057754819` repeated that evidence with a content SHA-256 fingerprint for `cc64553`. Run `39058607525` passed the hosted three-OS capability-probe test for `d4eb09f` after a first Linux-only attempt exposed the existing timing-sensitive export-queue test; no queue code changed. Run `39059471917` passed the three-OS build/test/publish/checksum matrix for `54dae94`, including the real timeline preview view-model test. Run `39059745492` passed the documentation/status checkpoint for `f5a05ac`. Run `39061301468` passed the timeline save/open implementation matrix for `9dff007`; run `39061566544` passed the associated status checkpoint for `16a1e3d`; run `39061896032` passed the final status correction for `c711903`; run `39062316915` passed the native-media matrix with real FFmpeg project save/reopen, media reimport and the existing export assertions for `2f1e16b`; and run `39062963831` passed the atomic timeline-restore safety fix for `964426f`. The Windows line-ending failure is resolved by `.gitattributes`; hosted packaging is still framework-dependent and unsigned. The local FT-903 trace tool passed on Windows at `f92c57f`, and the local native timeline/media smoke passed on 2026-10-17 as recorded above.
 
 **Playback CI checkpoint:** Run `39063757381` passed the cancellable timeline playback implementation on Windows, macOS and Linux for `70805c9`; hosted packaging remains framework-dependent and unsigned.
+
+**Photo persistence CI checkpoint:** Run `39065309000` passed photo project persistence, repository compatibility and the full quality matrix on Windows, macOS and Linux for `7d35174`; hosted packaging remains framework-dependent and unsigned.
 
 **E09 test checkpoint:** Added focused evidence for every keyboard workspace shortcut, validated-plan JSON synchronization/clearing, repeatable seek traces, cancellable frame playback and credential-assignment redaction. Hosted native media smoke now covers all three OS runners; these tests strengthen FT-901/FT-902/FT-903/FT-904 but do not replace the required interactive 1280x800/HiDPI manual acceptance.
 
@@ -109,6 +113,20 @@
 5. Keep MLT deferred unless interactive playback parity or a release licensing decision requires a new native engine spike.
 
 ## Latest execution record
+```text
+Date/time: 2026-10-18
+Task / Epic: FT-402 / editable photo project persistence
+Git SHA: 7d35174
+Files changed: src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/PhotoEditorViewModel.cs, src/FrameTheory.Desktop/PhotoProjectStateJson.cs, src/FrameTheory.Domain/Project.cs, src/FrameTheory.Storage/JsonProjectRepository.cs, tests/FrameTheory.UnitTests/PhotoProjectPersistenceTests.cs
+Actual behavior and UI path: The Photo workspace exposes Open photo project and Save photo project. Save stores non-destructive operations and adjustment layers in the existing atomic project JSON with a relative photo reference and SHA-256 source fingerprint; open reimports the photo and restores the editable state without mutating the current photo on failure.
+Commands executed + OS: Focused photo project tests, full unit tests, golden tests, Release build and formatting verification on Windows 11 x64; hosted quality gate run 39065309000 passed on Windows, macOS and Linux.
+Test outputs / exit codes: Focused photo project tests passed 3/3; full unit tests passed 143/143; golden tests passed 2/2; Release build passed with 0 warnings/errors; hosted run 39065309000 passed all jobs.
+Media fixtures and verification: The tests use temporary local photo bytes and deterministic import/process seams; no user media, API key, generated fixture or binary entered Git.
+Known limitations / blockers: Interactive Photo workspace close/reopen and cross-platform GUI acceptance remain open; sources must remain within the project directory under the existing portable project contract.
+Next unblocked task: Exercise photo and timeline project recovery through the native Avalonia UI when a usable native app surface is available.
+```
+
+## Previous execution record
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-903 / Video workspace preview proxy wiring
