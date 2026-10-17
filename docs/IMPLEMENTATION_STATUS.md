@@ -46,7 +46,7 @@
 - [x] FT-702 explicit video-frame/audio-waveform/photo-preview scope selector, local bounded sampler, upload-consent disclosure and cancellation
 - [x] FT-703 bounded JSON edit-plan parser, semantic project validation and allowlisted operation catalog
 - [x] FT-704 AI proposal review panel with action summaries, per-action approval state and no-mutation-before-approval behavior
-- [~] FT-705 transactional executor for approved grades, clip edits, transitions, titles, captions, keyframes, audio, trusted presets and bounded Reel actions; multi-clip/scope completion remains open
+- [x] FT-705 transactional executor for approved grades, clip edits, transitions, titles, captions, keyframes, audio, trusted presets and bounded Reel actions across multiple clips; real two-clip FFmpeg export smoke verified
 - [~] FT-801 editable one-clip before/after split, wipe and timed-reveal composition with real FFmpeg output; multi-clip wizard remains open
 - [~] FT-802 real MP4 social aspect presets for 16:9, 1:1 and 9:16 plus Photo workspace PNG/JPEG quality export; social photo dimensions and queue parity remain open
 - [~] FT-803 imported user audio, waveform-derived beat markers and existing creative title/caption slots; approved watermark and richer beat options remain open
@@ -70,21 +70,21 @@
 
 ## Next tasks
 1. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
-2. Wire FT-602 into the desktop caption workflow and add a known spoken-fixture/provider integration run, then complete FT-705/FT-706 and FT-801..FT-804 remaining P0 scope.
+2. Wire FT-602 into the desktop caption workflow and add a known spoken-fixture/provider integration run, then complete FT-706 and FT-801..FT-804 remaining P0 scope.
 3. Finish manual/cross-platform FT-901..FT-904 acceptance and hosted FT-1001..FT-1005 gates.
 
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
-Task / Epic: FT-602 / E06
+Task / Epic: FT-705 / E07
 Git SHA: pending commit
-Files changed: src/FrameTheory.Captions/Transcription.cs, tests/FrameTheory.UnitTests/TranscriptionTests.cs, docs/GEMINI_PROVIDER.md, docs/IMPLEMENTATION_STATUS.md
-Actual behavior and UI path: The headless `GeminiTranscriptionProvider` accepts only a local supported audio source and explicit consent, posts a bounded inline request to the Gemini Interactions endpoint, and returns only validated source-timed words with a SHA-256 fingerprint. No desktop transcription button is wired yet.
-Commands executed + OS: Windows 11 x64; focused transcription tests with .NET SDK 10.0.100.
-Test outputs / exit codes: `dotnet test tests/FrameTheory.UnitTests/FrameTheory.UnitTests.csproj --no-restore --configuration Release --filter FullyQualifiedName~TranscriptionTests` passed 6/6 (exit 0).
+Files changed: tests/FrameTheory.UnitTests/AiEditPlanExecutorTests.cs, tools/FrameTheory.TimelineExportSmoke/Program.cs, docs/E2E_JOURNEYS.md, docs/IMPLEMENTATION_STATUS.md
+Actual behavior and UI path: Approved AI actions now have an explicit multi-clip unit path. The timeline smoke applies two grades and a cross-dissolve to two imported videos, exports the resulting MP4, then exports a separate editable before/after Reel MP4; all outputs are ffprobe-verified.
+Commands executed + OS: Windows 11 x64; focused executor tests, Release build, and `FrameTheory.TimelineExportSmoke` with two synthetic H.264/AAC clips and .NET SDK 10.0.100.
+Test outputs / exit codes: Executor tests passed 4/4 (exit 0); smoke build passed 0 warnings/0 errors; smoke exported `timeline-ai.mp4` (29,893 bytes) and `timeline-ai-reel.mp4` (26,119 bytes), both 16x8 `bt709` video receipts (exit 0).
 Media fixtures and verification: Photo export continues to use real FFmpeg/ffprobe and atomic temporary files; no source media or API keys entered Git. Approved logo/watermark asset is still absent from the repository, so no watermark was invented.
 Known limitations / blockers: FT-602 still needs desktop wiring, a known spoken fixture against an approved user key, Files API support for longer audio, video audio extraction and a local ASR fallback. FT-706 still lacks follow-up request history, provider retries/timeouts, usage accounting and redaction logs. FT-804 has one active worker and no persisted queue/retry history; FT-802 social photo dimensions and queue parity remain open. FT-803 uses amplitude peaks as a basic marker aid. FT-006 remains partial pending MLT and second-OS evidence. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux analysis and desktop runs are unverified.
-Next unblocked task: FT-602 desktop wiring / FT-705 remaining P0 scope
+Next unblocked task: FT-602 desktop wiring / FT-706 remaining P0 scope
 ```
 
 ## Task execution record template
@@ -102,7 +102,7 @@ Next unblocked task:
 ```
 
 ## Release verification status
-Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601/FT-603/FT-604/FT-605/FT-701/FT-702/FT-703/FT-704, FT-705, bounded FT-801/FT-802/FT-803, FT-804 and FT-706 undo paths built/tested; FT-705/FT-801 multi-clip, FT-802 social-photo/queue parity, FT-803 watermark/spectral-marker, FT-804 retry/history, FT-602 desktop/provider fixture integration and FT-706 provider scope remain partial; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini provider: headless adapter contract tested; no live key/media upload run. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
+Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601/FT-603/FT-604/FT-605/FT-701/FT-702/FT-703/FT-704/FT-705, bounded FT-801/FT-802/FT-803, FT-804 and FT-706 undo paths built/tested; FT-801 multi-clip, FT-802 social-photo/queue parity, FT-803 watermark/spectral-marker, FT-804 retry/history, FT-602 desktop/provider fixture integration and FT-706 provider scope remain partial; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini provider: headless adapter contract tested; no live key/media upload run. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
 
 ## Honest reporting
 Codex should not mark a task complete for a mock UI, TODO, downloaded asset, simulated exporter, docs-only passing CI, or speculative integration. If execution is interrupted, preserve status and resume from first unblocked task on next run.

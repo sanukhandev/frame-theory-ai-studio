@@ -17,6 +17,7 @@ var runner = new FfmpegProcessRunner();
 var decoder = new FfmpegFrameDecoder(runner);
 var importer = new FfmpegMediaImporter(new FfprobeMediaProbe(runner), decoder, runner);
 var importedSourceA = await importer.ImportAsync(sourceA, CancellationToken.None);
+var importedSourceB = await importer.ImportAsync(sourceB, CancellationToken.None);
 var analysis = await new LocalAnalysisSampler(decoder).PrepareAsync(
     new GeminiAnalysisRequest([importedSourceA], GeminiAnalysisScope.VideoFrames | GeminiAnalysisScope.AudioWaveform, uploadConsent: false),
     new Progress<LocalAnalysisProgress>(update => Console.WriteLine($"analysis={update.Stage}; fraction={update.Fraction:0.0}")),
@@ -97,6 +98,7 @@ Console.WriteLine($"output={receipt.OutputPath}; bytes={receipt.OutputBytes}; ki
 
 var aiEditor = new TimelineEditorViewModel(frameRate);
 aiEditor.AddMedia(importedSourceA.Metadata);
+aiEditor.AddMedia(importedSourceB.Metadata);
 var aiAction = new AiEditAction(
     "ai-grade",
     "color.adjust",
@@ -111,6 +113,30 @@ var aiAction = new AiEditAction(
         ["temperature"] = JsonDocument.Parse("0").RootElement.Clone(),
         ["tint"] = JsonDocument.Parse("0").RootElement.Clone()
     });
+var aiSecondGradeAction = new AiEditAction(
+    "ai-grade-second",
+    "color.adjust",
+    importedSourceB.Metadata.Id.Value,
+    0,
+    Math.Max(1, importedSourceB.Metadata.DurationFrames),
+    new Dictionary<string, JsonElement>
+    {
+        ["exposureEV"] = JsonDocument.Parse("-0.2").RootElement.Clone(),
+        ["contrast"] = JsonDocument.Parse("0.05").RootElement.Clone(),
+        ["saturation"] = JsonDocument.Parse("0").RootElement.Clone(),
+        ["temperature"] = JsonDocument.Parse("0").RootElement.Clone(),
+        ["tint"] = JsonDocument.Parse("0").RootElement.Clone()
+    });
+var aiTransitionAction = new AiEditAction(
+    "ai-transition",
+    "transition.add",
+    importedSourceB.Metadata.Id.Value,
+    importedSourceA.Metadata.DurationFrames,
+    Math.Min(5, Math.Max(1, importedSourceB.Metadata.DurationFrames - 1)),
+    new Dictionary<string, JsonElement>
+    {
+        ["kind"] = JsonDocument.Parse("\"cross-dissolve\"").RootElement.Clone()
+    });
 var reelAction = new AiEditAction(
     "ai-reel",
     "reel.before_after",
@@ -122,7 +148,7 @@ var reelAction = new AiEditAction(
         ["style"] = JsonDocument.Parse("\"split\"").RootElement.Clone()
     });
 var aiResult = AiEditPlanExecutor.Execute(
-    [aiAction, reelAction],
+    [aiAction, aiSecondGradeAction, aiTransitionAction],
     aiEditor,
     new Dictionary<string, string>(),
     new Dictionary<string, FrameTheory.Color.ColorGrade>());
@@ -135,7 +161,11 @@ var aiOutput = Path.Combine(Path.GetDirectoryName(destination) ?? ".", $"{Path.G
 var aiPlan = aiEditor.BuildRenderPlan(
     importedSourceA.Metadata.Width,
     importedSourceA.Metadata.Height,
-    new Dictionary<MediaId, Uri> { [importedSourceA.Metadata.Id] = sourceA });
+    new Dictionary<MediaId, Uri>
+    {
+        [importedSourceA.Metadata.Id] = sourceA,
+        [importedSourceB.Metadata.Id] = sourceB
+    });
 var aiReceipt = await exporter.ExportAsync(
     aiPlan,
     aiOutput,
@@ -143,3 +173,28 @@ var aiReceipt = await exporter.ExportAsync(
     new Progress<ExportProgress>(update => Console.WriteLine($"ai-stage={update.Stage}; fraction={update.Fraction:0.0}")),
     CancellationToken.None);
 Console.WriteLine($"ai-output={aiReceipt.OutputPath}; bytes={aiReceipt.OutputBytes}; color={aiReceipt.VerifiedMetadata.ColorProfile}");
+
+var reelEditor = new TimelineEditorViewModel(frameRate);
+reelEditor.AddMedia(importedSourceA.Metadata);
+var reelResult = AiEditPlanExecutor.Execute(
+    [reelAction],
+    reelEditor,
+    new Dictionary<string, string>(),
+    new Dictionary<string, FrameTheory.Color.ColorGrade>());
+if (!reelResult.IsApplied)
+{
+    throw new InvalidOperationException(reelResult.Message);
+}
+
+var reelOutput = Path.Combine(Path.GetDirectoryName(destination) ?? ".", $"{Path.GetFileNameWithoutExtension(destination)}-ai-reel.mp4");
+var reelPlan = reelEditor.BuildRenderPlan(
+    importedSourceA.Metadata.Width,
+    importedSourceA.Metadata.Height,
+    new Dictionary<MediaId, Uri> { [importedSourceA.Metadata.Id] = sourceA });
+var reelReceipt = await exporter.ExportAsync(
+    reelPlan,
+    reelOutput,
+    new ExportPreset(importedSourceA.Metadata.Width, importedSourceA.Metadata.Height, frameRate, importedSourceA.Metadata.HasAudio),
+    new Progress<ExportProgress>(update => Console.WriteLine($"reel-stage={update.Stage}; fraction={update.Fraction:0.0}")),
+    CancellationToken.None);
+Console.WriteLine($"reel-output={reelReceipt.OutputPath}; bytes={reelReceipt.OutputBytes}; color={reelReceipt.VerifiedMetadata.ColorProfile}");

@@ -78,6 +78,49 @@ public sealed class AiEditPlanExecutorTests
         }
     }
 
+    [Xunit.Fact]
+    public void ApprovedActionsCanTargetMultipleTimelineClipsInOneUndoableGroup()
+    {
+        var editor = CreateEditor(out var firstMediaId);
+        var secondMediaId = MediaId.Create(new Uri("file:///second-fixture.mp4"), "second-fixture");
+        editor.AddMedia(new MediaSourceMetadata(
+            secondMediaId,
+            new Uri("file:///second-fixture.mp4"),
+            MediaKind.Video,
+            16,
+            8,
+            new RationalFrameRate(30, 1),
+            30,
+            TimeSpan.FromSeconds(1)));
+        var actions = new[]
+        {
+            ColorAction(firstMediaId.Value),
+            ColorAction(secondMediaId.Value),
+            new AiEditAction("transition", "transition.add", secondMediaId.Value, 30, 5, new Dictionary<string, JsonElement>
+            {
+                ["kind"] = JsonDocument.Parse("\"cross-dissolve\"").RootElement.Clone()
+            })
+        };
+
+        var result = AiEditPlanExecutor.Execute(actions, editor, new Dictionary<string, string>(), new Dictionary<string, FrameTheory.Color.ColorGrade>());
+        var plan = editor.BuildRenderPlan(16, 8, new Dictionary<MediaId, Uri>
+        {
+            [firstMediaId] = new Uri("file:///first-fixture.mp4"),
+            [secondMediaId] = new Uri("file:///second-fixture.mp4")
+        });
+
+        Xunit.Assert.True(result.IsApplied, result.Message);
+        Xunit.Assert.Equal(3, result.Outcomes.Count);
+        Xunit.Assert.Equal(2, plan.ColorGrades.Count);
+        Xunit.Assert.Contains(plan.Layers.Single().Segments, segment => segment.Transition == TimelineTransitionKind.CrossDissolve);
+        Xunit.Assert.True(editor.UndoAiEdit());
+        Xunit.Assert.Empty(editor.BuildRenderPlan(16, 8, new Dictionary<MediaId, Uri>
+        {
+            [firstMediaId] = new Uri("file:///first-fixture.mp4"),
+            [secondMediaId] = new Uri("file:///second-fixture.mp4")
+        }).ColorGrades);
+    }
+
     private static TimelineEditorViewModel CreateEditor(out MediaId mediaId)
     {
         mediaId = MediaId.Create(new Uri("file:///fixture.mp4"), "fixture");
