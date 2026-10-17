@@ -70,6 +70,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private TimelineExportRequest? _lastTimelineExportRequest;
     private readonly ILocalAnalysisSampler? _analysisSampler;
     private readonly IPreviewFrameDecoder _timelinePreviewDecoder;
+    private readonly FfmpegPreviewProxyService? _timelinePreviewProxy;
     private int _videoWidth;
     private int _videoHeight;
     private byte[]? _timelinePreviewPpm;
@@ -77,6 +78,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _timelineProjectStatusText = "No timeline project opened.";
     private CancellationTokenSource? _timelinePlaybackCancellation;
     private bool _isTimelinePreviewPlaying;
+    private bool _useTimelinePreviewProxy;
 
     public MainWindowViewModel(
         IWorkspaceCatalog workspaceCatalog,
@@ -94,7 +96,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         HttpClient? transcriptionHttpClient = null,
         IGeminiInteractionHistory? geminiInteractionHistory = null,
         IAudioSourcePreparer? audioSourcePreparer = null,
-        IPreviewFrameDecoder? timelinePreviewDecoder = null)
+        IPreviewFrameDecoder? timelinePreviewDecoder = null,
+        FfmpegPreviewProxyService? timelinePreviewProxy = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
@@ -117,6 +120,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         _timelineExporter = timelineExporter;
         _analysisSampler = analysisSampler;
         _timelinePreviewDecoder = timelinePreviewDecoder ?? new FfmpegFrameDecoder(new FfmpegProcessRunner());
+        _timelinePreviewProxy = timelinePreviewProxy;
         if (Workspaces.Count == 0)
         {
             throw new InvalidOperationException("At least one workspace is required.");
@@ -178,6 +182,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             _isTimelinePreviewPlaying = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool UseTimelinePreviewProxy
+    {
+        get => _useTimelinePreviewProxy;
+        set
+        {
+            if (value == _useTimelinePreviewProxy)
+            {
+                return;
+            }
+
+            _useTimelinePreviewProxy = value;
             OnPropertyChanged();
         }
     }
@@ -473,13 +492,35 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         try
         {
-            TimelinePreviewStatusText = $"Decoding frame {sourceFrame}...";
+            var previewSource = source;
+            var proxyDescription = string.Empty;
+            if (UseTimelinePreviewProxy)
+            {
+                if (_timelinePreviewProxy is null)
+                {
+                    TimelinePreviewStatusText = "Preview proxy support is unavailable in this host.";
+                    TimelinePreviewPpm = null;
+                    return false;
+                }
+
+                TimelinePreviewStatusText = $"Preparing preview proxy for {Path.GetFileName(source.LocalPath)}...";
+                var proxy = await _timelinePreviewProxy.CreateAsync(
+                    source,
+                    media.Metadata.Id.Value,
+                    Math.Max(2, Math.Min(media.Metadata.Width, 1280)),
+                    Math.Max(2, Math.Min(media.Metadata.Height, 720)),
+                    cancellationToken);
+                previewSource = new Uri(proxy.OutputPath);
+                proxyDescription = proxy.Reused ? " using cached preview proxy" : " using preview proxy";
+            }
+
+            TimelinePreviewStatusText = $"Decoding frame {sourceFrame}{proxyDescription}...";
             TimelinePreviewPpm = await _timelinePreviewDecoder.DecodeFrameAsync(
-                source,
+                previewSource,
                 media.Metadata.FrameRate ?? new RationalFrameRate(30, 1),
                 sourceFrame,
                 cancellationToken);
-            TimelinePreviewStatusText = $"Previewed frame {sourceFrame} from {Path.GetFileName(source.LocalPath)}.";
+            TimelinePreviewStatusText = $"Previewed frame {sourceFrame} from {Path.GetFileName(source.LocalPath)}{proxyDescription}.";
             return true;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -963,6 +1004,9 @@ public sealed class DesktopServices
         var probe = new FfprobeMediaProbe(processRunner);
         var repository = new JsonProjectRepository();
         var exportQueue = new ExportQueueService();
+        var previewProxy = new FfmpegPreviewProxyService(
+            processRunner,
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FrameTheoryStudio", "preview-cache"));
         return new(
             new WorkspaceCatalog(),
             new FrameTheory.Platform.SystemCapabilityDetector(),
@@ -973,6 +1017,7 @@ public sealed class DesktopServices
             analysisSampler: new LocalAnalysisSampler(decoder),
             exportQueue: exportQueue,
             diagnosticsLog: _diagnosticsLog,
-            timelinePreviewDecoder: decoder);
+            timelinePreviewDecoder: decoder,
+            timelinePreviewProxy: previewProxy);
     }
 }

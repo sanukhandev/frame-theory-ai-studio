@@ -599,6 +599,12 @@ public sealed class MainWindow : Window
         playTimeline.Click += async (_, _) => await viewModel.PlayTimelinePreviewAsync(CancellationToken.None);
         var stopTimeline = new Button { Content = "Stop playback" };
         stopTimeline.Click += (_, _) => viewModel.StopTimelinePreview();
+        var usePreviewProxy = new CheckBox { Content = "Use bounded preview proxy" };
+        usePreviewProxy.Bind(ToggleButton.IsCheckedProperty, new Binding(nameof(MainWindowViewModel.UseTimelinePreviewProxy))
+        {
+            Mode = BindingMode.TwoWay
+        });
+        AutomationProperties.SetName(usePreviewProxy, "Use bounded timeline preview proxy");
         var playhead = new Slider { Minimum = 0, Maximum = Math.Max(1, timeline.TotalFrames - 1), Value = timeline.CurrentFrame };
         AutomationProperties.SetName(playhead, "Timeline playhead frame");
         playhead.ValueChanged += (_, args) => timeline.SeekFrame((long)Math.Round(args.NewValue, MidpointRounding.AwayFromZero));
@@ -938,7 +944,7 @@ public sealed class MainWindow : Window
                 Children =
                 {
                     new TextBlock { Text = "Frame-accurate timeline", FontWeight = FontWeight.SemiBold },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { timelinePreview, new StackPanel { Spacing = 8, Children = { previewCurrentFrame, playTimeline, stopTimeline, timelinePreviewStatus } } } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { timelinePreview, new StackPanel { Spacing = 8, Children = { previewCurrentFrame, playTimeline, stopTimeline, usePreviewProxy, timelinePreviewStatus } } } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { new TextBlock { Text = "Frame" }, frameStatus, new TextBlock { Text = "Position" }, positionStatus } },
                     playhead,
                     ruler,

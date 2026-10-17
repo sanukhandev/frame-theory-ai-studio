@@ -41,6 +41,44 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task TimelinePreviewCanUseAndReuseBoundedProxy()
+    {
+        var sourcePath = Path.Combine(Path.GetTempPath(), $"frame-theory-preview-source-{Guid.NewGuid():N}.mp4");
+        var cachePath = Path.Combine(Path.GetTempPath(), $"frame-theory-preview-cache-{Guid.NewGuid():N}");
+        File.WriteAllBytes(sourcePath, [1, 2, 3]);
+        try
+        {
+            var decoder = new StubPreviewDecoder();
+            var processRunner = new ProxyProcessRunner();
+            var viewModel = new MainWindowViewModel(
+                new WorkspaceCatalog(),
+                new StubCapabilityDetector(),
+                new VideoImporter(),
+                timelinePreviewDecoder: decoder,
+                timelinePreviewProxy: new FfmpegPreviewProxyService(processRunner, cachePath));
+
+            await viewModel.ImportFilesAsync([sourcePath], CancellationToken.None);
+            viewModel.UseTimelinePreviewProxy = true;
+
+            Xunit.Assert.True(await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None));
+            Xunit.Assert.True(await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None));
+            Xunit.Assert.Equal(1, processRunner.Calls);
+            Xunit.Assert.Equal(2, decoder.Files.Count);
+            Xunit.Assert.NotEqual(new Uri(sourcePath), decoder.Files[0]);
+            Xunit.Assert.Equal(decoder.Files[0], decoder.Files[1]);
+            Xunit.Assert.Contains("cached preview proxy", viewModel.TimelinePreviewStatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            File.Delete(sourcePath);
+            if (Directory.Exists(cachePath))
+            {
+                Directory.Delete(cachePath, recursive: true);
+            }
+        }
+    }
+
+    [Xunit.Fact]
     public async Task TimelinePlaybackDecodesEveryFrameWithoutBoundarySnapping()
     {
         var decoder = new StubPreviewDecoder();
@@ -133,11 +171,26 @@ public sealed class DesktopImportTests
 
         public List<long> Frames { get; } = [];
 
+        public List<Uri> Files { get; } = [];
+
         public Task<byte[]> DecodeFrameAsync(Uri file, RationalFrameRate frameRate, long frameIndex, CancellationToken cancellationToken)
         {
+            Files.Add(file);
             FrameIndex = frameIndex;
             Frames.Add(frameIndex);
             return Task.FromResult("P6\n1 1\n255\n\0\0\0"u8.ToArray());
+        }
+    }
+
+    private sealed class ProxyProcessRunner : IMediaProcessRunner
+    {
+        public int Calls { get; private set; }
+
+        public Task<MediaProcessResult> RunAsync(string executable, IReadOnlyList<string> arguments, CancellationToken cancellationToken)
+        {
+            Calls++;
+            File.WriteAllBytes(arguments[^1], [1]);
+            return Task.FromResult(new MediaProcessResult(0, string.Empty, string.Empty));
         }
     }
 
