@@ -279,6 +279,41 @@ var aiReceipt = await exporter.ExportAsync(
     CancellationToken.None);
 Console.WriteLine($"ai-output={aiReceipt.OutputPath}; bytes={aiReceipt.OutputBytes}; stabilization=5; ffmpeg-stabilization=16; color={aiReceipt.VerifiedMetadata.ColorProfile}");
 
+var batchTargets = Enum.GetValues<SocialAspectRatio>().Select(aspectRatio =>
+{
+    var socialPreset = SocialVideoExportPreset.Create(aspectRatio, 8);
+    var batchPlan = aiEditor.BuildRenderPlan(
+        socialPreset.Width,
+        socialPreset.Height,
+        new Dictionary<MediaId, Uri>
+        {
+            [importedSourceA.Metadata.Id] = sourceA,
+            [importedSourceB.Metadata.Id] = sourceB
+        });
+    var name = aspectRatio switch
+    {
+        SocialAspectRatio.Landscape16By9 => "16x9-landscape",
+        SocialAspectRatio.Square1By1 => "1x1-square",
+        SocialAspectRatio.Portrait9By16 => "9x16-portrait",
+        _ => throw new ArgumentOutOfRangeException(nameof(aspectRatio))
+    };
+    return new TimelineBatchExportTarget(
+        name,
+        batchPlan,
+        Path.Combine(Path.GetDirectoryName(destination) ?? ".", $"{Path.GetFileNameWithoutExtension(destination)}-{name}.mp4"),
+        socialPreset.ToExportPreset(batchPlan.FrameRate, batchPlan.AudioLayers.Count > 0));
+}).ToArray();
+var batchReceipts = await new TimelineBatchExporter(exporter).ExportAsync(
+    batchTargets,
+    new Progress<TimelineBatchExportProgress>(update => Console.WriteLine($"batch-{update.TargetName}={update.Progress.Stage}; fraction={update.Progress.Fraction:0.0}")),
+    CancellationToken.None);
+if (batchReceipts.Count != 3 || batchReceipts.Any(receipt => receipt.VerifiedMetadata.Kind != MediaKind.Video))
+{
+    throw new InvalidOperationException("The multi-target batch export did not produce three verified videos.");
+}
+
+Console.WriteLine($"batch-output={batchReceipts.Count}; targets={string.Join(',', batchReceipts.Select(receipt => Path.GetFileName(receipt.OutputPath)))}");
+
 var roughCutEditor = new TimelineEditorViewModel(frameRate);
 roughCutEditor.AddMedia(importedSourceA.Metadata);
 roughCutEditor.AddMedia(importedSourceB.Metadata);
