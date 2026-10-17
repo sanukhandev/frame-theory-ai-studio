@@ -116,7 +116,12 @@ public sealed class FoundationTests
     [Xunit.Fact]
     public async Task CapabilityDetectorReportsNonzeroDependencyProbeAsUnknown()
     {
-        var detector = new FrameTheory.Platform.SystemCapabilityDetector("dotnet", "dotnet", "--frame-theory-invalid-probe");
+        var detector = new FrameTheory.Platform.SystemCapabilityDetector(
+            "dotnet",
+            "dotnet",
+            "--frame-theory-invalid-probe",
+            gpuExecutable: "dotnet",
+            gpuArguments: ["--frame-theory-invalid-gpu-probe"]);
 
         var report = await detector.DetectAsync(CancellationToken.None);
 
@@ -126,6 +131,25 @@ public sealed class FoundationTests
             Xunit.Assert.Contains("Exited with code", entry.Detail, StringComparison.Ordinal);
         });
         Xunit.Assert.Contains("FFmpeg: unknown (Exited with code", report.Summary, StringComparison.Ordinal);
+        Xunit.Assert.Contains(report.Entries, entry => entry.Name == "GPU" && entry.State == CapabilityState.Unknown);
+    }
+
+    [Xunit.Fact]
+    public async Task CapabilityDetectorUsesGpuProbeWithoutClaimingAcceleration()
+    {
+        var detector = new FrameTheory.Platform.SystemCapabilityDetector(
+            "dotnet",
+            "dotnet",
+            "--version",
+            gpuExecutable: "dotnet",
+            gpuArguments: ["--version"]);
+
+        var report = await detector.DetectAsync(CancellationToken.None);
+        var gpu = Xunit.Assert.Single(report.Entries, entry => entry.Name == "GPU");
+
+        Xunit.Assert.Equal(CapabilityState.Unknown, gpu.State);
+        Xunit.Assert.DoesNotContain("not configured", gpu.Detail, StringComparison.OrdinalIgnoreCase);
+        Xunit.Assert.Contains("CPU fallback", gpu.Detail, StringComparison.Ordinal);
     }
 
     [Xunit.Fact]

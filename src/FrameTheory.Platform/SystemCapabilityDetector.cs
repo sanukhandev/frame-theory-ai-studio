@@ -9,15 +9,22 @@ public sealed class SystemCapabilityDetector : ICapabilityDetector
     private readonly string _ffmpegExecutable;
     private readonly string _ffprobeExecutable;
     private readonly string _probeArgument;
+    private readonly string? _gpuExecutable;
+    private readonly IReadOnlyList<string> _gpuArguments;
 
     public SystemCapabilityDetector(
         string ffmpegExecutable = "ffmpeg",
         string ffprobeExecutable = "ffprobe",
-        string probeArgument = "-version")
+        string probeArgument = "-version",
+        string? gpuExecutable = null,
+        IReadOnlyList<string>? gpuArguments = null)
     {
         _ffmpegExecutable = RequireExecutable(ffmpegExecutable, nameof(ffmpegExecutable));
         _ffprobeExecutable = RequireExecutable(ffprobeExecutable, nameof(ffprobeExecutable));
         _probeArgument = RequireExecutable(probeArgument, nameof(probeArgument));
+        var defaultGpuProbe = GetDefaultGpuProbe();
+        _gpuExecutable = gpuExecutable ?? defaultGpuProbe.Executable;
+        _gpuArguments = (gpuArguments ?? defaultGpuProbe.Arguments).ToArray();
     }
 
     public async Task<CapabilityReport> DetectAsync(CancellationToken cancellationToken)
@@ -30,7 +37,7 @@ public sealed class SystemCapabilityDetector : ICapabilityDetector
             await ProbeStorageAsync(cancellationToken),
             await ProbeExecutableAsync(_ffmpegExecutable, "FFmpeg", cancellationToken),
             await ProbeExecutableAsync(_ffprobeExecutable, "ffprobe", cancellationToken),
-            new("GPU", CapabilityState.Unknown, "Native backend detection is not configured yet.")
+            await ProbeGpuAsync(cancellationToken)
         };
 
         return new CapabilityReport(
@@ -87,6 +94,102 @@ public sealed class SystemCapabilityDetector : ICapabilityDetector
         }
     }
 
+    private async Task<CapabilityStatus> ProbeGpuAsync(CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(_gpuExecutable))
+        {
+            return new CapabilityStatus("GPU", CapabilityState.Unknown, "No platform GPU adapter probe is available; CPU fallback remains active.");
+        }
+
+        try
+        {
+            using var process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = _gpuExecutable,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                }
+            };
+            foreach (var argument in _gpuArguments)
+            {
+                process.StartInfo.ArgumentList.Add(argument);
+            }
+
+            if (!process.Start())
+            {
+                return new CapabilityStatus("GPU", CapabilityState.Unknown, "The platform GPU adapter probe could not be started; CPU fallback remains active.");
+            }
+
+            var standardOutput = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            var standardError = process.StandardError.ReadToEndAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken);
+            var output = await Task.WhenAll(standardOutput, standardError);
+            var detail = SelectGpuDescription(output);
+            if (process.ExitCode != 0)
+            {
+                var failure = FirstOutputLine(output) ?? $"Exited with code {process.ExitCode}.";
+                return new CapabilityStatus("GPU", CapabilityState.Unknown, $"GPU adapter probe failed: {LimitDetail(failure)} CPU fallback remains active.");
+            }
+
+            return detail is null
+                ? new CapabilityStatus("GPU", CapabilityState.Unknown, "The platform GPU adapter probe reported no adapter; CPU fallback remains active.")
+                : new CapabilityStatus("GPU", CapabilityState.Available, LimitDetail(detail));
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            return new CapabilityStatus("GPU", CapabilityState.Unknown, "The platform GPU adapter probe is unavailable; CPU fallback remains active.");
+        }
+    }
+
+    private static GpuProbeConfiguration GetDefaultGpuProbe()
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            return new GpuProbeConfiguration(
+                "powershell",
+                ["-NoProfile", "-NonInteractive", "-Command", "Get-CimInstance Win32_VideoController | ForEach-Object { \"GPU: \" + $_.Name }"]);
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            return new GpuProbeConfiguration("system_profiler", ["SPDisplaysDataType"]);
+        }
+
+        if (OperatingSystem.IsLinux())
+        {
+            return new GpuProbeConfiguration("lspci", ["-nn"]);
+        }
+
+        return new GpuProbeConfiguration(null, []);
+    }
+
+    private static string? SelectGpuDescription(IReadOnlyList<string> output)
+    {
+        var lines = output
+            .SelectMany(value => value.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+            .Select(value => value.Trim())
+            .Where(value => value.Length > 0)
+            .ToArray();
+        return lines.FirstOrDefault(line =>
+            line.Contains("VGA compatible controller", StringComparison.OrdinalIgnoreCase) ||
+            line.Contains("3D controller", StringComparison.OrdinalIgnoreCase) ||
+            line.Contains("Display controller", StringComparison.OrdinalIgnoreCase) ||
+            line.Contains("Chipset Model", StringComparison.OrdinalIgnoreCase) ||
+            line.Contains("Graphics/Displays", StringComparison.OrdinalIgnoreCase) ||
+            line.Contains("GPU: ", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static string? FirstOutputLine(IReadOnlyList<string> output) => output
+        .SelectMany(value => value.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+        .Select(value => value.Trim())
+        .FirstOrDefault(value => value.Length > 0);
+
+    private static string LimitDetail(string value) => value.Length <= 512 ? value : value[..512];
+
     private static string RequireExecutable(string value, string parameterName) =>
         string.IsNullOrWhiteSpace(value) ? throw new ArgumentException("An executable or probe argument is required.", parameterName) : value.Trim();
 
@@ -112,4 +215,6 @@ public sealed class SystemCapabilityDetector : ICapabilityDetector
             File.Delete(path);
         }
     }
+
+    private sealed record GpuProbeConfiguration(string? Executable, IReadOnlyList<string> Arguments);
 }
