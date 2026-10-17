@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>FrameTheory.Desktop</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FrameTheory.Application\FrameTheory.Application.csproj" />
+    <ProjectReference Include="..\FrameTheory.Platform\FrameTheory.Platform.csproj" />
+  </ItemGroup>
+</Project>

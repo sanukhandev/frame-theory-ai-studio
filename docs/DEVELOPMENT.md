@@ -6,7 +6,7 @@
 - FFmpeg/ffprobe available on PATH for development; bundle only after legal/native packaging review.
 - Per-OS supported Avalonia/native dependencies, build tools and optional OS secure-store integration.
 
-## Start (after E00 scaffold)
+## Start
 ```bash
 git clone https://github.com/sanukhandev/frame-theory-ai-studio.git
 cd frame-theory-ai-studio
@@ -18,7 +18,7 @@ dotnet build --configuration Release
 dotnet test --configuration Release
 dotnet run --project src/FrameTheory.Desktop
 ```
-The solution/project command paths are **targets for Codex to create**, not assertions that they exist today. On first scaffold, update this document with exact tested commands.
+The solution targets .NET 10 and the desktop shell is currently a managed foundation entry point; Avalonia is introduced in FT-002 after the foundation build gate. FFmpeg/ffprobe remain required for media tasks beginning with FT-003/FT-006.
 
 ## Repository target layout
 ```text

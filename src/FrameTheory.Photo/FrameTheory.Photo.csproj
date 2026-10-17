@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>FrameTheory.Photo</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FrameTheory.Domain\FrameTheory.Domain.csproj" />
+    <ProjectReference Include="..\FrameTheory.Color\FrameTheory.Color.csproj" />
+  </ItemGroup>
+</Project>
