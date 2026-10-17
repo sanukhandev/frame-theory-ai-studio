@@ -40,9 +40,9 @@ public sealed class AiEditPlanExecutorTests
         var actions = new[]
         {
             ColorAction(mediaId.Value),
-            new AiEditAction("bad", "reel.before_after", "active-project", 0, 10, new Dictionary<string, JsonElement>
+            new AiEditAction("bad", "transition.add", mediaId.Value, 0, 10, new Dictionary<string, JsonElement>
             {
-                ["style"] = JsonDocument.Parse("\"split\"").RootElement.Clone()
+                ["kind"] = JsonDocument.Parse("\"cross-dissolve\"").RootElement.Clone()
             })
         };
 
@@ -51,6 +51,31 @@ public sealed class AiEditPlanExecutorTests
         Xunit.Assert.False(result.IsApplied);
         Xunit.Assert.Empty(editor.BuildRenderPlan(16, 8, new Dictionary<MediaId, Uri> { [mediaId] = new Uri("file:///unused.mp4") }).ColorGrades);
         Xunit.Assert.False(editor.UndoAiEdit());
+    }
+
+    [Xunit.Fact]
+    public void ApprovedReelActionProducesEditableRevealPlan()
+    {
+        var editor = CreateEditor(out var mediaId);
+        var action = new AiEditAction("reel", "reel.before_after", "active-project", 0, 10, new Dictionary<string, JsonElement>
+        {
+            ["style"] = JsonDocument.Parse("\"split\"").RootElement.Clone()
+        });
+        var source = new Uri(Path.GetFullPath(Path.Combine(Path.GetTempPath(), "frame-theory-ai-reel-source.mp4")));
+        File.WriteAllBytes(source.LocalPath, [0]);
+        try
+        {
+            var result = AiEditPlanExecutor.Execute([action], editor, new Dictionary<string, string>(), new Dictionary<string, FrameTheory.Color.ColorGrade>());
+            var graph = new TimelineFilterGraphBuilder().Build(editor.BuildRenderPlan(16, 8, new Dictionary<MediaId, Uri> { [mediaId] = source }));
+
+            Xunit.Assert.True(result.IsApplied, result.Message);
+            Xunit.Assert.Contains("beforeafter_left", graph.FilterComplex, StringComparison.Ordinal);
+            Xunit.Assert.True(editor.UndoAiEdit());
+        }
+        finally
+        {
+            File.Delete(source.LocalPath);
+        }
     }
 
     private static TimelineEditorViewModel CreateEditor(out MediaId mediaId)

@@ -142,7 +142,14 @@ public static class AiEditPlanExecutor
                 timeline.ApplyColorGradeToMedia(action.TargetId, grade);
                 break;
             case "reel.before_after":
-                throw new InvalidOperationException("Before/after reel execution requires a paired before and after source; use the Reel workspace composition task.");
+                timeline.ApplyBeforeAfterStyle(action.Params["style"].GetString() switch
+                {
+                    "split" => TimelineRevealStyle.Split,
+                    "wipe" => TimelineRevealStyle.Wipe,
+                    "timed-reveal" => TimelineRevealStyle.TimedReveal,
+                    _ => throw new InvalidOperationException("The before/after reveal style is not supported.")
+                });
+                break;
             default:
                 throw new InvalidOperationException($"The operation '{action.Type}' is not executable.");
         }

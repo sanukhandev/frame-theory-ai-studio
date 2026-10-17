@@ -111,8 +111,18 @@ var aiAction = new AiEditAction(
         ["temperature"] = JsonDocument.Parse("0").RootElement.Clone(),
         ["tint"] = JsonDocument.Parse("0").RootElement.Clone()
     });
+var reelAction = new AiEditAction(
+    "ai-reel",
+    "reel.before_after",
+    "active-project",
+    0,
+    Math.Max(1, importedSourceA.Metadata.DurationFrames),
+    new Dictionary<string, JsonElement>
+    {
+        ["style"] = JsonDocument.Parse("\"split\"").RootElement.Clone()
+    });
 var aiResult = AiEditPlanExecutor.Execute(
-    [aiAction],
+    [aiAction, reelAction],
     aiEditor,
     new Dictionary<string, string>(),
     new Dictionary<string, FrameTheory.Color.ColorGrade>());

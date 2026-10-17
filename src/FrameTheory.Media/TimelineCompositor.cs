@@ -18,7 +18,9 @@ public sealed record TimelineVideoRenderPlan
         IReadOnlyList<TimelineTitle>? titles = null,
         IReadOnlyList<TimedCaption>? captions = null,
         TimelineCaptionStyle? captionStyle = null,
-        IReadOnlyDictionary<MediaId, ColorGrade>? colorGrades = null)
+        IReadOnlyDictionary<MediaId, ColorGrade>? colorGrades = null,
+        TimelineRevealStyle? beforeAfterStyle = null,
+        long beforeAfterRevealFrame = 0)
     {
         if (width <= 0 || height <= 0 || durationFrames <= 0)
         {
@@ -40,6 +42,13 @@ public sealed record TimelineVideoRenderPlan
         ColorGrades = colorGrades is null
             ? new Dictionary<MediaId, ColorGrade>()
             : new Dictionary<MediaId, ColorGrade>(colorGrades);
+        if (beforeAfterStyle is not null && (beforeAfterRevealFrame < 0 || beforeAfterRevealFrame >= durationFrames))
+        {
+            throw new ArgumentOutOfRangeException(nameof(beforeAfterRevealFrame));
+        }
+
+        BeforeAfterStyle = beforeAfterStyle;
+        BeforeAfterRevealFrame = beforeAfterRevealFrame;
     }
 
     public RationalFrameRate FrameRate { get; }
@@ -63,6 +72,10 @@ public sealed record TimelineVideoRenderPlan
     public TimelineCaptionStyle? CaptionStyle { get; }
 
     public IReadOnlyDictionary<MediaId, ColorGrade> ColorGrades { get; }
+
+    public TimelineRevealStyle? BeforeAfterStyle { get; }
+
+    public long BeforeAfterRevealFrame { get; }
 }
 
 public sealed record TimelineFilterGraph(string FilterComplex, IReadOnlyList<Uri> Inputs, string OutputLabel, string? AudioOutputLabel);
@@ -79,22 +92,30 @@ public sealed class TimelineFilterGraphBuilder
         var inputs = usedMediaIds.Select(mediaId => GetSource(plan, mediaId)).ToArray();
         var inputIndexes = usedMediaIds.Select((mediaId, index) => (mediaId, index)).ToDictionary(item => item.mediaId, item => item.index);
         var filters = new List<string>();
-        var baseLabel = "base0";
         var durationSeconds = FormatSeconds(plan.DurationFrames, plan.FrameRate);
-        filters.Add($"color=c=black@0.0:s={plan.Width}x{plan.Height}:r={Rate(plan.FrameRate)}:d={durationSeconds},format=yuva420p[{baseLabel}]");
-        var currentBase = baseLabel;
+        var currentBase = string.Empty;
         var layerIndex = 0;
-        foreach (var layer in plan.Layers)
+        if (plan.BeforeAfterStyle is null)
         {
-            if (layer.Segments.Count == 0)
+            var baseLabel = "base0";
+            filters.Add($"color=c=black@0.0:s={plan.Width}x{plan.Height}:r={Rate(plan.FrameRate)}:d={durationSeconds},format=yuva420p[{baseLabel}]");
+            currentBase = baseLabel;
+            foreach (var layer in plan.Layers)
             {
-                continue;
-            }
+                if (layer.Segments.Count == 0)
+                {
+                    continue;
+                }
 
-            var layerStream = BuildLayer(plan, layer, inputIndexes, filters, layerIndex++);
-            var nextBase = $"base{layerIndex}";
-            filters.Add($"[{currentBase}][{layerStream}]overlay=x=0:y=0:eof_action=pass:shortest=0:format=auto[{nextBase}]");
-            currentBase = nextBase;
+                var layerStream = BuildLayer(plan, layer, inputIndexes, filters, layerIndex++);
+                var nextBase = $"base{layerIndex}";
+                filters.Add($"[{currentBase}][{layerStream}]overlay=x=0:y=0:eof_action=pass:shortest=0:format=auto[{nextBase}]");
+                currentBase = nextBase;
+            }
+        }
+        else
+        {
+            currentBase = BuildBeforeAfter(plan, inputIndexes, filters);
         }
 
         var titleIndex = 0;
@@ -282,6 +303,45 @@ public sealed class TimelineFilterGraphBuilder
         return timedLabel;
     }
 
+    private static string BuildBeforeAfter(
+        TimelineVideoRenderPlan plan,
+        IReadOnlyDictionary<MediaId, int> inputIndexes,
+        ICollection<string> filters)
+    {
+        var segment = plan.Layers.SelectMany(layer => layer.Segments).SingleOrDefault()
+            ?? throw new MediaExportException("Before/after composition currently requires exactly one video segment.");
+        var beforeLabel = "beforeafter_before";
+        var afterLabel = "beforeafter_after";
+        BuildSegment(plan, segment, inputIndexes, filters, beforeLabel, includeTimelineOffset: false, applyGrade: false);
+        BuildSegment(plan, segment, inputIndexes, filters, afterLabel, includeTimelineOffset: false, applyGrade: true);
+        var raw = "beforeafter_raw";
+        var graded = "beforeafter_graded";
+        filters.Add($"[{beforeLabel}]setpts=PTS-STARTPTS[{raw}]");
+        filters.Add($"[{afterLabel}]setpts=PTS-STARTPTS[{graded}]");
+        var result = "beforeafter_result";
+        switch (plan.BeforeAfterStyle)
+        {
+            case TimelineRevealStyle.Split:
+                filters.Add($"[{raw}]crop=iw/2:ih:0:0[beforeafter_left]");
+                filters.Add($"[{graded}]crop=iw/2:ih:iw/2:0[beforeafter_right]");
+                filters.Add($"[beforeafter_left]pad={plan.Width}:{plan.Height}:0:0:color=black@0[beforeafter_leftpad]");
+                filters.Add($"[beforeafter_right]pad={plan.Width}:{plan.Height}:{plan.Width / 2}:0:color=black@0[beforeafter_rightpad]");
+                filters.Add("[beforeafter_leftpad][beforeafter_rightpad]overlay=x=0:y=0:eof_action=pass:shortest=0:format=auto[beforeafter_result]");
+                break;
+            case TimelineRevealStyle.Wipe:
+                var revealSeconds = FormatSeconds(Math.Max(1, plan.BeforeAfterRevealFrame), plan.FrameRate);
+                filters.Add($"[{raw}][{graded}]overlay=x='-w+w*min(1,max(0,(t/{revealSeconds})))':y=0:eof_action=pass:shortest=0:format=auto[{result}]");
+                break;
+            case TimelineRevealStyle.TimedReveal:
+                filters.Add($"[{raw}][{graded}]overlay=x=0:y=0:enable='gte(n,{plan.BeforeAfterRevealFrame})':eof_action=pass:shortest=0:format=auto[{result}]");
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(plan.BeforeAfterStyle));
+        }
+
+        return result;
+    }
+
     private static string BuildAnimatedLayer(
         TimelineVideoRenderPlan plan,
         TimelineVideoLayer layer,
@@ -313,7 +373,8 @@ public sealed class TimelineFilterGraphBuilder
         ICollection<string> filters,
         string label,
         bool includeTimelineOffset,
-        bool padToCanvas = true)
+        bool padToCanvas = true,
+        bool applyGrade = true)
     {
         var transform = segment.Transform;
         var clip = segment.Clip;
@@ -327,7 +388,7 @@ public sealed class TimelineFilterGraphBuilder
             ? $"colorchannelmixer=aa={opacity}"
             : $"geq=r='r(X\\,Y)':g='g(X\\,Y)':b='b(X\\,Y)':a='alpha(X\\,Y)*({opacity})'";
         var filter = $"[{input}:v:0]trim=start_frame={clip.SourceStartUnit}:end_frame={sourceEnd},setpts=PTS-STARTPTS,fps={Rate(plan.FrameRate)},scale=trunc(iw*{scale}/2)*2:trunc(ih*{scale}/2)*2:eval=frame,format=yuva420p";
-        if (plan.ColorGrades.TryGetValue(clip.MediaId, out var grade))
+        if (applyGrade && plan.ColorGrades.TryGetValue(clip.MediaId, out var grade))
         {
             filter += $",eq=brightness={Format((Math.Pow(2, grade.ExposureEV) - 1) * 0.5)}:contrast={Format(1 + grade.Contrast)}:saturation={Format(1 + grade.Saturation)}";
             filter += $",colorbalance=rs={Format(grade.Temperature * 0.1)}:bs={Format(-grade.Temperature * 0.1)}:gs={Format(-grade.Tint * 0.1)}";

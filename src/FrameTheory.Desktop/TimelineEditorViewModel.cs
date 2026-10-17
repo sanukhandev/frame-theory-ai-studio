@@ -54,6 +54,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private double _framesPerPixel = 1;
     private long _scrollFrame;
     private bool _snapEnabled = true;
+    private TimelineRevealStyle? _beforeAfterStyle;
     private readonly Stack<TimelineEditorState> _aiUndo = [];
 
     public TimelineEditorViewModel(RationalFrameRate? projectFrameRate = null)
@@ -195,7 +196,19 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             _titles,
             _captions,
             _captionFontPath is null ? null : new TimelineCaptionStyle(_captionFontPath),
-            _colorGrades);
+            _colorGrades,
+            _beforeAfterStyle,
+            TotalFrames / 2);
+    }
+
+    public void ApplyBeforeAfterStyle(TimelineRevealStyle style)
+    {
+        if (_videoClips.Count != 1)
+        {
+            throw new InvalidOperationException("Before/after composition currently requires exactly one video clip.");
+        }
+
+        _beforeAfterStyle = style;
     }
 
     public bool SelectMedia(string mediaId, TimelineTrackKind kind)
@@ -332,6 +345,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         new Dictionary<TimelineClip, TimelineTransitionSettings>(_transitions),
         new Dictionary<TimelineClip, TimelineVideoTransform>(_staticTransforms),
         new Dictionary<MediaId, ColorGrade>(_colorGrades),
+        _beforeAfterStyle,
         _titles.ToArray(),
         _captions.ToArray(),
         _captionFontPath,
@@ -379,6 +393,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         {
             _colorGrades[item.Key] = item.Value;
         }
+
+        _beforeAfterStyle = state.BeforeAfterStyle;
 
         _titles.Clear();
         _titles.AddRange(state.Titles);
@@ -870,6 +886,7 @@ internal sealed record TimelineEditorState(
     IReadOnlyDictionary<TimelineClip, TimelineTransitionSettings> Transitions,
     IReadOnlyDictionary<TimelineClip, TimelineVideoTransform> StaticTransforms,
     IReadOnlyDictionary<MediaId, ColorGrade> ColorGrades,
+    TimelineRevealStyle? BeforeAfterStyle,
     IReadOnlyList<TimelineTitle> Titles,
     IReadOnlyList<TimedCaption> Captions,
     string? CaptionFontPath,
