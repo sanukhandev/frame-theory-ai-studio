@@ -5,10 +5,10 @@
 Run the existing decoder smoke against a local synthetic clip:
 
 ```text
-dotnet run --project tools/FrameTheory.FrameDecodeSmoke -- <clip.mp4> <frame-index>
+dotnet run --project tools/FrameTheory.FrameDecodeSmoke -- <clip.mp4> <frame-index> [sample-count]
 ```
 
-The output records cold and warm exact-frame seek milliseconds, decoded byte count, cache entries, cache limit and process working-set bytes. The warm read must be served from the bounded in-memory cache and must not start another FFmpeg process.
+The optional sample count is bounded to 120. The output records cold and warm exact-frame seek milliseconds, p50/p95 sequential seek latency, decoded throughput, cache entries, cache limit and process working-set bytes. The warm read must be served from the bounded in-memory cache and must not start another FFmpeg process.
 
 ## Current policy
 
@@ -22,7 +22,7 @@ The output records cold and warm exact-frame seek milliseconds, decoded byte cou
 On Windows 11 x64 with .NET 10.0.100, FFmpeg 9.0.2 and a generated 16x8, 30 fps, three-second H.264 clip, the smoke reported:
 
 ```text
-decoded_frame=15; bytes=396; cached_bytes=396; signature=P6; cold_ms=113.424; warm_ms=0.237; cache_entries=1; cache_limit=8; working_set_bytes=29003776
+decoded_frame=15; bytes=396; cached_bytes=396; signature=P6; cold_ms=113.424; warm_ms=0.237; sample_count=1; seek_p50_ms=0.237; seek_p95_ms=0.237; decode_fps=4219.409; cache_entries=1; cache_limit=8; working_set_bytes=29003776
 codec_name=h264
 width=16
 height=8
