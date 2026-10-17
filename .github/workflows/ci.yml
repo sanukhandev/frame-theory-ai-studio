@@ -94,6 +94,7 @@ jobs:
             -f lavfi -i "testsrc=size=16x8:rate=30:duration=1" \
             -f lavfi -i "sine=frequency=1000:sample_rate=48000:duration=1" \
             -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest artifacts/media-smoke/clip.mp4
+          cp artifacts/media-smoke/clip.mp4 artifacts/media-smoke/clip-b.mp4
           dotnet tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4 | tee artifacts/media-smoke/import.txt
           dotnet tools/FrameTheory.FrameDecodeSmoke/bin/Release/net10.0/FrameTheory.FrameDecodeSmoke.dll artifacts/media-smoke/clip.mp4 2 4 | tee artifacts/media-smoke/seek.txt
           grep -F 'kind=Video' artifacts/media-smoke/import.txt
@@ -102,7 +103,7 @@ jobs:
           grep -F 'seek_p95_ms=' artifacts/media-smoke/seek.txt
           dotnet tools/FrameTheory.TimelineExportSmoke/bin/Release/net10.0/FrameTheory.TimelineExportSmoke.dll \
             artifacts/media-smoke/clip.mp4 \
-            artifacts/media-smoke/clip.mp4 \
+            artifacts/media-smoke/clip-b.mp4 \
             artifacts/media-smoke/timeline.mp4 | tee artifacts/media-smoke/timeline.txt
           grep -F 'output=' artifacts/media-smoke/timeline.txt
           grep -F 'queue-retry-output=' artifacts/media-smoke/timeline.txt
