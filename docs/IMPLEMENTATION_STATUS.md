@@ -77,7 +77,7 @@
 - [~] FT-1001 core unit/golden/adversarial suite and source SHA-256 preservation assertion are implemented; full cross-platform integration matrix remains open
 - [~] FT-1002 UC-01..UC-06 executable smoke/test matrix is documented with Windows evidence; interactive and macOS/Linux acceptance remains open
 - [~] FT-1003 dependency inventory and external FFmpeg/native asset assessment are documented; license/CVE clearance and redistribution evidence remain open
-- [~] FT-1004 CI now publishes per-OS desktop/test artifacts with SHA-256 manifests; hosted runners and signed/notarized release evidence remain unverified
+- [x] FT-1004 GitHub Actions verifies Windows/macOS/Linux restore/build/format/test/publish jobs and uploads per-OS SHA-256 manifests; optional signing/notarization is not part of this task claim
 - [~] FT-1005 framework-dependent Windows/macOS/Linux publish scripts and release matrix are documented; installers, native media bundling and signing remain open
 - [~] FT-1006 V1 acceptance audit is recorded with 40 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
 - [x] FT-401 FFmpeg-backed PNG/JPEG photo import, PPM preview and bounded canvas fit/100%/zoom/pan state
@@ -120,7 +120,7 @@ Next unblocked task:
 ```
 
 ## Release verification status
-Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601/FT-603/FT-604/FT-605/FT-701/FT-702/FT-703/FT-704/FT-705/FT-801/FT-802, FT-803, FT-804 and FT-706 undo paths built/tested; FT-803 watermark/spectral-marker, FT-804 retry/history, FT-602 desktop/provider fixture integration and FT-706 provider scope remain partial; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini provider: headless adapter contract tested; no live key/media upload run. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
+Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601/FT-603/FT-604/FT-605/FT-701/FT-702/FT-703/FT-704/FT-705/FT-801/FT-802, FT-803, FT-804 and FT-706 undo paths built/tested; FT-1004 hosted CI artifacts verified; FT-803 watermark/spectral-marker, FT-602 live provider fixture and FT-706 live provider scope remain partial; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: hosted CI restore/build/test/publish verified by run 39050810748; native FFmpeg/media smoke and interactive desktop acceptance unverified. Linux: hosted CI restore/build/test/publish verified by run 39050810748; native FFmpeg/media smoke and interactive desktop acceptance unverified. Gemini provider: headless adapter contract tested; no live key/media upload run. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
 
 ## Honest reporting
 Codex should not mark a task complete for a mock UI, TODO, downloaded asset, simulated exporter, docs-only passing CI, or speculative integration. If execution is interrupted, preserve status and resume from first unblocked task on next run.
