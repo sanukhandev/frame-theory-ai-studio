@@ -55,6 +55,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private long _scrollFrame;
     private bool _snapEnabled = true;
     private TimelineRevealStyle? _beforeAfterStyle;
+    private readonly List<long> _beatMarkers = [];
     private readonly Stack<TimelineEditorState> _aiUndo = [];
 
     public TimelineEditorViewModel(RationalFrameRate? projectFrameRate = null)
@@ -120,6 +121,12 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public IReadOnlyList<TimelineTrackRowViewModel> TrackRows { get; private set; } = [];
 
+    public IReadOnlyList<long> BeatMarkers => _beatMarkers;
+
+    public string BeatMarkersText => _beatMarkers.Count == 0
+        ? "No beat markers detected. Import audio or video with audio."
+        : $"Beat markers: {string.Join(", ", _beatMarkers)} frames";
+
     public string RulerText => string.Join("  |  ", BuildRulerTicks(640).Select(tick => tick.ToString()));
 
     public void AddMedia(MediaSourceMetadata metadata)
@@ -165,6 +172,38 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         }
 
         Refresh();
+    }
+
+    public void AddBeatMarkers(MediaId mediaId, IReadOnlyList<float> waveformPeaks)
+    {
+        ArgumentNullException.ThrowIfNull(waveformPeaks);
+        var clip = _audioClips.FirstOrDefault(candidate => candidate.MediaId == mediaId);
+        if (clip is null || waveformPeaks.Count == 0)
+        {
+            return;
+        }
+
+        _beatMarkers.Clear();
+        // shortcut: amplitude peaks are only a basic marker aid; upgrade to spectral/onset analysis for production beat tracking.
+        for (var index = 0; index < waveformPeaks.Count; index++)
+        {
+            var peak = waveformPeaks[index];
+            var previous = index == 0 ? peak : waveformPeaks[index - 1];
+            var next = index == waveformPeaks.Count - 1 ? peak : waveformPeaks[index + 1];
+            if (peak < 0.6f || peak < previous || peak < next)
+            {
+                continue;
+            }
+
+            var frame = clip.TimelineRange.StartFrame + (long)index * clip.TimelineRange.Length / waveformPeaks.Count;
+            if (_beatMarkers.LastOrDefault(-4) + 3 <= frame)
+            {
+                _beatMarkers.Add(frame);
+            }
+        }
+
+        OnPropertyChanged(nameof(BeatMarkers));
+        OnPropertyChanged(nameof(BeatMarkersText));
     }
 
     public TimelineVideoRenderPlan BuildRenderPlan(

@@ -106,6 +106,20 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void TimelineEditorCreatesBasicBeatMarkersFromImportedWaveformPeaks()
+    {
+        var source = new Uri("file:///beats.mp4");
+        var metadata = Metadata(source, "beats", 90);
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(metadata);
+
+        editor.AddBeatMarkers(metadata.Id, [0, 0.8f, 0, 0.7f, 0]);
+
+        Xunit.Assert.Equal([18L, 54L], editor.BeatMarkers);
+        Xunit.Assert.Contains("18", editor.BeatMarkersText, StringComparison.Ordinal);
+    }
+
+    [Xunit.Fact]
     public void TimelineEditorAddsTitlesAtTheCurrentFrame()
     {
         var source = new Uri("file:///title.mp4");

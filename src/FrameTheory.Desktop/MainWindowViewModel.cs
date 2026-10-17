@@ -240,6 +240,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                     ColorInspector.SetSource(media.ThumbnailPpm);
                 }
                 TimelineEditor.AddMedia(media.Metadata);
+                TimelineEditor.AddBeatMarkers(media.Metadata.Id, media.WaveformPeaks);
             }
             catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException)
             {

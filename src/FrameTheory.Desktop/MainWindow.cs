@@ -433,6 +433,8 @@ public sealed class MainWindow : Window
         ruler.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.RulerText"));
         var tracks = new ListBox { Height = 100 };
         tracks.Bind(ItemsControl.ItemsSourceProperty, new Binding("TimelineEditor.TrackRows"));
+        var beatMarkers = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        beatMarkers.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.BeatMarkersText"));
         var snap = new CheckBox { Content = "Snap to clip boundaries" };
         snap.Bind(ToggleButton.IsCheckedProperty, new Binding("TimelineEditor.SnapEnabled") { Mode = BindingMode.TwoWay });
         var zoom = new Slider { Minimum = 0.05, Maximum = 20, Value = timeline.FramesPerPixel };
@@ -653,6 +655,7 @@ public sealed class MainWindow : Window
                     playhead,
                     ruler,
                     tracks,
+                    beatMarkers,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { back, forward, select, selectAudio, scrollBack, scrollForward } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { copy, paste, split, trim, move, rippleDelete } },
                     operationStatus,
