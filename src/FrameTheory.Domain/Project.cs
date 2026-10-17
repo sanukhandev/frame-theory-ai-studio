@@ -44,7 +44,8 @@ public sealed record ProjectSnapshot
         int canvasWidth,
         int canvasHeight,
         string workingColorSpace,
-        IEnumerable<MediaReference>? mediaReferences = null)
+        IEnumerable<MediaReference>? mediaReferences = null,
+        string? colorPresetName = null)
     {
         if (string.IsNullOrWhiteSpace(projectId))
         {
@@ -67,6 +68,7 @@ public sealed record ProjectSnapshot
         CanvasHeight = canvasHeight;
         WorkingColorSpace = workingColorSpace.Trim();
         MediaReferences = mediaReferences?.ToArray() ?? [];
+        ColorPresetName = string.IsNullOrWhiteSpace(colorPresetName) ? null : colorPresetName.Trim();
     }
 
     public int SchemaVersion => CurrentSchemaVersion;
@@ -83,9 +85,14 @@ public sealed record ProjectSnapshot
 
     public IReadOnlyList<MediaReference> MediaReferences { get; }
 
+    public string? ColorPresetName { get; }
+
     public ProjectSnapshot WithCanvas(int canvasWidth, int canvasHeight) =>
-        new(ProjectId, FrameRate, canvasWidth, canvasHeight, WorkingColorSpace, MediaReferences);
+        new(ProjectId, FrameRate, canvasWidth, canvasHeight, WorkingColorSpace, MediaReferences, ColorPresetName);
 
     public ProjectSnapshot WithMediaReferences(IEnumerable<MediaReference> mediaReferences) =>
-        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, mediaReferences);
+        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, mediaReferences, ColorPresetName);
+
+    public ProjectSnapshot WithColorPreset(string? colorPresetName) =>
+        new(ProjectId, FrameRate, CanvasWidth, CanvasHeight, WorkingColorSpace, MediaReferences, colorPresetName);
 }

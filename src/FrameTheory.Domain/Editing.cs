@@ -45,6 +45,19 @@ public sealed class AddMediaReferenceCommand : IEditCommand
     public IEditCommand Inverse(ProjectSnapshot before) => new RemoveMediaReferenceCommand(MediaReference);
 }
 
+public sealed class SetColorPresetCommand : IEditCommand
+{
+    public SetColorPresetCommand(string? presetName) => PresetName = string.IsNullOrWhiteSpace(presetName) ? null : presetName.Trim();
+
+    public string Name => PresetName is null ? "Clear color preset" : $"Apply color preset '{PresetName}'";
+
+    public string? PresetName { get; }
+
+    public ProjectSnapshot Apply(ProjectSnapshot source) => source.WithColorPreset(PresetName);
+
+    public IEditCommand Inverse(ProjectSnapshot before) => new SetColorPresetCommand(before.ColorPresetName);
+}
+
 public sealed class RemoveMediaReferenceCommand : IEditCommand
 {
     public RemoveMediaReferenceCommand(MediaReference mediaReference) => MediaReference = mediaReference;

@@ -134,6 +134,8 @@ public sealed class JsonProjectRepository : IProjectRepository
 
         public string? WorkingColorSpace { get; set; }
 
+        public string? ColorPresetName { get; set; }
+
         public List<MediaFile>? Media { get; set; }
 
         public static ProjectFile FromSnapshot(ProjectSnapshot snapshot) => new()
@@ -145,6 +147,7 @@ public sealed class JsonProjectRepository : IProjectRepository
             CanvasWidth = snapshot.CanvasWidth,
             CanvasHeight = snapshot.CanvasHeight,
             WorkingColorSpace = snapshot.WorkingColorSpace,
+            ColorPresetName = snapshot.ColorPresetName,
             Media = snapshot.MediaReferences.Select(MediaFile.FromReference).ToList()
         };
 
@@ -165,7 +168,8 @@ public sealed class JsonProjectRepository : IProjectRepository
                     CanvasWidth,
                     CanvasHeight,
                     WorkingColorSpace ?? throw new InvalidDataException("Working color space is required."),
-                    mediaReferences);
+                    mediaReferences,
+                    ColorPresetName);
             }
             catch (ArgumentException exception)
             {

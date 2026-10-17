@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Current status: LUT COLOR ENGINE COMPLETE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105 and FT-201 through FT-205 plus FT-301 through FT-303 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
+**Current status: REUSABLE COLOR PRESETS COMPLETE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105 and FT-201 through FT-205 plus FT-301 through FT-304 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
 
 ## Completed
 - [x] Product README and Codex agent operating contract
@@ -28,24 +28,25 @@
 - [x] FT-301 canonical color graph with explicit sRGB, Rec.709 and linear working profiles
 - [x] FT-302 bounded exposure, contrast, saturation and temperature/tint grading operators
 - [x] FT-303 bounded `.cube` 3D LUT parser, writer and trilinear interpolator
+- [x] FT-304 atomic named preset store, shared pixel application and reversible project preset command
 
 ## Next tasks
-1. FT-304 reusable named color presets applied through reversible project commands.
+1. FT-401 photo canvas import, pan/zoom/fit/100% and real raster preview.
 2. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
 3. Iterate per docs/EPICS_AND_TASKS.md; update this checkpoint **after every tested commit**.
 
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
-Task / Epic: FT-303 / E03
-Git SHA: 84b0c23
-Files changed: src/FrameTheory.Color/CubeLut.cs, tests/FrameTheory.UnitTests/CubeLutTests.cs, docs/IMPLEMENTATION_STATUS.md
-Actual behavior and UI path: `CubeLut` parses standard 3D directives, comments, domains and bounded 2..65 grids, performs trilinear interpolation, and emits deterministic `.cube` text. Unsupported 1D LUTs, malformed rows, invalid domains and oversized grids fail visibly.
+Task / Epic: FT-304 / E03
+Git SHA: pending commit
+Files changed: src/FrameTheory.Color/ColorPreset.cs, src/FrameTheory.Domain/Project.cs, src/FrameTheory.Domain/Editing.cs, src/FrameTheory.Storage/JsonProjectRepository.cs, tests/FrameTheory.UnitTests/ColorPresetTests.cs, docs/IMPLEMENTATION_STATUS.md
+Actual behavior and UI path: `JsonColorPresetStore` atomically persists named grades and optional LUT text. `ColorPreset.Apply` is shared by photo/video color pixels, while `SetColorPresetCommand` makes the project reference undoable and preserves source media.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
-Test outputs / exit codes: build 0 with 0 warnings/0 errors; format verification 0; 34 unit tests and 1 golden test passed; identity and known two-point trilinear LUTs round-tripped within 0.00001.
+Test outputs / exit codes: build 0 with 0 warnings/0 errors; format verification 0; 36 unit tests and 1 golden test passed; preset JSON round-trip, shared application, duplicate/malformed rejection and command undo passed.
 Media fixtures and verification: Temporary FFmpeg-generated MP4 under `%TEMP%\frame-theory-ffmpeg-spike`; no media binary committed.
-Known limitations / blockers: FT-006 remains partial pending MLT and second-OS evidence. LUTs are not yet connected to project presets, photo/video rendering or UI controls. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux color runs are unverified.
-Next unblocked task: FT-304
+Known limitations / blockers: FT-006 remains partial pending MLT and second-OS evidence. Presets are not yet exposed by a dedicated inspector, and photo/video renderer integration remains later work. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux color runs are unverified.
+Next unblocked task: FT-401
 ```
 
 ## Task execution record template
@@ -63,7 +64,7 @@ Next unblocked task:
 ```
 
 ## Release verification status
-Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303 built/tested; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
+Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304 built/tested; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
 
 ## Honest reporting
 Codex should not mark a task complete for a mock UI, TODO, downloaded asset, simulated exporter, docs-only passing CI, or speculative integration. If execution is interrupted, preserve status and resume from first unblocked task on next run.
