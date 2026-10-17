@@ -100,6 +100,14 @@ jobs:
           grep -F 'kind=Audio' artifacts/media-smoke/import.txt
           grep -F 'has_audio=True' artifacts/media-smoke/import.txt
           grep -F 'seek_p95_ms=' artifacts/media-smoke/seek.txt
+          dotnet tools/FrameTheory.TimelineExportSmoke/bin/Release/net10.0/FrameTheory.TimelineExportSmoke.dll \
+            artifacts/media-smoke/clip.mp4 \
+            artifacts/media-smoke/clip.mp4 \
+            artifacts/media-smoke/timeline.mp4 | tee artifacts/media-smoke/timeline.txt
+          grep -F 'output=' artifacts/media-smoke/timeline.txt
+          grep -F 'queue-retry-output=' artifacts/media-smoke/timeline.txt
+          grep -F 'ai-output=' artifacts/media-smoke/timeline.txt
+          grep -F 'reel-output=' artifacts/media-smoke/timeline.txt
       - name: Verify formatting
         if: steps.detect.outputs.has_solution == 'true'
         run: dotnet format --no-restore --verify-no-changes --verbosity minimal
