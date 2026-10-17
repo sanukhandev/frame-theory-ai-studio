@@ -24,7 +24,7 @@ public sealed class MediaExportTests
                 new Uri(sourcePath),
                 destinationPath,
                 new ExportPreset(8, 4, new RationalFrameRate(30, 1)),
-                new Progress<ExportProgress>(progress.Add),
+                new InlineProgress(progress.Add),
                 CancellationToken.None);
 
             Xunit.Assert.Equal(destinationPath, receipt.OutputPath);
@@ -92,5 +92,10 @@ public sealed class MediaExportTests
 
             return Task.FromResult(new MediaProcessResult(exitCode, string.Empty, string.Empty));
         }
+    }
+
+    private sealed class InlineProgress(Action<ExportProgress> callback) : IProgress<ExportProgress>
+    {
+        public void Report(ExportProgress value) => callback(value);
     }
 }
