@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Current status: PHOTO RECOVERY AND RELINK COMPLETE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-304 and FT-401 through FT-405 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
+**Current status: COLOR INSPECTOR COMPLETE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-305 and FT-401 through FT-405 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
 
 ## Completed
 - [x] Product README and Codex agent operating contract
@@ -29,6 +29,7 @@
 - [x] FT-302 bounded exposure, contrast, saturation and temperature/tint grading operators
 - [x] FT-303 bounded `.cube` 3D LUT parser, writer and trilinear interpolator
 - [x] FT-304 atomic named preset store, shared pixel application and reversible project preset command
+- [x] FT-305 real thumbnail before/after viewer, grade inspector controls and deterministic preview/export parity golden coverage
 - [x] FT-401 FFmpeg-backed PNG/JPEG photo import, PPM preview and bounded canvas fit/100%/zoom/pan state
 - [x] FT-402 non-destructive PPM crop, 90° rotation, nearest-neighbor resize and undo-last operation stack
 - [x] FT-403 immutable photo adjustment layers with ordering, inspector state and undo/redo history
@@ -36,23 +37,22 @@
 - [x] FT-405 photo project autosave recovery, missing-media relink and corrupt-input UI status paths
 
 ## Next tasks
-1. FT-305 before/after viewer and grade inspector UI with preview/export parity.
-2. FT-306 profile-correct JPEG/PNG and video Rec.709 output verification.
-3. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
-4. Iterate per docs/EPICS_AND_TASKS.md; update this checkpoint **after every tested commit**.
+1. FT-306 profile-correct JPEG/PNG and video Rec.709 output verification.
+2. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
+3. Iterate per docs/EPICS_AND_TASKS.md; update this checkpoint **after every tested commit**.
 
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
-Task / Epic: FT-405 / E04
-Git SHA: 0787ef1
-Files changed: src/FrameTheory.Desktop/FrameTheory.Desktop.csproj, src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/PhotoRecoveryViewModel.cs, tests/FrameTheory.UnitTests/DesktopImportTests.cs, tests/FrameTheory.UnitTests/PhotoRecoveryViewModelTests.cs, docs/IMPLEMENTATION_STATUS.md
-Actual behavior and UI path: The Photo workspace exposes a project recovery panel with a project path, autosave-aware open, missing-media list, replacement path and relink action. `PhotoRecoveryViewModel` persists a relinked relative reference atomically, reports corrupt project/media failures in status text, and never edits the replacement source.
+Task / Epic: FT-305 / E03
+Git SHA: pending commit
+Files changed: src/FrameTheory.Desktop/FrameTheory.Desktop.csproj, src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/ColorGradeInspectorViewModel.cs, src/FrameTheory.Photo/PhotoCanvas.cs, tests/FrameTheory.UnitTests/ColorInspectorTests.cs, tests/FrameTheory.GoldenTests/ColorPreviewGoldenTests.cs, tests/FrameTheory.GoldenTests/FrameTheory.GoldenTests.csproj, docs/IMPLEMENTATION_STATUS.md
+Actual behavior and UI path: Imported real thumbnails feed `ColorGradeInspectorViewModel`. The Color workspace displays actual before/after `WriteableBitmap` previews, mean-pixel summaries and functional exposure, contrast, saturation, temperature, tint and reset controls. Both previews use the shared linear-light `PpmRaster.Apply` path; a deterministic golden test checks the same bytes used for export.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
-Test outputs / exit codes: build 0 with 0 warnings/0 errors; format verification 0; 48 unit tests and 1 golden test passed; missing/relinked project persistence, corrupt project reporting and corrupt media import status passed.
-Media fixtures and verification: Temporary project/media files only; replacement checksum/content remained unchanged after relink; no media binary committed.
-Known limitations / blockers: FT-006 remains partial pending MLT and second-OS evidence. Photo canvas/export controls still need broader project wiring and visible render integration. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux photo runs are unverified.
-Next unblocked task: FT-305
+Test outputs / exit codes: build 0 with 0 warnings/0 errors; format verification 0; 50 unit tests and 2 golden tests passed; grade mutation/reset, invalid preview handling, parser whitespace edge cases and color preview/export byte parity passed.
+Media fixtures and verification: Deterministic PPM chart and real imported thumbnail bytes; no media binary committed.
+Known limitations / blockers: FT-006 remains partial pending MLT and second-OS evidence. Photo project/canvas integration and color persistence are still separate tasks. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux photo runs are unverified.
+Next unblocked task: FT-306
 ```
 
 ## Task execution record template
@@ -70,7 +70,7 @@ Next unblocked task:
 ```
 
 ## Release verification status
-Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-401/FT-402/FT-403/FT-404/FT-405 built/tested; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
+Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-401/FT-402/FT-403/FT-404/FT-405 built/tested; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
 
 ## Honest reporting
 Codex should not mark a task complete for a mock UI, TODO, downloaded asset, simulated exporter, docs-only passing CI, or speculative integration. If execution is interrupted, preserve status and resume from first unblocked task on next run.

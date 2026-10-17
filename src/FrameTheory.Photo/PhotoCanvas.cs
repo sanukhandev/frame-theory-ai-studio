@@ -429,10 +429,7 @@ public sealed class PpmRaster
             throw new InvalidDataException("The PPM dimensions are invalid or exceed the supported size.");
         }
 
-        while (index < bytes.Length && bytes[index] is 9 or 10 or 13 or 32)
-        {
-            index++;
-        }
+        ConsumeBinarySeparator(bytes, ref index);
 
         var expectedBytes = checked(width * height * 3);
         if (bytes.Length - index != expectedBytes)
@@ -617,10 +614,7 @@ public sealed class PpmRaster
         }
 
         var dataStart = headerEnd + "ENDHDR".Length;
-        while (dataStart < bytes.Length && (bytes[dataStart] is 9 or 10 or 13 or 32))
-        {
-            dataStart++;
-        }
+        ConsumeBinarySeparator(bytes, ref dataStart);
 
         var header = System.Text.Encoding.ASCII.GetString(bytes, 0, dataStart);
         var values = header.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
@@ -656,5 +650,19 @@ public sealed class PpmRaster
         }
 
         return new PpmRaster(width, height, rgb, alpha);
+    }
+
+    private static void ConsumeBinarySeparator(byte[] bytes, ref int index)
+    {
+        if (index >= bytes.Length || bytes[index] is not (9 or 10 or 13 or 32))
+        {
+            throw new InvalidDataException("The binary image header is missing its data separator.");
+        }
+
+        var separator = bytes[index++];
+        if (separator == 13 && index < bytes.Length && bytes[index] == 10)
+        {
+            index++;
+        }
     }
 }

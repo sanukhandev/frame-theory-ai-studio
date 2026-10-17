@@ -8,7 +8,7 @@ namespace FrameTheory.Desktop;
 
 public sealed record WorkspaceViewModel(string Name, string Description, string OfflineMessage);
 
-public sealed record ImportedMediaViewModel(string Name, string Summary)
+public sealed record ImportedMediaViewModel(string Name, string Summary, byte[]? ThumbnailPpm = null)
 {
     public override string ToString() => $"{Name} — {Summary}";
 }
@@ -41,7 +41,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         IWorkspaceCatalog workspaceCatalog,
         ICapabilityDetector capabilityDetector,
         IMediaImporter? mediaImporter = null,
-        PhotoRecoveryViewModel? photoRecovery = null)
+        PhotoRecoveryViewModel? photoRecovery = null,
+        ColorGradeInspectorViewModel? colorInspector = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
@@ -49,6 +50,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         PhotoRecovery = photoRecovery ?? new PhotoRecoveryViewModel(
             new ProjectRecoveryService(new JsonProjectRepository()),
             new JsonProjectRepository());
+        ColorInspector = colorInspector ?? new ColorGradeInspectorViewModel();
         if (Workspaces.Count == 0)
         {
             throw new InvalidOperationException("At least one workspace is required.");
@@ -60,6 +62,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public IReadOnlyList<ImportedMediaViewModel> ImportedMedia { get; private set; } = [];
 
     public PhotoRecoveryViewModel PhotoRecovery { get; }
+
+    public ColorGradeInspectorViewModel ColorInspector { get; }
 
     public int SelectedWorkspaceIndex
     {
@@ -129,7 +133,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 var media = await _mediaImporter.ImportAsync(new Uri(fullPath), cancellationToken);
                 imported.Add(new ImportedMediaViewModel(
                     Path.GetFileName(fullPath),
-                    $"{media.Metadata.Kind}; {media.Metadata.Width}x{media.Metadata.Height}; thumbnail {media.ThumbnailPpm?.Length ?? 0} bytes; waveform {media.WaveformPeaks.Count} peaks"));
+                    $"{media.Metadata.Kind}; {media.Metadata.Width}x{media.Metadata.Height}; thumbnail {media.ThumbnailPpm?.Length ?? 0} bytes; waveform {media.WaveformPeaks.Count} peaks",
+                    media.ThumbnailPpm));
+                if (media.ThumbnailPpm is not null)
+                {
+                    ColorInspector.SetSource(media.ThumbnailPpm);
+                }
             }
             catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException)
             {

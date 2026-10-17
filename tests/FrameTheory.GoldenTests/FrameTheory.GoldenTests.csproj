@@ -15,5 +15,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\tools\FrameTheory.Fixtures\FrameTheory.Fixtures.csproj" />
+    <ProjectReference Include="..\..\src\FrameTheory.Color\FrameTheory.Color.csproj" />
+    <ProjectReference Include="..\..\src\FrameTheory.Photo\FrameTheory.Photo.csproj" />
   </ItemGroup>
 </Project>

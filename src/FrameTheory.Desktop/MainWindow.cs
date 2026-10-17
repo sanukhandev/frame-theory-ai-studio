@@ -5,7 +5,11 @@ using Avalonia.Data;
 using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Platform.Storage;
+using System.Runtime.InteropServices;
+using FrameTheory.Photo;
 
 namespace FrameTheory.Desktop;
 
@@ -147,6 +151,10 @@ public sealed class MainWindow : Window
         {
             children.Add(CreatePhotoRecoveryPanel(viewModel));
         }
+        else if (workspace.Name == "Color")
+        {
+            children.Add(CreateColorInspectorPanel(viewModel));
+        }
 
         var stack = new StackPanel { Spacing = 12 };
         stack.Children.AddRange(children);
@@ -198,5 +206,106 @@ public sealed class MainWindow : Window
                 }
             }
         };
+    }
+
+    private static Control CreateColorInspectorPanel(MainWindowViewModel viewModel)
+    {
+        var inspector = viewModel.ColorInspector;
+        var beforeImage = new Image { Width = 240, Height = 135, Stretch = Stretch.Uniform };
+        var afterImage = new Image { Width = 240, Height = 135, Stretch = Stretch.Uniform };
+        void RefreshPreviews()
+        {
+            beforeImage.Source = CreateBitmap(inspector.BeforePreviewPpm);
+            afterImage.Source = CreateBitmap(inspector.AfterPreviewPpm);
+        }
+
+        inspector.PropertyChanged += (_, _) => RefreshPreviews();
+        RefreshPreviews();
+        var beforeSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        beforeSummary.Bind(TextBlock.TextProperty, new Binding("ColorInspector.BeforeSummary"));
+        var afterSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        afterSummary.Bind(TextBlock.TextProperty, new Binding("ColorInspector.AfterSummary"));
+        var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        status.Bind(TextBlock.TextProperty, new Binding("ColorInspector.StatusText"));
+        var controls = new StackPanel { Spacing = 4 };
+        controls.Children.Add(CreateGradeControl("Exposure EV", -8, 8, inspector.ExposureEV, value => inspector.ExposureEV = value));
+        controls.Children.Add(CreateGradeControl("Contrast", -1, 1, inspector.Contrast, value => inspector.Contrast = value));
+        controls.Children.Add(CreateGradeControl("Saturation", -1, 1, inspector.Saturation, value => inspector.Saturation = value));
+        controls.Children.Add(CreateGradeControl("Temperature", -1, 1, inspector.Temperature, value => inspector.Temperature = value));
+        controls.Children.Add(CreateGradeControl("Tint", -1, 1, inspector.Tint, value => inspector.Tint = value));
+        var reset = new Button { Content = "Reset grade" };
+        reset.Click += (_, _) => inspector.ResetGrade();
+        controls.Children.Add(reset);
+        return new Border
+        {
+            Margin = new Thickness(0, 16, 0, 0),
+            Padding = new Thickness(12),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 48, 48)),
+            Child = new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    new TextBlock { Text = "Color grade inspector", FontWeight = FontWeight.SemiBold },
+                    status,
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 12,
+                        Children =
+                        {
+                            new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "Before" }, beforeImage, beforeSummary } },
+                            new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "After" }, afterImage, afterSummary } }
+                        }
+                    },
+                    controls
+                }
+            }
+        };
+    }
+
+    private static Control CreateGradeControl(string label, double minimum, double maximum, float value, Action<float> setter)
+    {
+        var slider = new Slider { Minimum = minimum, Maximum = maximum, Value = value };
+        slider.ValueChanged += (_, args) => setter((float)args.NewValue);
+        return new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 8,
+            Children = { new TextBlock { Text = label, Width = 110 }, slider }
+        };
+    }
+
+    private static Bitmap? CreateBitmap(byte[]? previewPpm)
+    {
+        if (previewPpm is null)
+        {
+            return null;
+        }
+
+        var raster = PpmRaster.Parse(previewPpm);
+        var bitmap = new WriteableBitmap(
+            new PixelSize(raster.Width, raster.Height),
+            new Vector(96, 96),
+            PixelFormat.Rgba8888,
+            AlphaFormat.Opaque);
+        var rgba = new byte[checked(raster.Width * raster.Height * 4)];
+        for (var index = 0; index < raster.Width * raster.Height; index++)
+        {
+            var sourceOffset = index * 3;
+            var targetOffset = index * 4;
+            rgba[targetOffset] = raster.RgbBytes[sourceOffset];
+            rgba[targetOffset + 1] = raster.RgbBytes[sourceOffset + 1];
+            rgba[targetOffset + 2] = raster.RgbBytes[sourceOffset + 2];
+            rgba[targetOffset + 3] = raster.AlphaBytes?[index] ?? 255;
+        }
+
+        using var framebuffer = bitmap.Lock();
+        for (var row = 0; row < raster.Height; row++)
+        {
+            Marshal.Copy(rgba, row * raster.Width * 4, framebuffer.Address + row * framebuffer.RowBytes, raster.Width * 4);
+        }
+
+        return bitmap;
     }
 }
