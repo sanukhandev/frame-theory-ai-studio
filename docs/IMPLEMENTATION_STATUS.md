@@ -33,7 +33,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-203 / E02
-Git SHA: pending commit
+Git SHA: 92b9dfc
 Files changed: src/FrameTheory.Domain/Timeline.cs, tests/FrameTheory.UnitTests/TimelineTests.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: `TimelineGraph` models non-overlapping video and audio tracks at the project rational frame rate. `TimelineTransport` routes seek, time scrub and frame step through the same cursor; video samples map to source frames and audio samples map to source sample positions deterministically.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
