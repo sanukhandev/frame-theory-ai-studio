@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Current status: PHOTO/VIDEO EXPORT AND AI UNDO PARTIAL (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405, FT-501 through FT-506, FT-601, FT-603 through FT-605, and FT-701 through FT-704 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-705 now executes approved grade, clip, transition, title, caption, keyframe, audio, trusted-preset and Reel operations transactionally; FT-801 provides split, wipe and timed-reveal output for exactly one video clip. FT-802 provides real 16:9, 1:1 and 9:16 MP4 presets plus Photo workspace PNG/JPEG import, non-destructive rotate/undo, preview and quality-controlled export; FT-803 adds imported user audio and waveform-derived editable beat markers; FT-804 adds a single-worker cancellable export queue and Video workspace cancel control; FT-706 exposes undo for the last AI transaction. Watermark licensing, provider retries and usage/redaction logs remain open. FT-602 has a strict source-bound provider contract and JSON fixture adapter, but real local ASR/Gemini transcription is not connected. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
+**Current status: UX ACCESSIBILITY AND PERFORMANCE SLICE PARTIAL (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405, FT-501 through FT-506, FT-601, FT-603 through FT-605, and FT-701 through FT-704 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-705 now executes approved grade, clip, transition, title, caption, keyframe, audio, trusted-preset and Reel operations transactionally; FT-801 provides split, wipe and timed-reveal output for exactly one video clip. FT-802 provides real 16:9, 1:1 and 9:16 MP4 presets plus Photo workspace PNG/JPEG import, non-destructive rotate/undo, preview and quality-controlled export; FT-803 adds imported user audio and waveform-derived editable beat markers; FT-804 adds a single-worker cancellable export queue and Video workspace cancel control; FT-706 exposes undo for the last AI transaction. FT-901 now adds keyboard workspace/frame shortcuts, scroll-safe dense workspace layout, automation names for key controls and bounded dense/HiDPI ruler evidence. Watermark licensing, provider retries and usage/redaction logs remain open. FT-602 has a strict source-bound provider contract and JSON fixture adapter, but real local ASR/Gemini transcription is not connected. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
 
 ## Completed
 - [x] Product README and Codex agent operating contract
@@ -52,6 +52,7 @@
 - [~] FT-803 imported user audio, waveform-derived beat markers and existing creative title/caption slots; approved watermark and richer beat options remain open
 - [~] FT-804 single-worker cancellable background export queue with Video workspace cancellation; retry policy and multi-job progress remain open
 - [~] FT-706 AI transaction undo control; Gemini follow-up transport, retries, usage and redaction logs remain open
+- [~] FT-901 keyboard workspace/frame shortcuts, scroll-safe layout and automation labels are implemented; interactive 1280x800/HiDPI acceptance remains unverified
 - [x] FT-401 FFmpeg-backed PNG/JPEG photo import, PPM preview and bounded canvas fit/100%/zoom/pan state
 - [x] FT-402 non-destructive PPM crop, 90° rotation, nearest-neighbor resize and undo-last operation stack
 - [x] FT-403 immutable photo adjustment layers with ordering, inspector state and undo/redo history
@@ -59,22 +60,24 @@
 - [x] FT-405 photo project autosave recovery, missing-media relink and corrupt-input UI status paths
 
 ## Next tasks
-1. FT-901 adaptive UX, keyboard accessibility and performance evidence.
-2. FT-902 project reopen/export regression matrix and packaging evidence.
-3. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
+1. FT-902 view synchronization, inspector context and manual acceptance path.
+2. FT-903 cache limits, cancellation and recorded seek/render evidence.
+3. FT-904 local-first error/log and dependency failure UX.
+4. FT-1001 through FT-1006 release QA, security, licensing and packaging gates.
+5. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
 
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
-Task / Epic: FT-802 / E08
-Git SHA: 1fe94c1
-Files changed: src/FrameTheory.Desktop/PhotoEditorViewModel.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/MainWindow.cs
-Actual behavior and UI path: Photo workspace now exposes real image opening, preview, 90° non-destructive rotation, undo, PNG/JPEG selection and quality slider export through `PhotoImporter`, `PhotoEditHistory` and `PhotoExporter`. Original source files remain untouched; export retains the existing atomic verification path.
-Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet test FrameTheory.sln --no-build --configuration Release --logger console\;verbosity=minimal; git diff --check.
-Test outputs / exit codes: format 0; build 0 with 0 warnings/0 errors; 94 unit tests and 2 golden tests passed. Existing photo import/export unit and smoke coverage plus the full desktop build passed; the new shell path was not launched interactively in this checkpoint.
+Task / Epic: FT-901 / E09
+Git SHA: 31fbb4b
+Files changed: src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, tests/FrameTheory.UnitTests/FoundationTests.cs, tests/FrameTheory.UnitTests/TimelineEditorTests.cs, docs/UX_DESIGN.md
+Actual behavior and UI path: Desktop shell now handles `Ctrl/⌘+1..4` workspace switching, Video `Left/Right` frame stepping and `Ctrl/⌘+Z` AI undo outside text fields. Workspace bodies scroll at compact viewport sizes; imported media, timeline playhead/tracks/zoom, export aspect ratio and grade sliders have automation names. Injected `PhotoEditorViewModel` instances are preserved instead of overwritten by a second default service graph.
+Commands executed + OS: .NET 10.0.100 on Windows 11 x64; focused `dotnet test tests/FrameTheory.UnitTests/FrameTheory.UnitTests.csproj --no-restore --configuration Release --filter FullyQualifiedName~FoundationTests|FullyQualifiedName~TimelineEditorTests --logger console\;verbosity=minimal`.
+Test outputs / exit codes: focused build/test exit 0; 18 unit tests passed. Full format/build/test and interactive 1280x800/HiDPI shell acceptance remain to be run before marking FT-901 complete.
 Media fixtures and verification: Photo export continues to use real FFmpeg/ffprobe and atomic temporary files; no source media or API keys entered Git. Approved logo/watermark asset is still absent from the repository, so no watermark was invented.
 Known limitations / blockers: FT-706 still lacks Gemini transport, follow-up request history, provider retries/timeouts, usage accounting and redaction logs. FT-804 has one active worker and no persisted queue/retry history; FT-802 social photo dimensions and queue parity remain open. FT-803 uses amplitude peaks as a basic marker aid. FT-602 remains a contract/fixture adapter pending a real local ASR or consented Gemini provider. FT-006 remains partial pending MLT and second-OS evidence. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux analysis and desktop runs are unverified.
-Next unblocked task: FT-901
+Next unblocked task: FT-902
 ```
 
 ## Task execution record template
