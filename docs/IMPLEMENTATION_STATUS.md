@@ -16,7 +16,7 @@
 
 **FT-804 checkpoint:** The shared export queue now exposes queued/running/succeeded/failed/canceled state, bounded in-memory job history, immediate cancellation completion and retry of failed/canceled jobs. Video export exposes a real “Retry last export” action; exporter temp-file cleanup and atomic finalization remain in the existing exporter contracts.
 
-**CI checkpoint:** GitHub Actions run `39050810748` passed documentation/schema validation and .NET restore/build/format/test/publish/checksum jobs on Windows, macOS and Linux for `71b9bca`. Run `39051936860` also passed host-FFmpeg installation plus generated import/extracted-audio/repeated-seek assertions on Windows, macOS and Linux for `c37d112`. Run `39052895799` passed the same three-OS matrix with the NuGet advisory scan and published-artifact checksum verifier for `882c1c3`. Run `39053781388` passed the same three-OS matrix for `2858e59` after the FT-602 Files API implementation. Run `39054045247` is validating the current release-script/status checkpoint. The Windows line-ending failure is resolved by `.gitattributes`; hosted packaging is still framework-dependent and unsigned. The local FT-903 trace tool passed on Windows at `f92c57f`.
+**CI checkpoint:** GitHub Actions run `39050810748` passed documentation/schema validation and .NET restore/build/format/test/publish/checksum jobs on Windows, macOS and Linux for `71b9bca`. Run `39051936860` also passed host-FFmpeg installation plus generated import/extracted-audio/repeated-seek assertions on Windows, macOS and Linux for `c37d112`. Run `39052895799` passed the same three-OS matrix with the NuGet advisory scan and published-artifact checksum verifier for `882c1c3`. Run `39053781388` passed the same three-OS matrix for `2858e59` after the FT-602 Files API implementation. Run `39054338193` passed the self-contained packaging/status checkpoint for `a4affa2`. Run `39054513784` passed the same three-OS matrix plus the new shell packaging syntax gate for `3808988`. The Windows line-ending failure is resolved by `.gitattributes`; hosted packaging is still framework-dependent and unsigned. The local FT-903 trace tool passed on Windows at `f92c57f`.
 
 **E09 test checkpoint:** Added focused evidence for every keyboard workspace shortcut, validated-plan JSON synchronization/clearing, repeatable seek traces and credential-assignment redaction. Hosted native media smoke now covers all three OS runners; these tests strengthen FT-901/FT-902/FT-903/FT-904 but do not replace the required interactive 1280x800/HiDPI manual acceptance.
 
@@ -97,13 +97,13 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-1005 / E10 packaging validation
-Git SHA: working tree before commit
+Git SHA: a4affa2 (packaging), 3808988 (CI syntax gate)
 Files changed: scripts/package.ps1, scripts/package.sh, docs/RELEASE.md, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: The PowerShell packaging script now accepts `-SelfContained`; the shell packaging script accepts a validated `true` or `false` third argument. Both pass the value to `dotnet publish` and include the existing SHA-256 manifest. This produces portable runtime-bundled validation output, not an installer and not a native FFmpeg bundle.
 Commands executed + OS: Windows 11 x64; self-contained `win-x64` package script, package checksum verifier, Release build, Release tests, format verification and diff check using .NET SDK 10.0.100.
-Test outputs / exit codes: Self-contained publish exited 0 and produced `FrameTheory.Desktop.exe`; checksum verification reported 241 files verified; build passed with 0 warnings/errors; unit tests passed 128; golden tests passed 2; formatting and diff checks passed. Bash syntax check could not run because this Windows host exposes a WSL shim without `/bin/bash`.
+Test outputs / exit codes: Self-contained publish exited 0 and produced `FrameTheory.Desktop.exe`; checksum verification reported 241 files verified; build passed with 0 warnings/errors; unit tests passed 128; golden tests passed 2; formatting and diff checks passed. Bash syntax check could not run locally because this Windows host exposes a WSL shim without `/bin/bash`; hosted run `39054513784` passed it on all three OS runners.
 Media fixtures and verification: No media or user data entered the package; the package smoke was limited to publish output and checksums.
-Known limitations / blockers: Installers, native FFmpeg bundling, legal/codec clearance, signing/notarization and matching-host relaunch evidence remain open. Hosted validation of the checkpoint is run `39054045247`.
+Known limitations / blockers: Installers, native FFmpeg bundling, legal/codec clearance, signing/notarization and matching-host relaunch evidence remain open. Hosted packaging validation is run `39054338193`; the follow-up syntax-gate run is `39054513784`.
 Next unblocked task: Continue FT-901..FT-904 manual acceptance and FT-1002..FT-1006 release gates.
 ```
 
