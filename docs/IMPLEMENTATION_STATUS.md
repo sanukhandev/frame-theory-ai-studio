@@ -14,7 +14,7 @@
 
 **FT-804 checkpoint:** The shared export queue now exposes queued/running/succeeded/failed/canceled state, bounded in-memory job history, immediate cancellation completion and retry of failed/canceled jobs. Video export exposes a real “Retry last export” action; exporter temp-file cleanup and atomic finalization remain in the existing exporter contracts.
 
-**CI checkpoint:** GitHub Actions macOS/Linux jobs pass on the last pushed revision. The Windows formatting job failed only because checkout line endings conflicted with the LF editorconfig; `.gitattributes` now pins source/document text to LF and needs a pushed CI rerun.
+**CI checkpoint:** GitHub Actions run `39050810748` passed documentation/schema validation and .NET restore/build/format/test/publish/checksum jobs on Windows, macOS and Linux for `71b9bca`. The Windows line-ending failure is resolved by `.gitattributes`; hosted packaging is still framework-dependent and unsigned.
 
 **E09 test checkpoint:** Added focused evidence for every keyboard workspace shortcut and validated-plan JSON synchronization/clearing. These tests strengthen FT-901/FT-902 but do not replace the required interactive 1280x800/HiDPI manual acceptance.
 
