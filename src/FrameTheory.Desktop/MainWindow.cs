@@ -155,6 +155,10 @@ public sealed class MainWindow : Window
         {
             children.Add(CreateColorInspectorPanel(viewModel));
         }
+        else if (workspace.Name == "Video")
+        {
+            children.Add(CreateTimelinePanel(viewModel));
+        }
 
         var stack = new StackPanel { Spacing = 12 };
         stack.Children.AddRange(children);
@@ -259,6 +263,63 @@ public sealed class MainWindow : Window
                         }
                     },
                     controls
+                }
+            }
+        };
+    }
+
+    private static Control CreateTimelinePanel(MainWindowViewModel viewModel)
+    {
+        var timeline = viewModel.TimelineEditor;
+        var playhead = new Slider { Minimum = 0, Maximum = Math.Max(1, timeline.TotalFrames - 1), Value = timeline.CurrentFrame };
+        playhead.ValueChanged += (_, args) => timeline.SeekFrame((long)Math.Round(args.NewValue, MidpointRounding.AwayFromZero));
+        timeline.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(TimelineEditorViewModel.TotalFrames) or nameof(TimelineEditorViewModel.CurrentFrame))
+            {
+                playhead.Maximum = Math.Max(1, timeline.TotalFrames - 1);
+                playhead.Value = timeline.CurrentFrame;
+            }
+        };
+        var frameStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        frameStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentFrame"));
+        var positionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        positionStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentPosition"));
+        var ruler = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        ruler.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.RulerText"));
+        var tracks = new ListBox { Height = 100 };
+        tracks.Bind(ItemsControl.ItemsSourceProperty, new Binding("TimelineEditor.TrackRows"));
+        var snap = new CheckBox { Content = "Snap to clip boundaries" };
+        snap.Bind(ToggleButton.IsCheckedProperty, new Binding("TimelineEditor.SnapEnabled") { Mode = BindingMode.TwoWay });
+        var zoom = new Slider { Minimum = 0.05, Maximum = 20, Value = timeline.FramesPerPixel };
+        zoom.ValueChanged += (_, args) => timeline.SetZoom(args.NewValue);
+        var back = new Button { Content = "◀ Frame" };
+        back.Click += (_, _) => timeline.Step(-1);
+        var forward = new Button { Content = "Frame ▶" };
+        forward.Click += (_, _) => timeline.Step(1);
+        var select = new Button { Content = "Select at playhead" };
+        select.Click += (_, _) => timeline.SelectAt(timeline.CurrentFrame, "Video 1");
+        var scrollBack = new Button { Content = "Scroll ◀" };
+        scrollBack.Click += (_, _) => timeline.ScrollBy(-30);
+        var scrollForward = new Button { Content = "Scroll ▶" };
+        scrollForward.Click += (_, _) => timeline.ScrollBy(30);
+        return new Border
+        {
+            Margin = new Thickness(0, 16, 0, 0),
+            Padding = new Thickness(12),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 48, 48)),
+            Child = new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    new TextBlock { Text = "Frame-accurate timeline", FontWeight = FontWeight.SemiBold },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { new TextBlock { Text = "Frame" }, frameStatus, new TextBlock { Text = "Position" }, positionStatus } },
+                    playhead,
+                    ruler,
+                    tracks,
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { back, forward, select, scrollBack, scrollForward } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { snap, new TextBlock { Text = "Zoom" }, zoom } }
                 }
             }
         };

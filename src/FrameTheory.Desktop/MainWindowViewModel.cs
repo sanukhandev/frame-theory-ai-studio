@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using FrameTheory.Application;
+using FrameTheory.Domain;
 using FrameTheory.Media;
 using FrameTheory.Storage;
 
@@ -42,7 +43,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ICapabilityDetector capabilityDetector,
         IMediaImporter? mediaImporter = null,
         PhotoRecoveryViewModel? photoRecovery = null,
-        ColorGradeInspectorViewModel? colorInspector = null)
+        ColorGradeInspectorViewModel? colorInspector = null,
+        TimelineEditorViewModel? timelineEditor = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
@@ -51,6 +53,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             new ProjectRecoveryService(new JsonProjectRepository()),
             new JsonProjectRepository());
         ColorInspector = colorInspector ?? new ColorGradeInspectorViewModel();
+        TimelineEditor = timelineEditor ?? new TimelineEditorViewModel();
         if (Workspaces.Count == 0)
         {
             throw new InvalidOperationException("At least one workspace is required.");
@@ -64,6 +67,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public PhotoRecoveryViewModel PhotoRecovery { get; }
 
     public ColorGradeInspectorViewModel ColorInspector { get; }
+
+    public TimelineEditorViewModel TimelineEditor { get; }
 
     public int SelectedWorkspaceIndex
     {
@@ -139,6 +144,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 {
                     ColorInspector.SetSource(media.ThumbnailPpm);
                 }
+                TimelineEditor.AddMedia(media.Metadata);
             }
             catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException)
             {
