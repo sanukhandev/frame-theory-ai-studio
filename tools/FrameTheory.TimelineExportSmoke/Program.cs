@@ -3,6 +3,7 @@ using FrameTheory.Domain;
 using FrameTheory.AI;
 using FrameTheory.Desktop;
 using FrameTheory.Media;
+using System.Security.Cryptography;
 using System.Text.Json;
 
 if (args.Length is < 3 or > 4)
@@ -20,14 +21,15 @@ var importedSourceA = await importer.ImportAsync(sourceA, CancellationToken.None
 var importedSourceB = await importer.ImportAsync(sourceB, CancellationToken.None);
 var proxyDirectory = Path.Combine(Path.GetDirectoryName(destination) ?? ".", "proxy-cache");
 var proxyService = new FfmpegPreviewProxyService(runner, proxyDirectory, maximumCacheBytes: 64L * 1024 * 1024);
-var proxy = await proxyService.CreateAsync(sourceA, importedSourceA.Metadata.Id.Value, 8, 8, CancellationToken.None);
+var sourceFingerprint = $"sha256:{Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(sourceA.LocalPath))).ToLowerInvariant()}";
+var proxy = await proxyService.CreateAsync(sourceA, sourceFingerprint, 8, 8, CancellationToken.None);
 var proxyMetadata = await new FfprobeMediaProbe(runner).ProbeAsync(new Uri(proxy.OutputPath), CancellationToken.None);
 if (proxyMetadata.Kind != MediaKind.Video || proxyMetadata.Width > 8 || proxyMetadata.Height > 8)
 {
     throw new InvalidOperationException($"Preview proxy dimensions were invalid: {proxyMetadata.Kind} {proxyMetadata.Width}x{proxyMetadata.Height}.");
 }
 
-var reusedProxy = await proxyService.CreateAsync(sourceA, importedSourceA.Metadata.Id.Value, 8, 8, CancellationToken.None);
+var reusedProxy = await proxyService.CreateAsync(sourceA, sourceFingerprint, 8, 8, CancellationToken.None);
 if (!reusedProxy.Reused)
 {
     throw new InvalidOperationException("Preview proxy was not reused on the second request.");
