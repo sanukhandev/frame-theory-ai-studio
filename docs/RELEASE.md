@@ -10,6 +10,13 @@ sh ./scripts/package.sh osx-x64 artifacts/package
 sh ./scripts/package.sh linux-x64 artifacts/package
 ```
 
+Use `-SelfContained` with the PowerShell script, or pass `true` as the third argument to the shell script, when the target host must not install the .NET runtime:
+
+```text
+pwsh ./scripts/package.ps1 -RuntimeIdentifier win-x64 -OutputDirectory artifacts/package -SelfContained
+sh ./scripts/package.sh linux-x64 artifacts/package true
+```
+
 The output is a validation publish, not an installer. It must be tested on the matching host before distribution.
 
 CI writes `SHA256SUMS.txt` for the complete validation artifact set and verifies every listed file before upload with `pwsh ./scripts/verify_package.ps1`. The verifier rejects malformed, duplicate, escaping, missing or modified entries.

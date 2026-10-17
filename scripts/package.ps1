@@ -1,14 +1,16 @@
 param(
     [string]$RuntimeIdentifier = "win-x64",
-    [string]$OutputDirectory = "artifacts/package"
+    [string]$OutputDirectory = "artifacts/package",
+    [switch]$SelfContained
 )
 
 $ErrorActionPreference = "Stop"
+$selfContainedValue = if ($SelfContained.IsPresent) { "true" } else { "false" }
 
 dotnet publish src/FrameTheory.Desktop/FrameTheory.Desktop.csproj `
     --configuration Release `
     --runtime $RuntimeIdentifier `
-    --self-contained false `
+    --self-contained $selfContainedValue `
     --output $OutputDirectory
 
 $manifestPath = Join-Path $OutputDirectory "SHA256SUMS.txt"
@@ -19,4 +21,4 @@ $lines = foreach ($file in Get-ChildItem $OutputDirectory -File -Recurse | Where
     "{0}  {1}" -f $hash.Hash.ToLowerInvariant(), $relativePath
 }
 $lines | Set-Content $manifestPath
-Write-Output "Published $RuntimeIdentifier to $OutputDirectory"
+Write-Output "Published $RuntimeIdentifier (self-contained=$selfContainedValue) to $OutputDirectory"
