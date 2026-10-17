@@ -282,7 +282,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _animations.Remove(selected.Clip);
     }
 
-    public void ApplyAudioSettingsToSelected(double gainDb, bool muted, long fadeInFrames = 0, long fadeOutFrames = 0)
+    public void ApplyAudioSettingsToSelected(double gainDb, bool muted, long fadeInFrames = 0, long fadeOutFrames = 0, double duckingDb = 0)
     {
         var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
         if (!selected.Clip.IsAudio)
@@ -290,7 +290,46 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             throw new InvalidOperationException("Audio settings require an audio clip.");
         }
 
-        _audioSettings[selected.Clip] = new TimelineAudioSegment(selected.Clip, gainDb, muted, fadeInFrames, fadeOutFrames);
+        _audioSettings[selected.Clip] = new TimelineAudioSegment(selected.Clip, gainDb, muted, fadeInFrames, fadeOutFrames, duckingDb);
+    }
+
+    public void ApplyAudioDuckingToSelected(double duckingDb = 12)
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        if (!selected.Clip.IsAudio)
+        {
+            throw new InvalidOperationException("Audio ducking requires an audio clip.");
+        }
+
+        var current = _audioSettings.TryGetValue(selected.Clip, out var settings)
+            ? settings
+            : new TimelineAudioSegment(selected.Clip);
+        _audioSettings[selected.Clip] = new TimelineAudioSegment(
+            selected.Clip,
+            current.GainDb,
+            current.Muted,
+            current.FadeInFrames,
+            current.FadeOutFrames,
+            duckingDb);
+    }
+
+    public void ClearAudioDuckingFromSelected()
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        if (!selected.Clip.IsAudio)
+        {
+            throw new InvalidOperationException("Audio ducking requires an audio clip.");
+        }
+
+        var current = _audioSettings.TryGetValue(selected.Clip, out var settings)
+            ? settings
+            : new TimelineAudioSegment(selected.Clip);
+        _audioSettings[selected.Clip] = new TimelineAudioSegment(
+            selected.Clip,
+            current.GainDb,
+            current.Muted,
+            current.FadeInFrames,
+            current.FadeOutFrames);
     }
 
     public void ClearSelectedAudioSettings()

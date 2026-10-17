@@ -153,7 +153,7 @@ public sealed class TimelineFilterGraphBuilder
             var input = inputIndexes[clip.MediaId];
             var sourceEnd = checked(clip.SourceStartUnit + clip.SourceUnitCount);
             var label = $"audio{index}";
-            var gain = segment.Muted ? "0" : Format(segment.GainDb);
+            var gain = segment.Muted ? "-60" : Format(segment.GainDb);
             var filter = $"[{input}:a:0]atrim=start_sample={clip.SourceStartUnit}:end_sample={sourceEnd},asetpts=PTS-STARTPTS,aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo,volume={gain}dB";
             if (segment.FadeInFrames > 0)
             {
@@ -164,6 +164,29 @@ public sealed class TimelineFilterGraphBuilder
             {
                 var start = clip.TimelineRange.Length - segment.FadeOutFrames;
                 filter += $",afade=t=out:st={FormatSeconds(start, plan.FrameRate)}:d={FormatSeconds(segment.FadeOutFrames, plan.FrameRate)}";
+            }
+
+            if (segment.DuckingDb > 0)
+            {
+                for (var otherIndex = 0; otherIndex < segments.Length; otherIndex++)
+                {
+                    if (otherIndex == index)
+                    {
+                        continue;
+                    }
+
+                    var otherRange = segments[otherIndex].Clip.TimelineRange;
+                    var overlapStart = Math.Max(segment.Clip.TimelineRange.StartFrame, otherRange.StartFrame);
+                    var overlapEnd = Math.Min(segment.Clip.TimelineRange.EndFrameExclusive, otherRange.EndFrameExclusive);
+                    if (overlapEnd <= overlapStart)
+                    {
+                        continue;
+                    }
+
+                    var relativeStart = overlapStart - segment.Clip.TimelineRange.StartFrame;
+                    var relativeEnd = overlapEnd - segment.Clip.TimelineRange.StartFrame;
+                    filter += $",volume={Format(-segment.DuckingDb)}dB:enable='between(t,{FormatSeconds(relativeStart, plan.FrameRate)},{FormatSeconds(relativeEnd, plan.FrameRate)})'";
+                }
             }
 
             filter += $",asetpts=PTS-STARTPTS+{FormatSeconds(clip.TimelineRange.StartFrame, plan.FrameRate)}/TB[{label}]";

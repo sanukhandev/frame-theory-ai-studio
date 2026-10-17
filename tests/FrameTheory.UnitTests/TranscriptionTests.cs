@@ -57,4 +57,44 @@ public sealed class TranscriptionTests
             directory.Delete(true);
         }
     }
+
+    [Xunit.Fact]
+    public async Task JsonProviderReportsProgressAndHonorsCancellation()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-transcript-progress-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "spoken.mp4");
+            var transcriptPath = Path.Combine(directory.FullName, "spoken.transcript.json");
+            await File.WriteAllTextAsync(sourcePath, "media");
+            var source = new Uri(sourcePath);
+            await File.WriteAllTextAsync(transcriptPath, $$"""
+                {
+                  "Source": "{{source.AbsoluteUri}}",
+                  "SourceFingerprint": "sha256:fixture",
+                  "Words": [{ "Text": "hello", "StartMs": 100, "EndMs": 400 }]
+                }
+                """);
+
+            var progress = new List<TranscriptionProgress>();
+            var provider = new JsonTranscriptProvider(transcriptPath);
+            await provider.TranscribeAsync(source, new InlineProgress(progress.Add), CancellationToken.None);
+
+            Xunit.Assert.Equal("Reading", progress[0].Stage);
+            Xunit.Assert.Equal("Completed", progress[^1].Stage);
+            Xunit.Assert.Equal(1, progress[^1].Fraction);
+            using var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+            await Xunit.Assert.ThrowsAsync<OperationCanceledException>(() => provider.TranscribeAsync(source, new InlineProgress(_ => { }), cancellation.Token));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    private sealed class InlineProgress(Action<TranscriptionProgress> callback) : IProgress<TranscriptionProgress>
+    {
+        public void Report(TranscriptionProgress value) => callback(value);
+    }
 }

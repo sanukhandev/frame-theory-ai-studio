@@ -54,12 +54,35 @@ public sealed record TranscriptResult
     public CaptionProvenance Provenance => CaptionProvenance.VerifiedTranscript;
 }
 
+public sealed record TranscriptionProgress
+{
+    public TranscriptionProgress(string stage, double fraction)
+    {
+        if (string.IsNullOrWhiteSpace(stage) || double.IsNaN(fraction) || double.IsInfinity(fraction) || fraction is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(fraction));
+        }
+
+        Stage = stage.Trim();
+        Fraction = fraction;
+    }
+
+    public string Stage { get; }
+
+    public double Fraction { get; }
+}
+
 public interface ITranscriptionProvider
 {
     Task<TranscriptResult> TranscribeAsync(Uri source, CancellationToken cancellationToken);
 }
 
-public sealed class JsonTranscriptProvider : ITranscriptionProvider
+public interface IProgressiveTranscriptionProvider : ITranscriptionProvider
+{
+    Task<TranscriptResult> TranscribeAsync(Uri source, IProgress<TranscriptionProgress>? progress, CancellationToken cancellationToken);
+}
+
+public sealed class JsonTranscriptProvider : IProgressiveTranscriptionProvider
 {
     private const int MaximumBytes = 10 * 1024 * 1024;
     private readonly string _transcriptPath;
@@ -75,8 +98,15 @@ public sealed class JsonTranscriptProvider : ITranscriptionProvider
     }
 
     public async Task<TranscriptResult> TranscribeAsync(Uri source, CancellationToken cancellationToken)
+        => await TranscribeAsync(source, progress: null, cancellationToken);
+
+    public async Task<TranscriptResult> TranscribeAsync(
+        Uri source,
+        IProgress<TranscriptionProgress>? progress,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(source);
+        cancellationToken.ThrowIfCancellationRequested();
         if (!source.IsFile)
         {
             throw new InvalidDataException("Transcript sources must be local files.");
@@ -92,8 +122,28 @@ public sealed class JsonTranscriptProvider : ITranscriptionProvider
             throw new InvalidDataException("The transcript JSON file exceeds the supported size.");
         }
 
+        var fileLength = new FileInfo(_transcriptPath).Length;
+        progress?.Report(new TranscriptionProgress("Reading", 0));
         await using var stream = File.OpenRead(_transcriptPath);
-        var document = await JsonSerializer.DeserializeAsync<TranscriptDocument>(stream, cancellationToken: cancellationToken)
+        await using var payload = new MemoryStream((int)fileLength);
+        var buffer = new byte[64 * 1024];
+        long bytesRead = 0;
+        int read;
+        while ((read = await stream.ReadAsync(buffer.AsMemory(), cancellationToken)) > 0)
+        {
+            if (bytesRead > MaximumBytes - read)
+            {
+                throw new InvalidDataException("The transcript JSON file exceeds the supported size.");
+            }
+
+            await payload.WriteAsync(buffer.AsMemory(0, read), cancellationToken);
+            bytesRead += read;
+            progress?.Report(new TranscriptionProgress("Reading", bytesRead / (double)Math.Max(1, fileLength)));
+        }
+
+        payload.Position = 0;
+        progress?.Report(new TranscriptionProgress("Parsing", 0.9));
+        var document = await JsonSerializer.DeserializeAsync<TranscriptDocument>(payload, cancellationToken: cancellationToken)
             ?? throw new InvalidDataException("The transcript JSON document is empty.");
         if (!string.Equals(document.Source, source.AbsoluteUri, StringComparison.OrdinalIgnoreCase))
         {
@@ -107,10 +157,12 @@ public sealed class JsonTranscriptProvider : ITranscriptionProvider
 
         try
         {
-            return new TranscriptResult(
+            var result = new TranscriptResult(
                 source,
                 document.SourceFingerprint,
                 document.Words.Select(word => new TranscriptWord(word.Text ?? string.Empty, TimeSpan.FromMilliseconds(word.StartMs), TimeSpan.FromMilliseconds(word.EndMs))));
+            progress?.Report(new TranscriptionProgress("Completed", 1));
+            return result;
         }
         catch (ArgumentException exception)
         {

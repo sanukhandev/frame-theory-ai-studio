@@ -7,7 +7,8 @@ public sealed record TimelineAudioSegment
         double gainDb = 0,
         bool muted = false,
         long fadeInFrames = 0,
-        long fadeOutFrames = 0)
+        long fadeOutFrames = 0,
+        double duckingDb = 0)
     {
         ArgumentNullException.ThrowIfNull(clip);
         if (!clip.IsAudio)
@@ -25,11 +26,17 @@ public sealed record TimelineAudioSegment
             throw new ArgumentOutOfRangeException(nameof(fadeInFrames));
         }
 
+        if (double.IsNaN(duckingDb) || double.IsInfinity(duckingDb) || duckingDb is < 0 or > 60)
+        {
+            throw new ArgumentOutOfRangeException(nameof(duckingDb));
+        }
+
         Clip = clip;
         GainDb = gainDb;
         Muted = muted;
         FadeInFrames = fadeInFrames;
         FadeOutFrames = fadeOutFrames;
+        DuckingDb = duckingDb;
     }
 
     public TimelineClip Clip { get; }
@@ -41,6 +48,8 @@ public sealed record TimelineAudioSegment
     public long FadeInFrames { get; }
 
     public long FadeOutFrames { get; }
+
+    public double DuckingDb { get; }
 }
 
 public sealed record TimelineAudioLayer

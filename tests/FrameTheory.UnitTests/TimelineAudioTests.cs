@@ -14,8 +14,10 @@ public sealed class TimelineAudioTests
 
         Xunit.Assert.Equal(3, segment.GainDb);
         Xunit.Assert.Equal(48000, segment.Clip.SourceUnitCount);
+        Xunit.Assert.Equal(0, segment.DuckingDb);
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineAudioSegment(clip, gainDb: 20));
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineAudioSegment(clip, fadeInFrames: 30));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineAudioSegment(clip, duckingDb: 61));
     }
 
     [Xunit.Fact]
@@ -46,6 +48,40 @@ public sealed class TimelineAudioTests
             Xunit.Assert.Contains("afade=t=in", graph.FilterComplex);
             Xunit.Assert.Contains("afade=t=out", graph.FilterComplex);
             Xunit.Assert.Contains("amix=inputs=2", graph.FilterComplex);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
+    public void FilterGraphDucksMarkedAudioDuringOverlappingSegments()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-audio-duck-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            File.WriteAllText(sourcePath, "source");
+            var mediaId = MediaId.Create(new Uri(sourcePath), "audio-duck-test");
+            var videoClip = TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1));
+            var voiceClip = TimelineClip.Audio(mediaId, 0, 48000, 0, 30, 48000);
+            var musicClip = TimelineClip.Audio(mediaId, 0, 48000, 0, 30, 48000);
+            var plan = new TimelineVideoRenderPlan(
+                new RationalFrameRate(30, 1),
+                16,
+                8,
+                30,
+                new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
+                [new TimelineVideoLayer("video", 0, [new TimelineVideoSegment(videoClip)])],
+                [
+                    new TimelineAudioLayer("voice", 0, [new TimelineAudioSegment(voiceClip)]),
+                    new TimelineAudioLayer("music", 1, [new TimelineAudioSegment(musicClip, duckingDb: 12)])
+                ]);
+
+            var graph = new TimelineFilterGraphBuilder().Build(plan);
+
+            Xunit.Assert.Contains("volume=-12dB:enable='between(t,0,1)'", graph.FilterComplex);
         }
         finally
         {

@@ -18,6 +18,8 @@ var second = TimelineClip.Video(idB, 0, 30, 30, 30, frameRate);
 var overlay = TimelineClip.Video(idB, 0, 30, 15, 30, frameRate);
 var audioA = TimelineClip.Audio(idA, 0, 48000, 0, 30, 48000);
 var audioB = TimelineClip.Audio(idB, 0, 48000, 30, 30, 48000);
+var musicA = TimelineClip.Audio(idA, 0, 48000, 0, 30, 48000);
+var musicB = TimelineClip.Audio(idB, 0, 48000, 30, 30, 48000);
 var baseTransform = new TimelineVideoTransform(opacity: 0.9, scale: 1, offsetX: 0, offsetY: 0);
 var overlayTransform = new TimelineVideoTransform(opacity: 0.35, scale: 0.5, offsetX: 2, offsetY: 1);
 var titles = args.Length == 4
@@ -63,6 +65,10 @@ var plan = new TimelineVideoRenderPlan(
     [new TimelineAudioLayer("audio", 0, [
             new TimelineAudioSegment(audioA, fadeInFrames: 2, fadeOutFrames: 3),
             new TimelineAudioSegment(audioB, gainDb: -3, fadeInFrames: 2, fadeOutFrames: 3)
+        ]),
+        new TimelineAudioLayer("music", 1, [
+            new TimelineAudioSegment(musicA, gainDb: -6, duckingDb: 12),
+            new TimelineAudioSegment(musicB, gainDb: -6, duckingDb: 12)
         ])],
     titles,
     captions,

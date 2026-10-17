@@ -95,12 +95,14 @@ public sealed class TimelineEditorTests
         editor.AddMedia(metadata);
         editor.SelectAt(0, "Audio 1");
         editor.ApplyAudioSettingsToSelected(3, muted: false, fadeInFrames: 2, fadeOutFrames: 2);
+        editor.ApplyAudioDuckingToSelected();
 
         var audio = editor.BuildRenderPlan(1920, 1080, new Dictionary<MediaId, Uri> { [metadata.Id] = source }).AudioLayers.Single().Segments.Single();
 
         Xunit.Assert.Equal(3, audio.GainDb);
         Xunit.Assert.Equal(2, audio.FadeInFrames);
         Xunit.Assert.Equal(2, audio.FadeOutFrames);
+        Xunit.Assert.Equal(12, audio.DuckingDb);
     }
 
     [Xunit.Fact]
