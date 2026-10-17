@@ -61,6 +61,7 @@
 - [~] FT-1003 dependency inventory and external FFmpeg/native asset assessment are documented; license/CVE clearance and redistribution evidence remain open
 - [~] FT-1004 CI now publishes per-OS desktop/test artifacts with SHA-256 manifests; hosted runners and signed/notarized release evidence remain unverified
 - [~] FT-1005 framework-dependent Windows/macOS/Linux publish scripts and release matrix are documented; installers, native media bundling and signing remain open
+- [~] FT-1006 V1 acceptance audit is recorded with 40 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
 - [x] FT-401 FFmpeg-backed PNG/JPEG photo import, PPM preview and bounded canvas fit/100%/zoom/pan state
 - [x] FT-402 non-destructive PPM crop, 90° rotation, nearest-neighbor resize and undo-last operation stack
 - [x] FT-403 immutable photo adjustment layers with ordering, inspector state and undo/redo history
@@ -68,20 +69,22 @@
 - [x] FT-405 photo project autosave recovery, missing-media relink and corrupt-input UI status paths
 
 ## Next tasks
-1. FT-1006 final acceptance audit; return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
+1. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
+2. Complete FT-602 real transcription, then FT-705/FT-706 and FT-801..FT-804 remaining P0 scope.
+3. Finish manual/cross-platform FT-901..FT-904 acceptance and hosted FT-1001..FT-1005 gates.
 
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
-Task / Epic: FT-1005 / E10
-Git SHA: 6de3b7a
-Files changed: scripts/package.ps1, scripts/package.sh, docs/RELEASE.md
-Actual behavior and UI path: Release operators can publish the Avalonia desktop for a selected runtime identifier and receive a SHA-256 manifest; the release matrix documents what is actually verified on Windows and what remains unverified on macOS/Linux. No fake installer or signing artifact is created.
-Commands executed + OS: Windows 11 x64; `pwsh -NoProfile -File scripts/package.ps1 -RuntimeIdentifier win-x64 -OutputDirectory <temp>` with .NET SDK 10.0.100.
-Test outputs / exit codes: package publish exit 0; 55 files emitted and a relative-path SHA-256 manifest generated without self-hashing; installer artifact not claimed; native media redistribution and signing blockers remain explicit.
+Task / Epic: FT-1006 / E10
+Git SHA: pending commit
+Files changed: docs/V1_ACCEPTANCE_AUDIT.md, docs/GITHUB_TRACKER.md
+Actual behavior and UI path: The audit records the closed/open task boundary, current Windows evidence and every remaining P0 blocker. GitHub visibility is synchronized with that distinction; no partial task is closed and no V1 completion claim is made.
+Commands executed + OS: Windows 11 x64; `gh issue list --state open` compared with `docs/IMPLEMENTATION_STATUS.md` and `docs/V1_ACCEPTANCE_AUDIT.md`.
+Test outputs / exit codes: GitHub query exit 0; 40 implementation issues are closed, 29 implementation issues and 13 epic issues remain open; V1 audit fails intentionally until the listed P0 gates pass.
 Media fixtures and verification: Photo export continues to use real FFmpeg/ffprobe and atomic temporary files; no source media or API keys entered Git. Approved logo/watermark asset is still absent from the repository, so no watermark was invented.
 Known limitations / blockers: FT-706 still lacks Gemini transport, follow-up request history, provider retries/timeouts, usage accounting and redaction logs. FT-804 has one active worker and no persisted queue/retry history; FT-802 social photo dimensions and queue parity remain open. FT-803 uses amplitude peaks as a basic marker aid. FT-602 remains a contract/fixture adapter pending a real local ASR or consented Gemini provider. FT-006 remains partial pending MLT and second-OS evidence. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux analysis and desktop runs are unverified.
-Next unblocked task: FT-1002
+Next unblocked task: FT-006 / FT-602 / FT-705 remaining P0 scope
 ```
 
 ## Task execution record template

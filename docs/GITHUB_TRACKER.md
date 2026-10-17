@@ -28,7 +28,7 @@
 | [E12](https://github.com/sanukhandev/frame-theory-ai-studio/issues/13) | Advanced research | P2 | FT-1201..FT-1205 |
 
 ## Task issue lookup
-All tasks can be found under [open GitHub issues](https://github.com/sanukhandev/frame-theory-ai-studio/issues?q=is%3Aissue+is%3Aopen). Each issue starts with its stable ID, e.g. [FT-001](https://github.com/sanukhandev/frame-theory-ai-studio/issues/14), [FT-301](https://github.com/sanukhandev/frame-theory-ai-studio/issues/30), [FT-705](https://github.com/sanukhandev/frame-theory-ai-studio/issues/56) and [FT-1006](https://github.com/sanukhandev/frame-theory-ai-studio/issues/71). Use the title ID, not issue number, when linking commits across reorganization.
+Tasks are tracked in [GitHub issues](https://github.com/sanukhandev/frame-theory-ai-studio/issues). Completed implementation issues are closed with evidence comments; partial, blocked and future work remains open. Each issue starts with its stable ID, e.g. [FT-001](https://github.com/sanukhandev/frame-theory-ai-studio/issues/14), [FT-301](https://github.com/sanukhandev/frame-theory-ai-studio/issues/30), [FT-705](https://github.com/sanukhandev/frame-theory-ai-studio/issues/56) and [FT-1006](https://github.com/sanukhandev/frame-theory-ai-studio/issues/71). Use the title ID, not issue number, when linking commits across reorganization.
 
 ## Recommended Codex workflow
 1. Read docs/IMPLEMENTATION_STATUS.md to locate the first unblocked task.
