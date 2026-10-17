@@ -75,6 +75,34 @@ public sealed class PhotoExportTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task SocialPhotoExportCropsToExactPresetDimensions()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-photo-social-export-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.png");
+            var destinationPath = Path.Combine(directory.FullName, "output.jpg");
+            await File.WriteAllTextAsync(sourcePath, "source");
+            var runner = new StubProcessRunner();
+            var exporter = new PhotoExporter(runner, new StubProbe(new Uri(destinationPath), 4, 4));
+
+            var receipt = await exporter.ExportAsync(
+                new PhotoEditState(Document(new Uri(sourcePath))),
+                destinationPath,
+                new PhotoExportOptions(PhotoExportFormat.Jpeg, 80, SocialPhotoExportPreset.Create(SocialAspectRatio.Square1By1, 4)),
+                null,
+                CancellationToken.None);
+
+            Xunit.Assert.Equal((4, 4), (receipt.VerifiedMetadata.Width, receipt.VerifiedMetadata.Height));
+            Xunit.Assert.Contains("scale=4:4:force_original_aspect_ratio=increase,crop=4:4", runner.ArgumentsSeen.Single());
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private static PhotoDocument Document(Uri sourceUri) => new(
         sourceUri,
         new MediaSourceMetadata(
@@ -82,11 +110,11 @@ public sealed class PhotoExportTests
             colorProfile: "sRGB"),
         [.. "P6\n1 1\n255\n"u8, 128, 64, 32]);
 
-    private sealed class StubProbe(Uri sourceUri) : IMediaProbe
+    private sealed class StubProbe(Uri sourceUri, int width = 2, int height = 1) : IMediaProbe
     {
         public Task<MediaSourceMetadata> ProbeAsync(Uri file, CancellationToken cancellationToken) => Task.FromResult(
             new MediaSourceMetadata(
-                MediaId.Create(file, "photo-export-output"), sourceUri, MediaKind.Image, 2, 1, null, 0,
+                MediaId.Create(file, "photo-export-output"), sourceUri, MediaKind.Image, width, height, null, 0,
                 colorProfile: "bt709/iec61966-2-1/gbr/pc"));
     }
 

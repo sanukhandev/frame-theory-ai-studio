@@ -10,9 +10,36 @@ public enum PhotoExportFormat
     Jpeg
 }
 
+public sealed record SocialPhotoExportPreset
+{
+    public SocialPhotoExportPreset(SocialAspectRatio aspectRatio, int width, int height)
+    {
+        if (width <= 0 || height <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width));
+        }
+
+        AspectRatio = aspectRatio;
+        Width = width;
+        Height = height;
+    }
+
+    public SocialAspectRatio AspectRatio { get; }
+
+    public int Width { get; }
+
+    public int Height { get; }
+
+    public static SocialPhotoExportPreset Create(SocialAspectRatio aspectRatio, int longEdge = 1080)
+    {
+        var videoPreset = SocialVideoExportPreset.Create(aspectRatio, longEdge);
+        return new SocialPhotoExportPreset(aspectRatio, videoPreset.Width, videoPreset.Height);
+    }
+}
+
 public sealed class PhotoExportOptions
 {
-    public PhotoExportOptions(PhotoExportFormat format, int quality = 95)
+    public PhotoExportOptions(PhotoExportFormat format, int quality = 95, SocialPhotoExportPreset? preset = null)
     {
         if (format is not PhotoExportFormat.Png and not PhotoExportFormat.Jpeg)
         {
@@ -26,11 +53,14 @@ public sealed class PhotoExportOptions
 
         Format = format;
         Quality = quality;
+        Preset = preset;
     }
 
     public PhotoExportFormat Format { get; }
 
     public int Quality { get; }
+
+    public SocialPhotoExportPreset? Preset { get; }
 
     public string Extension => Format == PhotoExportFormat.Png ? ".png" : ".jpg";
 }
@@ -116,9 +146,11 @@ public sealed class PhotoExporter
             progress?.Report(new ExportProgress("Verifying", 0.9));
             var verifiedMetadata = await _probe.ProbeAsync(new Uri(temporaryOutput), cancellationToken);
             var rendered = PpmRaster.Parse(state.RenderPreview());
+            var expectedWidth = options.Preset?.Width ?? rendered.Width;
+            var expectedHeight = options.Preset?.Height ?? rendered.Height;
             if (verifiedMetadata.Kind != MediaKind.Image ||
-                verifiedMetadata.Width != rendered.Width ||
-                verifiedMetadata.Height != rendered.Height ||
+                verifiedMetadata.Width != expectedWidth ||
+                verifiedMetadata.Height != expectedHeight ||
                 string.IsNullOrWhiteSpace(verifiedMetadata.ColorProfile))
             {
                 throw new PhotoExportException("The exported image dimensions or media kind did not match the edit.");
@@ -152,7 +184,7 @@ public sealed class PhotoExporter
             "-i", sourcePath,
             "-map", "0:v:0", "-map_metadata", "1",
             "-frames:v", "1",
-            "-vf", $"format={(options.Format == PhotoExportFormat.Png && hasAlpha ? "rgba" : "rgb24")},setparams=color_primaries=bt709:color_trc=iec61966-2-1:colorspace=bt709:range=pc",
+            "-vf", BuildVideoFilter(options, hasAlpha),
             "-c:v", options.Format == PhotoExportFormat.Png ? "png" : "mjpeg",
             "-colorspace", "bt709",
             "-color_primaries", "bt709",
@@ -172,6 +204,20 @@ public sealed class PhotoExporter
 
         arguments.AddRange(["-f", "image2", outputPath]);
         return arguments;
+    }
+
+    private static string BuildVideoFilter(PhotoExportOptions options, bool hasAlpha)
+    {
+        var filters = new List<string>();
+        if (options.Preset is not null)
+        {
+            filters.Add($"scale={options.Preset.Width}:{options.Preset.Height}:force_original_aspect_ratio=increase");
+            filters.Add($"crop={options.Preset.Width}:{options.Preset.Height}");
+        }
+
+        filters.Add($"format={(options.Format == PhotoExportFormat.Png && hasAlpha ? "rgba" : "rgb24")}");
+        filters.Add("setparams=color_primaries=bt709:color_trc=iec61966-2-1:colorspace=bt709:range=pc");
+        return string.Join(',', filters);
     }
 
     private static int PngCompressionLevel(int quality) => 9 - (quality - 1) * 9 / 99;

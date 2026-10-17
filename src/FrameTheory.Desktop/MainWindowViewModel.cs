@@ -83,17 +83,18 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         _capabilityDetector = capabilityDetector;
         _diagnosticsLog = diagnosticsLog ?? new FileDiagnosticsLog();
         _mediaImporter = mediaImporter;
+        _exportQueue = exportQueue ?? new ExportQueueService();
         PhotoRecovery = photoRecovery ?? new PhotoRecoveryViewModel(
             new ProjectRecoveryService(new JsonProjectRepository()),
             new JsonProjectRepository());
         PhotoEditor = photoEditor ?? new PhotoEditorViewModel(
             new PhotoImporter(new FfprobeMediaProbe(new FfmpegProcessRunner()), new FfmpegFrameDecoder(new FfmpegProcessRunner())),
-            new PhotoExporter(new FfmpegProcessRunner(), new FfprobeMediaProbe(new FfmpegProcessRunner())));
+            new PhotoExporter(new FfmpegProcessRunner(), new FfprobeMediaProbe(new FfmpegProcessRunner())),
+            _exportQueue);
         ColorInspector = colorInspector ?? new ColorGradeInspectorViewModel();
         TimelineEditor = timelineEditor ?? new TimelineEditorViewModel();
         GeminiSettings = geminiSettings ?? new GeminiSettingsViewModel(new GeminiConfigurationService(new OperatingSystemSecretStore()));
         _timelineExporter = timelineExporter;
-        _exportQueue = exportQueue ?? new ExportQueueService();
         _analysisSampler = analysisSampler;
         if (Workspaces.Count == 0)
         {
@@ -503,14 +504,16 @@ public sealed class DesktopServices
             processRunner);
         var probe = new FfprobeMediaProbe(processRunner);
         var repository = new JsonProjectRepository();
+        var exportQueue = new ExportQueueService();
         return new(
             new WorkspaceCatalog(),
             new FrameTheory.Platform.SystemCapabilityDetector(),
             importer,
             new PhotoRecoveryViewModel(new ProjectRecoveryService(repository), repository),
-            new PhotoEditorViewModel(new PhotoImporter(probe, decoder), new PhotoExporter(processRunner, probe)),
+            new PhotoEditorViewModel(new PhotoImporter(probe, decoder), new PhotoExporter(processRunner, probe), exportQueue),
             timelineExporter: new FfmpegTimelineVideoExporter(processRunner, new FfprobeMediaProbe(processRunner)),
             analysisSampler: new LocalAnalysisSampler(decoder),
+            exportQueue: exportQueue,
             diagnosticsLog: _diagnosticsLog);
     }
 }

@@ -10,13 +10,15 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
 {
     private readonly PhotoImporter _importer;
     private readonly PhotoExporter _exporter;
+    private readonly ExportQueueService? _exportQueue;
     private PhotoEditHistory? _history;
     private string _statusText = "Open a local image to begin a non-destructive edit.";
 
-    public PhotoEditorViewModel(PhotoImporter importer, PhotoExporter exporter)
+    public PhotoEditorViewModel(PhotoImporter importer, PhotoExporter exporter, ExportQueueService? exportQueue = null)
     {
         _importer = importer ?? throw new ArgumentNullException(nameof(importer));
         _exporter = exporter ?? throw new ArgumentNullException(nameof(exporter));
+        _exportQueue = exportQueue;
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -85,7 +87,12 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         NotifyDocumentChanged();
     }
 
-    public async Task ExportAsync(string destinationPath, PhotoExportFormat format, int quality, CancellationToken cancellationToken)
+    public async Task ExportAsync(
+        string destinationPath,
+        PhotoExportFormat format,
+        int quality,
+        CancellationToken cancellationToken,
+        SocialPhotoExportPreset? preset = null)
     {
         if (Current is null)
         {
@@ -95,12 +102,29 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
 
         try
         {
-            var receipt = await _exporter.ExportAsync(
-                Current,
-                destinationPath,
-                new PhotoExportOptions(format, quality),
-                null,
-                cancellationToken);
+            PhotoExportReceipt? receipt;
+            if (_exportQueue is null)
+            {
+                receipt = await _exporter.ExportAsync(Current, destinationPath, new PhotoExportOptions(format, quality, preset), null, cancellationToken);
+            }
+            else
+            {
+                receipt = null;
+                var job = _exportQueue.Enqueue(async queueCancellation =>
+                {
+                    var result = await _exporter.ExportAsync(Current, destinationPath, new PhotoExportOptions(format, quality, preset), null, queueCancellation);
+                    receipt = result;
+                    return new ExportReceipt(result.JobId, result.OutputPath, result.OutputBytes, result.VerifiedMetadata);
+                });
+                using var cancellationRegistration = cancellationToken.Register(job.Cancel);
+                await job.Completion.WaitAsync(cancellationToken);
+            }
+
+            if (receipt is null)
+            {
+                throw new PhotoExportException("The queued photo export completed without a receipt.");
+            }
+
             StatusText = $"Exported {Path.GetFileName(receipt.OutputPath)} ({receipt.OutputBytes} bytes).";
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

@@ -316,6 +316,8 @@ public sealed class MainWindow : Window
         undo.Click += (_, _) => editor.Undo();
         var format = new ComboBox { ItemsSource = new[] { "PNG", "JPEG" }, SelectedIndex = 0, Width = 90 };
         var quality = new Slider { Minimum = 1, Maximum = 100, Value = 95, Width = 140 };
+        var socialPreset = new ComboBox { ItemsSource = new[] { "Original", "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
+        AutomationProperties.SetName(socialPreset, "Photo export social dimensions");
         var export = new Button { Content = "Export image" };
         export.Click += async (_, _) =>
         {
@@ -334,7 +336,14 @@ public sealed class MainWindow : Window
             var path = file?.TryGetLocalPath();
             if (path is not null)
             {
-                await editor.ExportAsync(path, jpeg ? PhotoExportFormat.Jpeg : PhotoExportFormat.Png, (int)Math.Round(quality.Value), CancellationToken.None);
+                var selectedPreset = socialPreset.SelectedIndex switch
+                {
+                    1 => SocialPhotoExportPreset.Create(SocialAspectRatio.Landscape16By9),
+                    2 => SocialPhotoExportPreset.Create(SocialAspectRatio.Square1By1),
+                    3 => SocialPhotoExportPreset.Create(SocialAspectRatio.Portrait9By16),
+                    _ => null
+                };
+                await editor.ExportAsync(path, jpeg ? PhotoExportFormat.Jpeg : PhotoExportFormat.Png, (int)Math.Round(quality.Value), CancellationToken.None, selectedPreset);
             }
         };
         return new Border
@@ -350,7 +359,7 @@ public sealed class MainWindow : Window
                     new TextBlock { Text = "Non-destructive photo editor", FontWeight = FontWeight.SemiBold },
                     preview,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { open, rotate, undo } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { format, quality, export } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { format, quality, socialPreset, export } },
                     status
                 }
             }
