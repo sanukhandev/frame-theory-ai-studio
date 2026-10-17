@@ -13,12 +13,15 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
     private string _statusText = "Import local media to inspect a real before/after grade.";
     private string _beforeSummary = "Before: no media";
     private string _afterSummary = "After: no media";
+    private string _scopeSummary = "Scopes: no media";
 
     public ColorGrade Grade => _grade;
 
     public byte[]? BeforePreviewPpm => _source?.ToPpm();
 
     public byte[]? AfterPreviewPpm => _source?.Apply(ColorGraph.ForSrgb(), _grade, _lut).ToPpm();
+
+    public ColorScopeData? Scopes => _source is null ? null : ColorScopeAnalyzer.Analyze(_source.Width, _source.Height, _source.RgbBytes);
 
     public string StatusText
     {
@@ -65,6 +68,21 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
         }
     }
 
+    public string ScopeSummary
+    {
+        get => _scopeSummary;
+        private set
+        {
+            if (value == _scopeSummary)
+            {
+                return;
+            }
+
+            _scopeSummary = value;
+            OnPropertyChanged();
+        }
+    }
+
     public float ExposureEV
     {
         get => _grade.ExposureEV;
@@ -102,6 +120,7 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
             _source = null;
             BeforeSummary = "Before: no image thumbnail";
             AfterSummary = "After: no image thumbnail";
+            ScopeSummary = "Scopes: no image thumbnail";
             StatusText = "Imported media has no image preview.";
             NotifyPreviewChanged();
             return;
@@ -120,6 +139,7 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
             StatusText = $"Color preview unavailable: {exception.Message}";
             BeforeSummary = "Before: invalid preview";
             AfterSummary = "After: invalid preview";
+            ScopeSummary = "Scopes: invalid preview";
             NotifyPreviewChanged();
         }
     }
@@ -160,6 +180,8 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
 
         BeforeSummary = FormatSummary("Before", _source);
         AfterSummary = FormatSummary("After", _source.Apply(ColorGraph.ForSrgb(), _grade, _lut));
+        var scopes = Scopes!;
+        ScopeSummary = $"Scopes: histogram peaks R {Peak(scopes.RedHistogram)}, G {Peak(scopes.GreenHistogram)}, B {Peak(scopes.BlueHistogram)}; waveform bins {scopes.Waveform.Count}; vectorscope bins {scopes.Vectorscope.Count}";
     }
 
     private static string FormatSummary(string label, PpmRaster raster)
@@ -188,6 +210,21 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(Tint));
         OnPropertyChanged(nameof(BeforePreviewPpm));
         OnPropertyChanged(nameof(AfterPreviewPpm));
+        OnPropertyChanged(nameof(Scopes));
+    }
+
+    private static int Peak(IReadOnlyList<int> histogram)
+    {
+        var peak = 0;
+        for (var index = 1; index < histogram.Count; index++)
+        {
+            if (histogram[index] > histogram[peak])
+            {
+                peak = index;
+            }
+        }
+
+        return peak;
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>

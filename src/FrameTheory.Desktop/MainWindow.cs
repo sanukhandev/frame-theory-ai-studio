@@ -671,6 +671,8 @@ public sealed class MainWindow : Window
         beforeSummary.Bind(TextBlock.TextProperty, new Binding("ColorInspector.BeforeSummary"));
         var afterSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
         afterSummary.Bind(TextBlock.TextProperty, new Binding("ColorInspector.AfterSummary"));
+        var scopeSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        scopeSummary.Bind(TextBlock.TextProperty, new Binding("ColorInspector.ScopeSummary"));
         var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
         status.Bind(TextBlock.TextProperty, new Binding("ColorInspector.StatusText"));
         var controls = new StackPanel { Spacing = 4 };
@@ -790,6 +792,7 @@ public sealed class MainWindow : Window
                             new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "After" }, afterImage, afterSummary } }
                         }
                     },
+                    scopeSummary,
                     controls,
                     new StackPanel
                     {
