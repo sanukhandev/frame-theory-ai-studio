@@ -69,6 +69,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private readonly IGeminiInteractionHistory _geminiInteractionHistory;
     private string? _lastGeminiInteractionId;
     private ExportQueueJob? _activeExport;
+    private CancellationTokenSource? _activeBatchExport;
     private ExportQueueJob? _lastTimelineExport;
     private TimelineExportRequest? _lastTimelineExportRequest;
     private readonly ILocalAnalysisSampler? _analysisSampler;
@@ -1105,6 +1106,67 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    public async Task<bool> ExportTimelineBatchAsync(string outputDirectory, CancellationToken cancellationToken)
+    {
+        if (_timelineExporter is null)
+        {
+            TimelineExportStatusText = "Timeline export is unavailable.";
+            return false;
+        }
+
+        try
+        {
+            outputDirectory = Path.GetFullPath(outputDirectory);
+            if (!Directory.Exists(outputDirectory))
+            {
+                throw new DirectoryNotFoundException(outputDirectory);
+            }
+
+            var targets = Enum.GetValues<SocialAspectRatio>().Select(aspectRatio =>
+            {
+                var socialPreset = SocialVideoExportPreset.Create(aspectRatio);
+                var plan = TimelineEditor.BuildRenderPlan(socialPreset.Width, socialPreset.Height, _mediaSources);
+                var name = aspectRatio switch
+                {
+                    SocialAspectRatio.Landscape16By9 => "16x9-landscape",
+                    SocialAspectRatio.Square1By1 => "1x1-square",
+                    SocialAspectRatio.Portrait9By16 => "9x16-portrait",
+                    _ => throw new ArgumentOutOfRangeException(nameof(aspectRatio))
+                };
+                return new TimelineBatchExportTarget(
+                    name,
+                    plan,
+                    Path.Combine(outputDirectory, $"frame-theory-{name}.mp4"),
+                    socialPreset.ToExportPreset(plan.FrameRate, plan.AudioLayers.Count > 0));
+            }).ToArray();
+
+            using var batchCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            _activeBatchExport = batchCancellation;
+            var receipts = await new TimelineBatchExporter(_timelineExporter).ExportAsync(
+                targets,
+                new Progress<TimelineBatchExportProgress>(update =>
+                    TimelineExportStatusText = $"{update.TargetName}: {update.Progress.Stage} ({update.Progress.Fraction:P0}); {update.CompletedTargets}/{update.TotalTargets} targets complete."),
+                batchCancellation.Token);
+            TimelineExportStatusText = $"Exported {receipts.Count} social targets to {outputDirectory}.";
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            TimelineExportStatusText = "Batch timeline export canceled.";
+            return false;
+        }
+        catch (Exception exception) when (exception is ArgumentException or DirectoryNotFoundException or IOException or InvalidOperationException or MediaExportException or MediaProbeException)
+        {
+            _diagnosticsLog.Record("timeline-batch-export-failed", exception);
+            TimelineExportStatusText = $"Batch timeline export failed: {exception.Message}";
+            return false;
+        }
+        finally
+        {
+            _activeBatchExport = null;
+        }
+    }
+
     public async Task<bool> RetryLastTimelineExportAsync(CancellationToken cancellationToken)
     {
         if (_timelineExporter is null || _lastTimelineExportRequest is null || _lastTimelineExport is null)
@@ -1164,13 +1226,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public void CancelTimelineExport()
     {
-        if (_activeExport is null)
+        if (_activeExport is null && _activeBatchExport is null)
         {
             TimelineExportStatusText = "No timeline export is active.";
             return;
         }
 
-        _activeExport.Cancel();
+        _activeExport?.Cancel();
+        _activeBatchExport?.Cancel();
         TimelineExportStatusText = "Timeline export cancellation requested.";
     }
 

@@ -1138,6 +1138,26 @@ public sealed class MainWindow : Window
             }
         };
         var export = new Button { Content = "Export composite MP4" };
+        var batchExport = new Button { Content = "Export all social targets" };
+        AutomationProperties.SetName(batchExport, "Export all social video targets");
+        batchExport.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(batchExport);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+            {
+                AllowMultiple = false
+            });
+            var path = folders.SingleOrDefault()?.TryGetLocalPath();
+            if (path is not null)
+            {
+                await viewModel.ExportTimelineBatchAsync(path, CancellationToken.None);
+            }
+        };
         var cancelExport = new Button { Content = "Cancel export" };
         cancelExport.Click += (_, _) => viewModel.CancelTimelineExport();
         var saveProject = new Button { Content = "Save timeline project" };
@@ -1292,7 +1312,7 @@ public sealed class MainWindow : Window
                     timelineReplacementPath,
                     relinkTimelineMedia,
                     projectStatus,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { aspectRatio, export, cancelExport, retryExport } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { aspectRatio, export, batchExport, cancelExport, retryExport } },
                     exportStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { selectWatermark, clearWatermark } },
                     watermarkStatus,
