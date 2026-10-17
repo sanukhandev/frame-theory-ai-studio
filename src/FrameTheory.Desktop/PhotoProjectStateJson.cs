@@ -47,7 +47,23 @@ public static class PhotoProjectStateJson
                 OffsetX = layer.OffsetX,
                 OffsetY = layer.OffsetY,
                 Opacity = layer.Opacity,
-                BlendMode = layer.BlendMode
+                BlendMode = layer.BlendMode,
+                MaskStrokes = layer.MaskStrokes.Select(stroke => new PhotoMaskStrokeProjectState
+                {
+                    CenterX = stroke.CenterX,
+                    CenterY = stroke.CenterY,
+                    Radius = stroke.Radius,
+                    Strength = stroke.Strength
+                }).ToList()
+            }).ToList(),
+            RetouchStrokes = state.RetouchStrokes.Select(stroke => new PhotoRetouchStrokeProjectState
+            {
+                CenterX = stroke.CenterX,
+                CenterY = stroke.CenterY,
+                Radius = stroke.Radius,
+                SourceOffsetX = stroke.SourceOffsetX,
+                SourceOffsetY = stroke.SourceOffsetY,
+                Strength = stroke.Strength
             }).ToList()
         }, Options);
     }
@@ -68,8 +84,8 @@ public static class PhotoProjectStateJson
         {
             var state = JsonSerializer.Deserialize<PhotoProjectState>(json, Options)
                 ?? throw new InvalidDataException("The photo edit state is empty.");
-            if (state.SchemaVersion != 1 || state.Operations is null || state.Layers is null || state.CompositeLayers is null ||
-                state.Operations.Count > MaximumEntries || state.Layers.Count > MaximumEntries || state.CompositeLayers.Count > MaximumEntries)
+            if (state.SchemaVersion != 1 || state.Operations is null || state.Layers is null || state.CompositeLayers is null || state.RetouchStrokes is null ||
+                state.Operations.Count > MaximumEntries || state.Layers.Count > MaximumEntries || state.CompositeLayers.Count > MaximumEntries || state.RetouchStrokes.Count > MaximumEntries)
             {
                 throw new InvalidDataException("The photo edit state schema or bounds are invalid.");
             }
@@ -96,9 +112,20 @@ public static class PhotoProjectStateJson
                     throw new InvalidDataException($"The composite layer source '{mediaId.Value}' is missing from the project.");
                 }
 
-                return new PhotoCompositeLayer(compositeSource, layer.OffsetX, layer.OffsetY, layer.Opacity, layer.BlendMode);
+                if (layer.MaskStrokes is null || layer.MaskStrokes.Count > MaximumEntries)
+                {
+                    throw new InvalidDataException("The photo state contains invalid overlay mask strokes.");
+                }
+
+                var maskStrokes = layer.MaskStrokes.Select(stroke => stroke is null
+                    ? throw new InvalidDataException("The photo state contains a null overlay mask stroke.")
+                    : new PhotoMaskStroke(stroke.CenterX, stroke.CenterY, stroke.Radius, stroke.Strength));
+                return new PhotoCompositeLayer(compositeSource, layer.OffsetX, layer.OffsetY, layer.Opacity, layer.BlendMode, maskStrokes);
             });
-            return new PhotoEditState(source, operations, new PhotoLayerStack(layers), compositeLayers);
+            var retouchStrokes = state.RetouchStrokes.Select(stroke => stroke is null
+                ? throw new InvalidDataException("The photo state contains a null retouch stroke.")
+                : new PhotoRetouchStroke(stroke.CenterX, stroke.CenterY, stroke.Radius, stroke.SourceOffsetX, stroke.SourceOffsetY, stroke.Strength));
+            return new PhotoEditState(source, operations, new PhotoLayerStack(layers), compositeLayers, retouchStrokes);
         }
         catch (JsonException exception)
         {
@@ -125,6 +152,8 @@ public static class PhotoProjectStateJson
         public List<PhotoAdjustmentLayerProjectState>? Layers { get; set; } = [];
 
         public List<PhotoCompositeLayerProjectState>? CompositeLayers { get; set; } = [];
+
+        public List<PhotoRetouchStrokeProjectState>? RetouchStrokes { get; set; } = [];
     }
 
     private sealed class PhotoOperationProjectState
@@ -168,5 +197,33 @@ public static class PhotoProjectStateJson
         public float Opacity { get; set; }
 
         public PhotoBlendMode BlendMode { get; set; }
+
+        public List<PhotoMaskStrokeProjectState>? MaskStrokes { get; set; } = [];
+    }
+
+    private sealed class PhotoMaskStrokeProjectState
+    {
+        public int CenterX { get; set; }
+
+        public int CenterY { get; set; }
+
+        public int Radius { get; set; }
+
+        public float Strength { get; set; }
+    }
+
+    private sealed class PhotoRetouchStrokeProjectState
+    {
+        public int CenterX { get; set; }
+
+        public int CenterY { get; set; }
+
+        public int Radius { get; set; }
+
+        public int SourceOffsetX { get; set; }
+
+        public int SourceOffsetY { get; set; }
+
+        public float Strength { get; set; }
     }
 }

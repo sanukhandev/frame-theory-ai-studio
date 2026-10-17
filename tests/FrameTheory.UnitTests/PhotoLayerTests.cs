@@ -71,6 +71,24 @@ public sealed class PhotoLayerTests
         Xunit.Assert.Equal(PhotoBlendMode.Screen, edited.CompositeLayers[0].BlendMode);
     }
 
+    [Xunit.Fact]
+    public void BrushMaskHidesOverlayAndRetouchCopiesSourcePixels()
+    {
+        var baseDocument = Document(new Uri("file:///base.png"), [100, 0, 0, 0, 100, 0]);
+        var overlayDocument = Document(new Uri("file:///overlay.png"), [200, 200, 200, 200, 200, 200]);
+        var edited = new PhotoEditState(baseDocument)
+            .AddCompositeLayer(new PhotoCompositeLayer(overlayDocument))
+            .MaskLastCompositeLayer(new PhotoMaskStroke(0, 0, 1, 1));
+        var retouched = new PhotoEditState(baseDocument)
+            .AddRetouchStroke(new PhotoRetouchStroke(1, 0, 1, -1, 0, 1));
+
+        var rendered = PpmRaster.Parse(edited.RenderPreview());
+        Xunit.Assert.Equal([100, 0, 0, 200, 200, 200], rendered.RgbBytes);
+        Xunit.Assert.Equal([100, 0, 0, 100, 0, 0], PpmRaster.Parse(retouched.RenderPreview()).RgbBytes);
+        Xunit.Assert.Single(edited.CompositeLayers[0].MaskStrokes);
+        Xunit.Assert.Single(retouched.RetouchStrokes);
+    }
+
     private static PhotoDocument Document(Uri source, byte[] pixels) => new(
         source,
         new MediaSourceMetadata(MediaId.Create(source, "photo-layer-test"), source, MediaKind.Image, 2, 1, null, 0),

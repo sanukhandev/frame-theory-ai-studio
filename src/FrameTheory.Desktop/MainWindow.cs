@@ -391,6 +391,54 @@ public sealed class MainWindow : Window
         };
         var clearOverlays = new Button { Content = "Clear overlays" };
         clearOverlays.Click += (_, _) => editor.ClearOverlays();
+        var maskX = new TextBox { Text = "0", PlaceholderText = "Mask X", Width = 55 };
+        var maskY = new TextBox { Text = "0", PlaceholderText = "Mask Y", Width = 55 };
+        var maskRadius = new TextBox { Text = "8", PlaceholderText = "Radius", Width = 65 };
+        var maskStrength = new TextBox { Text = "1", PlaceholderText = "Strength", Width = 70 };
+        AutomationProperties.SetName(maskX, "Photo mask center X");
+        AutomationProperties.SetName(maskY, "Photo mask center Y");
+        AutomationProperties.SetName(maskRadius, "Photo mask brush radius");
+        AutomationProperties.SetName(maskStrength, "Photo mask brush strength");
+        var applyMask = new Button { Content = "Mask last overlay" };
+        applyMask.Click += (_, _) =>
+        {
+            if (int.TryParse(maskX.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var centerX) &&
+                int.TryParse(maskY.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var centerY) &&
+                int.TryParse(maskRadius.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var radius) &&
+                float.TryParse(maskStrength.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var strength))
+            {
+                editor.MaskLastOverlay(centerX, centerY, radius, strength);
+            }
+        };
+        var clearMask = new Button { Content = "Clear last mask" };
+        clearMask.Click += (_, _) => editor.ClearLastOverlayMask();
+        var retouchX = new TextBox { Text = "0", PlaceholderText = "Retouch X", Width = 65 };
+        var retouchY = new TextBox { Text = "0", PlaceholderText = "Retouch Y", Width = 65 };
+        var retouchRadius = new TextBox { Text = "8", PlaceholderText = "Radius", Width = 65 };
+        var retouchOffsetX = new TextBox { Text = "1", PlaceholderText = "Source ΔX", Width = 75 };
+        var retouchOffsetY = new TextBox { Text = "0", PlaceholderText = "Source ΔY", Width = 75 };
+        var retouchStrength = new TextBox { Text = "1", PlaceholderText = "Strength", Width = 70 };
+        AutomationProperties.SetName(retouchX, "Photo retouch center X");
+        AutomationProperties.SetName(retouchY, "Photo retouch center Y");
+        AutomationProperties.SetName(retouchRadius, "Photo retouch brush radius");
+        AutomationProperties.SetName(retouchOffsetX, "Photo retouch source offset X");
+        AutomationProperties.SetName(retouchOffsetY, "Photo retouch source offset Y");
+        AutomationProperties.SetName(retouchStrength, "Photo retouch brush strength");
+        var applyRetouch = new Button { Content = "Apply clone retouch" };
+        applyRetouch.Click += (_, _) =>
+        {
+            if (int.TryParse(retouchX.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var centerX) &&
+                int.TryParse(retouchY.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var centerY) &&
+                int.TryParse(retouchRadius.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var radius) &&
+                int.TryParse(retouchOffsetX.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var offsetX) &&
+                int.TryParse(retouchOffsetY.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var offsetY) &&
+                float.TryParse(retouchStrength.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var strength))
+            {
+                editor.ApplyRetouch(centerX, centerY, radius, offsetX, offsetY, strength);
+            }
+        };
+        var clearRetouch = new Button { Content = "Clear retouch" };
+        clearRetouch.Click += (_, _) => editor.ClearRetouch();
         var format = new ComboBox { ItemsSource = new[] { "PNG", "JPEG" }, SelectedIndex = 0, Width = 90 };
         var quality = new Slider { Minimum = 1, Maximum = 100, Value = 95, Width = 140 };
         var socialPreset = new ComboBox { ItemsSource = new[] { "Original", "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
@@ -437,6 +485,8 @@ public sealed class MainWindow : Window
                     preview,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { open, openProject, saveProject, rotate, undo } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { importOverlay, clearOverlays, overlayBlend, overlayOpacity } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { applyMask, maskX, maskY, maskRadius, maskStrength, clearMask } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { applyRetouch, retouchX, retouchY, retouchRadius, retouchOffsetX, retouchOffsetY, retouchStrength, clearRetouch } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { format, quality, socialPreset, export } },
                     status
                 }

@@ -44,6 +44,14 @@ if (overlayPath is not null)
     {
         throw new InvalidOperationException(editor.StatusText);
     }
+
+    editor.MaskLastOverlay(0, 0, 1, 1);
+    editor.ApplyRetouch(1, 0, 1, -1, 0, 1);
+    overlayState = editor.Current;
+    if (overlayState is null || overlayState.CompositeLayers[0].MaskStrokes.Count != 1 || overlayState.RetouchStrokes.Count != 1)
+    {
+        throw new InvalidOperationException(editor.StatusText);
+    }
 }
 
 editor.RotateRight();
@@ -76,6 +84,6 @@ if (!await reopened.OpenProjectAsync(projectPath, CancellationToken.None) ||
 }
 
 Console.WriteLine($"format={format}; overlay={(overlayPath is null ? "none" : Path.GetFileName(overlayPath))}; size={receipt.VerifiedMetadata.Width}x{receipt.VerifiedMetadata.Height}; color={receipt.VerifiedMetadata.ColorProfile}; bytes={receipt.OutputBytes}; path={receipt.OutputPath}");
-Console.WriteLine($"photo-project-roundtrip={projectPath}; operations={reopened.Current.Operations.Count}; overlays={reopened.Current.CompositeLayers.Count}");
+Console.WriteLine($"photo-project-roundtrip={projectPath}; operations={reopened.Current.Operations.Count}; overlays={reopened.Current.CompositeLayers.Count}; masks={reopened.Current.CompositeLayers.Sum(layer => layer.MaskStrokes.Count)}; retouch={reopened.Current.RetouchStrokes.Count}");
 
 static bool IsPreset(string value) => value is "16:9" or "1:1" or "9:16";

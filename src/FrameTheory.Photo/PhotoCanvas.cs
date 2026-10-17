@@ -159,6 +159,70 @@ public enum PhotoBlendMode
     Screen
 }
 
+public sealed record PhotoMaskStroke
+{
+    public PhotoMaskStroke(int centerX, int centerY, int radius, float strength)
+    {
+        if (radius is < 1 or > 4096)
+        {
+            throw new ArgumentOutOfRangeException(nameof(radius));
+        }
+
+        if (float.IsNaN(strength) || float.IsInfinity(strength) || strength is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(strength));
+        }
+
+        CenterX = centerX;
+        CenterY = centerY;
+        Radius = radius;
+        Strength = strength;
+    }
+
+    public int CenterX { get; }
+
+    public int CenterY { get; }
+
+    public int Radius { get; }
+
+    public float Strength { get; }
+}
+
+public sealed record PhotoRetouchStroke
+{
+    public PhotoRetouchStroke(int centerX, int centerY, int radius, int sourceOffsetX, int sourceOffsetY, float strength)
+    {
+        if (radius is < 1 or > 4096)
+        {
+            throw new ArgumentOutOfRangeException(nameof(radius));
+        }
+
+        if (float.IsNaN(strength) || float.IsInfinity(strength) || strength is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(strength));
+        }
+
+        CenterX = centerX;
+        CenterY = centerY;
+        Radius = radius;
+        SourceOffsetX = sourceOffsetX;
+        SourceOffsetY = sourceOffsetY;
+        Strength = strength;
+    }
+
+    public int CenterX { get; }
+
+    public int CenterY { get; }
+
+    public int Radius { get; }
+
+    public int SourceOffsetX { get; }
+
+    public int SourceOffsetY { get; }
+
+    public float Strength { get; }
+}
+
 public sealed class PhotoCompositeLayer
 {
     public PhotoCompositeLayer(
@@ -166,7 +230,8 @@ public sealed class PhotoCompositeLayer
         int offsetX = 0,
         int offsetY = 0,
         float opacity = 1,
-        PhotoBlendMode blendMode = PhotoBlendMode.Normal)
+        PhotoBlendMode blendMode = PhotoBlendMode.Normal,
+        IEnumerable<PhotoMaskStroke>? maskStrokes = null)
     {
         Source = source ?? throw new ArgumentNullException(nameof(source));
         if (float.IsNaN(opacity) || float.IsInfinity(opacity) || opacity is < 0 or > 1)
@@ -178,6 +243,7 @@ public sealed class PhotoCompositeLayer
         OffsetY = offsetY;
         Opacity = opacity;
         BlendMode = blendMode;
+        MaskStrokes = maskStrokes?.ToArray() ?? [];
     }
 
     public PhotoDocument Source { get; }
@@ -191,6 +257,18 @@ public sealed class PhotoCompositeLayer
     public float Opacity { get; }
 
     public PhotoBlendMode BlendMode { get; }
+
+    public IReadOnlyList<PhotoMaskStroke> MaskStrokes { get; }
+
+    public PhotoCompositeLayer WithMaskStroke(PhotoMaskStroke stroke) => new(
+        Source,
+        OffsetX,
+        OffsetY,
+        Opacity,
+        BlendMode,
+        MaskStrokes.Append(stroke));
+
+    public PhotoCompositeLayer ClearMask() => new(Source, OffsetX, OffsetY, Opacity, BlendMode);
 }
 
 public sealed class PhotoEditState
@@ -201,12 +279,14 @@ public sealed class PhotoEditState
         PhotoDocument source,
         IEnumerable<PhotoEditOperation>? operations = null,
         PhotoLayerStack? layers = null,
-        IEnumerable<PhotoCompositeLayer>? compositeLayers = null)
+        IEnumerable<PhotoCompositeLayer>? compositeLayers = null,
+        IEnumerable<PhotoRetouchStroke>? retouchStrokes = null)
     {
         Source = source ?? throw new ArgumentNullException(nameof(source));
         _operations = operations?.ToArray() ?? [];
         Layers = layers ?? new PhotoLayerStack();
         CompositeLayers = compositeLayers?.ToArray() ?? [];
+        RetouchStrokes = retouchStrokes?.ToArray() ?? [];
         if (CompositeLayers.GroupBy(layer => layer.SourceMediaId).Any(group => group.Count() > 1))
         {
             throw new ArgumentException("Composite layer sources must be unique.", nameof(compositeLayers));
@@ -222,6 +302,8 @@ public sealed class PhotoEditState
     public PhotoLayerStack Layers { get; }
 
     public IReadOnlyList<PhotoCompositeLayer> CompositeLayers { get; }
+
+    public IReadOnlyList<PhotoRetouchStroke> RetouchStrokes { get; }
 
     public PhotoEditState Crop(int x, int y, int width, int height)
     {
@@ -256,7 +338,7 @@ public sealed class PhotoEditState
             return this;
         }
 
-        return new PhotoEditState(Source, _operations.Take(_operations.Count - 1), Layers, CompositeLayers);
+        return new PhotoEditState(Source, _operations.Take(_operations.Count - 1), Layers, CompositeLayers, RetouchStrokes);
     }
 
     public byte[] RenderPreview() => RenderRaster().ToPpm();
@@ -264,7 +346,7 @@ public sealed class PhotoEditState
     public byte[] RenderExportImage() => RenderRaster().ToExportImage();
 
     public PhotoEditState WithLayers(PhotoLayerStack layers) =>
-        new(Source, _operations, layers, CompositeLayers);
+        new(Source, _operations, layers, CompositeLayers, RetouchStrokes);
 
     public PhotoEditState AddCompositeLayer(PhotoCompositeLayer layer)
     {
@@ -274,14 +356,48 @@ public sealed class PhotoEditState
             throw new ArgumentException("A photo composite layer must reference a distinct source image.", nameof(layer));
         }
 
-        return new PhotoEditState(Source, _operations, Layers, CompositeLayers.Append(layer));
+        return new PhotoEditState(Source, _operations, Layers, CompositeLayers.Append(layer), RetouchStrokes);
     }
 
     public PhotoEditState ClearCompositeLayers() =>
-        new(Source, _operations, Layers);
+        new(Source, _operations, Layers, null, RetouchStrokes);
+
+    public PhotoEditState MaskLastCompositeLayer(PhotoMaskStroke stroke)
+    {
+        ArgumentNullException.ThrowIfNull(stroke);
+        if (CompositeLayers.Count == 0)
+        {
+            throw new InvalidOperationException("A photo overlay is required before applying a mask.");
+        }
+
+        var layers = CompositeLayers.ToArray();
+        layers[^1] = layers[^1].WithMaskStroke(stroke);
+        return new PhotoEditState(Source, _operations, Layers, layers, RetouchStrokes);
+    }
+
+    public PhotoEditState ClearLastCompositeMask()
+    {
+        if (CompositeLayers.Count == 0)
+        {
+            return this;
+        }
+
+        var layers = CompositeLayers.ToArray();
+        layers[^1] = layers[^1].ClearMask();
+        return new PhotoEditState(Source, _operations, Layers, layers, RetouchStrokes);
+    }
+
+    public PhotoEditState AddRetouchStroke(PhotoRetouchStroke stroke)
+    {
+        ArgumentNullException.ThrowIfNull(stroke);
+        return new PhotoEditState(Source, _operations, Layers, CompositeLayers, RetouchStrokes.Append(stroke));
+    }
+
+    public PhotoEditState ClearRetouchStrokes() =>
+        new(Source, _operations, Layers, CompositeLayers);
 
     private PhotoEditState WithOperation(PhotoEditOperation operation) =>
-        new(Source, _operations.Append(operation), Layers, CompositeLayers);
+        new(Source, _operations.Append(operation), Layers, CompositeLayers, RetouchStrokes);
 
     private PpmRaster RenderRaster()
     {
@@ -291,10 +407,15 @@ public sealed class PhotoEditState
             raster = ApplyOperation(raster, operation);
         }
 
+        foreach (var stroke in RetouchStrokes)
+        {
+            raster = raster.Retouch(stroke.CenterX, stroke.CenterY, stroke.Radius, stroke.SourceOffsetX, stroke.SourceOffsetY, stroke.Strength);
+        }
+
         raster = Layers.Apply(raster);
         foreach (var layer in CompositeLayers)
         {
-            raster = raster.Composite(PpmRaster.Parse(layer.Source.PreviewPpm), layer.OffsetX, layer.OffsetY, layer.Opacity, layer.BlendMode);
+            raster = raster.Composite(PpmRaster.Parse(layer.Source.PreviewPpm), layer.OffsetX, layer.OffsetY, layer.Opacity, layer.BlendMode, layer.MaskStrokes);
         }
 
         return raster;
@@ -578,7 +699,8 @@ public sealed class PpmRaster
         int offsetX,
         int offsetY,
         float opacity,
-        PhotoBlendMode blendMode = PhotoBlendMode.Normal)
+        PhotoBlendMode blendMode = PhotoBlendMode.Normal,
+        IReadOnlyList<PhotoMaskStroke>? maskStrokes = null)
     {
         ArgumentNullException.ThrowIfNull(overlay);
         if (float.IsNaN(opacity) || float.IsInfinity(opacity) || opacity is < 0 or > 1)
@@ -607,6 +729,7 @@ public sealed class PpmRaster
                 var sourceOffset = (overlayY * overlay.Width + overlayX) * 3;
                 var targetOffset = (targetY * Width + targetX) * 3;
                 var sourceAlpha = opacity * (overlay.AlphaBytes?[overlayY * overlay.Width + overlayX] ?? (byte)255) / 255f;
+                sourceAlpha *= GetMaskFactor(maskStrokes, overlayX, overlayY);
                 if (sourceAlpha <= 0)
                 {
                     continue;
@@ -634,6 +757,69 @@ public sealed class PpmRaster
                     var destinationAlpha = alpha[targetY * Width + targetX] / 255f;
                     alpha[targetY * Width + targetX] = (byte)Math.Clamp(
                         (int)MathF.Round((sourceAlpha + destinationAlpha * (1 - sourceAlpha)) * 255),
+                        0,
+                        255);
+                }
+            }
+        }
+
+        return new PpmRaster(Width, Height, output, alpha);
+    }
+
+    public PpmRaster Retouch(int centerX, int centerY, int radius, int sourceOffsetX, int sourceOffsetY, float strength)
+    {
+        if (radius is < 1 or > 4096)
+        {
+            throw new ArgumentOutOfRangeException(nameof(radius));
+        }
+
+        if (float.IsNaN(strength) || float.IsInfinity(strength) || strength is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(strength));
+        }
+
+        var output = RgbBytes.ToArray();
+        var alpha = AlphaBytes?.ToArray();
+        var radiusSquared = (long)radius * radius;
+        var minimumX = Math.Max(0, centerX - radius);
+        var maximumX = Math.Min(Width - 1, centerX + radius);
+        var minimumY = Math.Max(0, centerY - radius);
+        var maximumY = Math.Min(Height - 1, centerY + radius);
+        for (var targetY = minimumY; targetY <= maximumY; targetY++)
+        {
+            for (var targetX = minimumX; targetX <= maximumX; targetX++)
+            {
+                var deltaX = targetX - centerX;
+                var deltaY = targetY - centerY;
+                var distanceSquared = (long)deltaX * deltaX + (long)deltaY * deltaY;
+                if (distanceSquared > radiusSquared)
+                {
+                    continue;
+                }
+
+                var sourceX = targetX + sourceOffsetX;
+                var sourceY = targetY + sourceOffsetY;
+                if (sourceX < 0 || sourceX >= Width || sourceY < 0 || sourceY >= Height)
+                {
+                    continue;
+                }
+
+                var distance = MathF.Sqrt(distanceSquared);
+                var brushStrength = strength * (1 - distance / radius);
+                var targetOffset = (targetY * Width + targetX) * 3;
+                var sourceOffset = (sourceY * Width + sourceX) * 3;
+                for (var channel = 0; channel < 3; channel++)
+                {
+                    output[targetOffset + channel] = (byte)Math.Clamp(
+                        (int)MathF.Round(RgbBytes[targetOffset + channel] * (1 - brushStrength) + RgbBytes[sourceOffset + channel] * brushStrength),
+                        0,
+                        255);
+                }
+
+                if (alpha is not null)
+                {
+                    alpha[targetY * Width + targetX] = (byte)Math.Clamp(
+                        (int)MathF.Round(AlphaBytes![targetY * Width + targetX] * (1 - brushStrength) + AlphaBytes[sourceY * Width + sourceX] * brushStrength),
                         0,
                         255);
                 }
@@ -720,6 +906,32 @@ public sealed class PpmRaster
     }
 
     private static byte ToByte(float value) => (byte)Math.Clamp((int)MathF.Round(value * 255), 0, 255);
+
+    private static float GetMaskFactor(IReadOnlyList<PhotoMaskStroke>? strokes, int x, int y)
+    {
+        if (strokes is null || strokes.Count == 0)
+        {
+            return 1;
+        }
+
+        var factor = 1f;
+        foreach (var stroke in strokes)
+        {
+            var deltaX = x - stroke.CenterX;
+            var deltaY = y - stroke.CenterY;
+            var distanceSquared = (long)deltaX * deltaX + (long)deltaY * deltaY;
+            var radiusSquared = (long)stroke.Radius * stroke.Radius;
+            if (distanceSquared > radiusSquared)
+            {
+                continue;
+            }
+
+            var falloff = 1 - MathF.Sqrt(distanceSquared) / stroke.Radius;
+            factor *= 1 - falloff * stroke.Strength;
+        }
+
+        return factor;
+    }
 
     private static string ReadToken(byte[] bytes, ref int index)
     {

@@ -234,6 +234,72 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         NotifyDocumentChanged();
     }
 
+    public void MaskLastOverlay(int centerX, int centerY, int radius, float strength)
+    {
+        if (Current is null)
+        {
+            StatusText = "Open a photo before painting an overlay mask.";
+            return;
+        }
+
+        try
+        {
+            _history!.Execute(Current.MaskLastCompositeLayer(new PhotoMaskStroke(centerX, centerY, radius, strength)));
+            StatusText = "Applied a non-destructive brush mask to the last overlay.";
+            NotifyDocumentChanged();
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException)
+        {
+            StatusText = $"Photo mask could not be applied: {exception.Message}";
+        }
+    }
+
+    public void ClearLastOverlayMask()
+    {
+        if (Current is null || Current.CompositeLayers.Count == 0)
+        {
+            StatusText = "No photo overlay is available to unmask.";
+            return;
+        }
+
+        _history!.Execute(Current.ClearLastCompositeMask());
+        StatusText = "Cleared the last overlay mask.";
+        NotifyDocumentChanged();
+    }
+
+    public void ApplyRetouch(int centerX, int centerY, int radius, int sourceOffsetX, int sourceOffsetY, float strength)
+    {
+        if (Current is null)
+        {
+            StatusText = "Open a photo before applying retouch.";
+            return;
+        }
+
+        try
+        {
+            _history!.Execute(Current.AddRetouchStroke(new PhotoRetouchStroke(centerX, centerY, radius, sourceOffsetX, sourceOffsetY, strength)));
+            StatusText = "Applied a non-destructive clone retouch stroke.";
+            NotifyDocumentChanged();
+        }
+        catch (ArgumentException exception)
+        {
+            StatusText = $"Photo retouch could not be applied: {exception.Message}";
+        }
+    }
+
+    public void ClearRetouch()
+    {
+        if (Current is null || Current.RetouchStrokes.Count == 0)
+        {
+            StatusText = "No photo retouch strokes are available to clear.";
+            return;
+        }
+
+        _history!.Execute(Current.ClearRetouchStrokes());
+        StatusText = "Cleared photo retouch strokes.";
+        NotifyDocumentChanged();
+    }
+
     public void Undo()
     {
         if (_history?.Undo() != true)

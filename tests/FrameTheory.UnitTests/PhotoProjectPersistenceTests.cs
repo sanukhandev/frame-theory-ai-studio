@@ -95,7 +95,11 @@ public sealed class PhotoProjectPersistenceTests
 
             await first.OpenAsync(sourcePath, CancellationToken.None);
             await first.ImportOverlayAsync(overlayPath, 0, 0, 0.5f, PhotoBlendMode.Screen, CancellationToken.None);
+            first.MaskLastOverlay(0, 0, 1, 1);
+            first.ApplyRetouch(1, 0, 1, -1, 0, 1);
             Xunit.Assert.Single(first.Current!.CompositeLayers);
+            Xunit.Assert.Single(first.Current.CompositeLayers[0].MaskStrokes);
+            Xunit.Assert.Single(first.Current.RetouchStrokes);
             var expected = first.Current.RenderExportImage();
             Xunit.Assert.True(await first.SaveProjectAsync(projectPath, CancellationToken.None));
 
@@ -103,6 +107,8 @@ public sealed class PhotoProjectPersistenceTests
             Xunit.Assert.True(await second.OpenProjectAsync(projectPath, CancellationToken.None));
             Xunit.Assert.Single(second.Current!.CompositeLayers);
             Xunit.Assert.Equal(PhotoBlendMode.Screen, second.Current.CompositeLayers[0].BlendMode);
+            Xunit.Assert.Single(second.Current.CompositeLayers[0].MaskStrokes);
+            Xunit.Assert.Single(second.Current.RetouchStrokes);
             Xunit.Assert.Equal(expected, second.Current.RenderExportImage());
         }
         finally
