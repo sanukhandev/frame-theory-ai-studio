@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using FrameTheory.Application;
 using FrameTheory.Media;
+using FrameTheory.Storage;
 
 namespace FrameTheory.Desktop;
 
@@ -39,11 +40,15 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public MainWindowViewModel(
         IWorkspaceCatalog workspaceCatalog,
         ICapabilityDetector capabilityDetector,
-        IMediaImporter? mediaImporter = null)
+        IMediaImporter? mediaImporter = null,
+        PhotoRecoveryViewModel? photoRecovery = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
         _mediaImporter = mediaImporter;
+        PhotoRecovery = photoRecovery ?? new PhotoRecoveryViewModel(
+            new ProjectRecoveryService(new JsonProjectRepository()),
+            new JsonProjectRepository());
         if (Workspaces.Count == 0)
         {
             throw new InvalidOperationException("At least one workspace is required.");
@@ -53,6 +58,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public IReadOnlyList<WorkspaceViewModel> Workspaces { get; }
 
     public IReadOnlyList<ImportedMediaViewModel> ImportedMedia { get; private set; } = [];
+
+    public PhotoRecoveryViewModel PhotoRecovery { get; }
 
     public int SelectedWorkspaceIndex
     {
@@ -124,7 +131,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                     Path.GetFileName(fullPath),
                     $"{media.Metadata.Kind}; {media.Metadata.Width}x{media.Metadata.Height}; thumbnail {media.ThumbnailPpm?.Length ?? 0} bytes; waveform {media.WaveformPeaks.Count} peaks"));
             }
-            catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaImportException)
+            catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException)
             {
                 failures.Add($"{Path.GetFileName(path)} ({exception.Message})");
             }
@@ -169,6 +176,11 @@ public sealed class DesktopServices
             new FfprobeMediaProbe(processRunner),
             new FfmpegFrameDecoder(processRunner),
             processRunner);
-        return new(new WorkspaceCatalog(), new FrameTheory.Platform.SystemCapabilityDetector(), importer);
+        var repository = new JsonProjectRepository();
+        return new(
+            new WorkspaceCatalog(),
+            new FrameTheory.Platform.SystemCapabilityDetector(),
+            importer,
+            new PhotoRecoveryViewModel(new ProjectRecoveryService(repository), repository));
     }
 }
