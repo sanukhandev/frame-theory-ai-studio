@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Current status: TIMELINE COMPOSITING COMPLETE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405 and FT-501 through FT-503 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
+**Current status: TIMELINE ANIMATION COMPLETE (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405 and FT-501 through FT-504 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
 
 ## Completed
 - [x] Product README and Codex agent operating contract
@@ -34,6 +34,7 @@
 - [x] FT-501 timeline tracks, playhead, frame ruler, snapping, zoom/scroll and exact-frame selection UI
 - [x] FT-502 frame-level clip insert, move, split, trim, ripple delete and copy/paste operations with Video workspace controls
 - [x] FT-503 deterministic FFmpeg multi-layer compositing, transform contracts, cross-dissolve/wipe graph stages, atomic export and Video workspace composite MP4 export
+- [x] FT-504 opacity/position/scale keyframe interpolation, easing, fade/push presets, animated FFmpeg export and selected-clip Video workspace controls
 - [x] FT-401 FFmpeg-backed PNG/JPEG photo import, PPM preview and bounded canvas fit/100%/zoom/pan state
 - [x] FT-402 non-destructive PPM crop, 90° rotation, nearest-neighbor resize and undo-last operation stack
 - [x] FT-403 immutable photo adjustment layers with ordering, inspector state and undo/redo history
@@ -41,22 +42,22 @@
 - [x] FT-405 photo project autosave recovery, missing-media relink and corrupt-input UI status paths
 
 ## Next tasks
-1. FT-504 opacity/position/scale keyframes with presets and easing.
+1. FT-505 audio tracks, gains, fades, mute, source sync and waveform output.
 2. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
 3. Iterate per docs/EPICS_AND_TASKS.md; update this checkpoint **after every tested commit**.
 
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
-Task / Epic: FT-503 / E05
-Git SHA: 2be5d7a
-Files changed: src/FrameTheory.Domain/TimelineVisuals.cs, src/FrameTheory.Media/TimelineCompositor.cs, src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/TimelineEditorViewModel.cs, tests/FrameTheory.UnitTests/TimelineCompositorTests.cs, tools/FrameTheory.TimelineExportSmoke, FrameTheory.sln, docs/IMPLEMENTATION_STATUS.md
-Actual behavior and UI path: The Video workspace exposes an Export composite MP4 save action. The media compositor validates local sources, ordered layers, transforms, contiguous cross-dissolve/wipe transitions, Rec.709 output metadata and atomic finalization. The UI currently exports the authored default layer composition; per-clip transform/transition inspector controls remain part of the next keyframe task.
-Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet test FrameTheory.sln --no-build --configuration Release; managed desktop launch smoke for 3 seconds; synthetic red/blue 16x8 FFmpeg multi-layer/cross-dissolve export and ffmpeg decode verification
-Test outputs / exit codes: restore 0; format 0; build 0 with 0 warnings/0 errors; 56 unit tests and 2 golden tests passed; composite smoke completed and ffprobe verified Video 16x8 bt709/bt709/bt709/tv; desktop process remained alive during launch smoke.
+Task / Epic: FT-504 / E05
+Git SHA: 52f82e3
+Files changed: src/FrameTheory.Domain/TimelineKeyframes.cs, src/FrameTheory.Domain/TimelineVisuals.cs, src/FrameTheory.Media/TimelineCompositor.cs, src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/TimelineEditorViewModel.cs, tests/FrameTheory.UnitTests/TimelineKeyframeTests.cs, tests/FrameTheory.UnitTests/TimelineCompositorTests.cs, tests/FrameTheory.UnitTests/TimelineEditorTests.cs, tools/FrameTheory.TimelineExportSmoke/Program.cs
+Actual behavior and UI path: Select a video clip in the Video workspace, then apply Fade in preset or Push in preset, clear it, and export with Export composite MP4. Keyframes interpolate opacity, position and scale with linear/ease-in/ease-out/ease-in-out easing; FFmpeg evaluates those expressions frame-by-frame and preserves Rec.709 output metadata.
+Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check; managed desktop launch smoke for 3 seconds; synthetic red/blue 16x8 FFmpeg animated multi-layer/cross-dissolve export and ffmpeg decode verification
+Test outputs / exit codes: format 0; build 0 with 0 warnings/0 errors; 59 unit tests and 2 golden tests passed; animated composite smoke completed and ffprobe verified Video 16x8 bt709/bt709/bt709/tv; desktop process remained alive during launch smoke.
 Media fixtures and verification: Synthetic rational-rate video/audio metadata only; actual media import continues to feed the timeline through the existing FFmpeg importer; no media binary committed.
 Known limitations / blockers: FT-006 remains partial pending MLT and second-OS evidence. Timeline mutations, playback clock and rendered timeline export remain later tasks. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux photo and timeline runs are unverified.
-Next unblocked task: FT-504
+Next unblocked task: FT-505
 ```
 
 ## Task execution record template
@@ -74,7 +75,7 @@ Next unblocked task:
 ```
 
 ## Release verification status
-Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503 built/tested; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
+Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504 built/tested; FT-006 provisional FFmpeg smoke tested on Windows x64; packaged UI unverified. macOS: not built or tested locally. Linux: not built or tested locally. Gemini: not connected. Logo: source provided outside GitHub repository, not yet committed. MLT: not tested. Release native media: not approved or bundled.
 
 ## Honest reporting
 Codex should not mark a task complete for a mock UI, TODO, downloaded asset, simulated exporter, docs-only passing CI, or speculative integration. If execution is interrupted, preserve status and resume from first unblocked task on next run.
