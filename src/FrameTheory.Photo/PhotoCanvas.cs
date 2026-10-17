@@ -503,7 +503,9 @@ public sealed class PpmRaster
         return new PpmRaster(width, height, output, alpha);
     }
 
-    public PpmRaster Apply(ColorGraph graph, ColorGrade grade)
+    public PpmRaster Apply(ColorGraph graph, ColorGrade grade) => Apply(graph, grade, null);
+
+    public PpmRaster Apply(ColorGraph graph, ColorGrade grade, CubeLut? lut)
     {
         var pipeline = new ColorPipeline(graph);
         var output = RgbBytes.ToArray();
@@ -512,6 +514,7 @@ public sealed class PpmRaster
             var color = pipeline.Transform(
                 new RgbColor(output[index] / 255f, output[index + 1] / 255f, output[index + 2] / 255f),
                 grade);
+            color = lut?.Apply(color) ?? color;
             output[index] = ToByte(color.Red);
             output[index + 1] = ToByte(color.Green);
             output[index + 2] = ToByte(color.Blue);

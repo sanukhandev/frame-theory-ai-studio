@@ -9,6 +9,7 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
 {
     private PpmRaster? _source;
     private ColorGrade _grade = new();
+    private CubeLut? _lut;
     private string _statusText = "Import local media to inspect a real before/after grade.";
     private string _beforeSummary = "Before: no media";
     private string _afterSummary = "After: no media";
@@ -17,7 +18,7 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
 
     public byte[]? BeforePreviewPpm => _source?.ToPpm();
 
-    public byte[]? AfterPreviewPpm => _source?.Apply(ColorGraph.ForSrgb(), _grade).ToPpm();
+    public byte[]? AfterPreviewPpm => _source?.Apply(ColorGraph.ForSrgb(), _grade, _lut).ToPpm();
 
     public string StatusText
     {
@@ -123,7 +124,23 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
         }
     }
 
-    public void ResetGrade() => SetGrade(new ColorGrade());
+    public void ResetGrade()
+    {
+        _lut = null;
+        SetGrade(new ColorGrade());
+    }
+
+    public ColorPreset CreatePreset(string name) => new(name, _grade, _lut);
+
+    public void ApplyPreset(ColorPreset preset)
+    {
+        ArgumentNullException.ThrowIfNull(preset);
+        _grade = preset.Grade;
+        _lut = preset.Lut;
+        StatusText = $"Applied style '{preset.Name}' to the local color preview.";
+        RecomputeSummaries();
+        NotifyPreviewChanged();
+    }
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -142,7 +159,7 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
         }
 
         BeforeSummary = FormatSummary("Before", _source);
-        AfterSummary = FormatSummary("After", _source.Apply(ColorGraph.ForSrgb(), _grade));
+        AfterSummary = FormatSummary("After", _source.Apply(ColorGraph.ForSrgb(), _grade, _lut));
     }
 
     private static string FormatSummary(string label, PpmRaster raster)

@@ -24,6 +24,8 @@ public sealed class ColorPreset
 
     public CubeLut? Lut { get; }
 
+    public override string ToString() => Name;
+
     public RgbColor Apply(ColorGraph graph, RgbColor source)
     {
         var graded = new ColorPipeline(graph).Transform(source, Grade);

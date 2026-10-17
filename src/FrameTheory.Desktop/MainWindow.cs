@@ -10,6 +10,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
 using FrameTheory.AI;
+using FrameTheory.Color;
 using FrameTheory.Domain;
 using FrameTheory.Media;
 using System.Runtime.InteropServices;
@@ -595,6 +596,92 @@ public sealed class MainWindow : Window
         var reset = new Button { Content = "Reset grade" };
         reset.Click += (_, _) => inspector.ResetGrade();
         controls.Children.Add(reset);
+        var presetStore = new JsonColorPresetStore();
+        var presetName = new TextBox { PlaceholderText = "Style name", Width = 160 };
+        AutomationProperties.SetName(presetName, "Color style name");
+        var presetSelection = new ComboBox { Width = 220 };
+        AutomationProperties.SetName(presetSelection, "Loaded color styles");
+        var presetStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var savePreset = new Button { Content = "Save style library" };
+        AutomationProperties.SetName(savePreset, "Save color style library");
+        savePreset.Click += async (_, _) =>
+        {
+            if (string.IsNullOrWhiteSpace(presetName.Text))
+            {
+                presetStatus.Text = "Enter a style name before saving.";
+                return;
+            }
+
+            var topLevel = TopLevel.GetTopLevel(savePreset);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            try
+            {
+                var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+                {
+                    SuggestedFileName = "frame-theory-styles.json",
+                    FileTypeChoices = [new FilePickerFileType("Frame Theory styles") { Patterns = ["*.json"] }]
+                });
+                var path = file?.TryGetLocalPath();
+                if (path is not null)
+                {
+                    await presetStore.SaveAtomicAsync(path, [inspector.CreatePreset(presetName.Text)], CancellationToken.None);
+                    presetStatus.Text = $"Saved style library: {Path.GetFileName(path)}.";
+                }
+            }
+            catch (Exception exception) when (exception is IOException or InvalidDataException or ArgumentException)
+            {
+                presetStatus.Text = $"Style save failed: {exception.Message}";
+            }
+        };
+        var loadPreset = new Button { Content = "Load styles" };
+        AutomationProperties.SetName(loadPreset, "Load color style library");
+        loadPreset.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(loadPreset);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            try
+            {
+                var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+                {
+                    AllowMultiple = false,
+                    FileTypeFilter = [new FilePickerFileType("Frame Theory styles") { Patterns = ["*.json"] }]
+                });
+                var path = files.SingleOrDefault()?.TryGetLocalPath();
+                if (path is not null)
+                {
+                    var presets = await presetStore.LoadAsync(path, CancellationToken.None);
+                    presetSelection.ItemsSource = presets;
+                    presetSelection.SelectedIndex = presets.Count == 0 ? -1 : 0;
+                    presetStatus.Text = $"Loaded {presets.Count} style(s) from {Path.GetFileName(path)}.";
+                }
+            }
+            catch (Exception exception) when (exception is IOException or InvalidDataException or ArgumentException)
+            {
+                presetStatus.Text = $"Style load failed: {exception.Message}";
+            }
+        };
+        var applyPreset = new Button { Content = "Apply loaded style" };
+        AutomationProperties.SetName(applyPreset, "Apply loaded color style");
+        applyPreset.Click += (_, _) =>
+        {
+            if (presetSelection.SelectedItem is ColorPreset preset)
+            {
+                inspector.ApplyPreset(preset);
+                presetStatus.Text = $"Applied style '{preset.Name}'.";
+            }
+            else
+            {
+                presetStatus.Text = "Load and select a style first.";
+            }
+        };
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
@@ -617,7 +704,14 @@ public sealed class MainWindow : Window
                             new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "After" }, afterImage, afterSummary } }
                         }
                     },
-                    controls
+                    controls,
+                    new StackPanel
+                    {
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 8,
+                        Children = { presetName, savePreset, loadPreset, presetSelection, applyPreset }
+                    },
+                    presetStatus
                 }
             }
         };
