@@ -34,7 +34,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-204 / E02
-Git SHA: pending commit
+Git SHA: 560178a
 Files changed: src/FrameTheory.Media/MediaImport.cs, tests/FrameTheory.UnitTests/MediaImportTests.cs, tools/FrameTheory.MediaImportSmoke/, src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/FrameTheory.Desktop.csproj, FrameTheory.sln, docs/DEVELOPMENT.md, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: Dropping local files on the desktop window invokes the shared probe/decoder/import service, lists each successful import and reports metadata, thumbnail size and waveform peak count. `FfmpegMediaImporter` uses temp PCM output, bounded peak extraction and cleanup without mutating source media. Existing FT-104 relink logic remains available headlessly.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; real `FrameTheory.MediaImportSmoke` against temporary H.264/AAC MP4; git diff --check
