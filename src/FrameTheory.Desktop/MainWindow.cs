@@ -114,7 +114,7 @@ public sealed class MainWindow : Window
         {
             Margin = new Thickness(24),
             Padding = new Thickness(24),
-            Background = new SolidColorBrush(Color.FromRgb(35, 35, 35)),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(35, 35, 35)),
             CornerRadius = new CornerRadius(8),
             Child = new StackPanel
             {
@@ -137,7 +137,7 @@ public sealed class MainWindow : Window
                     {
                         Margin = new Thickness(0, 12, 0, 0),
                         Padding = new Thickness(12),
-                        Background = new SolidColorBrush(Color.FromRgb(48, 48, 48)),
+                        Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 48, 48)),
                         Child = new TextBlock
                         {
                             Text = workspace.OfflineMessage,
