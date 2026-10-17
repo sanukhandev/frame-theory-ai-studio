@@ -22,7 +22,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-002 / E00
-Git SHA: pending commit
+Git SHA: 1ee0ddc
 Files changed: src/FrameTheory.Desktop/, tests/FrameTheory.UnitTests/, README.md, docs/DEVELOPMENT.md, docs/DEPENDENCIES_AND_LICENSES.md, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: Avalonia desktop window boots with keyboard-navigable Video, Photo, Color and AI tabs. The tabs update a view-model selection; workspace content states the current offline boundary.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet build FrameTheory.sln --no-restore --configuration Release; dotnet test FrameTheory.sln --no-build --configuration Release; interactive `dotnet` managed-DLL launch for 10 seconds then Ctrl+C; git diff --check
