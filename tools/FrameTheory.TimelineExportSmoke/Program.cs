@@ -96,6 +96,36 @@ var receipt = await exporter.ExportAsync(
     CancellationToken.None);
 Console.WriteLine($"output={receipt.OutputPath}; bytes={receipt.OutputBytes}; kind={receipt.VerifiedMetadata.Kind}; size={receipt.VerifiedMetadata.Width}x{receipt.VerifiedMetadata.Height}; color={receipt.VerifiedMetadata.ColorProfile}");
 
+var queuedOutput = Path.Combine(Path.GetDirectoryName(destination) ?? ".", $"{Path.GetFileNameWithoutExtension(destination)}-queue-retry.mp4");
+await using var exportQueue = new ExportQueueService();
+var retryAttempts = 0;
+var failedJob = exportQueue.Enqueue(async queueCancellation =>
+{
+    if (Interlocked.Increment(ref retryAttempts) == 1)
+    {
+        throw new MediaExportException("Synthetic transient queue failure.");
+    }
+
+    return await exporter.ExportAsync(
+        plan,
+        queuedOutput,
+        new ExportPreset(16, 8, frameRate),
+        new Progress<ExportProgress>(update => Console.WriteLine($"retry-stage={update.Stage}; fraction={update.Fraction:0.0}")),
+        queueCancellation);
+});
+try
+{
+    await failedJob.Completion;
+    throw new InvalidOperationException("The synthetic queue failure unexpectedly succeeded.");
+}
+catch (MediaExportException)
+{
+}
+
+var retriedJob = exportQueue.Retry(failedJob);
+var retriedReceipt = await retriedJob.Completion;
+Console.WriteLine($"queue-retry-output={retriedReceipt.OutputPath}; bytes={retriedReceipt.OutputBytes}; attempts={retryAttempts}; history={exportQueue.History.Count}");
+
 var aiEditor = new TimelineEditorViewModel(frameRate);
 aiEditor.AddMedia(importedSourceA.Metadata);
 aiEditor.AddMedia(importedSourceB.Metadata);

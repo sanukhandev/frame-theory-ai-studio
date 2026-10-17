@@ -64,7 +64,7 @@
 - [x] FT-801 editable multi-clip before/after split, wipe and timed-reveal composition with real FFmpeg output; no watermark asset was invented
 - [x] FT-802 real MP4 and Photo social aspect presets for 16:9, 1:1 and 9:16, PNG/JPEG quality export, exact-dimension verification and shared cancellable queue path
 - [~] FT-803 imported user audio, waveform-derived amplitude/energy beat markers and existing creative title/caption slots; approved watermark asset verification remains open
-- [~] FT-804 single-worker cancellable background export queue with Video workspace cancellation, retry and in-memory job history are implemented; persisted queue history and cross-platform interruption evidence remain open
+- [x] FT-804 single-worker cancellable background export queue with Video workspace cancellation, retry, in-memory job history and real FFmpeg retry smoke; macOS/Linux interruption acceptance remains unverified
 - [~] FT-706 AI transaction undo control, bounded Gemini follow-up transport, typed retry/timeout/cancellation failures, usage accounting, prompt/secret-redacted local history and desktop revision-to-validator wiring are implemented; live provider-to-plan verification remains open
 - [~] FT-901 keyboard workspace/frame shortcuts, scroll-safe layout and automation labels are implemented; interactive 1280x800/HiDPI acceptance remains unverified
 - [~] FT-902 synchronized selected-clip/playhead context and AI approval summary are implemented; full manual workspace acceptance remains open
@@ -92,13 +92,13 @@
 Date/time: 2026-10-17
 Task / Epic: FT-804 / E08
 Git SHA: ee4d4a5
-Files changed: src/FrameTheory.Media/ExportQueue.cs, src/FrameTheory.Desktop/AiProposalViewModel.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/MainWindow.cs, tests/FrameTheory.UnitTests/ExportQueueTests.cs, tests/FrameTheory.UnitTests/DesktopAiRevisionTests.cs, docs/IMPLEMENTATION_STATUS.md
+Files changed: src/FrameTheory.Media/ExportQueue.cs, src/FrameTheory.Desktop/AiProposalViewModel.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/MainWindow.cs, tests/FrameTheory.UnitTests/ExportQueueTests.cs, tests/FrameTheory.UnitTests/DesktopAiRevisionTests.cs, tools/FrameTheory.TimelineExportSmoke/Program.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: Video workspace export now has Cancel export and Retry last export controls. The shared queue completes cancellation deterministically, records job state/attempt/error history in memory, retries failed or canceled jobs using the original operation, and keeps the existing atomic exporter cleanup path.
-Commands executed + OS: Windows 11 x64; focused export queue/desktop tests, `dotnet format`, Release build with warnings as errors, full solution tests, and `git diff --check` using .NET SDK 10.0.100.
-Test outputs / exit codes: Initial full gate exposed the queue cancellation race; the root fix then passed focused queue/revision tests 12/12 (exit 0). Final full gate passed `dotnet format`, Release build with 0 warnings/0 errors, 116 unit tests and 2 golden tests, plus `git diff --check` (all exit 0).
-Media fixtures and verification: Queue tests exercise a canceled queued job and a transient failed job retried to success. Real FFmpeg exporters retain atomic temporary output cleanup; no source media, API key or generated asset entered Git.
-Known limitations / blockers: The approved Frame Theory logo asset is absent from the repository, so branded watermark output is not verified and FT-803 stays partial. FT-602 desktop wiring and FT-706 desktop revision wiring are fake-HTTP verified, but live provider/key runs remain open. FT-804 history is process-local rather than persisted, and macOS/Linux interruption evidence is unverified. FT-006 remains partial pending MLT and second-OS evidence. Python is not installed, so `scripts/validate_repository.py` was not run locally. macOS/Linux analysis and desktop runs are unverified.
-Next unblocked task: FT-602 live provider fixture / FT-706 live provider plan / cross-platform release gates
+Commands executed + OS: Windows 11 x64; focused export queue/desktop tests, `dotnet format`, Release build with warnings as errors, full solution tests, `git diff --check`, and `FrameTheory.TimelineExportSmoke` with two synthetic H.264/AAC clips using .NET SDK 10.0.100 and FFmpeg/ffprobe 9.0.2.
+Test outputs / exit codes: Final full gate passed `dotnet format`, Release build with 0 warnings/0 errors, 116 unit tests and 2 golden tests, plus `git diff --check` (all exit 0). Real queue smoke passed a synthetic first-attempt failure, retried the actual FFmpeg export, and reported `attempts=2; history=2` (exit 0).
+Media fixtures and verification: `timeline-queue-retry.mp4` exported and ffprobe-verified as 16x8 Video with bt709 metadata; source clips remained unchanged and no API key or generated asset entered Git.
+Known limitations / blockers: The approved Frame Theory logo asset is absent from the repository, so branded watermark output is not verified and FT-803 stays partial. FT-602 desktop wiring and FT-706 desktop revision wiring are fake-HTTP verified, but live provider/key runs remain open. FT-804 queue history is process-local by design; macOS/Linux interruption acceptance is unverified. FT-006 remains partial pending MLT and second-OS evidence. Python is not installed, so `scripts/validate_repository.py` was not run locally. macOS/Linux analysis and desktop runs are unverified.
+Next unblocked task: FT-901 manual acceptance / FT-602 live provider fixture / FT-706 live provider plan
 ```
 
 ## Task execution record template
