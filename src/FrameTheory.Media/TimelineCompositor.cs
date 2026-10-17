@@ -495,10 +495,14 @@ public sealed class TimelineFilterGraphBuilder
             return;
         }
 
+        var offsetX = segment.Animation?.ToFfmpegExpression(value => value.OffsetX, clip.TimelineRange.StartFrame) ?? Format(transform.OffsetX);
+        var offsetY = segment.Animation?.ToFfmpegExpression(value => value.OffsetY, clip.TimelineRange.StartFrame) ?? Format(transform.OffsetY);
         var scale = segment.Animation?.ToFfmpegExpression(value => value.Scale, clip.TimelineRange.StartFrame) ?? Format(transform.Scale);
         var opacity = segment.Animation?.ToFfmpegExpression(value => value.Opacity, clip.TimelineRange.StartFrame, "N") ?? Format(transform.Opacity);
-        scale = EscapeFilterExpression(scale);
+        scale = EscapeFilterExpression($"min({scale},min(({plan.Width}-{offsetX})/iw,({plan.Height}-{offsetY})/ih))");
         opacity = EscapeFilterExpression(opacity);
+        offsetX = EscapeFilterExpression(offsetX);
+        offsetY = EscapeFilterExpression(offsetY);
         var alpha = segment.Animation is null
             ? $"colorchannelmixer=aa={opacity}"
             : $"geq=r='r(X\\,Y)':g='g(X\\,Y)':b='b(X\\,Y)':a='alpha(X\\,Y)*({opacity})'";
@@ -514,7 +518,7 @@ public sealed class TimelineFilterGraphBuilder
 
         if (padToCanvas)
         {
-            filter += $",pad={plan.Width}:{plan.Height}:{transform.OffsetX}:{transform.OffsetY}:color=black@0:eval=frame";
+            filter += $",pad={plan.Width}:{plan.Height}:{offsetX}:{offsetY}:color=black@0:eval=frame";
         }
 
         filter += $",{alpha}";
@@ -556,6 +560,8 @@ public sealed class TimelineFilterGraphBuilder
             }
 
             var transform = segment.Transform;
+            var offsetX = Format(transform.OffsetX);
+            var offsetY = Format(transform.OffsetY);
             var scale = segment.Animation?.ToFfmpegExpression(value => value.Scale, start.Frame) ?? Format(transform.Scale);
             var opacity = segment.Animation?.ToFfmpegExpression(value => value.Opacity, start.Frame, "N") ?? Format(transform.Opacity);
             var alpha = segment.Animation is null
@@ -564,7 +570,10 @@ public sealed class TimelineFilterGraphBuilder
             var stabilization = segment.Stabilization is null
                 ? string.Empty
                 : $",deshake=rx={segment.Stabilization.FfmpegSearchRadius}:ry={segment.Stabilization.FfmpegSearchRadius}:edge=mirror:search=exhaustive";
-            var filter = $"[{input}:v:0]trim=start_frame={sourceCursor}:end_frame={partEnd},setpts=(PTS-STARTPTS)/{Format(speed)}{stabilization},fps={Rate(plan.FrameRate)},scale=trunc(iw*{EscapeFilterExpression(scale)}/2)*2:trunc(ih*{EscapeFilterExpression(scale)}/2)*2:eval=frame,format=yuva420p";
+            var fittedScale = EscapeFilterExpression($"min({scale},min(({plan.Width}-{offsetX})/iw,({plan.Height}-{offsetY})/ih))");
+            offsetX = EscapeFilterExpression(offsetX);
+            offsetY = EscapeFilterExpression(offsetY);
+            var filter = $"[{input}:v:0]trim=start_frame={sourceCursor}:end_frame={partEnd},setpts=(PTS-STARTPTS)/{Format(speed)}{stabilization},fps={Rate(plan.FrameRate)},scale=trunc(iw*{fittedScale}/2)*2:trunc(ih*{fittedScale}/2)*2:eval=frame,format=yuva420p";
             if (applyGrade && plan.ColorGrades.TryGetValue(clip.MediaId, out var grade))
             {
                 filter += $",eq=brightness={Format((Math.Pow(2, grade.ExposureEV) - 1) * 0.5)}:contrast={Format(1 + grade.Contrast)}:saturation={Format(1 + grade.Saturation)}";
@@ -573,7 +582,7 @@ public sealed class TimelineFilterGraphBuilder
 
             if (padToCanvas)
             {
-                filter += $",pad={plan.Width}:{plan.Height}:{transform.OffsetX}:{transform.OffsetY}:color=black@0:eval=frame";
+                filter += $",pad={plan.Width}:{plan.Height}:{offsetX}:{offsetY}:color=black@0:eval=frame";
             }
 
             var partLabel = $"{label}part{index}";

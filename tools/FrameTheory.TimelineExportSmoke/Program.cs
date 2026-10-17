@@ -281,7 +281,7 @@ Console.WriteLine($"ai-output={aiReceipt.OutputPath}; bytes={aiReceipt.OutputByt
 
 var batchTargets = Enum.GetValues<SocialAspectRatio>().Select(aspectRatio =>
 {
-    var socialPreset = SocialVideoExportPreset.Create(aspectRatio, 8);
+    var socialPreset = SocialVideoExportPreset.Create(aspectRatio, 16);
     var batchPlan = aiEditor.BuildRenderPlan(
         socialPreset.Width,
         socialPreset.Height,

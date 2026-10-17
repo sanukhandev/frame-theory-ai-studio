@@ -135,7 +135,7 @@ public sealed class TimelineCompositorTests
             Xunit.Assert.Single(graph.Inputs);
             Xunit.Assert.Contains("xfade=transition=wipeleft", graph.FilterComplex);
             Xunit.Assert.Contains("overlay=x=0:y=0", graph.FilterComplex);
-            Xunit.Assert.Contains("scale=trunc(iw*if", graph.FilterComplex);
+            Xunit.Assert.Contains("scale=trunc(iw*min(if", graph.FilterComplex);
             Xunit.Assert.Contains("geq=r=", graph.FilterComplex);
             Xunit.Assert.Contains("if(lt(n\\,29)", graph.FilterComplex);
             Xunit.Assert.EndsWith("[outv]", graph.FilterComplex, StringComparison.Ordinal);
