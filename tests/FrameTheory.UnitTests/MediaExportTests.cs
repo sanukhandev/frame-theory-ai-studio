@@ -1,5 +1,6 @@
 using FrameTheory.Domain;
 using FrameTheory.Media;
+using System.Security.Cryptography;
 
 namespace FrameTheory.UnitTests;
 
@@ -14,6 +15,7 @@ public sealed class MediaExportTests
             var sourcePath = Path.Combine(directory.FullName, "source.mp4");
             var destinationPath = Path.Combine(directory.FullName, "output.mp4");
             await File.WriteAllTextAsync(sourcePath, "source");
+            var sourceChecksum = Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(sourcePath)));
             await File.WriteAllTextAsync(destinationPath, "old");
             var metadata = Metadata(new Uri(destinationPath), hasAudio: true);
             var runner = new StubProcessRunner();
@@ -36,6 +38,7 @@ public sealed class MediaExportTests
             Xunit.Assert.Contains("-color_primaries bt709", runner.ArgumentsSeen.Single());
             Xunit.Assert.Contains("setparams=color_primaries=bt709", runner.ArgumentsSeen.Single());
             Xunit.Assert.Equal("source", await File.ReadAllTextAsync(sourcePath));
+            Xunit.Assert.Equal(sourceChecksum, Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(sourcePath))));
         }
         finally
         {
