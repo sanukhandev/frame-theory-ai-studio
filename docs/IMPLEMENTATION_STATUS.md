@@ -45,7 +45,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-405 / E04
-Git SHA: pending commit
+Git SHA: 0787ef1
 Files changed: src/FrameTheory.Desktop/FrameTheory.Desktop.csproj, src/FrameTheory.Desktop/MainWindow.cs, src/FrameTheory.Desktop/MainWindowViewModel.cs, src/FrameTheory.Desktop/PhotoRecoveryViewModel.cs, tests/FrameTheory.UnitTests/DesktopImportTests.cs, tests/FrameTheory.UnitTests/PhotoRecoveryViewModelTests.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: The Photo workspace exposes a project recovery panel with a project path, autosave-aware open, missing-media list, replacement path and relink action. `PhotoRecoveryViewModel` persists a relinked relative reference atomically, reports corrupt project/media failures in status text, and never edits the replacement source.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; git diff --check
