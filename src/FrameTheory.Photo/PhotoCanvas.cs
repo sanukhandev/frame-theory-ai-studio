@@ -432,7 +432,11 @@ public sealed class PhotoEditState
 
 public sealed class PhotoAdjustmentLayer
 {
-    public PhotoAdjustmentLayer(string name, ColorGrade grade, bool isEnabled = true)
+    public PhotoAdjustmentLayer(
+        string name,
+        ColorGrade grade,
+        bool isEnabled = true,
+        IEnumerable<PhotoMaskStroke>? maskStrokes = null)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
@@ -442,6 +446,7 @@ public sealed class PhotoAdjustmentLayer
         Name = name.Trim();
         Grade = grade ?? throw new ArgumentNullException(nameof(grade));
         IsEnabled = isEnabled;
+        MaskStrokes = maskStrokes?.ToArray() ?? [];
     }
 
     public string Name { get; }
@@ -450,7 +455,13 @@ public sealed class PhotoAdjustmentLayer
 
     public bool IsEnabled { get; }
 
-    public PhotoAdjustmentLayer WithEnabled(bool isEnabled) => new(Name, Grade, isEnabled);
+    public IReadOnlyList<PhotoMaskStroke> MaskStrokes { get; }
+
+    public PhotoAdjustmentLayer WithEnabled(bool isEnabled) => new(Name, Grade, isEnabled, MaskStrokes);
+
+    public PhotoAdjustmentLayer WithMaskStroke(PhotoMaskStroke stroke) => new(Name, Grade, IsEnabled, MaskStrokes.Append(stroke));
+
+    public PhotoAdjustmentLayer ClearMask() => new(Name, Grade, IsEnabled);
 }
 
 public sealed class PhotoLayerStack
@@ -520,12 +531,56 @@ public sealed class PhotoLayerStack
         return new PhotoLayerStack(updated);
     }
 
+    public PhotoLayerStack Mask(string name, PhotoMaskStroke stroke)
+    {
+        ArgumentNullException.ThrowIfNull(stroke);
+        var found = false;
+        var updated = _layers.Select(layer =>
+        {
+            if (!string.Equals(layer.Name, name, StringComparison.OrdinalIgnoreCase))
+            {
+                return layer;
+            }
+
+            found = true;
+            return layer.WithMaskStroke(stroke);
+        }).ToArray();
+        if (!found)
+        {
+            throw new KeyNotFoundException($"Adjustment layer '{name}' was not found.");
+        }
+
+        return new PhotoLayerStack(updated);
+    }
+
+    public PhotoLayerStack ClearMask(string name)
+    {
+        var found = false;
+        var updated = _layers.Select(layer =>
+        {
+            if (!string.Equals(layer.Name, name, StringComparison.OrdinalIgnoreCase))
+            {
+                return layer;
+            }
+
+            found = true;
+            return layer.ClearMask();
+        }).ToArray();
+        if (!found)
+        {
+            throw new KeyNotFoundException($"Adjustment layer '{name}' was not found.");
+        }
+
+        return new PhotoLayerStack(updated);
+    }
+
     public PpmRaster Apply(PpmRaster raster)
     {
         var result = raster;
         foreach (var layer in _layers.Where(layer => layer.IsEnabled))
         {
-            result = result.Apply(ColorGraph.ForSrgb(), layer.Grade);
+            var graded = result.Apply(ColorGraph.ForSrgb(), layer.Grade);
+            result = layer.MaskStrokes.Count == 0 ? graded : result.ApplyMasked(graded, layer.MaskStrokes);
         }
 
         return result;
@@ -849,6 +904,40 @@ public sealed class PpmRaster
         return new PpmRaster(Width, Height, output, AlphaBytes?.ToArray());
     }
 
+    public PpmRaster ApplyMasked(PpmRaster graded, IReadOnlyList<PhotoMaskStroke> maskStrokes)
+    {
+        ArgumentNullException.ThrowIfNull(graded);
+        ArgumentNullException.ThrowIfNull(maskStrokes);
+        if (graded.Width != Width || graded.Height != Height)
+        {
+            throw new ArgumentException("Masked grade dimensions must match the source raster.", nameof(graded));
+        }
+
+        var output = RgbBytes.ToArray();
+        for (var y = 0; y < Height; y++)
+        {
+            for (var x = 0; x < Width; x++)
+            {
+                var coverage = GetMaskCoverage(maskStrokes, x, y);
+                if (coverage <= 0)
+                {
+                    continue;
+                }
+
+                var offset = (y * Width + x) * 3;
+                for (var channel = 0; channel < 3; channel++)
+                {
+                    output[offset + channel] = (byte)Math.Clamp(
+                        (int)MathF.Round(RgbBytes[offset + channel] * (1 - coverage) + graded.RgbBytes[offset + channel] * coverage),
+                        0,
+                        255);
+                }
+            }
+        }
+
+        return new PpmRaster(Width, Height, output, AlphaBytes?.ToArray());
+    }
+
     public byte[] ToPpm()
     {
         var header = System.Text.Encoding.ASCII.GetBytes($"P6\n{Width} {Height}\n255\n");
@@ -932,6 +1021,9 @@ public sealed class PpmRaster
 
         return factor;
     }
+
+    private static float GetMaskCoverage(IReadOnlyList<PhotoMaskStroke> strokes, int x, int y) =>
+        strokes.Count == 0 ? 1 : 1 - GetMaskFactor(strokes, x, y);
 
     private static string ReadToken(byte[] bytes, ref int index)
     {

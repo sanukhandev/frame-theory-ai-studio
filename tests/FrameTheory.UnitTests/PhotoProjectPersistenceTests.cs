@@ -45,13 +45,14 @@ public sealed class PhotoProjectPersistenceTests
         var source = Document(new Uri("file:///photo.png"));
         var state = new PhotoEditState(source).WithLayers(
             new PhotoLayerStack()
-                .Add(new PhotoAdjustmentLayer("Exposure", new ColorGrade(exposureEV: 1)))
+                .Add(new PhotoAdjustmentLayer("Exposure", new ColorGrade(exposureEV: 1), maskStrokes: [new PhotoMaskStroke(0, 0, 1, 1)]))
                 .Add(new PhotoAdjustmentLayer("Mono", new ColorGrade(saturation: -1), isEnabled: false)));
 
         var restored = PhotoProjectStateJson.Deserialize(PhotoProjectStateJson.Serialize(state), source);
 
         Xunit.Assert.Equal(state.Layers.InspectorRows, restored.Layers.InspectorRows);
         Xunit.Assert.Equal(state.RenderPreview(), restored.RenderPreview());
+        Xunit.Assert.Single(restored.Layers.Layers[0].MaskStrokes);
     }
 
     [Xunit.Fact]

@@ -39,7 +39,14 @@ public static class PhotoProjectStateJson
                 Contrast = layer.Grade.Contrast,
                 Saturation = layer.Grade.Saturation,
                 Temperature = layer.Grade.Temperature,
-                Tint = layer.Grade.Tint
+                Tint = layer.Grade.Tint,
+                MaskStrokes = layer.MaskStrokes.Select(stroke => new PhotoMaskStrokeProjectState
+                {
+                    CenterX = stroke.CenterX,
+                    CenterY = stroke.CenterY,
+                    Radius = stroke.Radius,
+                    Strength = stroke.Strength
+                }).ToList()
             }).ToList(),
             CompositeLayers = state.CompositeLayers.Select(layer => new PhotoCompositeLayerProjectState
             {
@@ -93,12 +100,15 @@ public static class PhotoProjectStateJson
             var operations = state.Operations.Select(operation => operation is null
                 ? throw new InvalidDataException("The photo edit state contains a null operation.")
                 : new PhotoEditOperation(operation.Kind, operation.First, operation.Second, operation.Third, operation.Fourth));
-            var layers = state.Layers.Select(layer => layer is null
+            var layers = state.Layers.Select(layer => layer is null || layer.MaskStrokes is null || layer.MaskStrokes.Count > MaximumEntries
                 ? throw new InvalidDataException("The photo edit state contains a null layer.")
                 : new PhotoAdjustmentLayer(
                     layer.Name ?? throw new InvalidDataException("A photo layer name is required."),
                     new ColorGrade(layer.ExposureEV, layer.Contrast, layer.Saturation, layer.Temperature, layer.Tint),
-                    layer.IsEnabled));
+                    layer.IsEnabled,
+                    layer.MaskStrokes.Select(stroke => stroke is null
+                        ? throw new InvalidDataException("The photo state contains a null adjustment mask stroke.")
+                        : new PhotoMaskStroke(stroke.CenterX, stroke.CenterY, stroke.Radius, stroke.Strength))));
             var compositeLayers = state.CompositeLayers.Select(layer =>
             {
                 if (layer is null || string.IsNullOrWhiteSpace(layer.SourceMediaId))
@@ -184,6 +194,8 @@ public static class PhotoProjectStateJson
         public float Temperature { get; set; }
 
         public float Tint { get; set; }
+
+        public List<PhotoMaskStrokeProjectState>? MaskStrokes { get; set; } = [];
     }
 
     private sealed class PhotoCompositeLayerProjectState

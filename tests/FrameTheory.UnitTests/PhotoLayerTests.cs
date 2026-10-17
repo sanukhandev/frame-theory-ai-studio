@@ -89,6 +89,21 @@ public sealed class PhotoLayerTests
         Xunit.Assert.Single(retouched.RetouchStrokes);
     }
 
+    [Xunit.Fact]
+    public void AdjustmentMaskLimitsColorGradeToPaintedPixels()
+    {
+        var document = Document(new Uri("file:///grade-mask.png"), [100, 100, 100, 20, 40, 60]);
+        var edited = new PhotoEditState(document).WithLayers(
+            new PhotoLayerStack().Add(
+                new PhotoAdjustmentLayer("Exposure", new ColorGrade(exposureEV: 1), maskStrokes: [new PhotoMaskStroke(0, 0, 1, 1)])));
+
+        var rendered = PpmRaster.Parse(edited.RenderPreview());
+
+        Xunit.Assert.NotEqual(document.PreviewPpm, edited.RenderPreview());
+        Xunit.Assert.Equal([20, 40, 60], rendered.RgbBytes[3..]);
+        Xunit.Assert.Single(edited.Layers.Layers[0].MaskStrokes);
+    }
+
     private static PhotoDocument Document(Uri source, byte[] pixels) => new(
         source,
         new MediaSourceMetadata(MediaId.Create(source, "photo-layer-test"), source, MediaKind.Image, 2, 1, null, 0),

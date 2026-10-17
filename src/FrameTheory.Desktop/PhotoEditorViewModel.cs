@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Security.Cryptography;
 using System.Runtime.CompilerServices;
 using FrameTheory.Application;
+using FrameTheory.Color;
 using FrameTheory.Domain;
 using FrameTheory.Media;
 using FrameTheory.Photo;
@@ -297,6 +298,62 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
 
         _history!.Execute(Current.ClearRetouchStrokes());
         StatusText = "Cleared photo retouch strokes.";
+        NotifyDocumentChanged();
+    }
+
+    public void AddAdjustmentLayer(float exposureEV)
+    {
+        if (Current is null)
+        {
+            StatusText = "Open a photo before adding a grade layer.";
+            return;
+        }
+
+        try
+        {
+            var name = $"Grade {Current.Layers.Layers.Count + 1}";
+            _history!.Execute(Current.WithLayers(Current.Layers.Add(new PhotoAdjustmentLayer(name, new ColorGrade(exposureEV: exposureEV)))));
+            StatusText = $"Added a non-destructive {name} exposure grade.";
+            NotifyDocumentChanged();
+        }
+        catch (ArgumentException exception)
+        {
+            StatusText = $"Photo grade could not be added: {exception.Message}";
+        }
+    }
+
+    public void MaskLastAdjustmentLayer(int centerX, int centerY, int radius, float strength)
+    {
+        if (Current is null || Current.Layers.Layers.Count == 0)
+        {
+            StatusText = "Add a photo grade layer before painting a grade mask.";
+            return;
+        }
+
+        try
+        {
+            var name = Current.Layers.Layers[^1].Name;
+            _history!.Execute(Current.WithLayers(Current.Layers.Mask(name, new PhotoMaskStroke(centerX, centerY, radius, strength))));
+            StatusText = "Applied a non-destructive mask to the last grade layer.";
+            NotifyDocumentChanged();
+        }
+        catch (ArgumentException exception)
+        {
+            StatusText = $"Photo grade mask could not be applied: {exception.Message}";
+        }
+    }
+
+    public void ClearLastAdjustmentLayerMask()
+    {
+        if (Current is null || Current.Layers.Layers.Count == 0)
+        {
+            StatusText = "No photo grade layer is available to unmask.";
+            return;
+        }
+
+        var name = Current.Layers.Layers[^1].Name;
+        _history!.Execute(Current.WithLayers(Current.Layers.ClearMask(name)));
+        StatusText = "Cleared the last grade layer mask.";
         NotifyDocumentChanged();
     }
 

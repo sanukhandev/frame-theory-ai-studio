@@ -439,6 +439,30 @@ public sealed class MainWindow : Window
         };
         var clearRetouch = new Button { Content = "Clear retouch" };
         clearRetouch.Click += (_, _) => editor.ClearRetouch();
+        var gradeExposure = new TextBox { Text = "1", PlaceholderText = "Exposure EV", Width = 90 };
+        AutomationProperties.SetName(gradeExposure, "Photo grade exposure");
+        var addGrade = new Button { Content = "Add exposure grade" };
+        AutomationProperties.SetName(addGrade, "Add photo exposure grade");
+        addGrade.Click += (_, _) =>
+        {
+            if (float.TryParse(gradeExposure.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var exposure))
+            {
+                editor.AddAdjustmentLayer(exposure);
+            }
+        };
+        var maskGrade = new Button { Content = "Mask last grade" };
+        maskGrade.Click += (_, _) =>
+        {
+            if (int.TryParse(maskX.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var centerX) &&
+                int.TryParse(maskY.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var centerY) &&
+                int.TryParse(maskRadius.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var radius) &&
+                float.TryParse(maskStrength.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var strength))
+            {
+                editor.MaskLastAdjustmentLayer(centerX, centerY, radius, strength);
+            }
+        };
+        var clearGradeMask = new Button { Content = "Clear grade mask" };
+        clearGradeMask.Click += (_, _) => editor.ClearLastAdjustmentLayerMask();
         var format = new ComboBox { ItemsSource = new[] { "PNG", "JPEG" }, SelectedIndex = 0, Width = 90 };
         var quality = new Slider { Minimum = 1, Maximum = 100, Value = 95, Width = 140 };
         var socialPreset = new ComboBox { ItemsSource = new[] { "Original", "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
@@ -487,6 +511,7 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { importOverlay, clearOverlays, overlayBlend, overlayOpacity } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { applyMask, maskX, maskY, maskRadius, maskStrength, clearMask } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { applyRetouch, retouchX, retouchY, retouchRadius, retouchOffsetX, retouchOffsetY, retouchStrength, clearRetouch } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { gradeExposure, addGrade, maskGrade, clearGradeMask } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { format, quality, socialPreset, export } },
                     status
                 }
