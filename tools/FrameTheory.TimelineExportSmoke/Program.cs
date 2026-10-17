@@ -23,6 +23,12 @@ var importedSourceB = await importer.ImportAsync(sourceB, CancellationToken.None
 var projectPath = Path.Combine(Path.GetDirectoryName(destination) ?? ".", "timeline-smoke.ftstudio");
 var projectViewModel = new MainWindowViewModel(new WorkspaceCatalog(), new SmokeCapabilityDetector(), importer);
 await projectViewModel.ImportFilesAsync([sourceA.LocalPath, sourceB.LocalPath], CancellationToken.None);
+if (!projectViewModel.TimelineEditor.SelectFirst(TimelineTrackKind.Video))
+{
+    throw new InvalidOperationException("The timeline smoke project did not select its first video clip.");
+}
+
+projectViewModel.TimelineEditor.ApplyStabilizationToSelected(5);
 if (!await projectViewModel.SaveTimelineProjectAsync(projectPath, CancellationToken.None))
 {
     throw new InvalidOperationException(projectViewModel.TimelineProjectStatusText);
@@ -36,7 +42,15 @@ if (!await reopenedProjectViewModel.OpenTimelineProjectAsync(projectPath, Cancel
     throw new InvalidOperationException(reopenedProjectViewModel.TimelineProjectStatusText);
 }
 
-Console.WriteLine($"project-roundtrip={projectPath}; media={reopenedProjectViewModel.ImportedMedia.Count}; status={reopenedProjectViewModel.TimelineProjectStatusText}");
+var reopenedStabilization = reopenedProjectViewModel.TimelineEditor.CaptureProjectState().VideoSettings
+    .Select(settings => settings.Stabilization)
+    .SingleOrDefault(settings => settings is not null);
+if (reopenedStabilization?.SearchRadius != 5)
+{
+    throw new InvalidOperationException("Timeline project reopen did not preserve stabilization settings.");
+}
+
+Console.WriteLine($"project-roundtrip={projectPath}; media={reopenedProjectViewModel.ImportedMedia.Count}; stabilization={reopenedStabilization.SearchRadius}; status={reopenedProjectViewModel.TimelineProjectStatusText}");
 var proxyDirectory = Path.Combine(Path.GetDirectoryName(destination) ?? ".", "proxy-cache");
 var proxyService = new FfmpegPreviewProxyService(runner, proxyDirectory, maximumCacheBytes: 64L * 1024 * 1024);
 var sourceFingerprint = $"sha256:{Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(sourceA.LocalPath))).ToLowerInvariant()}";
@@ -184,6 +198,8 @@ Console.WriteLine($"queue-retry-output={retriedReceipt.OutputPath}; bytes={retri
 var aiEditor = new TimelineEditorViewModel(frameRate);
 aiEditor.AddMedia(importedSourceA.Metadata);
 aiEditor.AddMedia(importedSourceB.Metadata);
+aiEditor.SelectFirst(TimelineTrackKind.Video);
+aiEditor.ApplyStabilizationToSelected(5);
 var aiAction = new AiEditAction(
     "ai-grade",
     "color.adjust",
@@ -251,13 +267,17 @@ var aiPlan = aiEditor.BuildRenderPlan(
         [importedSourceA.Metadata.Id] = sourceA,
         [importedSourceB.Metadata.Id] = sourceB
     });
+if (aiPlan.Layers.SelectMany(layer => layer.Segments).All(segment => segment.Stabilization?.SearchRadius != 5))
+{
+    throw new InvalidOperationException("Timeline render plan did not carry stabilization into native export.");
+}
 var aiReceipt = await exporter.ExportAsync(
     aiPlan,
     aiOutput,
     new ExportPreset(importedSourceA.Metadata.Width, importedSourceA.Metadata.Height, frameRate, importedSourceA.Metadata.HasAudio),
     new Progress<ExportProgress>(update => Console.WriteLine($"ai-stage={update.Stage}; fraction={update.Fraction:0.0}")),
     CancellationToken.None);
-Console.WriteLine($"ai-output={aiReceipt.OutputPath}; bytes={aiReceipt.OutputBytes}; color={aiReceipt.VerifiedMetadata.ColorProfile}");
+Console.WriteLine($"ai-output={aiReceipt.OutputPath}; bytes={aiReceipt.OutputBytes}; stabilization=5; color={aiReceipt.VerifiedMetadata.ColorProfile}");
 
 var roughCutEditor = new TimelineEditorViewModel(frameRate);
 roughCutEditor.AddMedia(importedSourceA.Metadata);
