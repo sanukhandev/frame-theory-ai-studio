@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Current status: SYNCHRONIZED CONTEXT AND UX PARTIAL (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405, FT-501 through FT-506, FT-601, FT-603 through FT-605, and FT-701 through FT-704 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-705 now executes approved grade, clip, transition, title, caption, keyframe, audio, trusted-preset and Reel operations transactionally; FT-801 provides split, wipe and timed-reveal output for exactly one video clip. FT-802 provides real 16:9, 1:1 and 9:16 MP4 presets plus Photo workspace PNG/JPEG import, non-destructive rotate/undo, preview and quality-controlled export; FT-803 adds imported user audio and waveform-derived editable beat markers; FT-804 adds a single-worker cancellable export queue and Video workspace cancel control; FT-706 exposes undo for the last AI transaction. FT-901 adds keyboard workspace/frame shortcuts, scroll-safe dense workspace layout, automation names for key controls and bounded dense/HiDPI ruler evidence. FT-902 now surfaces synchronized selected-clip/playhead context in Video and approved-action counts plus current AI status in the AI panel. Watermark licensing, provider retries and usage/redaction logs remain open. FT-602 has a strict source-bound provider contract and JSON fixture adapter, but real local ASR/Gemini transcription is not connected. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
+**Current status: PERFORMANCE EVIDENCE AND UX PARTIAL (2026-10-17).** FT-001 through FT-005, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405, FT-501 through FT-506, FT-601, FT-603 through FT-605, and FT-701 through FT-704 are implemented and verified on Windows x64 with .NET SDK 10.0.100. FT-705 now executes approved grade, clip, transition, title, caption, keyframe, audio, trusted-preset and Reel operations transactionally; FT-801 provides split, wipe and timed-reveal output for exactly one video clip. FT-802 provides real 16:9, 1:1 and 9:16 MP4 presets plus Photo workspace PNG/JPEG import, non-destructive rotate/undo, preview and quality-controlled export; FT-803 adds imported user audio and waveform-derived editable beat markers; FT-804 adds a single-worker cancellable export queue and Video workspace cancel control; FT-706 exposes undo for the last AI transaction. FT-901 adds keyboard workspace/frame shortcuts, scroll-safe dense workspace layout, automation names for key controls and bounded dense/HiDPI ruler evidence. FT-902 surfaces synchronized selected-clip/playhead context in Video and approved-action counts plus current AI status in the AI panel. FT-903 now records real cold/warm frame-seek timing, working-set bytes, bounded cache metrics and cancellation/cache policy; optional disk proxies remain deferred. Watermark licensing, provider retries and usage/redaction logs remain open. FT-602 has a strict source-bound provider contract and JSON fixture adapter, but real local ASR/Gemini transcription is not connected. FT-006 has a provisional Windows FFmpeg result and safe process adapter, but its two-OS/MLT acceptance gate is not complete. This is not a release.
 
 ## Completed
 - [x] Product README and Codex agent operating contract
@@ -54,6 +54,7 @@
 - [~] FT-706 AI transaction undo control; Gemini follow-up transport, retries, usage and redaction logs remain open
 - [~] FT-901 keyboard workspace/frame shortcuts, scroll-safe layout and automation labels are implemented; interactive 1280x800/HiDPI acceptance remains unverified
 - [~] FT-902 synchronized selected-clip/playhead context and AI approval summary are implemented; full manual workspace acceptance remains open
+- [~] FT-903 bounded preview cache and cancellable rendering are implemented; real Windows seek evidence is recorded, while optional disk proxy implementation and cross-platform traces remain open
 - [x] FT-401 FFmpeg-backed PNG/JPEG photo import, PPM preview and bounded canvas fit/100%/zoom/pan state
 - [x] FT-402 non-destructive PPM crop, 90° rotation, nearest-neighbor resize and undo-last operation stack
 - [x] FT-403 immutable photo adjustment layers with ordering, inspector state and undo/redo history
@@ -61,23 +62,22 @@
 - [x] FT-405 photo project autosave recovery, missing-media relink and corrupt-input UI status paths
 
 ## Next tasks
-1. FT-903 cache limits, cancellation and recorded seek/render evidence.
-2. FT-904 local-first error/log and dependency failure UX.
-3. FT-1001 through FT-1006 release QA, security, licensing and packaging gates.
-4. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
+1. FT-904 local-first error/log and dependency failure UX.
+2. FT-1001 through FT-1006 release QA, security, licensing and packaging gates.
+3. Return to FT-006 when macOS/Linux native prerequisites and an MLT test host are available.
 
 ## Latest execution record
 ```text
 Date/time: 2026-10-17
-Task / Epic: FT-902 / E09
-Git SHA: a8c78a3
-Files changed: src/FrameTheory.Desktop/TimelineEditorViewModel.cs, src/FrameTheory.Desktop/AiProposalViewModel.cs, src/FrameTheory.Desktop/MainWindow.cs, tests/FrameTheory.UnitTests/TimelineEditorTests.cs, tests/FrameTheory.UnitTests/AiProposalViewModelTests.cs, docs/UX_DESIGN.md
-Actual behavior and UI path: Video workspace now displays the selected track/clip, exact range and current playhead from the timeline model; the context updates with selection and seek changes. AI workspace now displays approved-action count next to the existing validation/apply/undo status and updates it as individual actions are checked.
-Commands executed + OS: .NET 10.0.100 on Windows 11 x64; focused `dotnet test tests/FrameTheory.UnitTests/FrameTheory.UnitTests.csproj --no-restore --configuration Release --filter FullyQualifiedName~TimelineEditorTests|FullyQualifiedName~AiProposalViewModelTests --logger console\;verbosity=minimal`.
-Test outputs / exit codes: focused build/test exit 0; 14 unit tests passed. Full format/build/test and interactive workspace acceptance remain to be run before marking FT-902 complete.
+Task / Epic: FT-903 / E09
+Git SHA: 811e68b
+Files changed: src/FrameTheory.Media/FrameDecoder.cs, tools/FrameTheory.FrameDecodeSmoke/Program.cs, tests/FrameTheory.UnitTests/FrameDecoderTests.cs, docs/PERFORMANCE.md
+Actual behavior and UI path: Decoder exposes read-only cache limit/count metrics for diagnostics. The existing frame smoke now performs a real cold exact-frame decode followed by a warm cache read and reports timing, memory and cache evidence. Decoder remains cancellable and bounded at 20 MiB per frame; no disk proxy is created implicitly.
+Commands executed + OS: Windows 11 x64, .NET 10.0.100, FFmpeg 9.0.2; generated a 16x8 30 fps H.264 clip with FFmpeg, ran `dotnet <FrameTheory.FrameDecodeSmoke.dll> <clip> 15`, and verified the clip with ffprobe; focused `dotnet test tests/FrameTheory.UnitTests/FrameTheory.UnitTests.csproj --no-restore --configuration Release --filter FullyQualifiedName~FrameDecoderTests --logger console\;verbosity=minimal`.
+Test outputs / exit codes: real smoke exit 0 with cold 113.424 ms, warm 0.237 ms, cache entries 1/8 and working set 29003776 bytes; ffprobe exit 0 with H.264 16x8 30/1; focused test exit 0 with 3 tests passed. Full format/build/test remains to be run before commit.
 Media fixtures and verification: Photo export continues to use real FFmpeg/ffprobe and atomic temporary files; no source media or API keys entered Git. Approved logo/watermark asset is still absent from the repository, so no watermark was invented.
 Known limitations / blockers: FT-706 still lacks Gemini transport, follow-up request history, provider retries/timeouts, usage accounting and redaction logs. FT-804 has one active worker and no persisted queue/retry history; FT-802 social photo dimensions and queue parity remain open. FT-803 uses amplitude peaks as a basic marker aid. FT-602 remains a contract/fixture adapter pending a real local ASR or consented Gemini provider. FT-006 remains partial pending MLT and second-OS evidence. Python is not installed, so scripts/validate_repository.py was not run locally. macOS/Linux analysis and desktop runs are unverified.
-Next unblocked task: FT-903
+Next unblocked task: FT-904
 ```
 
 ## Task execution record template
