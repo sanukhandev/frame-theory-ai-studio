@@ -164,6 +164,7 @@ public sealed class MainWindow : Window
         else if (workspace.Name == "AI")
         {
             children.Add(CreateGeminiSettingsPanel(viewModel));
+            children.Add(CreateAiProposalPanel(viewModel));
         }
 
         var stack = new StackPanel { Spacing = 12 };
@@ -286,6 +287,69 @@ public sealed class MainWindow : Window
                     uploadConsent,
                     prepareAnalysis,
                     analysisStatus
+                }
+            }
+        };
+    }
+
+    private static Control CreateAiProposalPanel(MainWindowViewModel viewModel)
+    {
+        var planJson = new TextBox
+        {
+            AcceptsReturn = true,
+            Height = 180,
+            TextWrapping = TextWrapping.Wrap,
+            PlaceholderText = "Paste a schema v1 AI edit plan JSON for local validation"
+        };
+        var actions = new StackPanel { Spacing = 4 };
+        void RefreshActions()
+        {
+            actions.Children.Clear();
+            foreach (var action in viewModel.AiProposal.Actions)
+            {
+                var approval = new CheckBox { Content = action.Summary, IsChecked = action.IsApproved };
+                approval.PropertyChanged += (_, args) =>
+                {
+                    if (args.Property == ToggleButton.IsCheckedProperty)
+                    {
+                        action.IsApproved = approval.IsChecked == true;
+                    }
+                };
+                actions.Children.Add(approval);
+            }
+        }
+
+        var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        status.Bind(TextBlock.TextProperty, new Binding("AiProposal.StatusText"));
+        viewModel.AiProposal.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(AiProposalViewModel.Actions))
+            {
+                RefreshActions();
+            }
+        };
+        var validate = new Button { Content = "Validate proposal" };
+        validate.Click += (_, _) => viewModel.ValidateAiPlan(planJson.Text ?? string.Empty);
+        var approve = new Button { Content = "Record selected approvals" };
+        approve.Click += (_, _) => viewModel.AiProposal.RecordApprovals();
+        var clear = new Button { Content = "Clear proposal" };
+        clear.Click += (_, _) => viewModel.AiProposal.Clear();
+        return new Border
+        {
+            Margin = new Thickness(0, 16, 0, 0),
+            Padding = new Thickness(12),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 48, 48)),
+            Child = new StackPanel
+            {
+                Spacing = 8,
+                Children =
+                {
+                    new TextBlock { Text = "AI proposal review", FontWeight = FontWeight.SemiBold },
+                    new TextBlock { Text = "Plans are treated as untrusted data. Validation and approval never mutate the project in this slice.", TextWrapping = TextWrapping.Wrap },
+                    planJson,
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { validate, approve, clear } },
+                    actions,
+                    status
                 }
             }
         };

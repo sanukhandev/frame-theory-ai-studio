@@ -90,6 +90,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public GeminiSettingsViewModel GeminiSettings { get; }
 
+    public AiProposalViewModel AiProposal { get; } = new();
+
     public string AnalysisStatusText
     {
         get => _analysisStatusText;
@@ -106,6 +108,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     }
 
     public LocalMediaAnalysisReport? LastLocalAnalysisReport { get; private set; }
+
+    public void ValidateAiPlan(string json)
+    {
+        var targetIds = _analysisAssets.Keys.Select(mediaId => mediaId.Value).ToHashSet(StringComparer.Ordinal);
+        targetIds.UnionWith(["Video 1", "Audio 1", "title-track", "caption-track", "active-project"]);
+        AiProposal.Validate(json, new AiPlanValidationContext("active-project", targetIds, Math.Max(1, TimelineEditor.TotalFrames)));
+    }
 
     public int SelectedWorkspaceIndex
     {
