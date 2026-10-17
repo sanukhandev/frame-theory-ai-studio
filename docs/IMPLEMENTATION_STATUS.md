@@ -152,11 +152,11 @@
 ```text
 Date/time: 2026-10-18
 Task / Epic: FT-003 / E00 capability detection
-Git SHA: pending commit
+Git SHA: bb65ae3
 Files changed: src/FrameTheory.Platform/SystemCapabilityDetector.cs, tests/FrameTheory.UnitTests/FoundationTests.cs, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: The startup capability report now executes fixed Windows, macOS or Linux GPU adapter probes and reports a bounded adapter description when one is found. Missing probes, nonzero exits and no-adapter output are visible as non-fatal unknown capability states; CPU fallback remains available.
 Commands executed + OS: Windows 11 x64 with .NET SDK 10.0.402; focused foundation tests, full Release build/tests and formatting/diff verification.
-Test outputs / exit codes: Focused foundation suite passed 13/13; full solution passed 169 unit and 2 golden tests; Release build passed with 0 warnings/errors; format verification and diff check passed. Hosted validation is pending for this increment.
+Test outputs / exit codes: Focused foundation suite passed 13/13; full solution passed 169 unit and 2 golden tests; Release build passed with 0 warnings/errors; format verification and diff check passed. Hosted quality gate run `39075442170` passed documentation/schema validation, advisory scan, restore/build, native media smoke, formatting, tests, publish and checksum verification on Windows, macOS and Linux.
 Media fixtures and verification: Deterministic `dotnet` probe fixtures exercised successful no-adapter, nonzero and injected-probe paths; no user media, API key or binary entered Git.
 Known limitations / blockers: GPU availability is informational only; real hardware-specific acceleration remains outside this CPU-first capability probe. Manual Avalonia UI, branding, licensing and installer evidence remain open.
 Next unblocked task: Continue remaining manual/platform and external-input gates; live provider, approved branding, licensing/native redistribution, installers/signing and native UI evidence remain open.
