@@ -11,7 +11,8 @@ public sealed record TimelineVideoRenderPlan
         int height,
         long durationFrames,
         IReadOnlyDictionary<MediaId, Uri> sources,
-        IReadOnlyList<TimelineVideoLayer> layers)
+        IReadOnlyList<TimelineVideoLayer> layers,
+        IReadOnlyList<TimelineAudioLayer>? audioLayers = null)
     {
         if (width <= 0 || height <= 0 || durationFrames <= 0)
         {
@@ -26,6 +27,7 @@ public sealed record TimelineVideoRenderPlan
         DurationFrames = durationFrames;
         Sources = sources;
         Layers = layers.OrderBy(layer => layer.Order).ToArray();
+        AudioLayers = (audioLayers ?? []).OrderBy(layer => layer.Order).ToArray();
     }
 
     public RationalFrameRate FrameRate { get; }
@@ -39,16 +41,21 @@ public sealed record TimelineVideoRenderPlan
     public IReadOnlyDictionary<MediaId, Uri> Sources { get; }
 
     public IReadOnlyList<TimelineVideoLayer> Layers { get; }
+
+    public IReadOnlyList<TimelineAudioLayer> AudioLayers { get; }
 }
 
-public sealed record TimelineFilterGraph(string FilterComplex, IReadOnlyList<Uri> Inputs, string OutputLabel);
+public sealed record TimelineFilterGraph(string FilterComplex, IReadOnlyList<Uri> Inputs, string OutputLabel, string? AudioOutputLabel);
 
 public sealed class TimelineFilterGraphBuilder
 {
     public TimelineFilterGraph Build(TimelineVideoRenderPlan plan)
     {
         ArgumentNullException.ThrowIfNull(plan);
-        var usedMediaIds = plan.Layers.SelectMany(layer => layer.Segments).Select(segment => segment.Clip.MediaId).Distinct().ToArray();
+        var usedMediaIds = plan.Layers.SelectMany(layer => layer.Segments).Select(segment => segment.Clip.MediaId)
+            .Concat(plan.AudioLayers.SelectMany(layer => layer.Segments).Select(segment => segment.Clip.MediaId))
+            .Distinct()
+            .ToArray();
         var inputs = usedMediaIds.Select(mediaId => GetSource(plan, mediaId)).ToArray();
         var inputIndexes = usedMediaIds.Select((mediaId, index) => (mediaId, index)).ToDictionary(item => item.mediaId, item => item.index);
         var filters = new List<string>();
@@ -71,7 +78,52 @@ public sealed class TimelineFilterGraphBuilder
         }
 
         filters.Add($"[{currentBase}]format=yuv420p,setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv[outv]");
-        return new TimelineFilterGraph(string.Join(';', filters), inputs, "outv");
+        var audioOutput = BuildAudio(plan, inputIndexes, filters);
+        return new TimelineFilterGraph(string.Join(';', filters), inputs, "outv", audioOutput);
+    }
+
+    private static string? BuildAudio(
+        TimelineVideoRenderPlan plan,
+        IReadOnlyDictionary<MediaId, int> inputIndexes,
+        ICollection<string> filters)
+    {
+        var segments = plan.AudioLayers.SelectMany(layer => layer.Segments).ToArray();
+        if (segments.Length == 0)
+        {
+            return null;
+        }
+
+        var labels = new List<string> { "silence" };
+        var duration = FormatSeconds(plan.DurationFrames, plan.FrameRate);
+        filters.Add($"anullsrc=r=48000:cl=stereo:d={duration}[silence]");
+        for (var index = 0; index < segments.Length; index++)
+        {
+            var segment = segments[index];
+            var clip = segment.Clip;
+            var input = inputIndexes[clip.MediaId];
+            var sourceEnd = checked(clip.SourceStartUnit + clip.SourceUnitCount);
+            var label = $"audio{index}";
+            var gain = segment.Muted ? "0" : Format(segment.GainDb);
+            var filter = $"[{input}:a:0]atrim=start_sample={clip.SourceStartUnit}:end_sample={sourceEnd},asetpts=PTS-STARTPTS,aresample=48000,aformat=sample_rates=48000:channel_layouts=stereo,volume={gain}dB";
+            if (segment.FadeInFrames > 0)
+            {
+                filter += $",afade=t=in:st=0:d={FormatSeconds(segment.FadeInFrames, plan.FrameRate)}";
+            }
+
+            if (segment.FadeOutFrames > 0)
+            {
+                var start = clip.TimelineRange.Length - segment.FadeOutFrames;
+                filter += $",afade=t=out:st={FormatSeconds(start, plan.FrameRate)}:d={FormatSeconds(segment.FadeOutFrames, plan.FrameRate)}";
+            }
+
+            filter += $",asetpts=PTS-STARTPTS+{FormatSeconds(clip.TimelineRange.StartFrame, plan.FrameRate)}/TB[{label}]";
+            filters.Add(filter);
+            labels.Add(label);
+        }
+
+        var joined = string.Join("][", labels);
+        filters.Add($"[{joined}]amix=inputs={labels.Count}:duration=first:dropout_transition=0:normalize=0[aout]");
+        return "aout";
     }
 
     private static string BuildLayer(
@@ -285,11 +337,6 @@ public sealed class FfmpegTimelineVideoExporter : ITimelineVideoExporter
     {
         ArgumentNullException.ThrowIfNull(plan);
         ArgumentNullException.ThrowIfNull(preset);
-        if (preset.IncludeAudio)
-        {
-            throw new MediaExportException("Timeline audio export is not available until FT-505.");
-        }
-
         if (preset.Width != plan.Width || preset.Height != plan.Height || preset.FrameRate != plan.FrameRate)
         {
             throw new MediaExportException("The timeline render plan and export preset must match.");
@@ -322,10 +369,24 @@ public sealed class FfmpegTimelineVideoExporter : ITimelineVideoExporter
             arguments.AddRange([
                 "-filter_complex", graph.FilterComplex,
                 "-map", $"[{graph.OutputLabel}]",
-                "-an", "-c:v", "libx264", "-preset", "medium", "-pix_fmt", "yuv420p",
+                "-c:v", "libx264", "-preset", "medium", "-pix_fmt", "yuv420p",
                 "-colorspace", "bt709", "-color_primaries", "bt709", "-color_trc", "bt709", "-color_range", "tv",
                 "-r", preset.FrameRate.ToString(), "-movflags", "+faststart", "-f", "mp4", temporaryPath
             ]);
+            if (preset.IncludeAudio)
+            {
+                if (graph.AudioOutputLabel is null)
+                {
+                    throw new MediaExportException("No timeline audio clips are available for audio export.");
+                }
+
+                var mapIndex = arguments.IndexOf("-map");
+                arguments.InsertRange(mapIndex + 2, ["-map", $"[{graph.AudioOutputLabel}]", "-c:a", "aac", "-b:a", "192k"]);
+            }
+            else
+            {
+                arguments.Insert(arguments.IndexOf("-c:v"), "-an");
+            }
             var result = await _processRunner.RunAsync("ffmpeg", arguments, cancellationToken);
             if (result.ExitCode != 0 || !File.Exists(temporaryPath))
             {
@@ -337,6 +398,7 @@ public sealed class FfmpegTimelineVideoExporter : ITimelineVideoExporter
             if (verifiedMetadata.Kind != MediaKind.Video ||
                 verifiedMetadata.Width != plan.Width ||
                 verifiedMetadata.Height != plan.Height ||
+                (preset.IncludeAudio && !verifiedMetadata.HasAudio) ||
                 !string.Equals(verifiedMetadata.ColorProfile, "bt709/bt709/bt709/tv", StringComparison.OrdinalIgnoreCase))
             {
                 throw new MediaExportException($"The timeline export did not match the requested preset: {verifiedMetadata.Kind}, {verifiedMetadata.Width}x{verifiedMetadata.Height}, {verifiedMetadata.ColorProfile}.");

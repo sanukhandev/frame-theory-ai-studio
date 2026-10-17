@@ -86,6 +86,23 @@ public sealed class TimelineEditorTests
         Xunit.Assert.Null(editor.BuildRenderPlan(1920, 1080, new Dictionary<MediaId, Uri> { [metadata.Id] = source }).Layers.Single().Segments.Single().Animation);
     }
 
+    [Xunit.Fact]
+    public void TimelineEditorAppliesAudioSettingsToSynchronizedRenderPlan()
+    {
+        var source = new Uri("file:///audio.mp4");
+        var metadata = Metadata(source, "audio", 30);
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(metadata);
+        editor.SelectAt(0, "Audio 1");
+        editor.ApplyAudioSettingsToSelected(3, muted: false, fadeInFrames: 2, fadeOutFrames: 2);
+
+        var audio = editor.BuildRenderPlan(1920, 1080, new Dictionary<MediaId, Uri> { [metadata.Id] = source }).AudioLayers.Single().Segments.Single();
+
+        Xunit.Assert.Equal(3, audio.GainDb);
+        Xunit.Assert.Equal(2, audio.FadeInFrames);
+        Xunit.Assert.Equal(2, audio.FadeOutFrames);
+    }
+
     private static MediaSourceMetadata Metadata(Uri uri, string fingerprint, long durationFrames, bool hasAudio = true) => new(
         MediaId.Create(uri, fingerprint),
         uri,

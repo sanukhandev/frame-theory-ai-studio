@@ -79,7 +79,7 @@ public sealed class TimelineCompositorTests
     }
 
     [Xunit.Fact]
-    public async Task TimelineExportIsAtomicAndRejectsAudioUntilAudioTask()
+    public async Task TimelineExportIsAtomicAndMapsTimelineAudio()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-compositor-export-");
         try
@@ -90,13 +90,15 @@ public sealed class TimelineCompositorTests
             File.WriteAllText(destinationPath, "old");
             var mediaId = MediaId.Create(new Uri(sourcePath), "compositor-export-test");
             var clip = TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1));
+            var audioClip = TimelineClip.Audio(mediaId, 0, 48000, 0, 30, 48000);
             var plan = new TimelineVideoRenderPlan(
                 new RationalFrameRate(30, 1),
                 16,
                 8,
                 30,
                 new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
-                [new TimelineVideoLayer("video-1", 0, [new TimelineVideoSegment(clip)])]);
+                [new TimelineVideoLayer("video-1", 0, [new TimelineVideoSegment(clip)])],
+                [new TimelineAudioLayer("audio-1", 0, [new TimelineAudioSegment(audioClip)])]);
             var metadata = new MediaSourceMetadata(
                 MediaId.Create(new Uri(destinationPath), "verified"),
                 new Uri(destinationPath),
@@ -107,26 +109,20 @@ public sealed class TimelineCompositorTests
                 30,
                 TimeSpan.FromSeconds(1),
                 colorProfile: "bt709/bt709/bt709/tv",
-                hasAudio: false);
+                hasAudio: true);
             var runner = new StubProcessRunner();
             var exporter = new FfmpegTimelineVideoExporter(runner, new StubProbe(metadata));
             var receipt = await exporter.ExportAsync(
                 plan,
                 destinationPath,
-                new ExportPreset(16, 8, new RationalFrameRate(30, 1), includeAudio: false),
+                new ExportPreset(16, 8, new RationalFrameRate(30, 1)),
                 null,
                 CancellationToken.None);
 
             Xunit.Assert.Equal(destinationPath, receipt.OutputPath);
             Xunit.Assert.Equal("encoded", await File.ReadAllTextAsync(destinationPath));
             Xunit.Assert.Contains("-filter_complex", runner.ArgumentsSeen.Single());
-
-            await Xunit.Assert.ThrowsAsync<MediaExportException>(() => exporter.ExportAsync(
-                plan,
-                destinationPath,
-                new ExportPreset(16, 8, new RationalFrameRate(30, 1)),
-                null,
-                CancellationToken.None));
+            Xunit.Assert.Contains("-map [aout]", runner.ArgumentsSeen.Single());
         }
         finally
         {

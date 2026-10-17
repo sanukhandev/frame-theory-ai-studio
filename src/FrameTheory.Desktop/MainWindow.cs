@@ -300,6 +300,8 @@ public sealed class MainWindow : Window
         forward.Click += (_, _) => timeline.Step(1);
         var select = new Button { Content = "Select at playhead" };
         select.Click += (_, _) => timeline.SelectAt(timeline.CurrentFrame, "Video 1");
+        var selectAudio = new Button { Content = "Select audio" };
+        selectAudio.Click += (_, _) => timeline.SelectAt(timeline.CurrentFrame, "Audio 1");
         var operationStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         void RunTimelineAction(Action action)
         {
@@ -350,6 +352,14 @@ public sealed class MainWindow : Window
         pushIn.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToSelected(TimelineAnimationPreset.PushIn));
         var clearAnimation = new Button { Content = "Clear animation" };
         clearAnimation.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedAnimation);
+        var muteAudio = new Button { Content = "Mute audio" };
+        muteAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioSettingsToSelected(0, muted: true));
+        var gainAudio = new Button { Content = "Audio +3 dB" };
+        gainAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioSettingsToSelected(3, muted: false));
+        var fadeAudio = new Button { Content = "Audio fades" };
+        fadeAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioSettingsToSelected(0, muted: false, fadeInFrames: 2, fadeOutFrames: 2));
+        var clearAudio = new Button { Content = "Clear audio" };
+        clearAudio.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedAudioSettings);
         var export = new Button { Content = "Export composite MP4" };
         export.Click += async (_, _) =>
         {
@@ -391,10 +401,11 @@ public sealed class MainWindow : Window
                     playhead,
                     ruler,
                     tracks,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { back, forward, select, scrollBack, scrollForward } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { back, forward, select, selectAudio, scrollBack, scrollForward } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { copy, paste, split, trim, move, rippleDelete } },
                     operationStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { fadeIn, pushIn, clearAnimation } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { muteAudio, gainAudio, fadeAudio, clearAudio } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { export } },
                     exportStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { snap, new TextBlock { Text = "Zoom" }, zoom } }

@@ -36,6 +36,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private readonly List<TimelineClip> _videoClips = [];
     private readonly List<TimelineClip> _audioClips = [];
     private readonly Dictionary<TimelineClip, TimelineTransformKeyframes> _animations = [];
+    private readonly Dictionary<TimelineClip, TimelineAudioSegment> _audioSettings = [];
     private readonly HashSet<MediaId> _mediaIds = [];
     private TimelineGraph _graph;
     private TimelineTransport _transport;
@@ -165,6 +166,9 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             throw new InvalidOperationException("Import at least one video before exporting the timeline.");
         }
 
+        IReadOnlyList<TimelineAudioLayer> audioLayers = _audioClips.Count == 0
+            ? []
+            : [new TimelineAudioLayer("Audio 1", 0, _audioClips.Select(clip => _audioSettings.TryGetValue(clip, out var settings) ? settings : new TimelineAudioSegment(clip)))];
         return new TimelineVideoRenderPlan(
             _projectFrameRate,
             width,
@@ -173,7 +177,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             sources,
             [new TimelineVideoLayer("Video 1", 0, _videoClips.Select(clip => new TimelineVideoSegment(
                 clip,
-                animation: _animations.TryGetValue(clip, out var animation) ? animation : null)))]);
+                animation: _animations.TryGetValue(clip, out var animation) ? animation : null)))],
+            audioLayers);
     }
 
     public void ApplyAnimationPresetToSelected(TimelineAnimationPreset preset)
@@ -195,6 +200,23 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     {
         var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
         _animations.Remove(selected.Clip);
+    }
+
+    public void ApplyAudioSettingsToSelected(double gainDb, bool muted, long fadeInFrames = 0, long fadeOutFrames = 0)
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        if (!selected.Clip.IsAudio)
+        {
+            throw new InvalidOperationException("Audio settings require an audio clip.");
+        }
+
+        _audioSettings[selected.Clip] = new TimelineAudioSegment(selected.Clip, gainDb, muted, fadeInFrames, fadeOutFrames);
+    }
+
+    public void ClearSelectedAudioSettings()
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        _audioSettings.Remove(selected.Clip);
     }
 
     public void InsertClip(TimelineTrackKind kind, TimelineClip clip)

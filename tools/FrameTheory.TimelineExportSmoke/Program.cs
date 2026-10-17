@@ -15,6 +15,8 @@ var idB = MediaId.Create(sourceB, "timeline-smoke-b");
 var first = TimelineClip.Video(idA, 0, 30, 0, 30, frameRate);
 var second = TimelineClip.Video(idB, 0, 30, 30, 30, frameRate);
 var overlay = TimelineClip.Video(idB, 0, 30, 15, 30, frameRate);
+var audioA = TimelineClip.Audio(idA, 0, 48000, 0, 30, 48000);
+var audioB = TimelineClip.Audio(idB, 0, 48000, 30, 30, 48000);
 var baseTransform = new TimelineVideoTransform(opacity: 0.9, scale: 1, offsetX: 0, offsetY: 0);
 var overlayTransform = new TimelineVideoTransform(opacity: 0.35, scale: 0.5, offsetX: 2, offsetY: 1);
 var plan = new TimelineVideoRenderPlan(
@@ -34,13 +36,18 @@ var plan = new TimelineVideoRenderPlan(
                 new TimelineTransformKeyframe(44, overlayTransform)
             ]))
         ])
-    ]);
+    ],
+    [new TimelineAudioLayer("audio", 0, [
+            new TimelineAudioSegment(audioA, fadeInFrames: 2, fadeOutFrames: 3),
+            new TimelineAudioSegment(audioB, gainDb: -3, fadeInFrames: 2, fadeOutFrames: 3)
+        ])]
+    );
 var runner = new FfmpegProcessRunner();
 var exporter = new FfmpegTimelineVideoExporter(runner, new FfprobeMediaProbe(runner));
 var receipt = await exporter.ExportAsync(
     plan,
     destination,
-    new ExportPreset(16, 8, frameRate, includeAudio: false),
+    new ExportPreset(16, 8, frameRate),
     new Progress<ExportProgress>(update => Console.WriteLine($"stage={update.Stage}; fraction={update.Fraction:0.0}")),
     CancellationToken.None);
 Console.WriteLine($"output={receipt.OutputPath}; bytes={receipt.OutputBytes}; kind={receipt.VerifiedMetadata.Kind}; size={receipt.VerifiedMetadata.Width}x{receipt.VerifiedMetadata.Height}; color={receipt.VerifiedMetadata.ColorProfile}");

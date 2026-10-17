@@ -198,7 +198,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         try
         {
             var plan = TimelineEditor.BuildRenderPlan(_videoWidth, _videoHeight, _mediaSources);
-            var preset = new ExportPreset(plan.Width, plan.Height, plan.FrameRate, includeAudio: false);
+            var preset = new ExportPreset(plan.Width, plan.Height, plan.FrameRate, includeAudio: plan.AudioLayers.Count > 0);
             var receipt = await _timelineExporter.ExportAsync(
                 plan,
                 destinationPath,
