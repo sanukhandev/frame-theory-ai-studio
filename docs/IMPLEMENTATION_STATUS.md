@@ -31,7 +31,7 @@
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-201 / E02
-Git SHA: pending commit
+Git SHA: 8dd5153
 Files changed: src/FrameTheory.Domain/TimeAndMedia.cs, src/FrameTheory.Media/MediaProbe.cs, tests/FrameTheory.UnitTests/MediaProbeTests.cs, tools/FrameTheory.MediaProbeSmoke/, FrameTheory.sln, docs/DEVELOPMENT.md, docs/IMPLEMENTATION_STATUS.md
 Actual behavior and UI path: `FfprobeMediaProbe` accepts only local file URIs, rejects missing/direct-reparse inputs, invokes ffprobe with explicit input arguments, and parses stream/container duration, dimensions, rational FPS, frame count, audio presence, orientation and color tags. The smoke CLI exposes the headless contract.
 Commands executed + OS: .NET 10.0.100 on Windows 11 x64; dotnet restore FrameTheory.sln; dotnet build FrameTheory.sln --no-restore --configuration Release --warnaserror; dotnet format FrameTheory.sln --no-restore --verify-no-changes --verbosity minimal; dotnet test FrameTheory.sln --no-build --configuration Release; real `FrameTheory.MediaProbeSmoke` against temporary H.264/AAC MP4; git diff --check
