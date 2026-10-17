@@ -1,3 +1,4 @@
+using FrameTheory.Captions;
 using FrameTheory.Domain;
 using FrameTheory.Desktop;
 
@@ -149,6 +150,23 @@ public sealed class TimelineEditorTests
         Xunit.Assert.Equal([36L], editor.BeatMarkers);
         editor.BeatDetectionMode = BeatDetectionMode.AmplitudePeaks;
         Xunit.Assert.Equal([36L], editor.BeatMarkers);
+    }
+
+    [Xunit.Fact]
+    public void TimelineEditorImportsTranscriptWordsAsVerifiedTimedCues()
+    {
+        var words = Enumerable.Range(0, 8)
+            .Select(index => new TranscriptWord($"word-{index}", TimeSpan.FromMilliseconds(index * 500), TimeSpan.FromMilliseconds(index * 500 + 250)))
+            .ToArray();
+        var transcript = new TranscriptResult(new Uri("file:///spoken.wav"), "sha256:spoken", words);
+        var editor = new TimelineEditorViewModel();
+
+        editor.ImportTranscript(transcript);
+
+        Xunit.Assert.Equal(2, editor.Captions.Count);
+        Xunit.Assert.Equal("word-0 word-1 word-2 word-3 word-4 word-5 word-6", editor.Captions[0].Text);
+        Xunit.Assert.Equal(CaptionProvenance.VerifiedTranscript, editor.Captions[0].Provenance);
+        Xunit.Assert.Equal("sha256:spoken", editor.TranscriptSourceFingerprint);
     }
 
     [Xunit.Fact]

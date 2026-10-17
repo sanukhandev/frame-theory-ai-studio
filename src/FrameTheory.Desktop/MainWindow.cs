@@ -748,6 +748,28 @@ public sealed class MainWindow : Window
         };
         var captionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         captionStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CaptionStatusText)));
+        var transcriptionConsent = new CheckBox { Content = "I approve uploading this exact local audio file to Gemini" };
+        AutomationProperties.SetName(transcriptionConsent, "Gemini transcription upload consent");
+        var transcribeAudio = new Button { Content = "Transcribe approved audio" };
+        transcribeAudio.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(transcribeAudio);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Audio or video with audio") { Patterns = ["*.wav", "*.mp3", "*.m4a", "*.aac", "*.flac", "*.ogg", "*.mp4", "*.mov"] }]
+            });
+            var path = files.SingleOrDefault()?.TryGetLocalPath();
+            if (path is not null)
+            {
+                await viewModel.TranscribeAudioAsync(path, transcriptionConsent.IsChecked == true, CancellationToken.None);
+            }
+        };
         var captionFont = new Button { Content = "Choose caption font" };
         captionFont.Click += async (_, _) =>
         {
@@ -853,6 +875,7 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { titleText, addTitle, fadeTitle, pushTitle } },
                     titleAnimationStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { importCaptions, exportCaptions } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { transcribeAudio, transcriptionConsent } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { captionFont } },
                     captionStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { aspectRatio, export, cancelExport } },

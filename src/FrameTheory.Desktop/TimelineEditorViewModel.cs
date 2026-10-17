@@ -51,6 +51,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private readonly Dictionary<MediaId, ColorGrade> _colorGrades = [];
     private readonly List<TimelineTitle> _titles = [];
     private IReadOnlyList<TimedCaption> _captions = [];
+    private string? _transcriptSourceFingerprint;
     private string? _captionFontPath;
     private readonly HashSet<MediaId> _mediaIds = [];
     private TimelineGraph _graph;
@@ -457,6 +458,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _watermark,
         _titles.ToArray(),
         _captions.ToArray(),
+        _transcriptSourceFingerprint,
         _captionFontPath,
         _mediaIds.ToHashSet(),
         _selectedTrackId,
@@ -509,6 +511,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _titles.Clear();
         _titles.AddRange(state.Titles);
         _captions = state.Captions;
+        _transcriptSourceFingerprint = state.TranscriptSourceFingerprint;
         _captionFontPath = state.CaptionFontPath;
         _mediaIds.Clear();
         _mediaIds.UnionWith(state.MediaIds);
@@ -518,6 +521,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         SeekFrame(state.CurrentFrame);
         OnPropertyChanged(nameof(Watermark));
         OnPropertyChanged(nameof(WatermarkStatusText));
+        OnPropertyChanged(nameof(Captions));
+        OnPropertyChanged(nameof(TranscriptSourceFingerprint));
     }
 
     public bool UndoAiEdit()
@@ -589,7 +594,32 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public IReadOnlyList<TimedCaption> Captions => _captions;
 
-    public void ImportCaptions(string content) => _captions = SrtCaptionFile.Import(content);
+    public string? TranscriptSourceFingerprint => _transcriptSourceFingerprint;
+
+    public void ImportCaptions(string content)
+    {
+        _captions = SrtCaptionFile.Import(content);
+        _transcriptSourceFingerprint = null;
+        OnPropertyChanged(nameof(Captions));
+        OnPropertyChanged(nameof(TranscriptSourceFingerprint));
+    }
+
+    public void ImportTranscript(TranscriptResult transcript)
+    {
+        ArgumentNullException.ThrowIfNull(transcript);
+        _captions = transcript.Words
+            .Chunk(7)
+            .Select((words, index) => new TimedCaption(
+                index + 1,
+                words[0].Start,
+                words[^1].End,
+                string.Join(' ', words.Select(word => word.Text)),
+                CaptionProvenance.VerifiedTranscript))
+            .ToArray();
+        _transcriptSourceFingerprint = transcript.SourceFingerprint;
+        OnPropertyChanged(nameof(Captions));
+        OnPropertyChanged(nameof(TranscriptSourceFingerprint));
+    }
 
     public string ExportCaptions() => SrtCaptionFile.Export(_captions);
 
@@ -1003,6 +1033,7 @@ internal sealed record TimelineEditorState(
     TimelineWatermark? Watermark,
     IReadOnlyList<TimelineTitle> Titles,
     IReadOnlyList<TimedCaption> Captions,
+    string? TranscriptSourceFingerprint,
     string? CaptionFontPath,
     IReadOnlySet<MediaId> MediaIds,
     string? SelectedTrackId,

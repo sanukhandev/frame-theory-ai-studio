@@ -60,6 +60,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private readonly Dictionary<MediaId, ImportedMedia> _analysisAssets = [];
     private ITimelineVideoExporter? _timelineExporter;
     private readonly ExportQueueService _exportQueue;
+    private readonly HttpClient _transcriptionHttpClient;
     private ExportQueueJob? _activeExport;
     private readonly ILocalAnalysisSampler? _analysisSampler;
     private int _videoWidth;
@@ -77,11 +78,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         GeminiSettingsViewModel? geminiSettings = null,
         ILocalAnalysisSampler? analysisSampler = null,
         ExportQueueService? exportQueue = null,
-        IDiagnosticsLog? diagnosticsLog = null)
+        IDiagnosticsLog? diagnosticsLog = null,
+        HttpClient? transcriptionHttpClient = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
         _diagnosticsLog = diagnosticsLog ?? new FileDiagnosticsLog();
+        _transcriptionHttpClient = transcriptionHttpClient ?? new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
         _mediaImporter = mediaImporter;
         _exportQueue = exportQueue ?? new ExportQueueService();
         PhotoRecovery = photoRecovery ?? new PhotoRecoveryViewModel(
@@ -460,6 +463,59 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         {
             _diagnosticsLog.Record("caption-export-failed", exception);
             CaptionStatusText = $"Caption export failed: {exception.Message}";
+            return false;
+        }
+    }
+
+    public async Task<bool> TranscribeAudioAsync(string sourcePath, bool uploadConsent, CancellationToken cancellationToken)
+    {
+        if (!uploadConsent)
+        {
+            CaptionStatusText = "Transcription stopped: explicitly approve uploading this exact local audio file first.";
+            return false;
+        }
+
+        try
+        {
+            var fullPath = Path.GetFullPath(sourcePath);
+            if (!File.Exists(fullPath))
+            {
+                throw new FileNotFoundException("The selected audio file was not found.", fullPath);
+            }
+
+            var apiKey = await GeminiSettings.ReadApiKeyAsync(cancellationToken);
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                CaptionStatusText = "Transcription requires a stored Gemini key; manual captions remain available offline.";
+                return false;
+            }
+
+            CaptionStatusText = $"Uploading approved audio: {Path.GetFileName(fullPath)}.";
+            var provider = new GeminiTranscriptionProvider(
+                _transcriptionHttpClient,
+                new GeminiTranscriptionOptions(apiKey, uploadConsent: true));
+            var result = await provider.TranscribeAsync(
+                new Uri(fullPath),
+                new Progress<TranscriptionProgress>(update => CaptionStatusText = $"{update.Stage} ({update.Fraction:P0})"),
+                cancellationToken);
+            TimelineEditor.ImportTranscript(result);
+            CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} verified transcript caption cue(s) from {Path.GetFileName(fullPath)}.";
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            CaptionStatusText = "Gemini transcription canceled; no caption changes were applied.";
+            return false;
+        }
+        catch (OperationCanceledException)
+        {
+            CaptionStatusText = "Gemini transcription timed out; no caption changes were applied.";
+            return false;
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidOperationException or HttpRequestException)
+        {
+            _diagnosticsLog.Record("gemini-transcription-failed", exception);
+            CaptionStatusText = $"Gemini transcription failed: {exception.Message}";
             return false;
         }
     }

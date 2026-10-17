@@ -21,6 +21,8 @@ public sealed class GeminiSettingsViewModel : INotifyPropertyChanged
 
     public IReadOnlyList<string> Models { get; }
 
+    public Task<string?> ReadApiKeyAsync(CancellationToken cancellationToken) => _configuration.ReadApiKeyAsync(cancellationToken);
+
     public string SelectedModelId
     {
         get => _selectedModelId;
