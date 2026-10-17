@@ -5,7 +5,10 @@
     <RootNamespace>FrameTheory.PhotoExportSmoke</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\FrameTheory.Application\FrameTheory.Application.csproj" />
+    <ProjectReference Include="..\..\src\FrameTheory.Desktop\FrameTheory.Desktop.csproj" />
     <ProjectReference Include="..\..\src\FrameTheory.Media\FrameTheory.Media.csproj" />
     <ProjectReference Include="..\..\src\FrameTheory.Photo\FrameTheory.Photo.csproj" />
+    <ProjectReference Include="..\..\src\FrameTheory.Storage\FrameTheory.Storage.csproj" />
   </ItemGroup>
 </Project>
