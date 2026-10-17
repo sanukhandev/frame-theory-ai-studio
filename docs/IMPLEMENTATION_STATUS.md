@@ -134,6 +134,7 @@
 - [~] FT-1006 V1 acceptance audit is recorded with 48 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
 - [x] FT-1103 audio beat detection, source-timed kinetic word captions, proxy pipeline and editable speed-ramp curves are implemented with persistence, UI and native-export smoke evidence; hosted run `39069354787` passed on Windows, macOS and Linux
 - [x] FT-1101 imported photo overlay composition with normal/multiply/screen blending, opacity, clipping, non-destructive undo, persisted brush masks and clone-style retouch, project persistence and hosted export/reopen smoke
+- [~] FT-1102 deterministic color scopes, translation tracking and persisted FFmpeg stabilization are implemented with UI controls and hosted graph/build/native evidence; motion-analysis UI and complete acceptance remain open
 - [~] FT-1104 offline reference matching, reusable style-library UI, consented visual Gemini analyzer with bounded inline/Files API inputs and waveform-grounded reviewed rough-cut apply/export are implemented with local and hosted evidence; live-provider and reference-grade semantic acceptance remain open
 - [x] FT-401 FFmpeg-backed PNG/JPEG photo import, PPM preview and bounded canvas fit/100%/zoom/pan state
 - [x] FT-402 non-destructive PPM crop, 90° rotation, nearest-neighbor resize and undo-last operation stack
@@ -164,6 +165,10 @@ Next unblocked task: Continue remaining manual/platform and external-input gates
 ```
 
 **FT-1101 composition checkpoint (2026-10-18):** The Photo workspace exposes Import overlay, Clear overlays, brush-mask and clone-retouch controls with blend-mode and opacity selection. Overlay source files remain local, are never mutated, render through the same `PpmRaster` export path as the base photo, and are saved/reopened as bounded relative project media references with SHA-256 fingerprints. Focused composition/mask/retouch/persistence coverage passes 10/10; hosted native FFmpeg export/reopen reports one overlay, one mask and one retouch stroke. FT-1101 implementation acceptance is complete; manual UI, branding, licensing and installer gates remain separate.
+
+**FT-1102 stabilization checkpoint (2026-10-18):** Deterministic scopes and bounded translation tracking are present in the media/color foundations. Timeline stabilization validates a 1–64 search radius, persists through project JSON and AI rollback state, exposes Apply/Clear controls in the Video workspace and emits real FFmpeg `deshake` filters for standard and speed-ramp segments. Local focused/full tests and hosted Windows/macOS/Linux quality gates pass; motion-analysis UI and full acceptance remain open.
+
+**FT-1102 execution record (2026-10-18):** Git SHA `bfe29b9`. Focused timeline tests passed 16/16; the full solution passed 181 unit and 2 golden tests; formatting verification passed. Hosted run `39077964361` passed documentation, restore, advisory, build, native-media, format, tests, publish and checksum jobs on Windows, macOS and Linux. No user media, API key or binary entered Git. Next: add a bounded motion-analysis action/report to the Video workspace or continue remaining P0 manual/external release gates without claiming FT-1102 complete.
 
 ## Previous execution record
 ```text
