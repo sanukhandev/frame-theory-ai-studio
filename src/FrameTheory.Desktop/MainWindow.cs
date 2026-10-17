@@ -655,6 +655,52 @@ public sealed class MainWindow : Window
         undo.Click += (_, _) => viewModel.UndoLastAiEdit();
         var clear = new Button { Content = "Clear proposal" };
         clear.Click += (_, _) => viewModel.AiProposal.Clear();
+        var recipeName = new TextBox { PlaceholderText = "Recipe name", Width = 180 };
+        AutomationProperties.SetName(recipeName, "AI recipe name");
+        var saveRecipe = new Button { Content = "Save recipe" };
+        AutomationProperties.SetName(saveRecipe, "Save validated AI recipe");
+        saveRecipe.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(saveRecipe);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            {
+                SuggestedFileName = "frame-theory-recipe.ftrecipe.json",
+                FileTypeChoices = [new FilePickerFileType("Frame Theory AI recipe") { Patterns = ["*.ftrecipe.json"] }]
+            });
+            var path = file?.TryGetLocalPath();
+            if (path is not null)
+            {
+                await viewModel.SaveAiRecipeAsync(path, recipeName.Text ?? string.Empty, CancellationToken.None);
+            }
+        };
+        var loadRecipe = new Button { Content = "Load recipe" };
+        AutomationProperties.SetName(loadRecipe, "Load AI recipe");
+        loadRecipe.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(loadRecipe);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Frame Theory AI recipe") { Patterns = ["*.ftrecipe.json"] }]
+            });
+            var path = files.SingleOrDefault()?.TryGetLocalPath();
+            if (path is not null)
+            {
+                await viewModel.LoadAiRecipeAsync(path, CancellationToken.None);
+            }
+        };
+        var recipeStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        recipeStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AiRecipeStatusText)));
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
@@ -671,6 +717,8 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { revisionInstruction, requestRevision } },
                     revisionStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { validate, approve, undo, clear } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { recipeName, saveRecipe, loadRecipe } },
+                    recipeStatus,
                     approvalSummary,
                     actions,
                     status

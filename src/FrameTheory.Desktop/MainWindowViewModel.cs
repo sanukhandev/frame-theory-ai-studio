@@ -60,6 +60,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _analysisStatusText = "No local AI analysis prepared.";
     private string _roughCutStatusText = "No rough-cut plan prepared.";
     private string _aiRevisionStatusText = "No Gemini revision requested.";
+    private string _aiRecipeStatusText = "No AI recipe loaded.";
     private readonly Dictionary<MediaId, Uri> _mediaSources = [];
     private readonly Dictionary<MediaId, ImportedMedia> _analysisAssets = [];
     private ITimelineVideoExporter? _timelineExporter;
@@ -256,6 +257,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public AiProposalViewModel AiProposal { get; } = new();
 
+    public string AiRecipeStatusText
+    {
+        get => _aiRecipeStatusText;
+        private set
+        {
+            if (value == _aiRecipeStatusText)
+            {
+                return;
+            }
+
+            _aiRecipeStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
     public string AiRevisionStatusText
     {
         get => _aiRevisionStatusText;
@@ -367,6 +383,56 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public void ValidateAiPlan(string json)
     {
         AiProposal.Validate(json, new AiPlanValidationContext("active-project", BuildAiTargetIds(), Math.Max(1, TimelineEditor.TotalFrames)));
+    }
+
+    public async Task<bool> SaveAiRecipeAsync(string path, string name, CancellationToken cancellationToken)
+    {
+        if (AiProposal.ValidatedJson is null)
+        {
+            AiRecipeStatusText = "Validate and review an AI plan before saving it as a recipe.";
+            return false;
+        }
+
+        try
+        {
+            await new AiRecipeStore().SaveAtomicAsync(path, name, AiProposal.ValidatedJson, cancellationToken);
+            AiRecipeStatusText = $"Saved validated recipe {Path.GetFileName(path)}.";
+            return true;
+        }
+        catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException)
+        {
+            _diagnosticsLog.Record("ai-recipe-save-failed", exception);
+            AiRecipeStatusText = $"AI recipe save failed: {exception.Message}";
+            return false;
+        }
+    }
+
+    public async Task<bool> LoadAiRecipeAsync(string path, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var recipe = await new AiRecipeStore().LoadAsync(path, cancellationToken);
+            ValidateAiPlan(recipe.PlanJson);
+            if (AiProposal.ValidatedJson is null)
+            {
+                AiRecipeStatusText = $"Recipe {recipe.Name} was rejected for this project; no action was loaded.";
+                return false;
+            }
+
+            AiRecipeStatusText = $"Loaded validated recipe {recipe.Name}; review and approve its actions before applying.";
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            AiRecipeStatusText = "AI recipe load canceled.";
+            return false;
+        }
+        catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException or AiPlanFormatException)
+        {
+            _diagnosticsLog.Record("ai-recipe-load-failed", exception);
+            AiRecipeStatusText = $"AI recipe load failed: {exception.Message}";
+            return false;
+        }
     }
 
     public void ApplyApprovedAiPlan()
