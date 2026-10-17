@@ -37,6 +37,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private int _selectedWorkspaceIndex;
     private string _capabilityStatusText = "Checking local capabilities...";
     private string _mediaImportStatusText = "Drop local media files into the window to import previews.";
+    private string _timelineExportStatusText = "Timeline export is available after importing video.";
+    private readonly Dictionary<MediaId, Uri> _mediaSources = [];
+    private ITimelineVideoExporter? _timelineExporter;
+    private int _videoWidth;
+    private int _videoHeight;
 
     public MainWindowViewModel(
         IWorkspaceCatalog workspaceCatalog,
@@ -44,7 +49,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         IMediaImporter? mediaImporter = null,
         PhotoRecoveryViewModel? photoRecovery = null,
         ColorGradeInspectorViewModel? colorInspector = null,
-        TimelineEditorViewModel? timelineEditor = null)
+        TimelineEditorViewModel? timelineEditor = null,
+        ITimelineVideoExporter? timelineExporter = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
         _capabilityDetector = capabilityDetector;
@@ -54,6 +60,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             new JsonProjectRepository());
         ColorInspector = colorInspector ?? new ColorGradeInspectorViewModel();
         TimelineEditor = timelineEditor ?? new TimelineEditorViewModel();
+        _timelineExporter = timelineExporter;
         if (Workspaces.Count == 0)
         {
             throw new InvalidOperationException("At least one workspace is required.");
@@ -118,6 +125,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    public string TimelineExportStatusText
+    {
+        get => _timelineExportStatusText;
+        private set
+        {
+            if (value == _timelineExportStatusText)
+            {
+                return;
+            }
+
+            _timelineExportStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
     public async Task ImportFilesAsync(IEnumerable<string> paths, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(paths);
@@ -140,6 +162,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                     Path.GetFileName(fullPath),
                     $"{media.Metadata.Kind}; {media.Metadata.Width}x{media.Metadata.Height}; thumbnail {media.ThumbnailPpm?.Length ?? 0} bytes; waveform {media.WaveformPeaks.Count} peaks",
                     media.ThumbnailPpm));
+                _mediaSources[media.Metadata.Id] = new Uri(fullPath);
+                if (media.Metadata.Kind == MediaKind.Video && _videoWidth == 0)
+                {
+                    _videoWidth = media.Metadata.Width;
+                    _videoHeight = media.Metadata.Height;
+                }
                 if (media.ThumbnailPpm is not null)
                 {
                     ColorInspector.SetSource(media.ThumbnailPpm);
@@ -157,6 +185,39 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         MediaImportStatusText = imported.Count == 0 && failures.Count == 0
             ? "No local media files were dropped."
             : $"Imported {imported.Count} file(s)." + (failures.Count == 0 ? string.Empty : $" Failed: {string.Join(", ", failures)}");
+    }
+
+    public async Task<bool> ExportTimelineAsync(string destinationPath, CancellationToken cancellationToken)
+    {
+        if (_timelineExporter is null)
+        {
+            TimelineExportStatusText = "Timeline export is unavailable.";
+            return false;
+        }
+
+        try
+        {
+            var plan = TimelineEditor.BuildRenderPlan(_videoWidth, _videoHeight, _mediaSources);
+            var preset = new ExportPreset(plan.Width, plan.Height, plan.FrameRate, includeAudio: false);
+            var receipt = await _timelineExporter.ExportAsync(
+                plan,
+                destinationPath,
+                preset,
+                new Progress<ExportProgress>(update => TimelineExportStatusText = $"{update.Stage} ({update.Fraction:P0})"),
+                cancellationToken);
+            TimelineExportStatusText = $"Exported {Path.GetFileName(receipt.OutputPath)} ({receipt.OutputBytes} bytes).";
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            TimelineExportStatusText = "Timeline export canceled.";
+            return false;
+        }
+        catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaExportException or MediaProbeException)
+        {
+            TimelineExportStatusText = $"Timeline export failed: {exception.Message}";
+            return false;
+        }
     }
 
     public async Task RefreshCapabilitiesAsync(CancellationToken cancellationToken)
@@ -196,6 +257,7 @@ public sealed class DesktopServices
             new WorkspaceCatalog(),
             new FrameTheory.Platform.SystemCapabilityDetector(),
             importer,
-            new PhotoRecoveryViewModel(new ProjectRecoveryService(repository), repository));
+            new PhotoRecoveryViewModel(new ProjectRecoveryService(repository), repository),
+            timelineExporter: new FfmpegTimelineVideoExporter(processRunner, new FfprobeMediaProbe(processRunner)));
     }
 }

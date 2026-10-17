@@ -343,6 +343,28 @@ public sealed class MainWindow : Window
         move.Click += (_, _) => RunTimelineAction(() => timeline.MoveSelected(timeline.CurrentFrame));
         var rippleDelete = new Button { Content = "Ripple delete" };
         rippleDelete.Click += (_, _) => RunTimelineAction(timeline.RippleDeleteSelected);
+        var export = new Button { Content = "Export composite MP4" };
+        export.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(export);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var file = await topLevel.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
+            {
+                SuggestedFileName = "frame-theory-timeline.mp4",
+                FileTypeChoices = [new FilePickerFileType("MP4 video") { Patterns = ["*.mp4"] }]
+            });
+            var path = file?.TryGetLocalPath();
+            if (path is not null)
+            {
+                await viewModel.ExportTimelineAsync(path, CancellationToken.None);
+            }
+        };
+        var exportStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        exportStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
         var scrollBack = new Button { Content = "Scroll ◀" };
         scrollBack.Click += (_, _) => timeline.ScrollBy(-30);
         var scrollForward = new Button { Content = "Scroll ▶" };
@@ -365,6 +387,8 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { back, forward, select, scrollBack, scrollForward } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { copy, paste, split, trim, move, rippleDelete } },
                     operationStatus,
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { export } },
+                    exportStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { snap, new TextBlock { Text = "Zoom" }, zoom } }
                 }
             }

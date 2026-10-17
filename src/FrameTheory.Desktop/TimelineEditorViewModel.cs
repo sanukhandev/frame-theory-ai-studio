@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using FrameTheory.Domain;
+using FrameTheory.Media;
 
 namespace FrameTheory.Desktop;
 
@@ -151,6 +152,25 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         }
 
         Refresh();
+    }
+
+    public TimelineVideoRenderPlan BuildRenderPlan(
+        int width,
+        int height,
+        IReadOnlyDictionary<MediaId, Uri> sources)
+    {
+        if (_videoClips.Count == 0)
+        {
+            throw new InvalidOperationException("Import at least one video before exporting the timeline.");
+        }
+
+        return new TimelineVideoRenderPlan(
+            _projectFrameRate,
+            width,
+            height,
+            TotalFrames,
+            sources,
+            [new TimelineVideoLayer("Video 1", 0, _videoClips.Select(clip => new TimelineVideoSegment(clip)))]);
     }
 
     public void InsertClip(TimelineTrackKind kind, TimelineClip clip)
