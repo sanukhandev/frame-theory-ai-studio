@@ -14,6 +14,7 @@ public sealed class GeminiCreativeDirectorClient
 {
     private const int MaximumSamples = 12;
     private const long MaximumInlineBytes = 20L * 1024 * 1024;
+    private const long MaximumFilesApiBytes = 2L * 1024 * 1024 * 1024;
     private static readonly JsonElement PlanSchema = JsonDocument.Parse("""
         {
           "type": "object",
@@ -85,44 +86,78 @@ public sealed class GeminiCreativeDirectorClient
             GeminiInteractionInput.CreateText(BuildPrompt(targetIds, projectDurationFrames, samples))
         };
         long uploadedBytes = 0;
-        foreach (var sample in samples)
+        var inlineVisualBytes = 0L;
+        var uploadedFiles = new List<GeminiUploadedFile>();
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            switch (sample.SampleKind)
+            for (var sampleIndex = 0; sampleIndex < samples.Length; sampleIndex++)
             {
-                case "video-frame-ppm":
-                case "photo-preview-ppm":
-                    var png = PpmPngEncoder.Encode(sample.Payload);
-                    uploadedBytes = checked(uploadedBytes + png.LongLength);
-                    if (uploadedBytes > MaximumInlineBytes)
-                    {
-                        throw new InvalidOperationException("The approved visual sample scope exceeds Gemini's 20 MiB inline limit; reduce the sample scope before retrying.");
-                    }
+                cancellationToken.ThrowIfCancellationRequested();
+                var sample = samples[sampleIndex];
+                switch (sample.SampleKind)
+                {
+                    case "video-frame-ppm":
+                    case "photo-preview-ppm":
+                        var png = PpmPngEncoder.Encode(sample.Payload);
+                        uploadedBytes = checked(uploadedBytes + png.LongLength);
+                        if (png.LongLength > MaximumFilesApiBytes)
+                        {
+                            throw new InvalidOperationException("An approved visual sample exceeds the Gemini Files API limit.");
+                        }
 
-                    inputs.Add(GeminiInteractionInput.CreateImage(png));
-                    break;
-                case "audio-waveform":
-                    if (sample.Payload.Length > 1_048_576)
-                    {
-                        throw new InvalidOperationException("The approved audio waveform sample exceeds the supported 1 MiB metadata limit.");
-                    }
+                        if (inlineVisualBytes <= MaximumInlineBytes - png.LongLength)
+                        {
+                            inputs.Add(GeminiInteractionInput.CreateImage(png));
+                            inlineVisualBytes += png.LongLength;
+                        }
+                        else
+                        {
+                            var uploadedFile = await _client.UploadFileAsync(
+                                png,
+                                "image/png",
+                                $"frame-theory-creative-direction-{sampleIndex + 1}.png",
+                                cancellationToken);
+                            uploadedFiles.Add(uploadedFile);
+                            if (!string.Equals(uploadedFile.MimeType, "image/png", StringComparison.OrdinalIgnoreCase))
+                            {
+                                throw new InvalidOperationException("Gemini returned an unsupported MIME type for an uploaded creative-direction sample.");
+                            }
 
-                    uploadedBytes = checked(uploadedBytes + sample.Payload.LongLength);
-                    inputs.Add(GeminiInteractionInput.CreateText($"Approved audio waveform sample: {System.Text.Encoding.UTF8.GetString(sample.Payload)}"));
-                    break;
-                default:
-                    throw new InvalidOperationException($"The analysis sample kind '{sample.SampleKind}' is not supported for Gemini creative direction.");
+                            inputs.Add(GeminiInteractionInput.CreateImageUri(uploadedFile.Uri, uploadedFile.MimeType));
+                        }
+
+                        break;
+                    case "audio-waveform":
+                        if (sample.Payload.Length > 1_048_576)
+                        {
+                            throw new InvalidOperationException("The approved audio waveform sample exceeds the supported 1 MiB metadata limit.");
+                        }
+
+                        uploadedBytes = checked(uploadedBytes + sample.Payload.LongLength);
+                        inputs.Add(GeminiInteractionInput.CreateText($"Approved audio waveform sample: {System.Text.Encoding.UTF8.GetString(sample.Payload)}"));
+                        break;
+                    default:
+                        throw new InvalidOperationException($"The analysis sample kind '{sample.SampleKind}' is not supported for Gemini creative direction.");
+                }
+            }
+
+            var result = await _client.CreatePlanAsync(inputs, PlanSchema, cancellationToken);
+            return new GeminiCreativeDirectorResult(
+                result.InteractionId,
+                result.OutputText,
+                result.Usage,
+                result.Attempts,
+                samples.Length,
+                uploadedBytes);
+        }
+        finally
+        {
+            foreach (var uploadedFile in uploadedFiles)
+            {
+                using var cleanupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+                await _client.DeleteFileAsync(uploadedFile.Name, cleanupTimeout.Token);
             }
         }
-
-        var result = await _client.CreatePlanAsync(inputs, PlanSchema, cancellationToken);
-        return new GeminiCreativeDirectorResult(
-            result.InteractionId,
-            result.OutputText,
-            result.Usage,
-            result.Attempts,
-            samples.Length,
-            uploadedBytes);
     }
 
     private static string BuildPrompt(

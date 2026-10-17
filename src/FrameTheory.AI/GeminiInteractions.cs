@@ -112,7 +112,11 @@ public sealed record GeminiInteractionInput(
     public static GeminiInteractionInput CreateText(string text) => new("text", text, null, null, null);
 
     public static GeminiInteractionInput CreateImage(byte[] png) => new("image", null, Convert.ToBase64String(png), null, "image/png");
+
+    public static GeminiInteractionInput CreateImageUri(string uri, string mimeType) => new("image", null, null, uri, mimeType);
 }
+
+internal sealed record GeminiUploadedFile(string Name, string Uri, string MimeType);
 
 public sealed record GeminiInteractionRecord(
     DateTimeOffset Timestamp,
@@ -201,6 +205,93 @@ public sealed class GeminiInteractionsClient : IGeminiClient
         _diagnostics = diagnostics;
     }
 
+    internal async Task<GeminiUploadedFile> UploadFileAsync(
+        byte[] payload,
+        string contentType,
+        string displayName,
+        CancellationToken cancellationToken)
+    {
+        var filesEndpoint = new Uri("https://generativelanguage.googleapis.com/upload/v1beta/files");
+        using var startRequest = new HttpRequestMessage(HttpMethod.Post, filesEndpoint)
+        {
+            Content = JsonContent.Create(new GeminiFileUploadStartRequest(new GeminiFileMetadata(displayName)))
+        };
+        startRequest.Headers.TryAddWithoutValidation("x-goog-api-key", _options.ApiKey);
+        startRequest.Headers.TryAddWithoutValidation("X-Goog-Upload-Protocol", "resumable");
+        startRequest.Headers.TryAddWithoutValidation("X-Goog-Upload-Command", "start");
+        startRequest.Headers.TryAddWithoutValidation("X-Goog-Upload-Header-Content-Length", payload.LongLength.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        startRequest.Headers.TryAddWithoutValidation("X-Goog-Upload-Header-Content-Type", contentType);
+
+        using var startResponse = await _httpClient.SendAsync(startRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        if (!startResponse.IsSuccessStatusCode)
+        {
+            throw new GeminiProviderException($"Gemini Files API upload initialization failed with HTTP {(int)startResponse.StatusCode} ({startResponse.StatusCode}).", GeminiProviderFailureKind.Transport, startResponse.StatusCode);
+        }
+
+        var uploadUrl = GetHeader(startResponse, "x-goog-upload-url");
+        if (!Uri.TryCreate(uploadUrl, UriKind.Absolute, out var uploadUri) ||
+            uploadUri.Scheme != Uri.UriSchemeHttps ||
+            !string.Equals(uploadUri.Host, filesEndpoint.Host, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new GeminiProviderException("Gemini returned an invalid Files API upload URL.", GeminiProviderFailureKind.MalformedResponse);
+        }
+
+        using var uploadRequest = new HttpRequestMessage(HttpMethod.Post, uploadUri)
+        {
+            Content = new ByteArrayContent(payload)
+        };
+        uploadRequest.Headers.TryAddWithoutValidation("x-goog-api-key", _options.ApiKey);
+        uploadRequest.Headers.TryAddWithoutValidation("X-Goog-Upload-Offset", "0");
+        uploadRequest.Headers.TryAddWithoutValidation("X-Goog-Upload-Command", "upload, finalize");
+        uploadRequest.Content.Headers.ContentLength = payload.LongLength;
+        uploadRequest.Content.Headers.TryAddWithoutValidation("Content-Type", contentType);
+
+        using var uploadResponse = await _httpClient.SendAsync(uploadRequest, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        if (!uploadResponse.IsSuccessStatusCode)
+        {
+            throw new GeminiProviderException($"Gemini Files API upload failed with HTTP {(int)uploadResponse.StatusCode} ({uploadResponse.StatusCode}).", GeminiProviderFailureKind.Transport, uploadResponse.StatusCode);
+        }
+
+        var upload = await uploadResponse.Content.ReadFromJsonAsync<GeminiFileUploadResponse>(cancellationToken: cancellationToken)
+            ?? throw new GeminiProviderException("Gemini Files API returned an empty upload response.", GeminiProviderFailureKind.MalformedResponse);
+        var file = upload.File;
+        if (file is null || string.IsNullOrWhiteSpace(file.Name) || string.IsNullOrWhiteSpace(file.Uri))
+        {
+            throw new GeminiProviderException("Gemini Files API returned an incomplete upload response.", GeminiProviderFailureKind.MalformedResponse);
+        }
+
+        if (!file.Name.StartsWith("files/", StringComparison.Ordinal) || file.Name.Contains("..", StringComparison.Ordinal) || file.Name.Contains('?') || file.Name.Contains('#'))
+        {
+            throw new GeminiProviderException("Gemini returned an invalid Files API file name.", GeminiProviderFailureKind.MalformedResponse);
+        }
+
+        if (!Uri.TryCreate(file.Uri, UriKind.Absolute, out var fileUri) ||
+            fileUri.Scheme != Uri.UriSchemeHttps ||
+            !string.Equals(fileUri.Host, filesEndpoint.Host, StringComparison.OrdinalIgnoreCase))
+        {
+            await DeleteFileAsync(file.Name, cancellationToken);
+            throw new GeminiProviderException("Gemini returned an invalid Files API file URI.", GeminiProviderFailureKind.MalformedResponse);
+        }
+
+        return new GeminiUploadedFile(file.Name, fileUri.AbsoluteUri, string.IsNullOrWhiteSpace(file.MimeType) ? contentType : file.MimeType);
+    }
+
+    internal async Task DeleteFileAsync(string fileName, CancellationToken cancellationToken)
+    {
+        if (!fileName.StartsWith("files/", StringComparison.Ordinal) || fileName.Contains("..", StringComparison.Ordinal) || fileName.Contains('?') || fileName.Contains('#'))
+        {
+            return;
+        }
+
+        using var request = new HttpRequestMessage(HttpMethod.Delete, new Uri($"https://generativelanguage.googleapis.com/v1beta/{fileName}"));
+        request.Headers.TryAddWithoutValidation("x-goog-api-key", _options.ApiKey);
+        using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new GeminiProviderException($"Gemini temporary file cleanup failed with HTTP {(int)response.StatusCode} ({response.StatusCode}).", GeminiProviderFailureKind.Transport, response.StatusCode);
+        }
+    }
+
     public async Task<GeminiInteractionResult> CreateFollowUpAsync(
         string prompt,
         string? previousInteractionId,
@@ -237,7 +328,7 @@ public sealed class GeminiInteractionsClient : IGeminiClient
 
         if (inputs.Skip(1).Any(input =>
             input.Type == "image"
-                ? string.IsNullOrWhiteSpace(input.Data) || input.MimeType != "image/png" || input.Uri is not null
+                ? !IsValidImageInput(input)
                 : input.Type != "text" || string.IsNullOrWhiteSpace(input.Text) || input.Data is not null || input.Uri is not null))
         {
             throw new ArgumentException("A Gemini plan accepts only inline PNG samples and bounded text metadata.", nameof(inputs));
@@ -249,6 +340,24 @@ public sealed class GeminiInteractionsClient : IGeminiClient
         }
 
         return await CreateInteractionAsync(inputs, null, responseSchema, "plan", cancellationToken);
+    }
+
+    private static bool IsValidImageInput(GeminiInteractionInput input)
+    {
+        if (input.MimeType != "image/png")
+        {
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(input.Data) && input.Uri is null)
+        {
+            return true;
+        }
+
+        return input.Data is null &&
+            Uri.TryCreate(input.Uri, UriKind.Absolute, out var uri) &&
+            uri.Scheme == Uri.UriSchemeHttps &&
+            string.Equals(uri.Host, "generativelanguage.googleapis.com", StringComparison.OrdinalIgnoreCase);
     }
 
     private async Task<GeminiInteractionResult> CreateInteractionAsync(
@@ -387,6 +496,11 @@ public sealed class GeminiInteractionsClient : IGeminiClient
         statusCode == (HttpStatusCode)429 ||
         (int)statusCode >= 500;
 
+    private static string? GetHeader(HttpResponseMessage response, string name) =>
+        response.Headers.TryGetValues(name, out var values)
+            ? values.SingleOrDefault()
+            : response.Content.Headers.TryGetValues(name, out values) ? values.SingleOrDefault() : null;
+
     private static GeminiProviderException CreateProviderException(HttpStatusCode statusCode) => statusCode switch
     {
         HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden => new GeminiProviderException("Gemini rejected the configured API key.", GeminiProviderFailureKind.InvalidKey, statusCode),
@@ -394,6 +508,28 @@ public sealed class GeminiInteractionsClient : IGeminiClient
         HttpStatusCode.PaymentRequired => new GeminiProviderException("Gemini reported a quota or billing limit.", GeminiProviderFailureKind.Quota, statusCode),
         _ => new GeminiProviderException($"Gemini follow-up failed with HTTP {(int)statusCode} ({statusCode}).", GeminiProviderFailureKind.Transport, statusCode)
     };
+
+    private sealed record GeminiFileMetadata([property: JsonPropertyName("display_name")] string DisplayName);
+
+    private sealed record GeminiFileUploadStartRequest([property: JsonPropertyName("file")] GeminiFileMetadata File);
+
+    private sealed class GeminiFileUploadResponse
+    {
+        [JsonPropertyName("file")]
+        public GeminiFileUpload? File { get; set; }
+    }
+
+    private sealed class GeminiFileUpload
+    {
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
+
+        [JsonPropertyName("uri")]
+        public string? Uri { get; set; }
+
+        [JsonPropertyName("mime_type")]
+        public string? MimeType { get; set; }
+    }
 
     private sealed record GeminiInteractionRequest(
         [property: JsonPropertyName("model")] string Model,
