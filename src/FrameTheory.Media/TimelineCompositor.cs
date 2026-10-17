@@ -1,4 +1,5 @@
 using System.Globalization;
+using FrameTheory.Captions;
 using FrameTheory.Domain;
 
 namespace FrameTheory.Media;
@@ -13,7 +14,9 @@ public sealed record TimelineVideoRenderPlan
         IReadOnlyDictionary<MediaId, Uri> sources,
         IReadOnlyList<TimelineVideoLayer> layers,
         IReadOnlyList<TimelineAudioLayer>? audioLayers = null,
-        IReadOnlyList<TimelineTitle>? titles = null)
+        IReadOnlyList<TimelineTitle>? titles = null,
+        IReadOnlyList<TimedCaption>? captions = null,
+        TimelineCaptionStyle? captionStyle = null)
     {
         if (width <= 0 || height <= 0 || durationFrames <= 0)
         {
@@ -30,6 +33,8 @@ public sealed record TimelineVideoRenderPlan
         Layers = layers.OrderBy(layer => layer.Order).ToArray();
         AudioLayers = (audioLayers ?? []).OrderBy(layer => layer.Order).ToArray();
         Titles = (titles ?? []).OrderBy(title => title.Order).ToArray();
+        Captions = (captions ?? []).OrderBy(caption => caption.Start).ToArray();
+        CaptionStyle = captionStyle;
     }
 
     public RationalFrameRate FrameRate { get; }
@@ -47,6 +52,10 @@ public sealed record TimelineVideoRenderPlan
     public IReadOnlyList<TimelineAudioLayer> AudioLayers { get; }
 
     public IReadOnlyList<TimelineTitle> Titles { get; }
+
+    public IReadOnlyList<TimedCaption> Captions { get; }
+
+    public TimelineCaptionStyle? CaptionStyle { get; }
 }
 
 public sealed record TimelineFilterGraph(string FilterComplex, IReadOnlyList<Uri> Inputs, string OutputLabel, string? AudioOutputLabel);
@@ -89,6 +98,26 @@ public sealed class TimelineFilterGraphBuilder
             var titleEndFrame = checked(title.TimelineRange.StartFrame + title.TimelineRange.Length);
             filters.Add($"[{currentBase}]drawtext=fontfile='{EscapeDrawText(fontPath)}':text='{EscapeDrawText(title.Text)}':fontsize={title.FontSize}:fontcolor=0x{title.ColorRgb:X6}:x={TitleX(title.Placement)}:y={TitleY(title.Placement)}:enable='between(t,{FormatSeconds(title.TimelineRange.StartFrame, plan.FrameRate)},{FormatSeconds(titleEndFrame, plan.FrameRate)})'[{nextBase}]");
             currentBase = nextBase;
+        }
+
+        if (plan.Captions.Count > 0)
+        {
+            if (plan.CaptionStyle is null)
+            {
+                throw new MediaExportException("Caption rendering requires a validated caption font style.");
+            }
+
+            var captionFontPath = GetFontPath(plan.CaptionStyle.FontPath);
+            for (var index = 0; index < plan.Captions.Count; index++)
+            {
+                var caption = plan.Captions[index];
+                var nextBase = $"caption{index}";
+                var end = caption.End.TotalSeconds.ToString("0.######", CultureInfo.InvariantCulture);
+                var start = caption.Start.TotalSeconds.ToString("0.######", CultureInfo.InvariantCulture);
+                var text = EscapeDrawText(WrapCaptionText(caption.Text, plan.CaptionStyle.MaximumCharactersPerLine));
+                filters.Add($"[{currentBase}]drawtext=fontfile='{EscapeDrawText(captionFontPath)}':text='{text}':fontsize={plan.CaptionStyle.FontSize}:fontcolor=0x{plan.CaptionStyle.ColorRgb:X6}:x=(w-text_w)/2:y=h-text_h-{plan.CaptionStyle.MarginBottom}:enable='between(t,{start},{end})'[{nextBase}]");
+                currentBase = nextBase;
+            }
         }
 
         filters.Add($"[{currentBase}]format=yuv420p,setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv[outv]");
@@ -309,9 +338,11 @@ public sealed class TimelineFilterGraphBuilder
         return new Uri(path);
     }
 
-    private static string GetFontPath(TimelineTitle title)
+    private static string GetFontPath(TimelineTitle title) => GetFontPath(title.FontPath);
+
+    private static string GetFontPath(string fontPath)
     {
-        var path = Path.GetFullPath(title.FontPath);
+        var path = Path.GetFullPath(fontPath);
         if (!File.Exists(path))
         {
             throw new FileNotFoundException("The selected title font was not found.", path);
@@ -323,6 +354,33 @@ public sealed class TimelineFilterGraphBuilder
         }
 
         return path;
+    }
+
+    private static string WrapCaptionText(string text, int maximumCharactersPerLine)
+    {
+        var lines = new List<string>();
+        foreach (var paragraph in text.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n'))
+        {
+            var words = paragraph.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            var line = string.Empty;
+            foreach (var word in words)
+            {
+                if (line.Length > 0 && line.Length + word.Length + 1 > maximumCharactersPerLine)
+                {
+                    lines.Add(line);
+                    line = string.Empty;
+                }
+
+                line = line.Length == 0 ? word : $"{line} {word}";
+            }
+
+            if (line.Length > 0 || words.Length == 0)
+            {
+                lines.Add(line);
+            }
+        }
+
+        return string.Join("\\n", lines);
     }
 
     private static string TitleX(TimelineTitlePlacement placement) => placement switch

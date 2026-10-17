@@ -432,6 +432,26 @@ public sealed class MainWindow : Window
         };
         var captionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         captionStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CaptionStatusText)));
+        var captionFont = new Button { Content = "Choose caption font" };
+        captionFont.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(captionFont);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("OpenType or TrueType font") { Patterns = ["*.ttf", "*.otf"] }]
+            });
+            var path = files.SingleOrDefault()?.TryGetLocalPath();
+            if (path is not null)
+            {
+                RunTimelineAction(() => timeline.SetCaptionFontPath(path));
+            }
+        };
         var export = new Button { Content = "Export composite MP4" };
         export.Click += async (_, _) =>
         {
@@ -480,6 +500,7 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { muteAudio, gainAudio, fadeAudio, clearAudio } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { titleText, addTitle } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { importCaptions, exportCaptions } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { captionFont } },
                     captionStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { export } },
                     exportStatus,

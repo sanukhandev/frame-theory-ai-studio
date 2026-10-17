@@ -1,3 +1,4 @@
+using FrameTheory.Captions;
 using FrameTheory.Domain;
 using FrameTheory.Media;
 
@@ -22,6 +23,12 @@ var overlayTransform = new TimelineVideoTransform(opacity: 0.35, scale: 0.5, off
 var titles = args.Length == 4
     ? new[] { new TimelineTitle("FRAME THEORY", Path.GetFullPath(args[3]), 5, 45, placement: TimelineTitlePlacement.TopCenter) }
     : Array.Empty<TimelineTitle>();
+var captions = args.Length == 4
+    ? new[] { new TimedCaption(1, TimeSpan.FromSeconds(0.2), TimeSpan.FromSeconds(0.8), "caption smoke test words") }
+    : Array.Empty<TimedCaption>();
+var captionStyle = args.Length == 4
+    ? new TimelineCaptionStyle(Path.GetFullPath(args[3]), maximumCharactersPerLine: 12)
+    : null;
 var plan = new TimelineVideoRenderPlan(
     frameRate,
     16,
@@ -44,7 +51,9 @@ var plan = new TimelineVideoRenderPlan(
             new TimelineAudioSegment(audioA, fadeInFrames: 2, fadeOutFrames: 3),
             new TimelineAudioSegment(audioB, gainDb: -3, fadeInFrames: 2, fadeOutFrames: 3)
         ])],
-    titles
+    titles,
+    captions,
+    captionStyle
     );
 var runner = new FfmpegProcessRunner();
 var exporter = new FfmpegTimelineVideoExporter(runner, new FfprobeMediaProbe(runner));

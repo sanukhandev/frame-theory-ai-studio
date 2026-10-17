@@ -40,6 +40,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private readonly Dictionary<TimelineClip, TimelineAudioSegment> _audioSettings = [];
     private readonly List<TimelineTitle> _titles = [];
     private IReadOnlyList<TimedCaption> _captions = [];
+    private string? _captionFontPath;
     private readonly HashSet<MediaId> _mediaIds = [];
     private TimelineGraph _graph;
     private TimelineTransport _transport;
@@ -182,7 +183,9 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
                 clip,
                 animation: _animations.TryGetValue(clip, out var animation) ? animation : null)))],
             audioLayers,
-            _titles);
+            _titles,
+            _captions,
+            _captionFontPath is null ? null : new TimelineCaptionStyle(_captionFontPath));
     }
 
     public void AddTitle(string text, string fontPath)
@@ -206,6 +209,16 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     public void ImportCaptions(string content) => _captions = SrtCaptionFile.Import(content);
 
     public string ExportCaptions() => SrtCaptionFile.Export(_captions);
+
+    public void SetCaptionFontPath(string fontPath)
+    {
+        if (string.IsNullOrWhiteSpace(fontPath))
+        {
+            throw new ArgumentException("A caption font path is required.", nameof(fontPath));
+        }
+
+        _captionFontPath = Path.GetFullPath(fontPath);
+    }
 
     public void ApplyAnimationPresetToSelected(TimelineAnimationPreset preset)
     {

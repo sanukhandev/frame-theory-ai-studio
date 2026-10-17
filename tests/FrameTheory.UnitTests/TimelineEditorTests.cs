@@ -118,6 +118,21 @@ public sealed class TimelineEditorTests
         Xunit.Assert.Equal(10, title.TimelineRange.StartFrame);
     }
 
+    [Xunit.Fact]
+    public void TimelineEditorCarriesCaptionFontIntoRenderPlan()
+    {
+        var source = new Uri("file:///caption.mp4");
+        var metadata = Metadata(source, "caption", 90, hasAudio: false);
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(metadata);
+        editor.ImportCaptions("1\n00:00:00,000 --> 00:00:01,000\nHello");
+        editor.SetCaptionFontPath("C:\\Fonts\\licensed.ttf");
+
+        var plan = editor.BuildRenderPlan(1920, 1080, new Dictionary<MediaId, Uri> { [metadata.Id] = source });
+        Xunit.Assert.Single(plan.Captions);
+        Xunit.Assert.NotNull(plan.CaptionStyle);
+    }
+
     private static MediaSourceMetadata Metadata(Uri uri, string fingerprint, long durationFrames, bool hasAudio = true) => new(
         MediaId.Create(uri, fingerprint),
         uri,

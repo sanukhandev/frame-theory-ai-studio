@@ -4,6 +4,7 @@
     <RootNamespace>FrameTheory.Media</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\FrameTheory.Captions\FrameTheory.Captions.csproj" />
     <ProjectReference Include="..\FrameTheory.Domain\FrameTheory.Domain.csproj" />
     <ProjectReference Include="..\FrameTheory.Color\FrameTheory.Color.csproj" />
   </ItemGroup>
