@@ -140,6 +140,43 @@ public sealed class TimelineProjectPersistenceTests
     }
 
     [Xunit.Fact]
+    public async Task TimelineProjectOpenWorksAfterProjectAndMediaMove()
+    {
+        var sourceDirectory = Path.Combine(Path.GetTempPath(), $"frame-theory-move-{Guid.NewGuid():N}");
+        var movedDirectory = sourceDirectory + "-moved";
+        Directory.CreateDirectory(sourceDirectory);
+        try
+        {
+            var mediaPath = Path.Combine(sourceDirectory, "clip.mp4");
+            await File.WriteAllBytesAsync(mediaPath, [1, 2, 3]);
+            var projectPath = Path.Combine(sourceDirectory, "project.ftstudio");
+            var first = CreateViewModel();
+            await first.ImportFilesAsync([mediaPath], CancellationToken.None);
+            Xunit.Assert.True(await first.SaveTimelineProjectAsync(projectPath, CancellationToken.None));
+
+            Directory.Move(sourceDirectory, movedDirectory);
+            var movedProjectPath = Path.Combine(movedDirectory, "project.ftstudio");
+            var second = CreateViewModel();
+
+            Xunit.Assert.True(await second.OpenTimelineProjectAsync(movedProjectPath, CancellationToken.None));
+            Xunit.Assert.Single(second.ImportedMedia);
+            Xunit.Assert.Empty(second.MissingTimelineMedia);
+        }
+        finally
+        {
+            if (Directory.Exists(sourceDirectory))
+            {
+                Directory.Delete(sourceDirectory, recursive: true);
+            }
+
+            if (Directory.Exists(movedDirectory))
+            {
+                Directory.Delete(movedDirectory, recursive: true);
+            }
+        }
+    }
+
+    [Xunit.Fact]
     public void TimelineStateRejectsMalformedJson()
     {
         Xunit.Assert.Throws<InvalidDataException>(() => TimelineProjectStateJson.Deserialize("{not-json"));

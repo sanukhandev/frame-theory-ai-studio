@@ -10,6 +10,8 @@
 
 **FT-1002 timeline relink checkpoint (2026-10-18):** Video project open now detects missing relative media before mutating the active timeline, exposes the missing references in the Video workspace and atomically relinks selected replacements within the project folder before reopening. Focused persistence/relink coverage passes 5/5; failures and cancellation preserve the current project. Hosted run `39068478308` passed the full three-OS quality and native-media matrix.
 
+**FT-1002 moved-project checkpoint (2026-10-18):** Timeline project save/open now has regression coverage for moving the complete project directory, resolving its relative media after the move and restoring the editable timeline without a relink. Focused persistence coverage passes 7/7; the remaining FT-1002 gate is manual Avalonia UI and platform acceptance.
+
 **Timeline playback checkpoint (2026-10-17):** The Video workspace now exposes cancellable frame-accurate Play/Stop controls. Playback temporarily disables timeline snapping so boundary clamping cannot stall frame advancement, decodes every frame through the shared preview path, restores the prior snapping setting and reports cancellation or completion. Focused playback coverage passes 4/4.
 
 **FT-903 preview proxy checkpoint (2026-10-17):** The Video workspace now exposes an opt-in bounded preview-proxy toggle. When enabled, current-frame preview and playback create or reuse an atomic FFmpeg proxy in the local cache, decode from that proxy, propagate cancellation and report cache usage without replacing the original media. Focused proxy/UI wiring coverage passes 5/5.
@@ -104,7 +106,7 @@
 - [~] FT-803 imported user audio, waveform-derived amplitude/energy beat markers and existing creative title/caption slots; approved watermark asset verification remains open
 - [x] FT-804 single-worker cancellable background export queue with Video workspace cancellation, retry, in-memory job history and real FFmpeg retry smoke; macOS/Linux interruption acceptance remains unverified
 - [x] Timeline project save/open preserves editable timeline state, reimports relative media and remaps media IDs without mutating the current project on failed open
-- [~] Timeline project missing-media detection and transactional relink are implemented and tested; moved-project and manual cross-platform UI acceptance remain open
+- [~] Timeline project missing-media detection, transactional relink and moved-project recovery are implemented and tested; manual cross-platform UI acceptance remains open
 - [~] FT-706 AI transaction undo control, bounded Gemini follow-up transport, typed retry/timeout/cancellation failures, usage accounting, prompt/secret-redacted local history and desktop revision-to-validator wiring are implemented; live provider-to-plan verification remains open
 - [~] FT-901 keyboard workspace/frame shortcuts, scroll-safe layout and automation labels are implemented; interactive 1280x800/HiDPI acceptance remains unverified
 - [~] FT-902 synchronized selected-clip/playhead context, real current-frame FFmpeg preview, cancellable frame-accurate Play/Stop playback and AI approval summary are implemented; full manual workspace acceptance remains open
@@ -132,6 +134,20 @@
 6. Continue FT-1104 with editable speed-ramp curves only after preserving A/V sync and project round-trip evidence.
 
 ## Latest execution record
+```text
+Date/time: 2026-10-18
+Task / Epic: FT-1002 / moved-project recovery
+Git SHA: pending commit
+Files changed: tests/FrameTheory.UnitTests/TimelineProjectPersistenceTests.cs, docs/E2E_JOURNEYS.md, docs/IMPLEMENTATION_STATUS.md
+Actual behavior and UI path: Saving a timeline project beside its media, moving the complete directory, and reopening the moved `.ftstudio` resolves relative media and restores the editable timeline without relink.
+Commands executed + OS: Windows 11 x64 with .NET SDK 10.0.402; focused persistence tests, full Release tests, Release build and formatting verification.
+Test outputs / exit codes: Focused persistence tests passed 7/7; full tests passed 150 unit and 2 golden tests; Release build passed with 0 warnings/errors; formatting verification passed.
+Media fixtures and verification: Temporary byte fixture only; no user media, API key, generated fixture or binary entered Git.
+Known limitations / blockers: Manual Avalonia UI and macOS/Linux interactive acceptance remain unverified; hosted validation follows the pushed commit.
+Next unblocked task: Continue FT-1002/FT-901..FT-905 manual and release-gate evidence while keeping external-input blockers visible.
+```
+
+## Previous execution record
 ```text
 Date/time: 2026-10-18
 Task / Epic: FT-402 / photo source integrity
