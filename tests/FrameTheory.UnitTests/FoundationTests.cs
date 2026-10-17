@@ -114,6 +114,21 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public async Task CapabilityFailureIsVisibleAndRecordedLocally()
+    {
+        var diagnostics = new RecordingDiagnostics();
+        var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
+            new FrameTheory.Desktop.WorkspaceCatalog(),
+            new ThrowingCapabilityDetector(),
+            diagnosticsLog: diagnostics);
+
+        await viewModel.RefreshCapabilitiesAsync(CancellationToken.None);
+
+        Xunit.Assert.Contains("Capability check failed", viewModel.CapabilityStatusText, StringComparison.Ordinal);
+        Xunit.Assert.Equal("capability-check-failed", diagnostics.EventName);
+    }
+
+    [Xunit.Fact]
     public async Task MediaProcessRunnerPassesArgumentsWithoutShellParsing()
     {
         var runner = new FrameTheory.Media.FfmpegProcessRunner();
@@ -173,5 +188,20 @@ public sealed class FoundationTests
     {
         public Task<CapabilityReport> DetectAsync(CancellationToken cancellationToken) => Task.FromResult(
             new CapabilityReport("Test OS", "x64", [new("Storage", CapabilityState.Available, "ready")]));
+    }
+
+    private sealed class ThrowingCapabilityDetector : ICapabilityDetector
+    {
+        public Task<CapabilityReport> DetectAsync(CancellationToken cancellationToken) =>
+            Task.FromException<CapabilityReport>(new InvalidOperationException("synthetic capability failure"));
+    }
+
+    private sealed class RecordingDiagnostics : IDiagnosticsLog
+    {
+        public string LogPath => "synthetic";
+
+        public string? EventName { get; private set; }
+
+        public void Record(string eventName, Exception? exception = null) => EventName = eventName;
     }
 }
