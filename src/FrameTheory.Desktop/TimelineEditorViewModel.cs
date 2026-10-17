@@ -26,6 +26,8 @@ public sealed record TimelineRulerTick(long Frame, TimeSpan Position)
     public override string ToString() => $"{Frame} ({Position.TotalSeconds:0.###}s)";
 }
 
+public sealed record TimelineClipboard(TimelineTrackKind Kind, TimelineClip Clip);
+
 public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 {
     private const int AudioSampleRate = 48000;
@@ -151,6 +153,128 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         Refresh();
     }
 
+    public void InsertClip(TimelineTrackKind kind, TimelineClip clip)
+    {
+        ArgumentNullException.ThrowIfNull(clip);
+        var video = _videoClips.ToArray();
+        var audio = _audioClips.ToArray();
+        if (kind == TimelineTrackKind.Video)
+        {
+            video = [.. video, clip];
+        }
+        else
+        {
+            audio = [.. audio, clip];
+        }
+
+        ApplyClips(video, audio);
+    }
+
+    public TimelineClipboard? CopySelected()
+    {
+        var selected = FindSelected();
+        return selected is null ? null : new TimelineClipboard(selected.Value.Kind, selected.Value.Clip);
+    }
+
+    public void Paste(TimelineClipboard clipboard, long timelineStartFrame)
+    {
+        ArgumentNullException.ThrowIfNull(clipboard);
+        if (timelineStartFrame < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(timelineStartFrame));
+        }
+
+        InsertClip(clipboard.Kind, MoveClip(clipboard.Clip, timelineStartFrame));
+        _selectedTrackId = TrackId(clipboard.Kind);
+        _selectedClipStart = timelineStartFrame;
+        RefreshRows();
+    }
+
+    public void MoveSelected(long timelineStartFrame)
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        if (timelineStartFrame < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(timelineStartFrame));
+        }
+
+        var replacement = MoveClip(selected.Clip, timelineStartFrame);
+        ReplaceSelected(selected.Kind, replacement);
+        _selectedClipStart = timelineStartFrame;
+        RefreshRows();
+    }
+
+    public void SplitSelectedAt(long timelineFrame)
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        if (!selected.Clip.TimelineRange.Contains(timelineFrame) || timelineFrame == selected.Clip.TimelineRange.StartFrame)
+        {
+            throw new ArgumentOutOfRangeException(nameof(timelineFrame));
+        }
+
+        var leftDuration = timelineFrame - selected.Clip.TimelineRange.StartFrame;
+        if (leftDuration == selected.Clip.TimelineRange.Length)
+        {
+            throw new ArgumentOutOfRangeException(nameof(timelineFrame));
+        }
+
+        var rightStart = SourceUnitAt(selected.Clip, timelineFrame);
+        var leftSourceCount = Math.Max(1, rightStart - selected.Clip.SourceStartUnit);
+        var rightSourceCount = Math.Max(1, selected.Clip.SourceUnitCount - leftSourceCount);
+        var left = CreateClip(selected.Clip, selected.Clip.TimelineRange.StartFrame, leftDuration, selected.Clip.SourceStartUnit, leftSourceCount);
+        var right = CreateClip(selected.Clip, timelineFrame, selected.Clip.TimelineRange.Length - leftDuration, rightStart, rightSourceCount);
+        var clips = Clips(selected.Kind).Where(clip => !ReferenceEquals(clip, selected.Clip)).Append(left).Append(right);
+        ApplyClips(selected.Kind == TimelineTrackKind.Video ? clips : _videoClips, selected.Kind == TimelineTrackKind.Audio ? clips : _audioClips);
+        _selectedClipStart = timelineFrame;
+        RefreshRows();
+    }
+
+    public void TrimSelected(long newStartFrame, long newEndFrameExclusive)
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        var range = selected.Clip.TimelineRange;
+        if (newStartFrame < range.StartFrame || newEndFrameExclusive > range.EndFrameExclusive || newEndFrameExclusive <= newStartFrame)
+        {
+            throw new ArgumentOutOfRangeException(nameof(newStartFrame));
+        }
+
+        var sourceStart = SourceUnitAt(selected.Clip, newStartFrame);
+        var sourceEnd = SourceUnitAt(selected.Clip, newEndFrameExclusive - 1);
+        var replacement = CreateClip(
+            selected.Clip,
+            newStartFrame,
+            newEndFrameExclusive - newStartFrame,
+            sourceStart,
+            Math.Max(1, sourceEnd - sourceStart + 1));
+        ReplaceSelected(selected.Kind, replacement);
+        _selectedClipStart = newStartFrame;
+        RefreshRows();
+    }
+
+    public void TrimSelectedEndAt(long timelineFrame)
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        TrimSelected(selected.Clip.TimelineRange.StartFrame, timelineFrame);
+    }
+
+    public void RippleDeleteSelected()
+    {
+        var selected = FindSelected() ?? throw new InvalidOperationException("A timeline clip must be selected.");
+        var deletedRange = selected.Clip.TimelineRange;
+        var video = _videoClips.Where(clip => !ReferenceEquals(clip, selected.Clip)).Select(clip =>
+            clip.TimelineRange.StartFrame >= deletedRange.EndFrameExclusive
+                ? MoveClip(clip, clip.TimelineRange.StartFrame - deletedRange.Length)
+                : clip);
+        var audio = _audioClips.Where(clip => !ReferenceEquals(clip, selected.Clip)).Select(clip =>
+            clip.TimelineRange.StartFrame >= deletedRange.EndFrameExclusive
+                ? MoveClip(clip, clip.TimelineRange.StartFrame - deletedRange.Length)
+                : clip);
+        ApplyClips(video, audio);
+        _selectedTrackId = null;
+        _selectedClipStart = null;
+        RefreshRows();
+    }
+
     public TimelineSeekResult SeekFrame(long frame)
     {
         var target = SnapFrame(Math.Clamp(frame, 0, Math.Max(0, TotalFrames - 1)));
@@ -238,6 +362,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     private void Refresh()
     {
+        var currentFrame = _transport.CurrentFrame;
         var tracks = new List<TimelineTrack>();
         if (_videoClips.Count > 0)
         {
@@ -252,6 +377,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _graph = new TimelineGraph(_projectFrameRate, tracks);
         _transport = new TimelineTransport(_graph);
         TotalFrames = Math.Max(1, tracks.SelectMany(track => track.Clips).Select(clip => clip.TimelineRange.EndFrameExclusive).DefaultIfEmpty(1).Max());
+        _transport.Seek(Math.Clamp(currentFrame, 0, Math.Max(0, TotalFrames - 1)));
         ScrollFrame = Math.Min(ScrollFrame, TotalFrames - 1);
         RefreshRows();
         OnPropertyChanged(nameof(TotalFrames));
@@ -285,4 +411,52 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    private (TimelineTrackKind Kind, TimelineClip Clip)? FindSelected()
+    {
+        if (_selectedTrackId is null || _selectedClipStart is null)
+        {
+            return null;
+        }
+
+        var track = _graph.Tracks.SingleOrDefault(candidate => string.Equals(candidate.Id, _selectedTrackId, StringComparison.OrdinalIgnoreCase));
+        var clip = track?.Clips.SingleOrDefault(candidate => candidate.TimelineRange.StartFrame == _selectedClipStart);
+        return clip is null ? null : (track!.Kind, clip);
+    }
+
+    private IReadOnlyList<TimelineClip> Clips(TimelineTrackKind kind) => kind == TimelineTrackKind.Video ? _videoClips : _audioClips;
+
+    private void ReplaceSelected(TimelineTrackKind kind, TimelineClip replacement)
+    {
+        var clips = Clips(kind).Select(clip => clip.TimelineRange.StartFrame == _selectedClipStart ? replacement : clip);
+        ApplyClips(kind == TimelineTrackKind.Video ? clips : _videoClips, kind == TimelineTrackKind.Audio ? clips : _audioClips);
+    }
+
+    private void ApplyClips(IEnumerable<TimelineClip> video, IEnumerable<TimelineClip> audio)
+    {
+        var videoArray = video.ToArray();
+        var audioArray = audio.ToArray();
+        _ = new TimelineTrack("Video 1", TimelineTrackKind.Video, videoArray);
+        _ = new TimelineTrack("Audio 1", TimelineTrackKind.Audio, audioArray);
+        _videoClips.Clear();
+        _videoClips.AddRange(videoArray);
+        _audioClips.Clear();
+        _audioClips.AddRange(audioArray);
+        Refresh();
+    }
+
+    private long SourceUnitAt(TimelineClip clip, long timelineFrame) =>
+        clip.IsVideo
+            ? clip.SourceFrameAt(timelineFrame, _projectFrameRate)
+            : clip.SourceSampleAt(timelineFrame, _projectFrameRate);
+
+    private static TimelineClip MoveClip(TimelineClip clip, long timelineStartFrame) =>
+        CreateClip(clip, timelineStartFrame, clip.TimelineRange.Length, clip.SourceStartUnit, clip.SourceUnitCount);
+
+    private static TimelineClip CreateClip(TimelineClip clip, long timelineStartFrame, long timelineDuration, long sourceStart, long sourceCount) =>
+        clip.IsVideo
+            ? TimelineClip.Video(clip.MediaId, sourceStart, sourceCount, timelineStartFrame, timelineDuration, clip.SourceFrameRate!.Value)
+            : TimelineClip.Audio(clip.MediaId, sourceStart, sourceCount, timelineStartFrame, timelineDuration, clip.AudioSampleRate);
+
+    private static string TrackId(TimelineTrackKind kind) => kind == TimelineTrackKind.Video ? "Video 1" : "Audio 1";
 }

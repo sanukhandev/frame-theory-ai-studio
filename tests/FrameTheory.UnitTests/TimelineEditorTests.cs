@@ -43,6 +43,29 @@ public sealed class TimelineEditorTests
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => editor.BuildRulerTicks(0));
     }
 
+    [Xunit.Fact]
+    public void TimelineEditorSupportsCopyPasteSplitTrimRippleDeleteAndOverlapProtection()
+    {
+        var mediaId = MediaId.Parse(new string('d', 64));
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(Metadata(new Uri("file:///clip.mp4"), "d", 90, hasAudio: false));
+        editor.SelectAt(10, "Video 1");
+        var clipboard = editor.CopySelected();
+
+        Xunit.Assert.NotNull(clipboard);
+        editor.Paste(clipboard!, 90);
+        editor.SplitSelectedAt(120);
+        editor.TrimSelected(120, 150);
+        editor.RippleDeleteSelected();
+
+        Xunit.Assert.Equal(120, editor.TotalFrames);
+        Xunit.Assert.Equal(2, editor.TrackRows.Single().Clips.Count);
+        Xunit.Assert.Throws<ArgumentException>(() => editor.InsertClip(
+            TimelineTrackKind.Video,
+            TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1))));
+        Xunit.Assert.Equal(120, editor.TotalFrames);
+    }
+
     private static MediaSourceMetadata Metadata(Uri uri, string fingerprint, long durationFrames, bool hasAudio = true) => new(
         MediaId.Create(uri, fingerprint),
         uri,

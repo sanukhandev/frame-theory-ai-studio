@@ -299,6 +299,50 @@ public sealed class MainWindow : Window
         forward.Click += (_, _) => timeline.Step(1);
         var select = new Button { Content = "Select at playhead" };
         select.Click += (_, _) => timeline.SelectAt(timeline.CurrentFrame, "Video 1");
+        var operationStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        void RunTimelineAction(Action action)
+        {
+            try
+            {
+                action();
+                operationStatus.Text = string.Empty;
+            }
+            catch (ArgumentException exception)
+            {
+                operationStatus.Text = exception.Message;
+            }
+            catch (InvalidOperationException exception)
+            {
+                operationStatus.Text = exception.Message;
+            }
+        }
+
+        TimelineClipboard? clipboard = null;
+        var copy = new Button { Content = "Copy" };
+        copy.Click += (_, _) =>
+        {
+            clipboard = timeline.CopySelected();
+            operationStatus.Text = clipboard is null ? "Select a clip before copying." : "Clip copied.";
+        };
+        var paste = new Button { Content = "Paste at playhead" };
+        paste.Click += (_, _) =>
+        {
+            if (clipboard is null)
+            {
+                operationStatus.Text = "Copy a clip before pasting.";
+                return;
+            }
+
+            RunTimelineAction(() => timeline.Paste(clipboard, timeline.CurrentFrame));
+        };
+        var split = new Button { Content = "Split" };
+        split.Click += (_, _) => RunTimelineAction(() => timeline.SplitSelectedAt(timeline.CurrentFrame));
+        var trim = new Button { Content = "Trim right" };
+        trim.Click += (_, _) => RunTimelineAction(() => timeline.TrimSelectedEndAt(timeline.CurrentFrame));
+        var move = new Button { Content = "Move to playhead" };
+        move.Click += (_, _) => RunTimelineAction(() => timeline.MoveSelected(timeline.CurrentFrame));
+        var rippleDelete = new Button { Content = "Ripple delete" };
+        rippleDelete.Click += (_, _) => RunTimelineAction(timeline.RippleDeleteSelected);
         var scrollBack = new Button { Content = "Scroll ◀" };
         scrollBack.Click += (_, _) => timeline.ScrollBy(-30);
         var scrollForward = new Button { Content = "Scroll ▶" };
@@ -319,6 +363,8 @@ public sealed class MainWindow : Window
                     ruler,
                     tracks,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { back, forward, select, scrollBack, scrollForward } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { copy, paste, split, trim, move, rippleDelete } },
+                    operationStatus,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { snap, new TextBlock { Text = "Zoom" }, zoom } }
                 }
             }
