@@ -53,11 +53,9 @@ public sealed class PhotoImporter
             throw new InvalidOperationException("The selected media is not a still image.");
         }
 
-        var preview = await _decoder.DecodeFrameAsync(
-            file,
-            new RationalFrameRate(1, 1),
-            0,
-            cancellationToken);
+        var preview = _decoder is IRgbaPreviewFrameDecoder rgbaDecoder
+            ? await rgbaDecoder.DecodeRgbaFrameAsync(file, new RationalFrameRate(1, 1), 0, cancellationToken)
+            : await _decoder.DecodeFrameAsync(file, new RationalFrameRate(1, 1), 0, cancellationToken);
         return new PhotoDocument(file, metadata, preview);
     }
 }
@@ -212,6 +210,8 @@ public sealed class PhotoEditState
     }
 
     public byte[] RenderPreview() => RenderRaster().ToPpm();
+
+    public byte[] RenderExportImage() => RenderRaster().ToExportImage();
 
     public PhotoEditState WithLayers(PhotoLayerStack layers) =>
         new(Source, _operations, layers);
@@ -389,11 +389,12 @@ public sealed class PpmRaster
 {
     private const int MaximumPixels = 64 * 1024 * 1024;
 
-    private PpmRaster(int width, int height, byte[] rgbBytes)
+    private PpmRaster(int width, int height, byte[] rgbBytes, byte[]? alphaBytes = null)
     {
         Width = width;
         Height = height;
         RgbBytes = rgbBytes;
+        AlphaBytes = alphaBytes;
     }
 
     public int Width { get; }
@@ -402,11 +403,20 @@ public sealed class PpmRaster
 
     public byte[] RgbBytes { get; }
 
+    public byte[]? AlphaBytes { get; }
+
+    public bool HasAlpha => AlphaBytes is not null;
+
     public static PpmRaster Parse(byte[] bytes)
     {
         ArgumentNullException.ThrowIfNull(bytes);
         var index = 0;
         var magic = ReadToken(bytes, ref index);
+        if (magic == "P7")
+        {
+            return ParsePam(bytes);
+        }
+
         if (magic != "P6" || !int.TryParse(ReadToken(bytes, ref index), out var width) ||
             !int.TryParse(ReadToken(bytes, ref index), out var height) ||
             !int.TryParse(ReadToken(bytes, ref index), out var maximumValue) || maximumValue != 255)
@@ -433,6 +443,8 @@ public sealed class PpmRaster
         return new PpmRaster(width, height, bytes[index..].ToArray());
     }
 
+    public byte[] ToExportImage() => HasAlpha ? ToPam() : ToPpm();
+
     public PpmRaster Crop(int x, int y, int width, int height)
     {
         if (x < 0 || y < 0 || width <= 0 || height <= 0 || x > Width - width || y > Height - height)
@@ -441,14 +453,16 @@ public sealed class PpmRaster
         }
 
         var output = new byte[checked(width * height * 3)];
+        var alpha = AlphaBytes is null ? null : new byte[checked(width * height)];
         for (var row = 0; row < height; row++)
         {
             var sourceOffset = ((y + row) * Width + x) * 3;
             var targetOffset = row * width * 3;
             RgbBytes.AsSpan(sourceOffset, width * 3).CopyTo(output.AsSpan(targetOffset, width * 3));
+            AlphaBytes?.AsSpan((y + row) * Width + x, width).CopyTo(alpha!.AsSpan(row * width, width));
         }
 
-        return new PpmRaster(width, height, output);
+        return new PpmRaster(width, height, output, alpha);
     }
 
     public PpmRaster Rotate(int degrees)
@@ -472,6 +486,7 @@ public sealed class PpmRaster
         }
 
         var output = new byte[checked(width * height * 3)];
+        var alpha = AlphaBytes is null ? null : new byte[checked(width * height)];
         for (var targetY = 0; targetY < height; targetY++)
         {
             var sourceY = targetY * Height / height;
@@ -481,10 +496,14 @@ public sealed class PpmRaster
                 var sourceOffset = (sourceY * Width + sourceX) * 3;
                 var targetOffset = (targetY * width + targetX) * 3;
                 RgbBytes.AsSpan(sourceOffset, 3).CopyTo(output.AsSpan(targetOffset, 3));
+                if (alpha is not null)
+                {
+                    alpha[targetY * width + targetX] = AlphaBytes![sourceY * Width + sourceX];
+                }
             }
         }
 
-        return new PpmRaster(width, height, output);
+        return new PpmRaster(width, height, output, alpha);
     }
 
     public PpmRaster Apply(ColorGraph graph, ColorGrade grade)
@@ -501,7 +520,7 @@ public sealed class PpmRaster
             output[index + 2] = ToByte(color.Blue);
         }
 
-        return new PpmRaster(Width, Height, output);
+        return new PpmRaster(Width, Height, output, AlphaBytes?.ToArray());
     }
 
     public byte[] ToPpm()
@@ -513,9 +532,33 @@ public sealed class PpmRaster
         return output;
     }
 
+    public byte[] ToPam()
+    {
+        if (AlphaBytes is null)
+        {
+            throw new InvalidOperationException("The raster has no alpha channel.");
+        }
+
+        var header = System.Text.Encoding.ASCII.GetBytes($"P7\nWIDTH {Width}\nHEIGHT {Height}\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n");
+        var output = new byte[checked(header.Length + RgbBytes.Length + AlphaBytes.Length)];
+        header.CopyTo(output, 0);
+        var offset = header.Length;
+        for (var index = 0; index < AlphaBytes.Length; index++)
+        {
+            var rgbOffset = index * 3;
+            output[offset++] = RgbBytes[rgbOffset];
+            output[offset++] = RgbBytes[rgbOffset + 1];
+            output[offset++] = RgbBytes[rgbOffset + 2];
+            output[offset++] = AlphaBytes[index];
+        }
+
+        return output;
+    }
+
     private PpmRaster RotateClockwise()
     {
         var output = new byte[checked(RgbBytes.Length)];
+        var alpha = AlphaBytes is null ? null : new byte[checked(Width * Height)];
         var outputWidth = Height;
         for (var sourceY = 0; sourceY < Height; sourceY++)
         {
@@ -526,10 +569,14 @@ public sealed class PpmRaster
                 var sourceOffset = (sourceY * Width + sourceX) * 3;
                 var targetOffset = (targetY * outputWidth + targetX) * 3;
                 RgbBytes.AsSpan(sourceOffset, 3).CopyTo(output.AsSpan(targetOffset, 3));
+                if (alpha is not null)
+                {
+                    alpha[targetY * outputWidth + targetX] = AlphaBytes![sourceY * Width + sourceX];
+                }
             }
         }
 
-        return new PpmRaster(Height, Width, output);
+        return new PpmRaster(Height, Width, output, alpha);
     }
 
     private static byte ToByte(float value) => (byte)Math.Clamp((int)MathF.Round(value * 255), 0, 255);
@@ -558,5 +605,56 @@ public sealed class PpmRaster
         }
 
         return System.Text.Encoding.ASCII.GetString(bytes, start, index - start);
+    }
+
+    private static PpmRaster ParsePam(byte[] bytes)
+    {
+        var headerEnd = System.Text.Encoding.ASCII.GetString(bytes, 0, Math.Min(bytes.Length, 4096))
+            .IndexOf("ENDHDR", StringComparison.Ordinal);
+        if (headerEnd < 0)
+        {
+            throw new InvalidDataException("The PAM header is invalid.");
+        }
+
+        var dataStart = headerEnd + "ENDHDR".Length;
+        while (dataStart < bytes.Length && (bytes[dataStart] is 9 or 10 or 13 or 32))
+        {
+            dataStart++;
+        }
+
+        var header = System.Text.Encoding.ASCII.GetString(bytes, 0, dataStart);
+        var values = header.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+            .Select(line => line.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries))
+            .Where(parts => parts.Length == 2)
+            .ToDictionary(parts => parts[0], parts => parts[1], StringComparer.Ordinal);
+        if (!int.TryParse(values.GetValueOrDefault("WIDTH"), out var width) ||
+            !int.TryParse(values.GetValueOrDefault("HEIGHT"), out var height) ||
+            values.GetValueOrDefault("DEPTH") != "4" ||
+            values.GetValueOrDefault("MAXVAL") != "255" ||
+            values.GetValueOrDefault("TUPLTYPE") != "RGB_ALPHA" ||
+            width <= 0 || height <= 0 || (long)width * height > MaximumPixels)
+        {
+            throw new InvalidDataException("Only 8-bit RGBA PAM previews are supported.");
+        }
+
+        var expectedBytes = checked(width * height * 4);
+        if (bytes.Length - dataStart != expectedBytes)
+        {
+            throw new InvalidDataException("The PAM pixel data length is invalid.");
+        }
+
+        var rgb = new byte[checked(width * height * 3)];
+        var alpha = new byte[checked(width * height)];
+        for (var index = 0; index < alpha.Length; index++)
+        {
+            var sourceOffset = index * 4;
+            var targetOffset = index * 3;
+            rgb[targetOffset] = bytes[dataStart + sourceOffset];
+            rgb[targetOffset + 1] = bytes[dataStart + sourceOffset + 1];
+            rgb[targetOffset + 2] = bytes[dataStart + sourceOffset + 2];
+            alpha[index] = bytes[dataStart + sourceOffset + 3];
+        }
+
+        return new PpmRaster(width, height, rgb, alpha);
     }
 }

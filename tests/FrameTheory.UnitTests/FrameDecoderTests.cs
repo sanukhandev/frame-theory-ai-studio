@@ -58,6 +58,32 @@ public sealed class FrameDecoderTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task DecoderProvidesSeparateCachedRgbaPreviewFrames()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-decode-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "photo.png");
+            await File.WriteAllTextAsync(path, "synthetic placeholder");
+            var runner = new StubProcessRunner();
+            var decoder = new FfmpegFrameDecoder(runner);
+            var uri = new Uri(path);
+
+            var first = await decoder.DecodeRgbaFrameAsync(uri, new RationalFrameRate(1, 1), 0, CancellationToken.None);
+            var cached = await decoder.DecodeRgbaFrameAsync(uri, new RationalFrameRate(1, 1), 0, CancellationToken.None);
+
+            Xunit.Assert.Equal(first, cached);
+            Xunit.Assert.StartsWith("P7", System.Text.Encoding.ASCII.GetString(first, 0, 2));
+            Xunit.Assert.Contains("-pix_fmt rgba", runner.ArgumentsSeen.Single());
+            Xunit.Assert.Equal(1, runner.InvocationCount);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private sealed class StubProcessRunner : IMediaProcessRunner
     {
         public int InvocationCount { get; private set; }
@@ -68,7 +94,10 @@ public sealed class FrameDecoderTests
         {
             InvocationCount++;
             ArgumentsSeen.Add(string.Join(' ', arguments));
-            File.WriteAllBytes(arguments[^1], "P6\n1 1\n255\n\0\0\0"u8.ToArray());
+            var pam = arguments[^1].EndsWith(".pam", StringComparison.OrdinalIgnoreCase);
+            File.WriteAllBytes(arguments[^1], pam
+                ? [.. "P7\nWIDTH 1\nHEIGHT 1\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n"u8, 0, 0, 0, 128]
+                : "P6\n1 1\n255\n\0\0\0"u8.ToArray());
             return Task.FromResult(new MediaProcessResult(0, string.Empty, string.Empty));
         }
     }

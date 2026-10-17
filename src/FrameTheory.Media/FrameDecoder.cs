@@ -14,7 +14,12 @@ public interface IPreviewFrameDecoder
     Task<byte[]> DecodeFrameAsync(Uri file, RationalFrameRate frameRate, long frameIndex, CancellationToken cancellationToken);
 }
 
-public sealed class FfmpegFrameDecoder : IPreviewFrameDecoder
+public interface IRgbaPreviewFrameDecoder
+{
+    Task<byte[]> DecodeRgbaFrameAsync(Uri file, RationalFrameRate frameRate, long frameIndex, CancellationToken cancellationToken);
+}
+
+public sealed class FfmpegFrameDecoder : IPreviewFrameDecoder, IRgbaPreviewFrameDecoder
 {
     private const int MaximumFrameBytes = 20 * 1024 * 1024;
     private readonly IMediaProcessRunner _processRunner;
@@ -39,6 +44,21 @@ public sealed class FfmpegFrameDecoder : IPreviewFrameDecoder
         RationalFrameRate frameRate,
         long frameIndex,
         CancellationToken cancellationToken)
+        => await DecodeFrameInternalAsync(file, frameRate, frameIndex, rgba: false, cancellationToken);
+
+    public async Task<byte[]> DecodeRgbaFrameAsync(
+        Uri file,
+        RationalFrameRate frameRate,
+        long frameIndex,
+        CancellationToken cancellationToken)
+        => await DecodeFrameInternalAsync(file, frameRate, frameIndex, rgba: true, cancellationToken);
+
+    private async Task<byte[]> DecodeFrameInternalAsync(
+        Uri file,
+        RationalFrameRate frameRate,
+        long frameIndex,
+        bool rgba,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(file);
         if (!file.IsFile)
@@ -62,7 +82,7 @@ public sealed class FfmpegFrameDecoder : IPreviewFrameDecoder
             throw new MediaDecodeException("Symlinked media paths are not accepted by the decoder.");
         }
 
-        var cacheKey = $"{file.AbsoluteUri}|{frameRate}|{frameIndex}";
+        var cacheKey = $"{file.AbsoluteUri}|{frameRate}|{frameIndex}|rgba={rgba}";
         var cached = TryGetCached(cacheKey);
         if (cached is not null)
         {
@@ -70,21 +90,26 @@ public sealed class FfmpegFrameDecoder : IPreviewFrameDecoder
         }
 
         cancellationToken.ThrowIfCancellationRequested();
-        var outputPath = Path.Combine(Path.GetTempPath(), $"frame-theory-preview-{Guid.NewGuid():N}.ppm");
+        var outputExtension = rgba ? "pam" : "ppm";
+        var outputPath = Path.Combine(Path.GetTempPath(), $"frame-theory-preview-{Guid.NewGuid():N}.{outputExtension}");
         try
         {
-            var result = await _processRunner.RunAsync(
-                "ffmpeg",
-                [
-                    "-hide_banner", "-loglevel", "error", "-y",
-                    "-i", path,
-                    "-vf", $"select=eq(n\\,{frameIndex})",
-                    "-frames:v", "1",
-                    "-f", "image2",
-                    "-c:v", "ppm",
-                    outputPath
-                ],
-                cancellationToken);
+            var arguments = new List<string>
+            {
+                "-hide_banner", "-loglevel", "error", "-y",
+                "-i", path,
+                "-vf", $"select=eq(n\\,{frameIndex})",
+                "-frames:v", "1",
+                "-f", "image2",
+                "-c:v", rgba ? "pam" : "ppm"
+            };
+            if (rgba)
+            {
+                arguments.AddRange(["-pix_fmt", "rgba"]);
+            }
+
+            arguments.Add(outputPath);
+            var result = await _processRunner.RunAsync("ffmpeg", arguments, cancellationToken);
             if (result.ExitCode != 0 || !File.Exists(outputPath))
             {
                 throw new MediaDecodeException("FFmpeg could not decode the requested frame.");
