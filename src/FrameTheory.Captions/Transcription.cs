@@ -162,6 +162,11 @@ public sealed class GeminiTranscriptionProvider : IProgressiveTranscriptionProvi
             throw new FileNotFoundException("The transcription source was not found.", sourcePath);
         }
 
+        if ((File.GetAttributes(sourcePath) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new InvalidDataException("Symlinked transcription sources are not accepted.");
+        }
+
         var contentType = GetAudioContentType(sourcePath);
         var fileInfo = new FileInfo(sourcePath);
         if (fileInfo.Length == 0)
