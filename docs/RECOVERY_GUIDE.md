@@ -23,4 +23,4 @@ This guide applies to the current portable validation build. It is not an instal
 
 ## Current release limitation
 
-The repository has hosted native-media evidence, checksummed portable publishes and unsigned validation installers. Bundled FFmpeg/ffprobe, signing/notarization, approved branding and clean-host install/relaunch evidence remain open release gates.
+The repository has hosted native-media evidence, checksummed portable publishes, unsigned validation installers and a hosted-validated optional reviewed FFmpeg/ffprobe bundle mechanism. Approved production redistribution, signing/notarization, approved branding and clean-host install/relaunch evidence remain open release gates.
