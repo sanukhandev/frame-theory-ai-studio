@@ -60,6 +60,33 @@ public sealed class TimelineBatchExportTests
         Xunit.Assert.Empty(exporter.Outputs);
     }
 
+    [Xunit.Fact]
+    public async Task BatchSnapshotsTargetsBeforeAsyncExport()
+    {
+        var exporter = new RecordingTimelineExporter();
+        var plan = Plan(16, 9);
+        var targets = new List<TimelineBatchExportTarget>
+        {
+            Target("first", plan, "first.mp4"),
+            Target("second", plan, "second.mp4")
+        };
+
+        var first = true;
+        var progress = new InlineProgress<TimelineBatchExportProgress>(_ =>
+        {
+            if (first)
+            {
+                first = false;
+                targets.Clear();
+            }
+        });
+
+        var receipts = await new TimelineBatchExporter(exporter).ExportAsync(targets, progress, CancellationToken.None);
+
+        Xunit.Assert.Equal(2, receipts.Count);
+        Xunit.Assert.Equal(new[] { "first.mp4", "second.mp4" }, exporter.Outputs.Select(Path.GetFileName));
+    }
+
     private static TimelineBatchExportTarget Target(string name, TimelineVideoRenderPlan plan, string path) =>
         new(name, plan, path, new ExportPreset(plan.Width, plan.Height, plan.FrameRate, includeAudio: false));
 

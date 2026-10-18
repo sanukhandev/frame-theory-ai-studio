@@ -55,8 +55,9 @@ public sealed class TimelineBatchExporter
             throw new ArgumentException("At least one batch export target is required.", nameof(targets));
         }
 
+        var targetSnapshot = targets.ToArray();
         var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var target in targets)
+        foreach (var target in targetSnapshot)
         {
             ArgumentNullException.ThrowIfNull(target);
             if (!paths.Add(target.DestinationPath))
@@ -65,19 +66,19 @@ public sealed class TimelineBatchExporter
             }
         }
 
-        var receipts = new List<ExportReceipt>(targets.Count);
-        for (var index = 0; index < targets.Count; index++)
+        var receipts = new List<ExportReceipt>(targetSnapshot.Length);
+        for (var index = 0; index < targetSnapshot.Length; index++)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            var target = targets[index];
+            var target = targetSnapshot[index];
             var completed = index;
             var targetProgress = new InlineProgress<ExportProgress>(update =>
-                progress?.Report(new TimelineBatchExportProgress(target.Name, completed, targets.Count, update)));
+                progress?.Report(new TimelineBatchExportProgress(target.Name, completed, targetSnapshot.Length, update)));
             receipts.Add(await _exporter.ExportAsync(target.Plan, target.DestinationPath, target.Preset, targetProgress, cancellationToken).ConfigureAwait(false));
             progress?.Report(new TimelineBatchExportProgress(
                 target.Name,
                 index + 1,
-                targets.Count,
+                targetSnapshot.Length,
                 new ExportProgress("Completed", 1)));
         }
 
