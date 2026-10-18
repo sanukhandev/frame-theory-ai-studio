@@ -1999,7 +1999,16 @@ public sealed class MainWindow : Window
         var selectAudio = new Button { Content = "Select audio" };
         AutomationProperties.SetName(selectAudio, "Select audio clip at playhead");
         selectAudio.Click += (_, _) => timeline.SelectAt(timeline.CurrentFrame, "Audio 1");
-        var operationStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var operationStatus = new TextBox
+        {
+            IsReadOnly = true,
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(operationStatus, "Timeline operation status");
         void RunTimelineAction(Action action)
         {

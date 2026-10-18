@@ -250,6 +250,10 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Current frame and timeline position.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBlock>().Single(control => AutomationProperties.GetName(control) == "Timeline ruler")));
+                Xunit.Assert.True(window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline operation status")
+                    .IsReadOnly);
                 var timelineSectionNames = new HashSet<string>(StringComparer.Ordinal)
                 {
                     "Analysis and rough cut section",
