@@ -157,6 +157,7 @@
 5. Keep MLT deferred unless interactive playback parity or a release licensing decision requires a new native engine spike.
 6. Keep FT-1104 open for live-provider and reference-grade semantic acceptance; do not close it on offline or fake-HTTP evidence alone.
 7. Continue FT-1105 only when the approved official asset source is available; do not invent branding assets.
+8. Keep FT-1106 deferred until an approved segmentation/enhancement model, license terms and target hardware baseline are supplied; do not add a fake or unlicensed model.
 
 ## Latest execution record
 ```text
