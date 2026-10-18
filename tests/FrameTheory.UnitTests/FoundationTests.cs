@@ -1359,6 +1359,42 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public async Task MainWindowRendersEveryWorkspaceAtCompactSize()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
+        await session.Dispatch(() =>
+        {
+            var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
+                new FrameTheory.Desktop.WorkspaceCatalog(),
+                new TestCapabilityDetector());
+            var window = new FrameTheory.Desktop.MainWindow(viewModel);
+            try
+            {
+                window.Show();
+                window.Width = 960;
+                window.Height = 640;
+                var tabs = window.GetVisualDescendants()
+                    .OfType<TabControl>()
+                    .Single(control => AutomationProperties.GetName(control) == "Workspaces");
+
+                for (var workspaceIndex = 0; workspaceIndex < 4; workspaceIndex++)
+                {
+                    tabs.SelectedIndex = workspaceIndex;
+                    Dispatcher.UIThread.RunJobs();
+                    AvaloniaHeadlessPlatform.ForceRenderTimerTick(3);
+                    using var frame = window.CaptureRenderedFrame();
+                    Xunit.Assert.NotNull(frame);
+                    Xunit.Assert.Equal(new Avalonia.PixelSize(960, 640), frame.PixelSize);
+                }
+            }
+            finally
+            {
+                window.Close();
+            }
+        }, CancellationToken.None);
+    }
+
+    [Xunit.Fact]
     public async Task ColorScopesRenderFromTheRealInspectorSource()
     {
         using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
