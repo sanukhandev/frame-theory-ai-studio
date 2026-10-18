@@ -36,9 +36,11 @@ jobs:
           }
 
           $null = & pwsh -NoProfile -File scripts/package_windows.ps1 -Version invalid 2>&1
-          if ($LASTEXITCODE -eq 0) {
+          $childExitCode = $LASTEXITCODE
+          if ($childExitCode -eq 0) {
             throw "Windows package version validation did not reject an invalid version."
           }
+          $global:LASTEXITCODE = 0
       - name: Validate Linux package guards
         shell: bash
         run: |
