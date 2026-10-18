@@ -64,6 +64,38 @@ public sealed class MediaProbeTests
     }
 
     [Xunit.Fact]
+    public async Task FfprobeAdapterRejectsMediaUnderSymlinkedParent()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-probe-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-probe-external-");
+        try
+        {
+            var linkedDirectory = Path.Combine(directory.FullName, "media");
+            Directory.CreateSymbolicLink(linkedDirectory, externalDirectory.FullName);
+            var path = Path.Combine(linkedDirectory, "clip.mp4");
+            await File.WriteAllTextAsync(Path.Combine(externalDirectory.FullName, "clip.mp4"), "source");
+
+            await Xunit.Assert.ThrowsAsync<MediaProbeException>(() =>
+                new FfprobeMediaProbe(new StubProcessRunner("{}"))
+                    .ProbeAsync(new Uri(path), CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task FfprobeAdapterClassifiesStillImageExtensionAsImage()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-probe-");

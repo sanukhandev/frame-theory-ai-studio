@@ -79,7 +79,7 @@ public sealed class FfmpegAudioSourcePreparer : IAudioSourcePreparer
             throw new FileNotFoundException("The audio source was not found.", sourcePath);
         }
 
-        if ((File.GetAttributes(sourcePath) & FileAttributes.ReparsePoint) != 0)
+        if (MediaPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new InvalidDataException("Symlinked audio sources are not accepted.");
         }

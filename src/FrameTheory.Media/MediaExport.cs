@@ -168,7 +168,7 @@ public sealed class FfmpegMediaExporter : IMediaExporter
 
     private static void EnsureNotReparsePoint(string path, string description)
     {
-        if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+        if (MediaPathSecurity.ContainsReparsePoint(path))
         {
             throw new MediaExportException($"{description} symlink paths are not accepted.");
         }

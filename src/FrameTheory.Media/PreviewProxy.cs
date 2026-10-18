@@ -62,13 +62,13 @@ public sealed class FfmpegPreviewProxyService
             throw new FileNotFoundException("The preview source was not found.", sourcePath);
         }
 
-        if ((File.GetAttributes(sourcePath) & FileAttributes.ReparsePoint) != 0)
+        if (MediaPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new PreviewProxyException("Symlinked preview sources are not accepted.");
         }
 
         Directory.CreateDirectory(_cacheDirectory);
-        if ((File.GetAttributes(_cacheDirectory) & FileAttributes.ReparsePoint) != 0)
+        if (MediaPathSecurity.ContainsReparsePoint(_cacheDirectory))
         {
             throw new PreviewProxyException("Symlinked preview cache directories are not accepted.");
         }
@@ -82,7 +82,7 @@ public sealed class FfmpegPreviewProxyService
         {
             if (File.Exists(outputPath))
             {
-                if ((File.GetAttributes(outputPath) & FileAttributes.ReparsePoint) != 0)
+                if (MediaPathSecurity.ContainsReparsePoint(outputPath))
                 {
                     throw new PreviewProxyException("Symlinked preview cache entries are not accepted.");
                 }

@@ -637,7 +637,7 @@ public sealed class TimelineFilterGraphBuilder
             throw new FileNotFoundException("A timeline source file was not found.", path);
         }
 
-        if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+        if (MediaPathSecurity.ContainsReparsePoint(path))
         {
             throw new MediaExportException("Symlinked timeline sources are not accepted.");
         }
@@ -658,7 +658,7 @@ public sealed class TimelineFilterGraphBuilder
             throw new FileNotFoundException("The selected watermark file was not found.", watermark.SourcePath);
         }
 
-        if ((File.GetAttributes(watermark.SourcePath) & FileAttributes.ReparsePoint) != 0)
+        if (MediaPathSecurity.ContainsReparsePoint(watermark.SourcePath))
         {
             throw new MediaExportException("Symlinked watermark files are not accepted.");
         }
@@ -676,7 +676,7 @@ public sealed class TimelineFilterGraphBuilder
             throw new FileNotFoundException("The selected title font was not found.", path);
         }
 
-        if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+        if (MediaPathSecurity.ContainsReparsePoint(path))
         {
             throw new MediaExportException("Symlinked title fonts are not accepted.");
         }
@@ -789,12 +789,12 @@ public sealed class FfmpegTimelineVideoExporter : ITimelineVideoExporter
             throw new DirectoryNotFoundException(outputDirectory);
         }
 
-        if ((File.GetAttributes(outputDirectory) & FileAttributes.ReparsePoint) != 0)
+        if (MediaPathSecurity.ContainsReparsePoint(outputDirectory))
         {
             throw new MediaExportException("Export directories that are symlinks are not accepted.");
         }
 
-        if (File.Exists(outputPath) && (File.GetAttributes(outputPath) & FileAttributes.ReparsePoint) != 0)
+        if (File.Exists(outputPath) && MediaPathSecurity.ContainsReparsePoint(outputPath))
         {
             throw new MediaExportException("Export destinations that are symlinks are not accepted.");
         }
