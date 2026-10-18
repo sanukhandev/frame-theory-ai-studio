@@ -3431,6 +3431,7 @@ public sealed class MainWindow : Window
             : BeatDetectionMode.AmplitudePeaks;
         var prepareRoughCut = new Button { Content = "Plan activity rough cut" };
         AutomationProperties.SetName(prepareRoughCut, "Plan waveform activity rough cut");
+        ToolTip.SetTip(prepareRoughCut, "Analyze local waveform activity and prepare a reviewable rough-cut proposal.");
         prepareRoughCut.Click += (_, _) => viewModel.PrepareRoughCutPlan();
         var applyRoughCut = new Button { Content = "Apply reviewed rough cut" };
         applyRoughCut.Classes.Add("primary");
@@ -3490,15 +3491,19 @@ public sealed class MainWindow : Window
         };
         var back = new Button { Content = "◀ Frame" };
         AutomationProperties.SetName(back, "Previous timeline frame");
+        ToolTip.SetTip(back, "Move the playhead back by one exact timeline frame.");
         back.Click += (_, _) => timeline.Step(-1);
         var forward = new Button { Content = "Frame ▶" };
         AutomationProperties.SetName(forward, "Next timeline frame");
+        ToolTip.SetTip(forward, "Move the playhead forward by one exact timeline frame.");
         forward.Click += (_, _) => timeline.Step(1);
         var select = new Button { Content = "Select at playhead" };
         AutomationProperties.SetName(select, "Select video clip at playhead");
+        ToolTip.SetTip(select, "Select the video clip under the current playhead position.");
         select.Click += (_, _) => timeline.SelectAt(timeline.CurrentFrame, "Video 1");
         var selectAudio = new Button { Content = "Select audio" };
         AutomationProperties.SetName(selectAudio, "Select audio clip at playhead");
+        ToolTip.SetTip(selectAudio, "Select the audio clip under the current playhead position.");
         selectAudio.Click += (_, _) => timeline.SelectAt(timeline.CurrentFrame, "Audio 1");
         var operationStatus = new TextBox
         {
@@ -3532,6 +3537,7 @@ public sealed class MainWindow : Window
         TimelineClipboard? clipboard = null;
         var copy = new Button { Content = "Copy" };
         AutomationProperties.SetName(copy, "Copy selected timeline clip");
+        ToolTip.SetTip(copy, "Copy selected timeline clip");
         copy.Click += (_, _) =>
         {
             clipboard = timeline.CopySelected();
@@ -3539,6 +3545,7 @@ public sealed class MainWindow : Window
         };
         var paste = new Button { Content = "Paste at playhead" };
         AutomationProperties.SetName(paste, "Paste timeline clip at playhead");
+        ToolTip.SetTip(paste, "Insert the copied clip at the current playhead position.");
         paste.Click += (_, _) =>
         {
             if (clipboard is null)
@@ -3551,24 +3558,31 @@ public sealed class MainWindow : Window
         };
         var split = new Button { Content = "Split" };
         AutomationProperties.SetName(split, "Split selected timeline clip");
+        ToolTip.SetTip(split, "Split the selected clip at the current playhead position.");
         split.Click += (_, _) => RunTimelineAction(() => timeline.SplitSelectedAt(timeline.CurrentFrame));
         var trim = new Button { Content = "Trim right" };
         AutomationProperties.SetName(trim, "Trim selected clip at playhead");
+        ToolTip.SetTip(trim, "Trim the selected clip's right edge to the playhead.");
         trim.Click += (_, _) => RunTimelineAction(() => timeline.TrimSelectedEndAt(timeline.CurrentFrame));
         var move = new Button { Content = "Move to playhead" };
         AutomationProperties.SetName(move, "Move selected clip to playhead");
+        ToolTip.SetTip(move, "Move the selected clip to the current playhead position.");
         move.Click += (_, _) => RunTimelineAction(() => timeline.MoveSelected(timeline.CurrentFrame));
         var rippleDelete = new Button { Content = "Ripple delete" };
         AutomationProperties.SetName(rippleDelete, "Ripple delete selected clip");
+        ToolTip.SetTip(rippleDelete, "Delete the selected clip and close the resulting timeline gap.");
         rippleDelete.Click += (_, _) => RunTimelineAction(timeline.RippleDeleteSelected);
         var fadeIn = new Button { Content = "Fade in preset" };
         AutomationProperties.SetName(fadeIn, "Apply fade-in animation preset");
+        ToolTip.SetTip(fadeIn, "Apply an editable fade-in animation to the selected clip.");
         fadeIn.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToSelected(TimelineAnimationPreset.FadeIn));
         var pushIn = new Button { Content = "Push in preset" };
         AutomationProperties.SetName(pushIn, "Apply push-in animation preset");
+        ToolTip.SetTip(pushIn, "Apply an editable push-in animation to the selected clip.");
         pushIn.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToSelected(TimelineAnimationPreset.PushIn));
         var clearAnimation = new Button { Content = "Clear animation" };
         AutomationProperties.SetName(clearAnimation, "Clear selected clip animation");
+        ToolTip.SetTip(clearAnimation, "Remove the selected clip's editable animation settings.");
         clearAnimation.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedAnimation);
         var speedRampStart = new TextBox { Text = "1", Width = 55 };
         AutomationProperties.SetName(speedRampStart, "Speed ramp start multiplier");
@@ -3578,6 +3592,7 @@ public sealed class MainWindow : Window
         ToolTip.SetTip(speedRampEnd, "Playback speed at the end of the selected clip, from 0.25× to 4×.");
         var applySpeedRamp = new Button { Content = "Apply speed ramp" };
         AutomationProperties.SetName(applySpeedRamp, "Apply speed ramp");
+        ToolTip.SetTip(applySpeedRamp, "Apply the entered start and end speeds to the selected clip.");
         applySpeedRamp.Click += (_, _) =>
         {
             if (!double.TryParse(speedRampStart.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var startSpeed) ||
@@ -3591,12 +3606,14 @@ public sealed class MainWindow : Window
         };
         var clearSpeedRamp = new Button { Content = "Clear speed ramp" };
         AutomationProperties.SetName(clearSpeedRamp, "Clear speed ramp");
+        ToolTip.SetTip(clearSpeedRamp, "Remove the selected clip's speed ramp and restore normal speed.");
         clearSpeedRamp.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedSpeedRamp);
         var stabilizationRadius = new TextBox { Text = "8", Width = 55 };
         AutomationProperties.SetName(stabilizationRadius, "Stabilization search radius");
         ToolTip.SetTip(stabilizationRadius, "Motion search radius for local stabilization, from 1 to 64.");
         var applyStabilization = new Button { Content = "Apply stabilization" };
         AutomationProperties.SetName(applyStabilization, "Apply stabilization");
+        ToolTip.SetTip(applyStabilization, "Apply local motion stabilization using the entered search radius.");
         applyStabilization.Click += (_, _) =>
         {
             if (!int.TryParse(stabilizationRadius.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var radius))
@@ -3609,6 +3626,7 @@ public sealed class MainWindow : Window
         };
         var clearStabilization = new Button { Content = "Clear stabilization" };
         AutomationProperties.SetName(clearStabilization, "Clear stabilization");
+        ToolTip.SetTip(clearStabilization, "Remove stabilization from the selected clip.");
         clearStabilization.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedStabilization);
         var muteAudio = new Button { Content = "Mute audio" };
         AutomationProperties.SetName(muteAudio, "Mute selected audio");

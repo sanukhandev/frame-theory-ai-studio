@@ -495,7 +495,16 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Playback speed at the start of the selected clip, from 0.25× to 4×.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBox>().Single(control => AutomationProperties.GetName(control) == "Speed ramp start multiplier")));
+                Xunit.Assert.Equal(
+                    "Apply the entered start and end speeds to the selected clip.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Apply speed ramp")));
                 timelineSections["Motion and speed section"].IsExpanded = false;
+                Xunit.Assert.Equal(
+                    "Split the selected clip at the current playhead position.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Split selected timeline clip")));
+                Xunit.Assert.Equal(
+                    "Delete the selected clip and close the resulting timeline gap.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Ripple delete selected clip")));
                 var aspectRatio = window.GetVisualDescendants()
                     .OfType<ComboBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Video export aspect ratio");
