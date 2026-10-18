@@ -149,8 +149,9 @@ jobs:
           $siblingName = Split-Path -Leaf $sibling
           Set-Content -LiteralPath (Join-Path $package "SHA256SUMS.txt") -Value ("{0}  {1}/outside.bin" -f $outsideHash, $siblingName)
           $verifier = Join-Path (Get-Location) "scripts/verify_package.ps1"
-          if ((Get-Content -LiteralPath $verifier -Raw) -notmatch 'ReparsePoint') {
-            throw "Package verifier must reject reparse-point files."
+          $verifierContent = Get-Content -LiteralPath $verifier -Raw
+          if ($verifierContent -notmatch 'ReparsePoint' -or $verifierContent -notmatch 'EnumerateFileSystemEntries') {
+            throw "Package verifier must reject reparse-point entries before recursive hashing."
           }
           Push-Location (Split-Path -Parent $package)
           try {

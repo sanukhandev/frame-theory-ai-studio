@@ -7,6 +7,34 @@ param(
 $ErrorActionPreference = "Stop"
 
 $packageRoot = (Resolve-Path -LiteralPath $PackageDirectory).Path
+$packageRootItem = Get-Item -LiteralPath $packageRoot -Force
+if (-not $packageRootItem.PSIsContainer) {
+    throw "Package path is not a directory: $PackageDirectory"
+}
+if ($packageRootItem.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+    throw "Package directory must not be a reparse point."
+}
+
+function Get-PackageFiles([string]$root) {
+    $directories = [System.Collections.Generic.Stack[string]]::new()
+    $directories.Push($root)
+    while ($directories.Count -gt 0) {
+        $directory = $directories.Pop()
+        foreach ($path in [IO.Directory]::EnumerateFileSystemEntries($directory)) {
+            $item = Get-Item -LiteralPath $path -Force
+            if ($item.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+                throw "Package contains a reparse-point entry: $path"
+            }
+
+            if ($item.PSIsContainer) {
+                $directories.Push($item.FullName)
+            } else {
+                $item
+            }
+        }
+    }
+}
+
 $manifest = if ([string]::IsNullOrWhiteSpace($ManifestPath)) {
     Join-Path $packageRoot "SHA256SUMS.txt"
 } else {
@@ -76,12 +104,7 @@ foreach ($entry in $entries.GetEnumerator()) {
 }
 
 $manifestPath = (Resolve-Path -LiteralPath $manifest).Path
-$actualFiles = @(Get-ChildItem -LiteralPath $packageRoot -File -Recurse | Where-Object FullName -ne $manifestPath)
-foreach ($actualFile in $actualFiles) {
-    if ($actualFile.Attributes -band [IO.FileAttributes]::ReparsePoint) {
-        throw "Package contains a reparse-point file: $($actualFile.FullName)"
-    }
-}
+$actualFiles = @(Get-PackageFiles $packageRoot | Where-Object FullName -ne $manifestPath)
 if ($actualFiles.Count -ne $verified) {
     throw "Manifest covers $verified file(s), but the package contains $($actualFiles.Count) file(s)."
 }
