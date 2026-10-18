@@ -97,6 +97,21 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task TimelineCompositorPreviewFailureIsReportedWithoutEscapingTheUi()
+    {
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new VideoImporter(),
+            timelinePreviewRenderer: new FailingTimelinePreviewRenderer());
+
+        await viewModel.ImportFilesAsync(["preview-failure.mp4"], CancellationToken.None);
+
+        Xunit.Assert.False(await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None));
+        Xunit.Assert.Contains("Timeline preview failed", viewModel.TimelinePreviewStatusText, StringComparison.Ordinal);
+    }
+
+    [Xunit.Fact]
     public async Task TimelineMotionAnalysisUsesDecodedFramesAndRestoresThePlayhead()
     {
         var decoder = new StubPreviewDecoder();
@@ -258,5 +273,11 @@ public sealed class DesktopImportTests
             await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
             return [];
         }
+    }
+
+    private sealed class FailingTimelinePreviewRenderer : ITimelinePreviewRenderer
+    {
+        public Task<byte[]> RenderFrameAsync(TimelineVideoRenderPlan plan, long frameIndex, CancellationToken cancellationToken) =>
+            throw new MediaExportException("invalid preview graph");
     }
 }
