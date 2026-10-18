@@ -278,6 +278,11 @@ public sealed class FoundationTests
                         .OfType<TextBlock>()
                         .Single(control => AutomationProperties.GetName(control) == "Selected media summary")
                         .Text);
+                var selectedMediaChip = window.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => AutomationProperties.GetName(control) == "Selected media chip");
+                Xunit.Assert.Equal(new Avalonia.Thickness(7, 3), selectedMediaChip.Padding);
+                Xunit.Assert.IsType<TextBlock>(selectedMediaChip.Child);
                 Xunit.Assert.Equal(
                     "Imported local media available to the active workspace.",
                     ToolTip.GetTip(importedMediaList));
