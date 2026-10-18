@@ -55,6 +55,28 @@ public sealed class TimelinePreviewTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task RendererReportsProcessFailureAndCleansTemporaryOutput()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-timeline-preview-failure-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            await File.WriteAllTextAsync(sourcePath, "source");
+            var runner = new FailingProcessRunner();
+
+            await Xunit.Assert.ThrowsAsync<MediaDecodeException>(() => new FfmpegTimelinePreviewRenderer(runner)
+                .RenderFrameAsync(CreatePlan(sourcePath), 0, CancellationToken.None));
+
+            Xunit.Assert.NotNull(runner.OutputPath);
+            Xunit.Assert.False(File.Exists(runner.OutputPath));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private static TimelineVideoRenderPlan CreatePlan(string sourcePath)
     {
         var mediaId = MediaId.Create(new Uri(sourcePath), "preview-test");
@@ -78,6 +100,18 @@ public sealed class TimelinePreviewTests
             ArgumentsSeen = string.Join(' ', arguments);
             File.WriteAllBytes(arguments[^1], "P6\n1 1\n255\n\0\0\0"u8.ToArray());
             return Task.FromResult(new MediaProcessResult(0, string.Empty, string.Empty));
+        }
+    }
+
+    private sealed class FailingProcessRunner : IMediaProcessRunner
+    {
+        public string? OutputPath { get; private set; }
+
+        public Task<MediaProcessResult> RunAsync(string executable, IReadOnlyList<string> arguments, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            OutputPath = arguments[^1];
+            return Task.FromResult(new MediaProcessResult(1, string.Empty, "render failed"));
         }
     }
 }
