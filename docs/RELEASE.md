@@ -21,6 +21,8 @@ The output is a validation publish, not an installer. It must be tested on the m
 
 CI writes `SHA256SUMS.txt` for the complete validation artifact set and verifies every listed file before upload with `pwsh ./scripts/verify_package.ps1`. The verifier rejects malformed, duplicate, escaping, missing or modified entries.
 
+CI also creates `frame-theory-<platform>-portable.zip` from the published desktop tree with `pwsh ./scripts/archive_package.ps1`. This is a portable validation archive, not an installer and not a native FFmpeg bundle.
+
 ## Current matrix
 
 | Platform | Build/CI compile | Local GUI/media evidence | Installer/signing |

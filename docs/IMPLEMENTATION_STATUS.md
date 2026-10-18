@@ -132,7 +132,7 @@
 - [~] FT-1002 UC-01..UC-06 executable smoke/test matrix is documented with Windows evidence and hosted photo/video/native-media evidence; interactive and macOS/Linux acceptance remains open
 - [~] FT-1003 dependency inventory and external FFmpeg/native asset assessment are documented; license/CVE clearance and redistribution evidence remain open
 - [x] FT-1004 GitHub Actions verifies Windows/macOS/Linux restore/build/format/test/publish jobs and uploads per-OS SHA-256 manifests; optional signing/notarization is not part of this task claim
-- [~] FT-1005 framework-dependent Windows/macOS/Linux publish scripts and release matrix are documented; installers, native media bundling and signing remain open
+- [~] FT-1005 framework-dependent and opt-in self-contained Windows/macOS/Linux publishes plus checksummed portable validation archives are available; installers, native media bundling and signing remain open
 - [~] FT-1006 V1 acceptance audit is recorded with 48 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
 - [x] FT-1103 audio beat detection, source-timed kinetic word captions, proxy pipeline and editable speed-ramp curves are implemented with persistence, UI and native-export smoke evidence; hosted run `39069354787` passed on Windows, macOS and Linux
 - [x] FT-1101 imported photo overlay composition with normal/multiply/screen blending, opacity, clipping, non-destructive undo, persisted brush masks and clone-style retouch, project persistence and hosted export/reopen smoke
