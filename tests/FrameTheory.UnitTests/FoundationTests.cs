@@ -517,6 +517,8 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Choose the output framing used by the local video renderer.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<ComboBox>().Single(control => AutomationProperties.GetName(control) == "Video export aspect ratio")));
+                Xunit.Assert.Contains(timelineSections["Project and export section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Replacement media");
+                Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Output framing");
                 Xunit.Assert.Equal(
                     "Current frame and timeline position.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBlock>().Single(control => AutomationProperties.GetName(control) == "Timeline ruler")));
@@ -537,6 +539,9 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(220, timelineReplacementPath.MinWidth);
                 Xunit.Assert.Equal(360, timelineReplacementPath.MaxWidth);
                 Xunit.Assert.Equal(HorizontalAlignment.Stretch, timelineReplacementPath.HorizontalAlignment);
+                Xunit.Assert.Equal(
+                    "Enter a contained replacement path relative to the current project folder.",
+                    ToolTip.GetTip(timelineReplacementPath));
                 var rulerPlayhead = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline ruler playhead");

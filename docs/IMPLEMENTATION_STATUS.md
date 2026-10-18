@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 19 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 20 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
 
 **FT-901 photo-inspector grouping checkpoint (2026-10-19):** The Photo mask-and-retouch inspector now presents separate `OVERLAY MASK` and `CLONE RETOUCH` groups, reducing control density without changing edit behavior. Headless production-shell coverage verifies both groups are reachable and the full Release gate passes 271 unit tests and 2 golden tests with a warning-free build, format verification, repository validation and `git diff --check`. Native visual and screen-reader acceptance remains open.
 
@@ -25,6 +25,8 @@
 **Release gate checkpoint (2026-10-19):** The full Release gate after the latest inspector refinements passes 271 unit tests and 2 golden tests, builds with 0 warnings/errors, and passes format verification, repository validation and `git diff --check`. These 18 local commits remain unpushed pending the owner-requested 50-commit boundary.
 
 **FT-901 launch-smoke checkpoint (2026-10-19):** The managed Windows desktop shell smoke launches the current production app and detects the real title `Frame Theory Studio AI` after the latest UI refinements. This verifies startup only; native visual, HiDPI and screen-reader acceptance remain open.
+
+**FT-901 timeline-guidance checkpoint (2026-10-19):** Timeline project relink and output-framing controls now keep persistent labels and trust-boundary guidance beside their live inputs, making missing-media recovery and social framing discoverable in the compact inspector. Focused production-shell coverage and formatting verification pass; relink/export behavior is unchanged.
 
 **FT-901 workspace-render checkpoint (2026-10-19):** The production Skia-backed headless shell now captures all four Video, Photo, Color and AI workspaces at the compact 960×640 surface after real tab selection. Focused render coverage passes 2/2; the full Release suite passes 271 unit tests and 2 golden tests with format verification, repository validation and `git diff --check` green. This strengthens responsive-render evidence but does not replace native visual or screen-reader review.
 

@@ -3946,8 +3946,10 @@ public sealed class MainWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
         AutomationProperties.SetName(timelineReplacementPath, "Timeline replacement media path");
+        ToolTip.SetTip(timelineReplacementPath, "Enter a contained replacement path relative to the current project folder.");
         var missingTimelineMedia = new ListBox { Height = 80 };
         AutomationProperties.SetName(missingTimelineMedia, "Missing timeline media");
+        ToolTip.SetTip(missingTimelineMedia, "Select the missing timeline media entry to relink.");
         missingTimelineMedia.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(MainWindowViewModel.MissingTimelineMedia)));
         missingTimelineMedia.Bind(SelectingItemsControl.SelectedItemProperty, new Binding(nameof(MainWindowViewModel.SelectedMissingTimelineMedia))
         {
@@ -4201,7 +4203,7 @@ public sealed class MainWindow : Window
             CreateSectionContent(
                 CreateFlow(saveProject, openProject),
                 missingTimelineMedia,
-                timelineReplacementPath,
+                CreateLabeledField("Replacement media", timelineReplacementPath),
                 relinkTimelineMedia,
                 projectStatus,
                 CreateFlow(export, batchExport, cancelExport, retryExport),
@@ -4244,7 +4246,7 @@ public sealed class MainWindow : Window
                     FontWeight = FontWeight.SemiBold,
                     Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
                 },
-                CreateFlow(aspectRatio, quickSaveProject, quickExport),
+                CreateFlow(CreateLabeledField("Output framing", aspectRatio), quickSaveProject, quickExport),
                 quickActionStatus,
                 usePreviewProxy,
                 analyzeMotion,
