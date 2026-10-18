@@ -281,6 +281,7 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Live save, export, edit or provider status for the active workspace.",
                     ToolTip.GetTip(activeWorkspaceStatus));
+                Xunit.Assert.Equal(240, activeWorkspaceStatus.MaxWidth);
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(

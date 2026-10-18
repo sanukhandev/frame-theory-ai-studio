@@ -890,7 +890,7 @@ public sealed class MainWindow : Window
         var status = new TextBox
         {
             IsReadOnly = true,
-            MaxWidth = 380,
+            MaxWidth = 240,
             FontSize = 11,
             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
             HorizontalAlignment = HorizontalAlignment.Right,

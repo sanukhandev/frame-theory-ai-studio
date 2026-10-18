@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Workspace status-density checkpoint (2026-10-18):** The duplicated active-workspace status readout now caps at 240px beside the workspace title and mode badge, keeping narrow editor headers aligned while retaining the full status in its tooltip and global capability/status bar. The adaptive-shell contract verifies the compact cap; native visual and HiDPI acceptance remains open.
+
 **P0 parser self-check checkpoint (2026-10-18):** Release validation now exercises a synthetic heading/status fixture before checking the repository, covering both `[P0]` and `[P0, depends ...]` epic forms and the partial-blocker rule. The real validator still passes and reports six partial P0 tasks; this protects the release audit from silently undercounting blockers.
 
 **Responsive grade-control checkpoint (2026-10-18):** Color grade controls now use a fixed label column, a stretchable slider column and a fixed value column instead of a 180px slider row. The compact inspector can therefore shrink or wrap without clipping grade input; the adaptive-shell contract verifies unset slider width and stretch alignment.
