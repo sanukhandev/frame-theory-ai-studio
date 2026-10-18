@@ -3792,6 +3792,8 @@ public sealed class MainWindow : Window
             ItemsSource = new[] { "16:9 landscape", "1:1 square", "9:16 portrait" },
             SelectedIndex = 0,
             MinWidth = 150,
+            MaxWidth = 220,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Left
         };
         AutomationProperties.SetName(aspectRatio, "Video export aspect ratio");
