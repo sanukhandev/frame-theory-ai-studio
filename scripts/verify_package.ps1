@@ -67,8 +67,8 @@ foreach ($entry in $entries.GetEnumerator()) {
     $verified++
 }
 
-$manifestLeaf = [IO.Path]::GetFileName($manifest)
-$actualFiles = @(Get-ChildItem -LiteralPath $packageRoot -File -Recurse | Where-Object Name -ne $manifestLeaf)
+$manifestPath = (Resolve-Path -LiteralPath $manifest).Path
+$actualFiles = @(Get-ChildItem -LiteralPath $packageRoot -File -Recurse | Where-Object FullName -ne $manifestPath)
 if ($actualFiles.Count -ne $verified) {
     throw "Manifest covers $verified file(s), but the package contains $($actualFiles.Count) file(s)."
 }

@@ -90,6 +90,14 @@ jobs:
           & pwsh -NoProfile -File ./scripts/verify_package.ps1 -PackageDirectory $package -ManifestPath (Join-Path $package "SHA256SUMS.txt")
           if ($LASTEXITCODE -ne 0) { throw "A valid package manifest was rejected." }
 
+          New-Item -ItemType Directory -Force -Path (Join-Path $package "nested") | Out-Null
+          Set-Content -LiteralPath (Join-Path $package "nested/SHA256SUMS.txt") -Value "unlisted"
+          $output = & pwsh -NoProfile -File ./scripts/verify_package.ps1 -PackageDirectory $package -ManifestPath (Join-Path $package "SHA256SUMS.txt") 2>&1
+          if ($LASTEXITCODE -eq 0 -or (($output -join "`n") -notmatch 'Manifest covers')) {
+            throw "An unlisted nested manifest was not rejected."
+          }
+          $global:LASTEXITCODE = 0
+
           $outsideHash = (Get-FileHash -Algorithm SHA256 -LiteralPath (Join-Path $sibling "outside.bin")).Hash.ToLowerInvariant()
           $siblingName = Split-Path -Leaf $sibling
           Set-Content -LiteralPath (Join-Path $package "SHA256SUMS.txt") -Value ("{0}  {1}/outside.bin" -f $outsideHash, $siblingName)
