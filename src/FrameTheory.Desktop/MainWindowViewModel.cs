@@ -52,6 +52,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private readonly ICapabilityDetector _capabilityDetector;
     private readonly IDiagnosticsLog _diagnosticsLog;
     private readonly IMediaImporter? _mediaImporter;
+    private readonly IWorkspaceStateStore _workspaceStateStore;
     private int _selectedWorkspaceIndex;
     private string _capabilityStatusText = "Checking local capabilities...";
     private string _mediaImportStatusText = "Drop local media files into the window to import previews.";
@@ -108,9 +109,15 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         IGeminiInteractionHistory? geminiInteractionHistory = null,
         IAudioSourcePreparer? audioSourcePreparer = null,
         IPreviewFrameDecoder? timelinePreviewDecoder = null,
-        FfmpegPreviewProxyService? timelinePreviewProxy = null)
+        FfmpegPreviewProxyService? timelinePreviewProxy = null,
+        IWorkspaceStateStore? workspaceStateStore = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
+        _workspaceStateStore = workspaceStateStore ?? new NoopWorkspaceStateStore();
+        var savedWorkspaceIndex = _workspaceStateStore.LoadSelectedWorkspaceIndex();
+        _selectedWorkspaceIndex = savedWorkspaceIndex >= 0 && savedWorkspaceIndex < Workspaces.Count
+            ? savedWorkspaceIndex
+            : 0;
         _capabilityDetector = capabilityDetector;
         _diagnosticsLog = diagnosticsLog ?? new FileDiagnosticsLog();
         _transcriptionHttpClient = transcriptionHttpClient ?? new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
@@ -512,6 +519,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             _selectedWorkspaceIndex = value;
+            _workspaceStateStore.SaveSelectedWorkspaceIndex(value);
             OnPropertyChanged();
             OnPropertyChanged(nameof(SelectedWorkspace));
         }
@@ -1474,6 +1482,7 @@ public sealed class DesktopServices
             exportQueue: exportQueue,
             diagnosticsLog: _diagnosticsLog,
             timelinePreviewDecoder: decoder,
-            timelinePreviewProxy: previewProxy);
+            timelinePreviewProxy: previewProxy,
+            workspaceStateStore: new FileWorkspaceStateStore());
     }
 }

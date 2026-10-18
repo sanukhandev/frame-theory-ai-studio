@@ -84,6 +84,47 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public void DesktopWorkspaceSelectionPersistsAndRejectsInvalidSavedState()
+    {
+        var state = new TestWorkspaceStateStore(99);
+        var first = new FrameTheory.Desktop.MainWindowViewModel(
+            new FrameTheory.Desktop.WorkspaceCatalog(),
+            new TestCapabilityDetector(),
+            workspaceStateStore: state);
+
+        Xunit.Assert.Equal("Video", first.SelectedWorkspace.Name);
+
+        first.SelectedWorkspaceIndex = 2;
+
+        var reopened = new FrameTheory.Desktop.MainWindowViewModel(
+            new FrameTheory.Desktop.WorkspaceCatalog(),
+            new TestCapabilityDetector(),
+            workspaceStateStore: state);
+
+        Xunit.Assert.Equal("Color", reopened.SelectedWorkspace.Name);
+    }
+
+    [Xunit.Fact]
+    public async Task FileWorkspaceStateStoreRoundTripsAtomically()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-workspace-state-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "state.json");
+            var store = new FrameTheory.Desktop.FileWorkspaceStateStore(path);
+
+            store.SaveSelectedWorkspaceIndex(3);
+
+            Xunit.Assert.Equal(3, store.LoadSelectedWorkspaceIndex());
+            Xunit.Assert.Contains("SelectedWorkspaceIndex", await File.ReadAllTextAsync(path), StringComparison.Ordinal);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public void CapabilitySummaryProvidesActionableMediaDependencyGuidance()
     {
         var report = new CapabilityReport("Test", "x64",
@@ -227,6 +268,15 @@ public sealed class FoundationTests
     {
         public Task<CapabilityReport> DetectAsync(CancellationToken cancellationToken) => Task.FromResult(
             new CapabilityReport("Test OS", "x64", [new("Storage", CapabilityState.Available, "ready")]));
+    }
+
+    private sealed class TestWorkspaceStateStore(int selectedWorkspaceIndex) : FrameTheory.Desktop.IWorkspaceStateStore
+    {
+        private int _selectedWorkspaceIndex = selectedWorkspaceIndex;
+
+        public int LoadSelectedWorkspaceIndex() => _selectedWorkspaceIndex;
+
+        public void SaveSelectedWorkspaceIndex(int index) => _selectedWorkspaceIndex = index;
     }
 
     private sealed class ThrowingCapabilityDetector : ICapabilityDetector
