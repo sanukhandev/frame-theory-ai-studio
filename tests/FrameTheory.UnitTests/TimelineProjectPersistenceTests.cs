@@ -229,6 +229,49 @@ public sealed class TimelineProjectPersistenceTests
     }
 
     [Xunit.Fact]
+    public async Task CanceledProjectOpenPreservesCurrentMissingMediaRecoveryState()
+    {
+        var currentDirectory = Path.Combine(Path.GetTempPath(), $"frame-theory-current-recovery-{Guid.NewGuid():N}");
+        var nextDirectory = Path.Combine(Path.GetTempPath(), $"frame-theory-next-project-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(currentDirectory);
+        Directory.CreateDirectory(nextDirectory);
+        try
+        {
+            var currentMedia = Path.Combine(currentDirectory, "current.mp4");
+            var currentProject = Path.Combine(currentDirectory, "current.ftstudio");
+            await File.WriteAllBytesAsync(currentMedia, [1, 2, 3]);
+            var currentSource = CreateViewModel();
+            await currentSource.ImportFilesAsync([currentMedia], CancellationToken.None);
+            Xunit.Assert.True(await currentSource.SaveTimelineProjectAsync(currentProject, CancellationToken.None));
+            File.Delete(currentMedia);
+
+            var nextMediaA = Path.Combine(nextDirectory, "next-a.mp4");
+            var nextMediaB = Path.Combine(nextDirectory, "next-b.mp4");
+            var nextProject = Path.Combine(nextDirectory, "next.ftstudio");
+            await File.WriteAllBytesAsync(nextMediaA, [4, 5, 6]);
+            await File.WriteAllBytesAsync(nextMediaB, [7, 8, 9]);
+            var nextSource = CreateViewModel();
+            await nextSource.ImportFilesAsync([nextMediaA, nextMediaB], CancellationToken.None);
+            Xunit.Assert.True(await nextSource.SaveTimelineProjectAsync(nextProject, CancellationToken.None));
+
+            using var cancellation = new CancellationTokenSource();
+            var viewModel = CreateViewModel(new CancelAfterFirstProjectImporter(cancellation));
+            Xunit.Assert.False(await viewModel.OpenTimelineProjectAsync(currentProject, CancellationToken.None));
+            Xunit.Assert.Single(viewModel.MissingTimelineMedia);
+
+            Xunit.Assert.False(await viewModel.OpenTimelineProjectAsync(nextProject, cancellation.Token));
+
+            Xunit.Assert.Single(viewModel.MissingTimelineMedia);
+            Xunit.Assert.Contains("canceled", viewModel.TimelineProjectStatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            Directory.Delete(currentDirectory, recursive: true);
+            Directory.Delete(nextDirectory, recursive: true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task TimelineProjectOpenWorksAfterProjectAndMediaMove()
     {
         var sourceDirectory = Path.Combine(Path.GetTempPath(), $"frame-theory-move-{Guid.NewGuid():N}");
@@ -336,10 +379,10 @@ public sealed class TimelineProjectPersistenceTests
         Xunit.Assert.Equal(before, editor.TrackRows);
     }
 
-    private static MainWindowViewModel CreateViewModel() => new(
+    private static MainWindowViewModel CreateViewModel(IMediaImporter? importer = null) => new(
         new WorkspaceCatalog(),
         new StubCapabilityDetector(),
-        new VideoImporter());
+        importer ?? new VideoImporter());
 
     private sealed class StubCapabilityDetector : ICapabilityDetector
     {
@@ -360,6 +403,30 @@ public sealed class TimelineProjectPersistenceTests
                 new RationalFrameRate(30, 1),
                 30,
                 TimeSpan.FromSeconds(1));
+            return Task.FromResult(new ImportedMedia(metadata, null, []));
+        }
+    }
+
+    private sealed class CancelAfterFirstProjectImporter(CancellationTokenSource cancellation) : IMediaImporter
+    {
+        private int _calls;
+
+        public Task<ImportedMedia> ImportAsync(Uri file, CancellationToken cancellationToken)
+        {
+            var metadata = new MediaSourceMetadata(
+                MediaId.Create(file, "persist-test"),
+                file,
+                MediaKind.Video,
+                16,
+                9,
+                new RationalFrameRate(30, 1),
+                30,
+                TimeSpan.FromSeconds(1));
+            if (++_calls == 1)
+            {
+                cancellation.Cancel();
+            }
+
             return Task.FromResult(new ImportedMedia(metadata, null, []));
         }
     }

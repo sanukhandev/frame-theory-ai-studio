@@ -1158,9 +1158,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 return false;
             }
 
-            _pendingTimelineProjectPath = null;
-            _pendingTimelineSnapshot = null;
-            SetMissingTimelineMedia([]);
             var directory = Path.GetDirectoryName(fullPath) ?? throw new ArgumentException("A project directory is required.", nameof(projectPath));
             var imported = new List<(MediaReference Reference, ImportedMedia Media, Uri Source)>();
             foreach (var reference in snapshot.MediaReferences)
