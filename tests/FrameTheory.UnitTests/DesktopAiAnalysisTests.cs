@@ -11,6 +11,12 @@ namespace FrameTheory.UnitTests;
 public sealed class DesktopAiAnalysisTests
 {
     [Xunit.Fact]
+    public void InvalidBrandFontPathIsIgnoredInsteadOfEscapingApproval()
+    {
+        Xunit.Assert.Null(MainWindowViewModel.ResolveBrandFontPath("bad\0font.ttf"));
+    }
+
+    [Xunit.Fact]
     public async Task DesktopAnalysisUploadsApprovedSamplesAndLeavesProposalUnapplied()
     {
         var plan = """

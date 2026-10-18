@@ -597,17 +597,30 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public void ApplyApprovedAiPlan()
     {
         var fonts = new Dictionary<string, string>(StringComparer.Ordinal);
-        var brandFontPath = Environment.GetEnvironmentVariable("FRAME_THEORY_BRAND_FONT_PATH");
-        if (!string.IsNullOrWhiteSpace(brandFontPath))
+        if (ResolveBrandFontPath(Environment.GetEnvironmentVariable("FRAME_THEORY_BRAND_FONT_PATH")) is { } brandFontPath)
         {
-            var fullBrandFontPath = Path.GetFullPath(brandFontPath);
-            if (!LocalPathSecurity.ContainsReparsePoint(fullBrandFontPath) && File.Exists(fullBrandFontPath))
-            {
-                fonts["brand-sans"] = fullBrandFontPath;
-            }
+            fonts["brand-sans"] = brandFontPath;
         }
 
         AiProposal.ApplyApproved(actions => AiEditPlanExecutor.Execute(actions, TimelineEditor, fonts, new Dictionary<string, FrameTheory.Color.ColorGrade>(StringComparer.Ordinal)));
+    }
+
+    internal static string? ResolveBrandFontPath(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return null;
+        }
+
+        try
+        {
+            var fullPath = Path.GetFullPath(path);
+            return !LocalPathSecurity.ContainsReparsePoint(fullPath) && File.Exists(fullPath) ? fullPath : null;
+        }
+        catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
     }
 
     public async Task<bool> RequestAiRevisionAsync(string instruction, string currentPlanJson, CancellationToken cancellationToken)
