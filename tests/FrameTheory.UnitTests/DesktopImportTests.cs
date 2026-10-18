@@ -273,11 +273,23 @@ public sealed class DesktopImportTests
                 Xunit.Assert.Empty(mediaList.Items);
                 Xunit.Assert.True(clear.IsEnabled);
                 Xunit.Assert.True(emptyState.IsVisible);
+                Xunit.Assert.Equal(
+                    "No media selected",
+                    window.GetVisualDescendants()
+                        .OfType<TextBlock>()
+                        .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Selected media summary")
+                        .Text);
 
                 clear.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(2, mediaList.Items.Count);
                 Xunit.Assert.Equal("second.mp4", Xunit.Assert.IsType<ImportedMediaViewModel>(mediaList.SelectedItem).Name);
+                Xunit.Assert.Equal(
+                    "VIDEO  ·  second.mp4",
+                    window.GetVisualDescendants()
+                        .OfType<TextBlock>()
+                        .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Selected media summary")
+                        .Text);
                 Xunit.Assert.False(clear.IsEnabled);
                 Xunit.Assert.False(emptyState.IsVisible);
             }
