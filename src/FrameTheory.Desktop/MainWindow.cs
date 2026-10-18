@@ -1953,15 +1953,51 @@ public sealed class MainWindow : Window
 
         inspector.PropertyChanged += (_, _) => RefreshPreviews();
         RefreshPreviews();
-        var beforeSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var beforeSummary = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(beforeSummary, "Color grade before summary");
-        beforeSummary.Bind(TextBlock.TextProperty, new Binding("ColorInspector.BeforeSummary"));
-        var afterSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        ToolTip.SetTip(beforeSummary, "Summary of the ungraded source preview.");
+        beforeSummary.Bind(TextBox.TextProperty, new Binding("ColorInspector.BeforeSummary"));
+        var afterSummary = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(afterSummary, "Color grade after summary");
-        afterSummary.Bind(TextBlock.TextProperty, new Binding("ColorInspector.AfterSummary"));
-        var scopeSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        ToolTip.SetTip(afterSummary, "Summary of the current graded preview.");
+        afterSummary.Bind(TextBox.TextProperty, new Binding("ColorInspector.AfterSummary"));
+        var scopeSummary = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(scopeSummary, "Color scope summary");
-        scopeSummary.Bind(TextBlock.TextProperty, new Binding("ColorInspector.ScopeSummary"));
+        ToolTip.SetTip(scopeSummary, "Summary of the local post-grade waveform and vectorscope scope.");
+        scopeSummary.Bind(TextBox.TextProperty, new Binding("ColorInspector.ScopeSummary"));
         var status = new TextBox
         {
             IsReadOnly = true,

@@ -629,6 +629,24 @@ public sealed class FoundationTests
                 colorSections["Style library section"].IsExpanded = true;
                 colorSections["Reference match section"].IsExpanded = true;
                 Dispatcher.UIThread.RunJobs();
+                var beforeSummary = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color grade before summary");
+                Xunit.Assert.True(beforeSummary.IsReadOnly);
+                Xunit.Assert.Equal(11, beforeSummary.FontSize);
+                Xunit.Assert.Equal("Summary of the ungraded source preview.", ToolTip.GetTip(beforeSummary));
+                var afterSummary = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color grade after summary");
+                Xunit.Assert.True(afterSummary.IsReadOnly);
+                Xunit.Assert.Equal(11, afterSummary.FontSize);
+                Xunit.Assert.Equal("Summary of the current graded preview.", ToolTip.GetTip(afterSummary));
+                var scopeSummary = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color scope summary");
+                Xunit.Assert.True(scopeSummary.IsReadOnly);
+                Xunit.Assert.Equal(11, scopeSummary.FontSize);
+                Xunit.Assert.Equal("Summary of the local post-grade waveform and vectorscope scope.", ToolTip.GetTip(scopeSummary));
                 var colorStyleStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Color style library status");
