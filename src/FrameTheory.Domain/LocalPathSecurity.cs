@@ -10,7 +10,9 @@ public static class LocalPathSecurity
             : Path.GetDirectoryName(fullPath);
         while (!string.IsNullOrWhiteSpace(current))
         {
-            if ((File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0)
+            var normalizedCurrent = Path.TrimEndingDirectorySeparator(current);
+            if (!IsMacOsSystemAlias(normalizedCurrent) &&
+                (File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0)
             {
                 return true;
             }
@@ -26,4 +28,7 @@ public static class LocalPathSecurity
 
         return false;
     }
+
+    private static bool IsMacOsSystemAlias(string path) =>
+        OperatingSystem.IsMacOS() && path is "/var" or "/tmp" or "/etc";
 }
