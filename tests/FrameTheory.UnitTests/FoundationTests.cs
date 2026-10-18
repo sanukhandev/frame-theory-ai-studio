@@ -89,6 +89,20 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public void LocalPathSecurityAllowsMissingRegularPath()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-path-security-missing-");
+        try
+        {
+            Xunit.Assert.False(LocalPathSecurity.ContainsReparsePoint(Path.Combine(directory.FullName, "future.json")));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public void DesktopShellProvidesAllRequiredWorkspaces()
     {
         var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
