@@ -710,7 +710,20 @@ public sealed class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(preview, "Photo edit preview");
-        void RefreshPreview() => preview.Source = CreateBitmap(editor.PreviewPpm);
+        var previewEmptyState = new TextBlock
+        {
+            Text = "Open an image to begin",
+            FontSize = 12,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        AutomationProperties.SetName(previewEmptyState, "Photo preview empty state");
+        void RefreshPreview()
+        {
+            preview.Source = CreateBitmap(editor.PreviewPpm);
+            previewEmptyState.IsVisible = editor.PreviewPpm is null;
+        }
         editor.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName is nameof(PhotoEditorViewModel.PreviewPpm) or nameof(PhotoEditorViewModel.Current))
@@ -718,6 +731,7 @@ public sealed class MainWindow : Window
                 RefreshPreview();
             }
         };
+        RefreshPreview();
         var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(status, "Photo editor status");
         status.Bind(TextBlock.TextProperty, new Binding(nameof(PhotoEditorViewModel.StatusText)));
@@ -939,7 +953,7 @@ public sealed class MainWindow : Window
             Background = Brushes.Black,
             BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
             BorderThickness = new Thickness(1),
-            Child = new Grid { Children = { preview } }
+            Child = new Grid { Children = { previewEmptyState, preview } }
         };
         return new Border
         {
@@ -1470,6 +1484,15 @@ public sealed class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(timelinePreview, "Timeline current frame preview");
+        var timelinePreviewEmptyState = new TextBlock
+        {
+            Text = "Preview a frame to inspect the timeline",
+            FontSize = 12,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        AutomationProperties.SetName(timelinePreviewEmptyState, "Timeline preview empty state");
         var timelinePreviewStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(timelinePreviewStatus, "Timeline preview status");
         timelinePreviewStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePreviewStatusText)));
@@ -1482,7 +1505,12 @@ public sealed class MainWindow : Window
         var motionAnalysisStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(motionAnalysisStatus, "Timeline motion analysis status");
         motionAnalysisStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.MotionAnalysisStatusText)));
-        void RefreshTimelinePreview() => timelinePreview.Source = CreateBitmap(viewModel.TimelinePreviewPpm);
+        void RefreshTimelinePreview()
+        {
+            timelinePreview.Source = CreateBitmap(viewModel.TimelinePreviewPpm);
+            timelinePreviewEmptyState.IsVisible = viewModel.TimelinePreviewPpm is null;
+        }
+        RefreshTimelinePreview();
         viewModel.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName is nameof(MainWindowViewModel.TimelinePreviewPpm))
@@ -2150,7 +2178,7 @@ public sealed class MainWindow : Window
             MinHeight = 190,
             Margin = new Thickness(0, 0, 12, 0),
             Background = Brushes.Black,
-            Child = timelinePreview
+            Child = new Grid { Children = { timelinePreviewEmptyState, timelinePreview } }
         });
         previewGrid.Children.Add(previewActions);
         Grid.SetColumn(previewActions, 1);
