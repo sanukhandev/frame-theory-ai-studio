@@ -1,5 +1,6 @@
 using FrameTheory.Captions;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace FrameTheory.UnitTests;
@@ -19,7 +20,7 @@ public sealed class TranscriptionTests
             await File.WriteAllTextAsync(transcriptPath, $$"""
                 {
                   "Source": "{{source.AbsoluteUri}}",
-                  "SourceFingerprint": "sha256:fixture",
+                  "SourceFingerprint": "{{Fingerprint(sourcePath)}}",
                   "Words": [
                     { "Text": "hello", "StartMs": 100, "EndMs": 400 },
                     { "Text": "world", "StartMs": 450, "EndMs": 800 }
@@ -29,7 +30,7 @@ public sealed class TranscriptionTests
 
             var result = await new JsonTranscriptProvider(transcriptPath).TranscribeAsync(source, CancellationToken.None);
 
-            Xunit.Assert.Equal("sha256:fixture", result.SourceFingerprint);
+            Xunit.Assert.Equal(Fingerprint(sourcePath), result.SourceFingerprint);
             Xunit.Assert.Equal(CaptionProvenance.VerifiedTranscript, result.Provenance);
             Xunit.Assert.Equal(TimeSpan.FromMilliseconds(450), result.Words[1].Start);
         }
@@ -61,6 +62,32 @@ public sealed class TranscriptionTests
     }
 
     [Xunit.Fact]
+    public async Task JsonProviderRejectsSourceFingerprintMismatch()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-transcript-fingerprint-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "spoken.mp4");
+            var transcriptPath = Path.Combine(directory.FullName, "spoken.transcript.json");
+            await File.WriteAllTextAsync(sourcePath, "media");
+            var source = new Uri(sourcePath);
+            await File.WriteAllTextAsync(transcriptPath, $$"""
+                {
+                  "Source": "{{source.AbsoluteUri}}",
+                  "SourceFingerprint": "sha256:wrong",
+                  "Words": [{ "Text": "hello", "StartMs": 100, "EndMs": 400 }]
+                }
+                """);
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => new JsonTranscriptProvider(transcriptPath).TranscribeAsync(source, CancellationToken.None));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task JsonProviderReportsProgressAndHonorsCancellation()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-transcript-progress-");
@@ -73,7 +100,7 @@ public sealed class TranscriptionTests
             await File.WriteAllTextAsync(transcriptPath, $$"""
                 {
                   "Source": "{{source.AbsoluteUri}}",
-                  "SourceFingerprint": "sha256:fixture",
+                  "SourceFingerprint": "{{Fingerprint(sourcePath)}}",
                   "Words": [{ "Text": "hello", "StartMs": 100, "EndMs": 400 }]
                 }
                 """);
@@ -338,6 +365,9 @@ public sealed class TranscriptionTests
             directory.Delete(true);
         }
     }
+
+    private static string Fingerprint(string path)
+        => $"sha256:{Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant()}";
 
     private sealed class InlineProgress(Action<TranscriptionProgress> callback) : IProgress<TranscriptionProgress>
     {
