@@ -152,6 +152,20 @@ jobs:
         if: steps.detect.outputs.has_solution == 'true'
         shell: pwsh
         run: ./scripts/archive_package.ps1 -PackageDirectory artifacts/publish -OutputPath artifacts/frame-theory-${{ matrix.platform }}-portable.zip
+      - name: Verify portable archive contents
+        if: steps.detect.outputs.has_solution == 'true'
+        shell: pwsh
+        run: |
+          $archivePath = "artifacts/frame-theory-${{ matrix.platform }}-portable.zip"
+          Add-Type -AssemblyName System.IO.Compression
+          $archive = [IO.Compression.ZipFile]::OpenRead((Resolve-Path $archivePath).Path)
+          try {
+            if (-not ($archive.Entries.FullName -contains "FrameTheory.Desktop.dll")) {
+              throw "Portable archive does not contain FrameTheory.Desktop.dll."
+            }
+          } finally {
+            $archive.Dispose()
+          }
       - name: Create SHA-256 manifest
         if: steps.detect.outputs.has_solution == 'true'
         shell: pwsh
