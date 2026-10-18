@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**GitHub backlog audit checkpoint (2026-10-18):** `gh issue list` reports 55 closed issues and 27 open issues. The closed implementation set covers FT-001 through FT-804, FT-903/FT-904, FT-1001/FT-1004, and FT-1101/FT-1103; the remaining open implementation/release items are manual UI/platform acceptance, legal/native redistribution, signing, live-provider or approved-asset gates, plus deferred E11/E12 scope. No open issue is being closed from indirect evidence.
+
 **Latest hosted inspector validation checkpoint (2026-10-18):** Run `39131287232` for pushed commit `53c0f0b` passed documentation/schema validation and Windows, macOS and Linux quality jobs. It includes the corrected Windows UI Automation smoke, which successfully navigated collapsed Video/Color/AI inspector sections before finding nested controls, plus native FFmpeg media smoke, 261 unit tests, 2 golden tests, formatting, portable archives, Windows installer, macOS DMG, Linux DEB, packaged relaunch and checksum artifacts. Manual native visual/HiDPI/screen-reader acceptance remains open.
 
 **UIA guard checkpoint (2026-10-18):** Repository validation now requires the native UI smoke to include explicit inspector-section expansion and coverage for Video titles/captions, Color reference matching and AI activity before checking nested controls. Documentation validation, PowerShell parsing and diff checks pass; hosted confirmation is green in run `39131287232`.
@@ -525,7 +527,7 @@
 - [~] FT-1003 dependency inventory, advisory evidence, per-OS native bundle manifests and external FFmpeg/native asset assessment are documented; license/CVE clearance and redistribution approval remain open
 - [x] FT-1004 GitHub Actions verifies Windows/macOS/Linux restore/build/format/test/publish jobs and uploads per-OS SHA-256 manifests; optional signing/notarization is not part of this task claim
 - [~] FT-1005 framework-dependent and opt-in self-contained publishes, checksummed portable archives, unsigned Windows/macOS/Linux validation installers and the reviewed native-bundle mechanism are available; clean-host production acceptance, legal redistribution and signing remain open
-- [~] FT-1006 V1 acceptance audit is recorded with 54 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
+- [~] FT-1006 V1 acceptance audit is recorded with 55 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
 - [x] FT-1103 audio beat detection, source-timed kinetic word captions, proxy pipeline and editable speed-ramp curves are implemented with persistence, UI and native-export smoke evidence; hosted run `39069354787` passed on Windows, macOS and Linux
 - [x] FT-1101 imported photo overlay composition with normal/multiply/screen blending, opacity, clipping, non-destructive undo, persisted brush masks and clone-style retouch, project persistence and hosted export/reopen smoke
 - [~] FT-1102 mask-aware non-destructive photo grading, deterministic color scopes, translation tracking, decoded-frame motion reporting and persisted FFmpeg stabilization are implemented with Photo/Video workspace controls and hosted graph/build/native evidence; visual-quality acceptance remains open
