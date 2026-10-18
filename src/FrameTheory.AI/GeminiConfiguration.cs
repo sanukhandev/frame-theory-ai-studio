@@ -36,7 +36,8 @@ public sealed class GeminiConfigurationService
 
     public async Task<GeminiConfiguration> SaveAsync(string modelId, string apiKey, CancellationToken cancellationToken)
     {
-        if (!GeminiModelCatalog.Contains(modelId))
+        var normalizedModelId = modelId?.Trim();
+        if (string.IsNullOrWhiteSpace(normalizedModelId) || !GeminiModelCatalog.Contains(normalizedModelId))
         {
             throw new ArgumentException("The selected Gemini model is not supported.", nameof(modelId));
         }
@@ -47,7 +48,7 @@ public sealed class GeminiConfigurationService
         }
 
         await _secretStore.StoreAsync(ApiKeyName, apiKey.Trim(), cancellationToken);
-        return new GeminiConfiguration(modelId, true);
+        return new GeminiConfiguration(normalizedModelId, true);
     }
 
     public async Task DeleteAsync(CancellationToken cancellationToken)

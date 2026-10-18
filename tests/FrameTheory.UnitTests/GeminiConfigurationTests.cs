@@ -13,7 +13,7 @@ public sealed class GeminiConfigurationTests
         var configuration = new GeminiConfigurationService(secrets);
 
         var offline = await configuration.LoadAsync(CancellationToken.None);
-        var saved = await configuration.SaveAsync("gemini-2.5-pro", "test-key-value", CancellationToken.None);
+        var saved = await configuration.SaveAsync(" gemini-2.5-pro ", "test-key-value", CancellationToken.None);
         var loaded = await configuration.LoadAsync(CancellationToken.None);
         var storedSecret = secrets.Values[GeminiConfigurationService.ApiKeyName];
         await configuration.DeleteAsync(CancellationToken.None);
