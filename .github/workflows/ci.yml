@@ -93,7 +93,7 @@ jobs:
           $unixScripts = @('scripts/package.sh', 'scripts/package_macos_dmg.sh', 'scripts/package_linux_deb.sh')
           foreach ($path in $unixScripts) {
             $content = Get-Content -LiteralPath $path -Raw
-            if ($content -notmatch 'ffmpeg_directory' -or $content -notmatch 'ffmpeg' -or $content -notmatch 'ffprobe' -or $content -notmatch '\[ -L ') {
+            if ($content -notmatch 'ffmpeg_directory' -or $content -notmatch 'ffmpeg' -or $content -notmatch 'ffprobe' -or $content -notmatch 'basename' -or $content -notmatch '\[ -L ') {
               throw "$path does not validate the Unix FFmpeg/ffprobe bundle pair."
             }
           }
