@@ -27,7 +27,7 @@ CI also creates `frame-theory-<platform>-portable.zip` from the published deskto
 
 | Platform | Build/CI compile | Local GUI/media evidence | Installer/signing |
 |---|---|---|---|
-| Windows 11 x64 | Local and hosted CI publish verified; latest matrix run `39080954139` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; interactive shell/package relaunch remains open | Portable validation package available; no installer, signing or notarization |
+| Windows 11 x64 | Local and hosted CI publish verified; managed desktop shell startup smoke passed in `39083391933` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; interactive workspace and packaged relaunch remain open | Portable validation package available; no installer, signing or notarization |
 | macOS Apple Silicon/Intel | Hosted restore/build/test/publish and native media smoke verified in `39080954139` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; local GUI/package relaunch not run here | Portable validation package path available; no installer or notarization |
 | Linux x64 | Hosted restore/build/test/publish and native media smoke verified in `39080954139` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; local GUI/package relaunch not run here | Portable validation package path available; no installer or signing |
 
