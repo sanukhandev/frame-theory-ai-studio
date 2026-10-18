@@ -1514,7 +1514,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             var provider = new JsonTranscriptProvider(fullTranscriptPath);
             var result = await provider.TranscribeAsync(
                 new Uri(fullSourcePath),
-                new Progress<TranscriptionProgress>(update => CaptionStatusText = $"{update.Stage} ({update.Fraction:P0})"),
+                new Progress<TranscriptionProgress>(update =>
+                {
+                    if (update.Fraction < 1)
+                    {
+                        CaptionStatusText = $"{update.Stage} ({update.Fraction:P0})";
+                    }
+                }),
                 cancellationToken);
             TimelineEditor.ImportTranscript(result);
             CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} verified transcript caption cue(s) from {Path.GetFileName(fullTranscriptPath)}.";
