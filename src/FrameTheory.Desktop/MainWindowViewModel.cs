@@ -1262,7 +1262,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         ColorInspector.ApplyGrade(grade);
         _pendingReferenceGrade = null;
-        ReferenceAnalysisStatusText = "Applied the reviewed Gemini reference grade; the change remains editable and undoable through the color controls.";
+        ReferenceAnalysisStatusText = "Applied the reviewed Gemini reference grade; the change remains editable through the color controls.";
         return true;
     }
 
