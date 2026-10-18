@@ -49,14 +49,21 @@ public sealed class MainWindow : Window
         tabs.HorizontalContentAlignment = HorizontalAlignment.Stretch;
         tabs.VerticalContentAlignment = VerticalAlignment.Stretch;
         var navigationIndicators = new List<Border>();
+        var navigationDensity = new List<(TabItem Tab, Grid Header, StackPanel Details, TextBlock KeyHint)>();
         foreach (var workspace in viewModel.Workspaces)
         {
-            var navigationHeader = CreateWorkspaceNavHeader(workspace, tabs.Items.Count, out var navigationIndicator);
+            var navigationHeader = CreateWorkspaceNavHeader(
+                workspace,
+                tabs.Items.Count,
+                out var navigationIndicator,
+                out var navigationDetails,
+                out var navigationKeyHint);
             var tab = new TabItem
             {
                 Header = navigationHeader,
                 Content = CreateWorkspaceContent(workspace, viewModel),
                 MinWidth = 152,
+                Width = 152,
                 MinHeight = 62,
                 HorizontalContentAlignment = HorizontalAlignment.Stretch
             };
@@ -64,6 +71,7 @@ public sealed class MainWindow : Window
             ToolTip.SetTip(tab, $"{workspace.Name}: {workspace.Description}");
             tabs.Items.Add(tab);
             navigationIndicators.Add(navigationIndicator);
+            navigationDensity.Add((tab, (Grid)navigationHeader, navigationDetails, navigationKeyHint));
         }
         tabs.Bind(SelectingItemsControl.SelectedIndexProperty, new Binding(nameof(MainWindowViewModel.SelectedWorkspaceIndex))
         {
@@ -81,6 +89,32 @@ public sealed class MainWindow : Window
 
         tabs.SelectionChanged += (_, _) => RefreshWorkspaceNavigation();
         RefreshWorkspaceNavigation();
+        void RefreshNavigationDensity(double width)
+        {
+            var topLevel = TopLevel.GetTopLevel(tabs);
+            var windowWidth = topLevel is Window window && !double.IsNaN(window.Width)
+                ? window.Width
+                : topLevel?.Bounds.Width is > 0
+                    ? topLevel.Bounds.Width
+                    : width > 0 ? width : Width;
+            var compact = windowWidth < 1120;
+            foreach (var (tab, header, details, keyHint) in navigationDensity)
+            {
+                tab.Width = 152;
+                header.HorizontalAlignment = compact ? HorizontalAlignment.Center : HorizontalAlignment.Stretch;
+                details.IsVisible = !compact;
+                keyHint.IsVisible = !compact;
+            }
+        }
+
+        SizeChanged += (_, args) =>
+        {
+            if (IsVisible)
+            {
+                Dispatcher.UIThread.Post(() => RefreshNavigationDensity(args.NewSize.Width));
+            }
+        };
+        RefreshNavigationDensity(Width);
 
         var brand = new StackPanel
         {
@@ -219,6 +253,7 @@ public sealed class MainWindow : Window
         Opened += (_, _) =>
         {
             RefreshHeaderDensity(Bounds.Width > 0 ? Bounds.Width : Width);
+            RefreshNavigationDensity(Bounds.Width > 0 ? Bounds.Width : Width);
             NameUnnamedButtonsForAccessibility();
         };
     }
@@ -307,7 +342,12 @@ public sealed class MainWindow : Window
         }
     }
 
-    private static Control CreateWorkspaceNavHeader(WorkspaceViewModel workspace, int index, out Border activeIndicator)
+    private static Control CreateWorkspaceNavHeader(
+        WorkspaceViewModel workspace,
+        int index,
+        out Border activeIndicator,
+        out StackPanel details,
+        out TextBlock keyHint)
     {
         var shortName = workspace.Name switch
         {
@@ -351,7 +391,7 @@ public sealed class MainWindow : Window
             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
             TextTrimming = TextTrimming.CharacterEllipsis
         };
-        var keyHint = new TextBlock
+        keyHint = new TextBlock
         {
             Text = $"{index + 1}",
             FontSize = 10,
@@ -366,6 +406,7 @@ public sealed class MainWindow : Window
             Spacing = 1,
             Children = { title, descriptor }
         };
+        details = titleStack;
         activeIndicator = new Border
         {
             Width = 3,

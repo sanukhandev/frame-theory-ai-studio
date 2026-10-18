@@ -205,6 +205,17 @@ public sealed class FoundationTests
                 window.Width = 1280;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.True(shortcutHint.IsVisible);
+                Xunit.Assert.All(tabItems, tab =>
+                {
+                    Xunit.Assert.Equal(152, tab.Width);
+                    Xunit.Assert.Equal(HorizontalAlignment.Stretch, Xunit.Assert.IsType<Grid>(tab.Header).HorizontalAlignment);
+                });
+                Xunit.Assert.All(tabItems, tab =>
+                {
+                    var header = Xunit.Assert.IsType<Grid>(tab.Header);
+                    Xunit.Assert.True(header.Children.OfType<StackPanel>().Single().IsVisible);
+                    Xunit.Assert.True(header.Children.OfType<TextBlock>().Single(text => text.Text == (Array.IndexOf(tabItems, tab) + 1).ToString()).IsVisible);
+                });
                 var capabilityStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Capability status");
@@ -220,9 +231,25 @@ public sealed class FoundationTests
                 window.Width = 960;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.False(diagnosticsStatus.IsVisible);
+                Xunit.Assert.All(tabItems, tab =>
+                {
+                    Xunit.Assert.Equal(152, tab.Width);
+                    Xunit.Assert.Equal(HorizontalAlignment.Center, Xunit.Assert.IsType<Grid>(tab.Header).HorizontalAlignment);
+                });
+                Xunit.Assert.All(tabItems, tab =>
+                {
+                    var header = Xunit.Assert.IsType<Grid>(tab.Header);
+                    Xunit.Assert.False(header.Children.OfType<StackPanel>().Single().IsVisible);
+                    Xunit.Assert.False(header.Children.OfType<TextBlock>().Single(text => text.Text == (Array.IndexOf(tabItems, tab) + 1).ToString()).IsVisible);
+                });
                 window.Width = 1280;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.True(diagnosticsStatus.IsVisible);
+                Xunit.Assert.All(tabItems, tab =>
+                {
+                    Xunit.Assert.Equal(152, tab.Width);
+                    Xunit.Assert.Equal(HorizontalAlignment.Stretch, Xunit.Assert.IsType<Grid>(tab.Header).HorizontalAlignment);
+                });
                 var importStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Media import status");
