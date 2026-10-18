@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Hosted responsive editor follow-up checkpoint (2026-10-18):** Quality Gates run `39154109601` for pushed commit `53f9b73` passed documentation/schema validation plus Windows, macOS and Linux restore/build/test, native FFmpeg smoke, formatting, headless shell, Windows UI automation, portable archive, installers/DMG/DEB, packaged relaunch and checksums. It validates responsive Color scopes, Photo previews/export controls, AI/Color inspector inputs, monitor stacking, title input and photo undo/redo shortcuts. Manual native visual, 1280x800/HiDPI and screen-reader acceptance remains open; local native SendKeys smoke remains unverified on this host.
+
 **Responsive photo-export checkpoint (2026-10-18):** Photo format, JPEG quality and social-dimension controls now use bounded responsive widths instead of fixed children, keeping export actions readable when the inspector wraps. Foundation coverage verifies each control’s compact geometry; native visual and HiDPI acceptance remains open.
 
 **Responsive style-input checkpoint (2026-10-18):** Color style-library naming now uses a bounded 140–220px input that stretches with the inspector flow and explains its local-save purpose through a tooltip. Foundation coverage verifies the compact geometry and accessible name.
