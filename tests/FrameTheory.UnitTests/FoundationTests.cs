@@ -840,6 +840,9 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Choose how the imported overlay blends with the photo.",
                     ToolTip.GetTip(overlayBlend));
+                Xunit.Assert.Equal(
+                    "Import a local image as a non-destructive overlay layer.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Import photo overlay")));
                 Xunit.Assert.Contains(photoSections["Layers and blend section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Blend mode");
                 Xunit.Assert.Contains(photoSections["Layers and blend section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Opacity");
                 Xunit.Assert.Equal("100%", window.GetVisualDescendants()
@@ -861,6 +864,9 @@ public sealed class FoundationTests
                 Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "CLONE RETOUCH");
                 Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Center X");
                 Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Source ΔX");
+                Xunit.Assert.Equal(
+                    "Apply an editable clone-retouch operation using the entered source offset.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Apply photo clone retouch")));
                 photoSections["Mask and retouch section"].IsExpanded = false;
                 var photoFormat = window.GetVisualDescendants()
                     .OfType<ComboBox>()
@@ -886,6 +892,9 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Choose the output canvas framing for the photo export.",
                     ToolTip.GetTip(photoSocialPreset));
+                Xunit.Assert.Equal(
+                    "Add the entered exposure value as a non-destructive adjustment layer.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Add photo exposure grade")));
                 photoSections["Layers and blend section"].IsExpanded = false;
                 Xunit.Assert.True(window.GetVisualDescendants()
                     .OfType<TextBlock>()

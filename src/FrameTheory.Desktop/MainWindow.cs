@@ -1489,6 +1489,7 @@ public sealed class MainWindow : Window
         ToolTip.SetTip(overlayBlend, "Choose how the imported overlay blends with the photo.");
         var importOverlay = new Button { Content = "Import overlay" };
         AutomationProperties.SetName(importOverlay, "Import photo overlay");
+        ToolTip.SetTip(importOverlay, "Import a local image as a non-destructive overlay layer.");
         importOverlay.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(importOverlay);
@@ -1516,6 +1517,7 @@ public sealed class MainWindow : Window
         };
         var clearOverlays = new Button { Content = "Clear overlays" };
         AutomationProperties.SetName(clearOverlays, "Clear photo overlays");
+        ToolTip.SetTip(clearOverlays, "Remove all overlay layers without changing the source image.");
         clearOverlays.Click += (_, _) => editor.ClearOverlays();
         var maskX = new TextBox { Text = "0", PlaceholderText = "Mask X", Width = 55 };
         var maskY = new TextBox { Text = "0", PlaceholderText = "Mask Y", Width = 55 };
@@ -1527,6 +1529,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(maskStrength, "Photo mask brush strength");
         var applyMask = new Button { Content = "Mask last overlay" };
         AutomationProperties.SetName(applyMask, "Mask last photo overlay");
+        ToolTip.SetTip(applyMask, "Apply the entered circular mask to the latest overlay layer.");
         applyMask.Click += (_, _) =>
         {
             if (int.TryParse(maskX.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var centerX) &&
@@ -1539,6 +1542,7 @@ public sealed class MainWindow : Window
         };
         var clearMask = new Button { Content = "Clear last mask" };
         AutomationProperties.SetName(clearMask, "Clear last photo overlay mask");
+        ToolTip.SetTip(clearMask, "Remove the mask from the latest overlay layer.");
         clearMask.Click += (_, _) => editor.ClearLastOverlayMask();
         var retouchX = new TextBox { Text = "0", PlaceholderText = "Retouch X", Width = 65 };
         var retouchY = new TextBox { Text = "0", PlaceholderText = "Retouch Y", Width = 65 };
@@ -1554,6 +1558,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(retouchStrength, "Photo retouch brush strength");
         var applyRetouch = new Button { Content = "Apply clone retouch" };
         AutomationProperties.SetName(applyRetouch, "Apply photo clone retouch");
+        ToolTip.SetTip(applyRetouch, "Apply an editable clone-retouch operation using the entered source offset.");
         applyRetouch.Click += (_, _) =>
         {
             if (int.TryParse(retouchX.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var centerX) &&
@@ -1568,12 +1573,14 @@ public sealed class MainWindow : Window
         };
         var clearRetouch = new Button { Content = "Clear retouch" };
         AutomationProperties.SetName(clearRetouch, "Clear photo clone retouch");
+        ToolTip.SetTip(clearRetouch, "Remove the latest clone-retouch operation.");
         clearRetouch.Click += (_, _) => editor.ClearRetouch();
         var gradeExposure = new TextBox { Text = "1", PlaceholderText = "Exposure EV", Width = 90 };
         AutomationProperties.SetName(gradeExposure, "Photo grade exposure");
         ToolTip.SetTip(gradeExposure, "Exposure adjustment in EV applied as a non-destructive photo layer.");
         var addGrade = new Button { Content = "Add exposure grade" };
         AutomationProperties.SetName(addGrade, "Add photo exposure grade");
+        ToolTip.SetTip(addGrade, "Add the entered exposure value as a non-destructive adjustment layer.");
         addGrade.Click += (_, _) =>
         {
             if (float.TryParse(gradeExposure.Text, NumberStyles.Float, CultureInfo.InvariantCulture, out var exposure))
@@ -1583,6 +1590,7 @@ public sealed class MainWindow : Window
         };
         var maskGrade = new Button { Content = "Mask last grade" };
         AutomationProperties.SetName(maskGrade, "Mask last photo grade");
+        ToolTip.SetTip(maskGrade, "Apply the entered circular mask to the latest exposure grade.");
         maskGrade.Click += (_, _) =>
         {
             if (int.TryParse(maskX.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var centerX) &&
@@ -1595,6 +1603,7 @@ public sealed class MainWindow : Window
         };
         var clearGradeMask = new Button { Content = "Clear grade mask" };
         AutomationProperties.SetName(clearGradeMask, "Clear last photo grade mask");
+        ToolTip.SetTip(clearGradeMask, "Remove the mask from the latest exposure grade.");
         clearGradeMask.Click += (_, _) => editor.ClearLastAdjustmentLayerMask();
         var format = new ComboBox
         {
