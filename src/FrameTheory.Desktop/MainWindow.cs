@@ -364,8 +364,10 @@ public sealed class MainWindow : Window
 
         var stack = new StackPanel { Spacing = 12 };
         stack.Children.AddRange(children);
-        return new ScrollViewer
+        var workspaceScrollViewer = new ScrollViewer
         {
+            HorizontalContentAlignment = HorizontalAlignment.Stretch,
+            VerticalContentAlignment = VerticalAlignment.Top,
             Content = new Border
             {
                 Margin = new Thickness(20),
@@ -377,6 +379,8 @@ public sealed class MainWindow : Window
                 Child = stack
             }
         };
+        AutomationProperties.SetName(workspaceScrollViewer, $"{workspace.Name} workspace content");
+        return workspaceScrollViewer;
     }
 
     private static Control CreatePhotoRecoveryPanel(MainWindowViewModel viewModel)

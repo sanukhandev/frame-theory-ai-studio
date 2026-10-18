@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive workspace checkpoint (2026-10-18):** Each workspace content surface now explicitly stretches to the available editor width and anchors at the top of its scroll viewport, with automation coverage for all four workspace containers. The Foundation adaptive-shell test, Desktop Release build, formatting and `git diff --check` pass; native resize/HiDPI review remains unverified.
+
 **UI accessibility checkpoint (2026-10-18):** Every visible editor button with an action now has an explicit automation name, including Photo recovery/editor, Color, Gemini settings, timeline editing/audio/caption controls and timeline navigation. The Foundation shell test fails if a content-bearing button is unnamed; Desktop Release build, focused shell test, formatting and `git diff --check` pass. Native visual, keyboard and HiDPI review remains unverified.
 
 **Explicit import control checkpoint (2026-10-18):** Every workspace now exposes a real multi-select `Import media` file-picker action alongside drag/drop, limited to supported local media patterns and routed through the existing path-safe importer. The new control is automation-named and covered by the headless shell test; Desktop Release build, formatting and diff checks pass.
