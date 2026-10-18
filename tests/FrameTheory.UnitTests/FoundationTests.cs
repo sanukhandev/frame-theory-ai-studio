@@ -168,6 +168,11 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     new[] { "Video workspace content", "Photo workspace content", "Color workspace content", "AI workspace content" },
                     workspaceScrollers.Select(AutomationProperties.GetName));
+                var mediaBin = window.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => AutomationProperties.GetName(control) == "Media bin");
+                var mediaBinGrid = Xunit.Assert.IsType<Grid>(mediaBin.Child);
+                Xunit.Assert.Equal(2, mediaBinGrid.ColumnDefinitions.Count);
 
                 var performanceStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
