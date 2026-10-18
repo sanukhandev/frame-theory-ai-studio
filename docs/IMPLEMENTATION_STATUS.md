@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Input accessibility checkpoint (2026-10-18):** Placeholder-driven text inputs now receive stable automation names after the window is opened, and the adaptive-shell test rejects any placeholder-bearing text box without a name. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native screen-reader review remains unverified.
+
 **Media-selection styling checkpoint (2026-10-18):** Imported-media and timeline-track list rows now share dark hover and selected states, keeping the active clip or asset readable without changing selection behavior. The rebuilt Foundation shell test, Release test-project build, formatting and `git diff --check` pass; native visual selection review remains unverified.
 
 **Status-region accessibility checkpoint (2026-10-18):** The live capability and diagnostics footer regions now expose explicit automation names alongside the existing refresh action, and the adaptive-shell test asserts both names. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native screen-reader review remains unverified.

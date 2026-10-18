@@ -191,6 +191,14 @@ public sealed class MainWindow : Window
                 AutomationProperties.SetName(button, text);
             }
         }
+
+        foreach (var textBox in this.GetVisualDescendants().OfType<TextBox>())
+        {
+            if (!string.IsNullOrWhiteSpace(textBox.PlaceholderText) && string.IsNullOrWhiteSpace(AutomationProperties.GetName(textBox)))
+            {
+                AutomationProperties.SetName(textBox, textBox.PlaceholderText);
+            }
+        }
     }
 
     private async void OnDrop(object? sender, DragEventArgs args)

@@ -178,6 +178,9 @@ public sealed class FoundationTests
                 Xunit.Assert.DoesNotContain(window.GetVisualDescendants()
                     .OfType<Button>(),
                     button => button.Content is not null && string.IsNullOrWhiteSpace(AutomationProperties.GetName(button)));
+                Xunit.Assert.DoesNotContain(window.GetVisualDescendants()
+                    .OfType<TextBox>(),
+                    textBox => !string.IsNullOrWhiteSpace(textBox.PlaceholderText) && string.IsNullOrWhiteSpace(AutomationProperties.GetName(textBox)));
 
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
