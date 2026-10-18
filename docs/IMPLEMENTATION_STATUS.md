@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline-preview cleanup checkpoint (2026-10-19):** Rendered timeline-frame cleanup is now best effort, preserving the underlying FFmpeg, decode or cancellation failure when the temporary PPM cannot be removed. Existing timeline preview coverage remains green.
+
 **Frame-decoder cleanup checkpoint (2026-10-19):** Single-frame preview cleanup is now best effort, preserving the decoder or cancellation error when the temporary output cannot be removed. Existing decoder failure and cancellation coverage remains green.
 
 **Photo-export cleanup checkpoint (2026-10-19):** Photo export temporary-file cleanup is now best effort, so an encoder, verification or cancellation error remains the user-visible failure even when the operating system denies cleanup. Existing photo export failure coverage remains green.

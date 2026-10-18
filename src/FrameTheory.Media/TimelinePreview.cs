@@ -86,9 +86,18 @@ public sealed class FfmpegTimelinePreviewRenderer : ITimelinePreviewRenderer
         }
         finally
         {
-            if (File.Exists(outputPath))
+            try
             {
-                File.Delete(outputPath);
+                if (File.Exists(outputPath))
+                {
+                    File.Delete(outputPath);
+                }
+            }
+            catch (IOException)
+            {
+            }
+            catch (UnauthorizedAccessException)
+            {
             }
         }
     }
