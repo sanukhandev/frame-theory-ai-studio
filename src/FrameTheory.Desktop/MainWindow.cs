@@ -2125,6 +2125,7 @@ public sealed class MainWindow : Window
             Mode = BindingMode.TwoWay
         });
         AutomationProperties.SetName(usePreviewProxy, "Use bounded timeline preview proxy");
+        ToolTip.SetTip(usePreviewProxy, "Limit preview decoding to a bounded local proxy for responsive playback.");
         var playhead = new Slider { Minimum = 0, Maximum = Math.Max(1, timeline.TotalFrames - 1), Value = timeline.CurrentFrame };
         AutomationProperties.SetName(playhead, "Timeline playhead frame");
         ToolTip.SetTip(playhead, "Scrub to an exact timeline frame.");
@@ -2434,6 +2435,7 @@ public sealed class MainWindow : Window
         beatMarkers.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.BeatMarkersText"));
         var beatDetection = new ComboBox { ItemsSource = new[] { "Amplitude peaks", "Energy onsets" }, SelectedIndex = 0, Width = 150 };
         AutomationProperties.SetName(beatDetection, "Beat detection mode");
+        ToolTip.SetTip(beatDetection, "Choose the local waveform analysis used for beat markers.");
         beatDetection.SelectionChanged += (_, _) => timeline.BeatDetectionMode = beatDetection.SelectedIndex == 1
             ? BeatDetectionMode.EnergyOnsets
             : BeatDetectionMode.AmplitudePeaks;
@@ -2448,9 +2450,11 @@ public sealed class MainWindow : Window
         roughCutStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.RoughCutStatusText)));
         var snap = new CheckBox { Content = "Snap to clip boundaries" };
         AutomationProperties.SetName(snap, "Snap timeline edits to clip boundaries");
+        ToolTip.SetTip(snap, "Keep clip moves, trims and inserts aligned to nearby clip edges.");
         snap.Bind(ToggleButton.IsCheckedProperty, new Binding("TimelineEditor.SnapEnabled") { Mode = BindingMode.TwoWay });
         var zoom = new Slider { Minimum = 0.05, Maximum = 20, Value = timeline.FramesPerPixel };
         AutomationProperties.SetName(zoom, "Timeline zoom");
+        ToolTip.SetTip(zoom, "Adjust timeline scale in frames per pixel.");
         var zoomValue = new TextBlock
         {
             Text = $"{timeline.FramesPerPixel:0.00} frames/px",
@@ -2908,6 +2912,7 @@ public sealed class MainWindow : Window
         projectStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineProjectStatusText)));
         var aspectRatio = new ComboBox { ItemsSource = new[] { "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
         AutomationProperties.SetName(aspectRatio, "Video export aspect ratio");
+        ToolTip.SetTip(aspectRatio, "Choose the output framing used by the local video renderer.");
         export.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(export);

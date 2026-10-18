@@ -298,6 +298,12 @@ public sealed class FoundationTests
                     "Scrub to an exact timeline frame.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<Slider>().Single(control => AutomationProperties.GetName(control) == "Timeline playhead frame")));
                 Xunit.Assert.Equal(
+                    "Adjust timeline scale in frames per pixel.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Slider>().Single(control => AutomationProperties.GetName(control) == "Timeline zoom")));
+                Xunit.Assert.Equal(
+                    "Choose the output framing used by the local video renderer.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<ComboBox>().Single(control => AutomationProperties.GetName(control) == "Video export aspect ratio")));
+                Xunit.Assert.Equal(
                     "Current frame and timeline position.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBlock>().Single(control => AutomationProperties.GetName(control) == "Timeline ruler")));
                 Xunit.Assert.Equal(
