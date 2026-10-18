@@ -3250,7 +3250,13 @@ public sealed class MainWindow : Window
         var projectStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(projectStatus, "Timeline project status");
         projectStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineProjectStatusText)));
-        var aspectRatio = new ComboBox { ItemsSource = new[] { "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
+        var aspectRatio = new ComboBox
+        {
+            ItemsSource = new[] { "16:9 landscape", "1:1 square", "9:16 portrait" },
+            SelectedIndex = 0,
+            MinWidth = 150,
+            HorizontalContentAlignment = HorizontalAlignment.Left
+        };
         AutomationProperties.SetName(aspectRatio, "Video export aspect ratio");
         ToolTip.SetTip(aspectRatio, "Choose the output framing used by the local video renderer.");
         async Task ExportTimelineFrom(Control source)

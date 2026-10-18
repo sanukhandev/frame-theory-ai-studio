@@ -337,10 +337,12 @@ public sealed class FoundationTests
                 Xunit.Assert.True(timelineSections["Clip editing section"].IsExpanded);
                 Xunit.Assert.False(timelineSections["Project and export section"].IsExpanded);
                 Xunit.Assert.False(timelineSections["Timeline view section"].IsExpanded);
-                Xunit.Assert.True(window.GetVisualDescendants()
+                var aspectRatio = window.GetVisualDescendants()
                     .OfType<ComboBox>()
-                    .Single(control => AutomationProperties.GetName(control) == "Video export aspect ratio")
-                    .IsVisible);
+                    .Single(control => AutomationProperties.GetName(control) == "Video export aspect ratio");
+                Xunit.Assert.True(aspectRatio.IsVisible);
+                Xunit.Assert.Equal(150, aspectRatio.MinWidth);
+                Xunit.Assert.Equal(HorizontalAlignment.Left, aspectRatio.HorizontalContentAlignment);
                 timelineSections["Project and export section"].IsExpanded = true;
                 timelineSections["Timeline view section"].IsExpanded = true;
                 Dispatcher.UIThread.RunJobs();
