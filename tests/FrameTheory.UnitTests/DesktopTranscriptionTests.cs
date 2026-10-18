@@ -137,6 +137,40 @@ public sealed class DesktopTranscriptionTests
     }
 
     [Xunit.Fact]
+    public async Task DesktopCaptionExportRejectsSymlinkedDestinationBeforeWrite()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-caption-export-link-");
+        try
+        {
+            var targetPath = Path.Combine(directory.FullName, "target.srt");
+            var linkedPath = Path.Combine(directory.FullName, "linked.srt");
+            await File.WriteAllTextAsync(targetPath, "original");
+            File.CreateSymbolicLink(linkedPath, targetPath);
+            var viewModel = new MainWindowViewModel(new WorkspaceCatalog(), new TestCapabilityDetector());
+            viewModel.TimelineEditor.ImportCaptions("1\n00:00:00,000 --> 00:00:01,000\nCaption\n");
+
+            var succeeded = await viewModel.ExportCaptionsAsync(linkedPath, CancellationToken.None);
+
+            Xunit.Assert.False(succeeded);
+            Xunit.Assert.Contains("symlinked", viewModel.CaptionStatusText, StringComparison.OrdinalIgnoreCase);
+            Xunit.Assert.Equal("original", await File.ReadAllTextAsync(targetPath));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task DesktopTranscriptionExtractsVideoAudioBeforeUpload()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-transcription-video-");

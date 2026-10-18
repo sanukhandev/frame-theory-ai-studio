@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Exact-ten batch checkpoint (2026-10-18):** The ten local commits after pushed `7c81dd6` are now validated through focused trust-boundary tests; the final desktop caption-I/O slice passes 11/11, with formatting, repository validation and `git diff --check` green. Push is now authorized by the batch policy; hosted cross-platform revalidation remains required.
+
 **Desktop caption-I/O checkpoint (2026-10-18):** Caption import, verified transcript import, local Whisper input and caption export destinations now reject reparse-point paths before reading or writing. A dangling caption-link regression passes; focused desktop caption coverage passes 10/10, with formatting, repository validation and `git diff --check` green. This is local evidence pending the next exact-ten-commit hosted revalidation.
 
 **Recovery dangling-path checkpoint (2026-10-18):** Autosave load/clear and media relink now reject reparse-point paths before missing-file fallbacks; a dangling replacement link is rejected as unsafe rather than reported as an ordinary missing file. Focused recovery coverage passes 6/6; formatting, repository validation and `git diff --check` pass. This is local evidence pending the next exact-ten-commit hosted revalidation.
