@@ -2878,6 +2878,7 @@ public sealed class MainWindow : Window
         timelinePerformanceStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePerformanceStatusText)));
         var analyzeMotion = new Button { Content = "Analyze motion" };
         AutomationProperties.SetName(analyzeMotion, "Analyze timeline motion");
+        ToolTip.SetTip(analyzeMotion, "Analyze motion locally for the active timeline without uploading media.");
         analyzeMotion.Click += async (_, _) => await viewModel.AnalyzeTimelineMotionAsync(CancellationToken.None);
         var motionAnalysisStatus = new TextBox
         {
@@ -4186,6 +4187,7 @@ public sealed class MainWindow : Window
         ToolTip.SetTip(quickActionStatus, "Status for the latest local project save and timeline export.");
         var retryExport = new Button { Content = "Retry last export" };
         AutomationProperties.SetName(retryExport, "Retry last timeline export");
+        ToolTip.SetTip(retryExport, "Retry the most recent local timeline export using its saved settings.");
         retryExport.Click += async (_, _) => await viewModel.RetryLastTimelineExportAsync(CancellationToken.None);
         var watermarkStatus = new TextBox
         {
@@ -4204,9 +4206,11 @@ public sealed class MainWindow : Window
         watermarkStatus.Bind(TextBox.TextProperty, new Binding("TimelineEditor.WatermarkStatusText"));
         var useApprovedWatermark = new Button { Content = "Use Frame Theory watermark" };
         AutomationProperties.SetName(useApprovedWatermark, "Use approved Frame Theory watermark");
+        ToolTip.SetTip(useApprovedWatermark, "Use only the approved Frame Theory watermark asset for this export.");
         useApprovedWatermark.Click += (_, _) => RunTimelineAction(timeline.SetApprovedWatermark);
         var selectWatermark = new Button { Content = "Select watermark" };
         AutomationProperties.SetName(selectWatermark, "Select custom watermark");
+        ToolTip.SetTip(selectWatermark, "Choose a licensed local PNG, JPEG or WebP watermark for this export.");
         selectWatermark.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(selectWatermark);
@@ -4228,12 +4232,15 @@ public sealed class MainWindow : Window
         };
         var clearWatermark = new Button { Content = "Clear watermark" };
         AutomationProperties.SetName(clearWatermark, "Clear watermark");
+        ToolTip.SetTip(clearWatermark, "Remove the watermark from the current timeline export settings.");
         clearWatermark.Click += (_, _) => timeline.ClearWatermark();
         var scrollBack = new Button { Content = "Scroll ◀" };
         AutomationProperties.SetName(scrollBack, "Scroll timeline backward");
+        ToolTip.SetTip(scrollBack, "Scroll the timeline viewport backward by 30 frames.");
         scrollBack.Click += (_, _) => timeline.ScrollBy(-30);
         var scrollForward = new Button { Content = "Scroll ▶" };
         AutomationProperties.SetName(scrollForward, "Scroll timeline forward");
+        ToolTip.SetTip(scrollForward, "Scroll the timeline viewport forward by 30 frames.");
         scrollForward.Click += (_, _) => timeline.ScrollBy(30);
         var analysisSection = CreateInspectorExpander(
             "Analysis and rough cut",

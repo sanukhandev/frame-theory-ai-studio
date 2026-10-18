@@ -651,6 +651,9 @@ public sealed class FoundationTests
                     ToolTip.GetTip(window.GetVisualDescendants()
                         .OfType<TextBox>()
                         .Single(control => AutomationProperties.GetName(control) == "Timeline motion analysis status")));
+                Xunit.Assert.Equal(
+                    "Analyze motion locally for the active timeline without uploading media.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Analyze timeline motion")));
                 Xunit.Assert.True(window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline preview empty state")
@@ -725,6 +728,12 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Status for the latest local project save and timeline export.",
                     ToolTip.GetTip(timelineActionStatus));
+                Xunit.Assert.Equal(
+                    "Use only the approved Frame Theory watermark asset for this export.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Use approved Frame Theory watermark")));
+                Xunit.Assert.Equal(
+                    "Scroll the timeline viewport forward by 30 frames.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Scroll timeline forward")));
                 timelineSections["Analysis and rough cut section"].IsExpanded = true;
                 timelineSections["Titles and captions section"].IsExpanded = true;
                 Dispatcher.UIThread.RunJobs();
