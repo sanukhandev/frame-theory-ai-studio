@@ -3157,9 +3157,18 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(quickSaveProject, "Quick save timeline project");
         ToolTip.SetTip(quickSaveProject, "Save the current editable timeline project to a portable file.");
         quickSaveProject.Click += async (_, _) => await SaveTimelineProjectFrom(quickSaveProject);
-        var quickSaveStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var quickSaveStatus = new TextBox
+        {
+            IsReadOnly = true,
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(quickSaveStatus, "Quick save status");
-        quickSaveStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineProjectStatusText)));
+        quickSaveStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineProjectStatusText)));
         var openProject = new Button { Content = "Open timeline project" };
         AutomationProperties.SetName(openProject, "Open timeline project");
         ToolTip.SetTip(openProject, "Open a Frame Theory project and restore its editable timeline.");
@@ -3250,9 +3259,18 @@ public sealed class MainWindow : Window
         var exportStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(exportStatus, "Timeline export status");
         exportStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
-        var quickExportStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var quickExportStatus = new TextBox
+        {
+            IsReadOnly = true,
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(quickExportStatus, "Quick export status");
-        quickExportStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
+        quickExportStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
         var quickActionStatus = new Border
         {
             Padding = new Thickness(8),

@@ -417,13 +417,13 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     viewModel.TimelineExportStatusText,
                     window.GetVisualDescendants()
-                        .OfType<TextBlock>()
+                        .OfType<TextBox>()
                         .Single(control => AutomationProperties.GetName(control) == "Quick export status")
                         .Text);
                 Xunit.Assert.Equal(
                     viewModel.TimelineProjectStatusText,
                     window.GetVisualDescendants()
-                        .OfType<TextBlock>()
+                        .OfType<TextBox>()
                         .Single(control => AutomationProperties.GetName(control) == "Quick save status")
                         .Text);
                 var timelineActionStatus = window.GetVisualDescendants()
