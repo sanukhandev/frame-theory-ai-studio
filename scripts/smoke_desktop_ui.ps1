@@ -163,6 +163,7 @@ try {
             "Stop playback",
             "Quick save timeline project",
             "Quick export timeline MP4",
+            "Timeline action status",
             "Timeline playhead frame",
             "Select at playhead",
             "Import verified transcript JSON",

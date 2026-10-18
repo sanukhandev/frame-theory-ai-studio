@@ -411,6 +411,13 @@ public sealed class FoundationTests
                         .OfType<TextBlock>()
                         .Single(control => AutomationProperties.GetName(control) == "Quick save status")
                         .Text);
+                var timelineActionStatus = window.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline action status");
+                Xunit.Assert.True(timelineActionStatus.IsVisible);
+                Xunit.Assert.Equal(
+                    "Status for the latest local project save and timeline export.",
+                    ToolTip.GetTip(timelineActionStatus));
                 Xunit.Assert.False(window.GetVisualDescendants()
                     .OfType<Button>()
                     .Single(control => AutomationProperties.GetName(control) == "Stop timeline preview")
@@ -664,6 +671,7 @@ public sealed class FoundationTests
                     "Caption status",
                     "Timeline project status",
                     "Timeline export status",
+                    "Timeline action status",
                     "Watermark status",
                     "Missing photo media",
                     "Photo recovery status",
