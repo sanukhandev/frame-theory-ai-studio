@@ -72,6 +72,16 @@ public static class LocalPathSecurity
             attributes = default;
             return false;
         }
+        catch (IOException)
+        {
+            attributes = default;
+            return true;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            attributes = default;
+            return true;
+        }
     }
 
     private static bool IsMacOsSystemAlias(string path) =>

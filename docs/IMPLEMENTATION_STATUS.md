@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Path-security checkpoint (2026-10-19):** Reparse-point checks now treat attribute IO and access failures as unsafe paths instead of leaking an OS exception through the security boundary. Existing path-security and storage coverage remains green.
+
 **Autosave cleanup checkpoint (2026-10-19):** Autosave removal is now best effort, so recovery and project lifecycle callers are not interrupted by a secondary filesystem cleanup failure. Existing autosave recovery and relink coverage remains green.
 
 **Timeline-compositor cleanup checkpoint (2026-10-19):** Timeline compositor temporary output cleanup is now best effort, preserving composition, verification and cancellation failures when an intermediate file cannot be deleted. Existing compositor coverage remains green.
