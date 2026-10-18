@@ -1097,9 +1097,23 @@ public sealed class MainWindow : Window
             PlaceholderText = "Paste a schema v1 AI edit plan JSON for local validation"
         };
         var actions = new StackPanel { Spacing = 4 };
+        var emptyActions = new TextBlock
+        {
+            Text = "No validated actions yet. Validate a reviewed plan to see editable operations.",
+            FontSize = 12,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
+            TextWrapping = TextWrapping.Wrap
+        };
+        AutomationProperties.SetName(emptyActions, "AI proposal empty state");
         void RefreshActions()
         {
             actions.Children.Clear();
+            if (viewModel.AiProposal.Actions.Count == 0)
+            {
+                actions.Children.Add(emptyActions);
+                return;
+            }
+
             foreach (var action in viewModel.AiProposal.Actions)
             {
                 var approval = new CheckBox { Content = action.Summary, IsChecked = action.IsApproved };
@@ -1113,6 +1127,7 @@ public sealed class MainWindow : Window
                 actions.Children.Add(approval);
             }
         }
+        RefreshActions();
 
         var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(status, "AI proposal status");
