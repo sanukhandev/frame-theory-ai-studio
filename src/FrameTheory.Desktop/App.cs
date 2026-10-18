@@ -62,6 +62,23 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.BorderBrushProperty, accent)
             }
         });
+        Styles.Add(new Style(selector => selector.OfType<Button>().Class("primary"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, accent),
+                new Setter(TemplatedControl.ForegroundProperty, Brushes.White),
+                new Setter(TemplatedControl.BorderBrushProperty, accent)
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<Button>().Class("primary").Class(":pointerover"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(118, 143, 255))),
+                new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(150, 168, 255)))
+            }
+        });
         Styles.Add(new Style(selector => selector.OfType<Button>().Class(":disabled"))
         {
             Setters =

@@ -482,6 +482,7 @@ public sealed class MainWindow : Window
             }
         };
         var importMedia = new Button { Content = "Import media", HorizontalAlignment = HorizontalAlignment.Left };
+        importMedia.Classes.Add("primary");
         AutomationProperties.SetName(importMedia, "Import local media");
         ToolTip.SetTip(importMedia, "Import local video, photo or audio files.");
         importMedia.Click += async (_, _) =>
@@ -1015,6 +1016,7 @@ public sealed class MainWindow : Window
         var socialPreset = new ComboBox { ItemsSource = new[] { "Original", "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
         AutomationProperties.SetName(socialPreset, "Photo export social dimensions");
         var export = new Button { Content = "Export image" };
+        export.Classes.Add("primary");
         AutomationProperties.SetName(export, "Export photo image");
         export.Click += async (_, _) =>
         {
@@ -1156,6 +1158,7 @@ public sealed class MainWindow : Window
             await viewModel.PrepareLocalAnalysisAsync(scopes, uploadConsent.IsChecked == true, CancellationToken.None);
         };
         var analyzeApprovedSamples = new Button { Content = "Analyze approved samples with Gemini" };
+        analyzeApprovedSamples.Classes.Add("primary");
         AutomationProperties.SetName(analyzeApprovedSamples, "Analyze approved samples with Gemini");
         analyzeApprovedSamples.Click += async (_, _) => await viewModel.RequestAiAnalysisAsync(CancellationToken.None);
         var analysisStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
@@ -1281,6 +1284,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(revisionStatus, "AI revision status");
         revisionStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AiRevisionStatusText)));
         var approve = new Button { Content = "Apply approved actions" };
+        approve.Classes.Add("primary");
         AutomationProperties.SetName(approve, "Apply approved AI actions");
         approve.Click += (_, _) => viewModel.ApplyApprovedAiPlan();
         var undo = new Button { Content = "Undo last AI apply" };
@@ -1516,6 +1520,7 @@ public sealed class MainWindow : Window
             }
         };
         var applyPreset = new Button { Content = "Apply loaded style" };
+        applyPreset.Classes.Add("primary");
         AutomationProperties.SetName(applyPreset, "Apply loaded color style");
         applyPreset.Click += (_, _) =>
         {
@@ -1600,8 +1605,10 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(referenceTarget, "Reference target preview");
         var referenceConsent = new CheckBox { Content = "I approve uploading these exact previews to Gemini" };
         var analyzeReference = new Button { Content = "Analyze approved visual reference" };
+        analyzeReference.Classes.Add("primary");
         AutomationProperties.SetName(analyzeReference, "Analyze approved visual reference");
         var applyReference = new Button { Content = "Apply reviewed reference grade" };
+        applyReference.Classes.Add("primary");
         AutomationProperties.SetName(applyReference, "Apply reviewed reference grade");
         var referenceStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(referenceStatus, "Reference analysis status");
@@ -1741,6 +1748,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(previewCurrentFrame, "Preview current timeline frame");
         previewCurrentFrame.Click += async (_, _) => await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None);
         var playTimeline = new Button { Content = "Play timeline" };
+        playTimeline.Classes.Add("primary");
         AutomationProperties.SetName(playTimeline, "Play timeline preview");
         playTimeline.Click += async (_, _) => await viewModel.PlayTimelinePreviewAsync(CancellationToken.None);
         var stopTimeline = new Button { Content = "Stop playback" };
@@ -2229,6 +2237,7 @@ public sealed class MainWindow : Window
             }
         };
         var export = new Button { Content = "Export composite MP4" };
+        export.Classes.Add("primary");
         AutomationProperties.SetName(export, "Export timeline MP4");
         var batchExport = new Button { Content = "Export all social targets" };
         AutomationProperties.SetName(batchExport, "Export all social video targets");
