@@ -317,13 +317,20 @@ jobs:
         shell: pwsh
         run: |
           choco install innosetup --no-progress -y
-          ./scripts/package_windows.ps1 -OutputDirectory artifacts/installer -PublishDirectory artifacts/installer-publish -Version 0.1.1
+          $bundleDirectory = Join-Path $env:RUNNER_TEMP "frame-theory-ffmpeg-bundle"
+          New-Item -ItemType Directory -Force -Path $bundleDirectory | Out-Null
+          Copy-Item -LiteralPath (Get-Command ffmpeg -ErrorAction Stop).Source -Destination (Join-Path $bundleDirectory "ffmpeg.exe") -Force
+          Copy-Item -LiteralPath (Get-Command ffprobe -ErrorAction Stop).Source -Destination (Join-Path $bundleDirectory "ffprobe.exe") -Force
+          ./scripts/package_windows.ps1 -OutputDirectory artifacts/installer -PublishDirectory artifacts/installer-publish -Version 0.1.1 -FfmpegDirectory $bundleDirectory
           $installer = Join-Path (Resolve-Path artifacts/installer).Path "FrameTheoryStudioAI-win-x64.exe"
           $installDirectory = Join-Path $env:RUNNER_TEMP "frame-theory-installed"
           if (Test-Path -LiteralPath $installDirectory) {
             Remove-Item -LiteralPath $installDirectory -Recurse -Force
           }
           Start-Process -FilePath $installer -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/DIR=$installDirectory") -Wait
+          if (-not (Test-Path -LiteralPath (Join-Path $installDirectory "ffmpeg.exe")) -or -not (Test-Path -LiteralPath (Join-Path $installDirectory "ffprobe.exe"))) {
+            throw "Windows installer did not include the validated FFmpeg/ffprobe pair."
+          }
           ./scripts/smoke_desktop.ps1 -AssemblyPath (Join-Path $installDirectory "FrameTheory.Desktop.exe") -RequireWindowTitle
           Start-Process -FilePath (Join-Path $installDirectory "unins000.exe") -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait
           if (Test-Path -LiteralPath $installDirectory) {
@@ -334,13 +341,21 @@ jobs:
         shell: bash
         run: |
           chmod +x scripts/package_macos_dmg.sh
-          scripts/package_macos_dmg.sh "" artifacts/installer 0.1.1
+          bundle_directory="$RUNNER_TEMP/frame-theory-ffmpeg-bundle"
+          rm -rf "$bundle_directory"
+          mkdir -p "$bundle_directory"
+          cp "$(command -v ffmpeg)" "$bundle_directory/ffmpeg"
+          cp "$(command -v ffprobe)" "$bundle_directory/ffprobe"
+          chmod +x "$bundle_directory/ffmpeg" "$bundle_directory/ffprobe"
+          scripts/package_macos_dmg.sh "" artifacts/installer 0.1.1 "$bundle_directory"
           mkdir -p "$RUNNER_TEMP/frame-theory-dmg"
           dmg_mount="$RUNNER_TEMP/frame-theory-dmg"
           cleanup_dmg() { hdiutil detach "$dmg_mount" >/dev/null 2>&1 || true; }
           trap cleanup_dmg EXIT
           hdiutil attach -nobrowse -readonly artifacts/installer/FrameTheoryStudioAI-*.dmg -mountpoint "$dmg_mount"
           test -x "$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
+          test -x "$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS/ffmpeg"
+          test -x "$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS/ffprobe"
           bundle_version="$(plutil -extract CFBundleShortVersionString raw -o - "$dmg_mount/Frame Theory Studio AI.app/Contents/Info.plist")"
           echo "Mounted DMG bundle version: $bundle_version"
           test "$bundle_version" = "0.1.1"
@@ -354,7 +369,13 @@ jobs:
         shell: bash
         run: |
           chmod +x scripts/package_linux_deb.sh
-          scripts/package_linux_deb.sh linux-x64 artifacts/installer 0.1.1
+          bundle_directory="$RUNNER_TEMP/frame-theory-ffmpeg-bundle"
+          rm -rf "$bundle_directory"
+          mkdir -p "$bundle_directory"
+          cp "$(command -v ffmpeg)" "$bundle_directory/ffmpeg"
+          cp "$(command -v ffprobe)" "$bundle_directory/ffprobe"
+          chmod +x "$bundle_directory/ffmpeg" "$bundle_directory/ffprobe"
+          scripts/package_linux_deb.sh linux-x64 artifacts/installer 0.1.1 "$bundle_directory"
           dpkg-deb --info artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb
           test "$(dpkg-deb --field artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb Version)" = "0.1.1"
           test "$(dpkg-deb --field artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb Architecture)" = "amd64"
@@ -363,10 +384,14 @@ jobs:
           rm -rf "$deb_directory"
           mkdir -p "$deb_directory"
           dpkg-deb --extract artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb "$deb_directory"
+          test -x "$deb_directory/opt/frame-theory-studio/ffmpeg"
+          test -x "$deb_directory/opt/frame-theory-studio/ffprobe"
           test -x "$deb_directory/usr/bin/frame-theory-studio-ai"
           grep -F 'exec /opt/frame-theory-studio/FrameTheory.Desktop' "$deb_directory/usr/bin/frame-theory-studio-ai"
           xvfb-run -a pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath "$deb_directory/opt/frame-theory-studio/FrameTheory.Desktop"
           sudo dpkg -i artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb
+          test -x /opt/frame-theory-studio/ffmpeg
+          test -x /opt/frame-theory-studio/ffprobe
           cleanup_deb() { sudo dpkg -r frame-theory-studio-ai >/dev/null 2>&1 || true; }
           trap cleanup_deb EXIT
           xvfb-run -a pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath /opt/frame-theory-studio/FrameTheory.Desktop
