@@ -1918,13 +1918,19 @@ public sealed class MainWindow : Window
         return panel;
     }
 
-    private static TextBlock CreateSectionLabel(string text) => new()
+    private static Control CreateSectionLabel(string text) => new Border
     {
         Margin = new Thickness(0, 12, 0, 0),
-        Text = text.ToUpperInvariant(),
-        FontSize = 10,
-        FontWeight = FontWeight.SemiBold,
-        Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+        Padding = new Thickness(0, 10, 0, 6),
+        BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 54, 65)),
+        BorderThickness = new Thickness(0, 1, 0, 0),
+        Child = new TextBlock
+        {
+            Text = text.ToUpperInvariant(),
+            FontSize = 10,
+            FontWeight = FontWeight.SemiBold,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+        }
     };
 
     private static Control? CreateApprovedLogo()
