@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive monitor-stack checkpoint (2026-10-18):** The Video program monitor now stacks its action rail below the measured 520px compact-card threshold and restores the two-column monitor/action composition above it. Headless adaptive-shell coverage verifies both arrangements and preserves the live controls; native visual and HiDPI acceptance remains open.
+
 **Keyboard edit-history checkpoint (2026-10-18):** Photo undo/redo now routes through standard `Ctrl/Cmd+Z`, `Ctrl/Cmd+Shift+Z` and `Ctrl/Cmd+Y` shortcuts according to the active workspace, while Video/AI preserve the existing approved-AI undo path. Empty-history calls return explicit status without mutation; Foundation coverage exercises the routing contract.
 
 **Photo redo checkpoint (2026-10-18):** The existing non-destructive photo history now exposes a real `Redo photo edit` action beside undo, preserves the operation stack and reports an explicit empty-redo state. Persistence coverage exercises undo followed by redo before save/reopen, and the adaptive shell exposes the accessible control.

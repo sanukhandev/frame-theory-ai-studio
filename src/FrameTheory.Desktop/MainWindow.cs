@@ -3911,6 +3911,7 @@ public sealed class MainWindow : Window
                 ColumnDefinitions = new ColumnDefinitions("2*,*")
             }
         };
+        AutomationProperties.SetName(previewCard, "Timeline monitor preview card");
         var previewGrid = (Grid)previewCard.Child;
         var monitorFrame = new Border
         {
@@ -3954,6 +3955,22 @@ public sealed class MainWindow : Window
         });
         previewGrid.Children.Add(previewActionsCard);
         Grid.SetColumn(previewActionsCard, 1);
+        void RefreshPreviewLayout(double width)
+        {
+            var compact = width < 520;
+            previewGrid.ColumnDefinitions = compact
+                ? new ColumnDefinitions("*")
+                : new ColumnDefinitions("2*,*");
+            previewGrid.RowDefinitions = compact
+                ? new RowDefinitions("Auto,Auto")
+                : new RowDefinitions("Auto");
+            Grid.SetColumn(previewActionsCard, compact ? 0 : 1);
+            Grid.SetRow(previewActionsCard, compact ? 1 : 0);
+            monitorFrame.Margin = compact ? new Thickness(0, 0, 0, 12) : new Thickness(0, 0, 12, 0);
+        }
+
+        previewCard.SizeChanged += (_, args) => RefreshPreviewLayout(args.NewSize.Width);
+        RefreshPreviewLayout(previewCard.Width);
         var timelineNavigation = new Border
         {
             Padding = new Thickness(12),

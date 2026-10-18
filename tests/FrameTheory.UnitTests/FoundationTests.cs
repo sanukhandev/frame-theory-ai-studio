@@ -465,6 +465,22 @@ public sealed class FoundationTests
                     ToolTip.GetTip(window.GetVisualDescendants()
                         .OfType<TextBox>()
                         .Single(control => AutomationProperties.GetName(control) == "Timeline preview status")));
+                var monitorPreviewCard = window.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline monitor preview card");
+                var monitorPreviewGrid = Xunit.Assert.IsType<Grid>(monitorPreviewCard.Child);
+                var monitorControls = window.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline monitor controls");
+                window.Width = 960;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(2, monitorPreviewGrid.RowDefinitions.Count);
+                Xunit.Assert.Equal(1, Grid.GetRow(monitorControls));
+                window.Width = 1280;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Single(monitorPreviewGrid.RowDefinitions);
+                Xunit.Assert.Equal(2, monitorPreviewGrid.ColumnDefinitions.Count);
+                Xunit.Assert.Equal(1, Grid.GetColumn(monitorControls));
                 Xunit.Assert.Equal(
                     viewModel.MotionAnalysisStatusText,
                     window.GetVisualDescendants()
