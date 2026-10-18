@@ -172,6 +172,7 @@ public sealed class TimelineProjectPersistenceTests
             Xunit.Assert.True(await second.OpenTimelineProjectAsync(projectPath, CancellationToken.None));
 
             Xunit.Assert.Single(second.ImportedMedia);
+            Xunit.Assert.Equal("1 asset", second.ImportedMediaSummary);
             Xunit.Assert.Single(second.TimelineEditor.TrackRows.Single(row => row.Kind == TimelineTrackKind.Video).Clips);
             Xunit.Assert.Contains("Opened timeline project", second.TimelineProjectStatusText, StringComparison.Ordinal);
         }

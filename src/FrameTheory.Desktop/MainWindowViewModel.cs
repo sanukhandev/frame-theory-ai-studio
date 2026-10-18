@@ -1109,6 +1109,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             ImportedMedia = importedViewModels;
             OnPropertyChanged(nameof(ImportedMedia));
+            OnPropertyChanged(nameof(ImportedMediaSummary));
             var video = imported.Select(item => item.Media.Metadata).FirstOrDefault(metadata => metadata.Kind == MediaKind.Video);
             _videoWidth = video?.Width ?? 0;
             _videoHeight = video?.Height ?? 0;
