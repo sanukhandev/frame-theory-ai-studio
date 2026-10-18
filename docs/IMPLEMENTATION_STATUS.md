@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Local UI batch gate checkpoint (2026-10-18):** The current responsive-shell and Windows UI-smoke batch passes a warning-free Release build, 266 unit tests, 2 golden tests, repository/schema validation, formatting verification and `git diff --check`. The validator now accepts either the legacy SendKeys or the hardened SendInput shortcut path while still requiring the all-workspace loop. Hosted revalidation is deferred until the next exact-ten push.
+
 **Responsive color-style selector checkpoint (2026-10-18):** The loaded Color style-library selector now uses a 140–220px bounded stretch instead of a fixed 220px width, keeping reusable-style controls aligned in compact inspectors. Foundation coverage verifies the geometry and accessible name.
 
 **Responsive media-header checkpoint (2026-10-18):** The media-bin header now keeps title, selected asset and asset count aligned in one row at standard width, then moves the selected-media chip to a full-width second row below 1120px. Foundation coverage verifies both arrangements and preserves selection semantics; native visual and HiDPI acceptance remains open.
