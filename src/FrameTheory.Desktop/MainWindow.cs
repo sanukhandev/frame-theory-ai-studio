@@ -2526,12 +2526,36 @@ public sealed class MainWindow : Window
                 playhead.Value = timeline.CurrentFrame;
             }
         };
-        var frameStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var frameStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.NoWrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(frameStatus, "Timeline frame status");
-        frameStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentFrame"));
-        var positionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        ToolTip.SetTip(frameStatus, "Current local timeline frame number.");
+        frameStatus.Bind(TextBox.TextProperty, new Binding("TimelineEditor.CurrentFrame"));
+        var positionStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.NoWrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(positionStatus, "Timeline position status");
-        positionStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentTimecode"));
+        ToolTip.SetTip(positionStatus, "Current local timeline timecode.");
+        positionStatus.Bind(TextBox.TextProperty, new Binding("TimelineEditor.CurrentTimecode"));
         var monitorTimecode = new TextBlock
         {
             FontSize = 11,

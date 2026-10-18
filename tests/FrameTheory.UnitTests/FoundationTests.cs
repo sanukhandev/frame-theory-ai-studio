@@ -241,9 +241,19 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Timeline monitor timecode");
                 Xunit.Assert.Equal(viewModel.TimelineEditor.CurrentTimecode, monitorTimecode.Text);
                 var positionStatus = window.GetVisualDescendants()
-                    .OfType<TextBlock>()
+                    .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline position status");
                 Xunit.Assert.Equal(viewModel.TimelineEditor.CurrentTimecode, positionStatus.Text);
+                Xunit.Assert.True(positionStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, positionStatus.FontSize);
+                Xunit.Assert.Equal("Current local timeline timecode.", ToolTip.GetTip(positionStatus));
+                var frameStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline frame status");
+                Xunit.Assert.Equal(viewModel.TimelineEditor.CurrentFrame.ToString(), frameStatus.Text);
+                Xunit.Assert.True(frameStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, frameStatus.FontSize);
+                Xunit.Assert.Equal("Current local timeline frame number.", ToolTip.GetTip(frameStatus));
                 var activeWorkspaceStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Active workspace status");
