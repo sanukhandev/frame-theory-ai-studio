@@ -345,6 +345,9 @@ jobs:
             if (-not ($archive.Entries.FullName -contains "FrameTheory.Desktop.dll")) {
               throw "Portable archive does not contain FrameTheory.Desktop.dll."
             }
+            if (-not ($archive.Entries.FullName -contains "assets/brand/frame-theory-original.png")) {
+              throw "Portable archive does not contain the approved Frame Theory logo asset."
+            }
           } finally {
             $archive.Dispose()
           }
