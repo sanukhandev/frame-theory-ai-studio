@@ -104,6 +104,38 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task TimelineLanePositionsClipsByFrameStart()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new BatchImporter());
+        await session.Dispatch(() =>
+        {
+            viewModel.ImportFilesAsync(["first.mp4", "second.mp4"], CancellationToken.None).GetAwaiter().GetResult();
+            var window = new MainWindow(viewModel);
+            try
+            {
+                window.Show();
+                var canvas = window.GetVisualDescendants()
+                    .OfType<Canvas>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Video timeline clip canvas");
+                var clips = canvas.Children.OfType<Button>().ToArray();
+
+                Xunit.Assert.Equal(2, clips.Length);
+                Xunit.Assert.Equal(0, Canvas.GetLeft(clips[0]));
+                Xunit.Assert.Equal(30, Canvas.GetLeft(clips[1]));
+                Xunit.Assert.All(clips, clip => Xunit.Assert.Equal(128, clip.MinWidth));
+            }
+            finally
+            {
+                window.Close();
+            }
+        }, CancellationToken.None);
+    }
+
+    [Xunit.Fact]
     public async Task MediaBrowserSearchFiltersNoMatchStateAndClearWithImportedAssets()
     {
         using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));

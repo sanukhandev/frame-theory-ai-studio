@@ -2111,6 +2111,7 @@ public sealed class MainWindow : Window
                     Width = Math.Max(320, (maxFrame - timeline.ScrollFrame) / timeline.FramesPerPixel + 24),
                     Height = 40
                 };
+                AutomationProperties.SetName(clipCanvas, $"{item.Kind} timeline clip canvas");
                 foreach (var clip in item.Clips)
                 {
                     var clipWidth = Math.Max(128, clip.DurationFrames / timeline.FramesPerPixel);
