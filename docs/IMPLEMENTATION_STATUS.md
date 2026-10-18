@@ -40,6 +40,8 @@
 
 **Core snapshot checkpoint (2026-10-19):** Project media references, timeline tracks/clips/layers and render-plan sources/collections now expose immutable snapshots, preventing caller mutation from changing persisted or rendered edit state. Focused snapshot coverage passes 19/19 with format and diff checks clean; the local fix remains unpushed until the next exact 50-commit boundary.
 
+**FT-401 photo-source checkpoint (2026-10-19):** Photo documents now defensively copy imported preview bytes and return a fresh preview snapshot, preventing caller mutation from altering non-destructive source edits. Focused photo edit coverage passes 9/9 with format and diff checks clean; the local fix remains unpushed until the next exact 50-commit boundary.
+
 **Post-rough-cut Release gate checkpoint (2026-10-19):** The local changes pass 277 unit tests and 2 golden tests, build with 0 warnings/errors, pass `dotnet format --verify-no-changes`, repository validation through `py scripts/validate_repository.py` and `git diff --check`. The validator correctly remains blocked by six tracked partial P0 tasks; this is not a V1 completion claim. The local commits remain unpushed until the next exact 50-commit boundary.
 
 **Workspace navigation affordance checkpoint (2026-10-19):** The adaptive shell's Ctrl+1 through Ctrl+4 workspace shortcut hint now has an explicit accessible tooltip explaining each destination. Focused production-shell coverage and format/diff checks pass; native keyboard acceptance remains unverified.
