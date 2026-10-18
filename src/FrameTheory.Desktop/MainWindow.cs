@@ -2785,7 +2785,14 @@ public sealed class MainWindow : Window
 
     private static Control CreateGradeControl(string label, double minimum, double maximum, float value, Action<float> setter)
     {
-        var slider = new Slider { Minimum = minimum, Maximum = maximum, Value = value };
+        var slider = new Slider
+        {
+            Minimum = minimum,
+            Maximum = maximum,
+            Value = value,
+            Width = 180,
+            VerticalAlignment = VerticalAlignment.Center
+        };
         AutomationProperties.SetName(slider, label);
         slider.ValueChanged += (_, args) => setter((float)args.NewValue);
         return new StackPanel

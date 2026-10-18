@@ -332,6 +332,12 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Color before preview empty state")
                     .IsVisible);
+                Xunit.Assert.Equal(
+                    180,
+                    window.GetVisualDescendants()
+                        .OfType<Slider>()
+                        .Single(control => AutomationProperties.GetName(control) == "Exposure EV")
+                        .Width);
                 Xunit.Assert.True(window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Color after preview empty state")
