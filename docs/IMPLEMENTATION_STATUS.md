@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**UI smoke compatibility checkpoint (2026-10-18):** Restored the established `Open image` automation name after hosted Windows UI smoke correctly detected that the accessibility wording change had broken the existing control contract. Desktop build, rebuilt Foundation shell test, formatting and `git diff --check` pass; hosted smoke revalidation is pending.
+
 **Full local UI batch gate (2026-10-18):** The adaptive shell regression now verifies all four workspace scroll surfaces are named as well as stretched and top-aligned. The Release solution build passes with 0 warnings/errors, unit tests pass 260/260, golden tests pass 2/2, repository validation and formatting pass, and `git diff --check` is clean. Hosted revalidation is required after the current ten-commit batch; native visual/HiDPI and manual screen-reader acceptance remain unverified.
 
 **Selector accessibility checkpoint (2026-10-18):** Photo export format/quality and the Gemini model selector now have explicit automation names and are included in the adaptive-shell contract. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native assistive-technology review remains unverified.
