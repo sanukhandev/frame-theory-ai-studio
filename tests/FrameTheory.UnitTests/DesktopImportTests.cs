@@ -173,6 +173,49 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task TimelineSelectionSynchronizesColorInspectorSource()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new ThumbnailBatchImporter());
+        await session.Dispatch(() =>
+        {
+            viewModel.ImportFilesAsync(["first.mp4", "second.mp4"], CancellationToken.None).GetAwaiter().GetResult();
+            var first = viewModel.ImportedMedia.Single(item => item.Name == "first.mp4");
+            var second = viewModel.ImportedMedia.Single(item => item.Name == "second.mp4");
+            var window = new MainWindow(viewModel);
+            try
+            {
+                window.Show();
+                var clips = window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Where(control => Avalonia.Automation.AutomationProperties.GetName(control)?.StartsWith("Select Video clip", StringComparison.Ordinal) == true)
+                    .OrderBy(control => Avalonia.Controls.Canvas.GetLeft(control))
+                    .ToArray();
+
+                clips[0].RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(first.ThumbnailPpm, viewModel.ColorInspector.BeforePreviewPpm);
+
+                window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Where(control => Avalonia.Automation.AutomationProperties.GetName(control)?.StartsWith("Select Video clip", StringComparison.Ordinal) == true)
+                    .OrderBy(control => Avalonia.Controls.Canvas.GetLeft(control))
+                    .ElementAt(1)
+                    .RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(second.ThumbnailPpm, viewModel.ColorInspector.BeforePreviewPpm);
+            }
+            finally
+            {
+                window.Close();
+            }
+        }, CancellationToken.None);
+    }
+
+    [Xunit.Fact]
     public async Task TimelineLanePositionsClipsByFrameStart()
     {
         using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
@@ -609,6 +652,25 @@ public sealed class DesktopImportTests
                 30,
                 TimeSpan.FromSeconds(1));
             return Task.FromResult(new ImportedMedia(metadata, null, [0.25f, 0.75f]));
+        }
+    }
+
+    private sealed class ThumbnailBatchImporter : IMediaImporter
+    {
+        public Task<ImportedMedia> ImportAsync(Uri file, CancellationToken cancellationToken)
+        {
+            var metadata = new MediaSourceMetadata(
+                MediaId.Create(file, "thumbnail-batch-test"),
+                file,
+                MediaKind.Video,
+                1,
+                1,
+                new RationalFrameRate(30, 1),
+                30,
+                TimeSpan.FromSeconds(1));
+            var second = string.Equals(Path.GetFileName(file.LocalPath), "second.mp4", StringComparison.OrdinalIgnoreCase);
+            var pixels = second ? new byte[] { 0, 255, 0 } : new byte[] { 255, 0, 0 };
+            return Task.FromResult(new ImportedMedia(metadata, [.. "P6\n1 1\n255\n"u8, .. pixels], [0.25f, 0.75f]));
         }
     }
 
