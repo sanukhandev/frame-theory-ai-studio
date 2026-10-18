@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Hosted regression and correction checkpoint (2026-10-18):** Quality Gates run `39137069246` correctly exposed two independent issues in the ten-commit UI batch: Windows UI Automation could not surface the semantic `Border` named `Timeline selection inspector`, and macOS `hdiutil create` transiently failed with `Resource busy`. Commit `6e5fc73` adds the existing UIA context-name alias, bounded five-attempt DMG creation with stale-output cleanup, and a repository guard for that retry contract. The failed run remains non-release evidence; a new exact-ten-commit push is required.
+
 **UI automation and workspace affordance batch checkpoint (2026-10-18):** The next ten-commit batch adds hosted smoke coverage for media search/clear, timeline tracks/selection context/operation status, named video/audio timeline lanes, media-card metadata tooltips, timeline navigation/status tooltips and a primary local-image entry action. The full local Release gate passes with 0 warnings/errors, 262 unit tests, 2 golden tests, repository validation, formatting and `git diff --check`; push is ready for hosted revalidation.
 
 **Hosted UI contract extension checkpoint (2026-10-18):** The Windows UI smoke now requires the production media search/clear controls, timeline track surface, selection inspector and operation status in addition to the existing transport/export actions. PowerShell parsing, repository validation and `git diff --check` pass locally; hosted confirmation is deferred to the next exact-ten-commit push.
