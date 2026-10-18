@@ -2155,6 +2155,21 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(stopTimeline, "Stop timeline preview");
         ToolTip.SetTip(stopTimeline, "Stop timeline playback and keep the current playhead position.");
         stopTimeline.Click += (_, _) => viewModel.StopTimelinePreview();
+        void RefreshPlaybackControls()
+        {
+            playTimeline.IsEnabled = !viewModel.IsTimelinePreviewPlaying;
+            stopTimeline.IsEnabled = viewModel.IsTimelinePreviewPlaying;
+            playTimeline.Content = viewModel.IsTimelinePreviewPlaying ? "Playing…" : "Play timeline";
+        }
+
+        viewModel.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(MainWindowViewModel.IsTimelinePreviewPlaying))
+            {
+                RefreshPlaybackControls();
+            }
+        };
+        RefreshPlaybackControls();
         var usePreviewProxy = new CheckBox { Content = "Use bounded preview proxy" };
         usePreviewProxy.Bind(ToggleButton.IsCheckedProperty, new Binding(nameof(MainWindowViewModel.UseTimelinePreviewProxy))
         {

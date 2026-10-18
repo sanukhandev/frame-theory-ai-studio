@@ -382,6 +382,15 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline preview empty state")
                     .IsVisible);
+                var playTimeline = window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Play timeline preview");
+                Xunit.Assert.True(playTimeline.IsEnabled);
+                Xunit.Assert.Equal("Play timeline", playTimeline.Content);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Stop timeline preview")
+                    .IsEnabled);
                 var selectionInspector = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline selection inspector");
