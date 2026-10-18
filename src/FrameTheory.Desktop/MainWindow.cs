@@ -349,6 +349,7 @@ public sealed class MainWindow : Window
                 }
             }
         };
+        AutomationProperties.SetName(importZone, "Local media import drop zone");
         var children = new List<Control>
         {
             new TextBlock

@@ -215,6 +215,7 @@ public sealed class FoundationTests
                 {
                     "Imported media",
                     "Import local media",
+                    "Local media import drop zone",
                     "Capability status",
                     "Diagnostics status",
                     "Workspace keyboard shortcuts",
