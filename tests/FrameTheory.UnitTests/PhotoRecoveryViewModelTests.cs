@@ -31,6 +31,7 @@ public sealed class PhotoRecoveryViewModelTests
 
             await viewModel.OpenProjectAsync(CancellationToken.None);
             Xunit.Assert.Single(viewModel.MissingMedia);
+            Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<MissingMediaViewModel>>(viewModel.MissingMedia).IsReadOnly);
             Xunit.Assert.Contains("1 missing", viewModel.StatusText);
 
             await viewModel.RelinkSelectedAsync(replacementPath, CancellationToken.None);
