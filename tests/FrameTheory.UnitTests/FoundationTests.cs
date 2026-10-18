@@ -378,6 +378,15 @@ public sealed class FoundationTests
                         window.GetVisualDescendants().OfType<Button>(),
                         button => AutomationProperties.GetName(button) == primaryActionName && button.Classes.Contains("primary"));
                 }
+                Xunit.Assert.Equal(
+                    "Render the frame at the current playhead position.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Preview current timeline frame")));
+                Xunit.Assert.Equal(
+                    "Play the timeline from the current playhead position.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Play timeline preview")));
+                Xunit.Assert.Equal(
+                    "Render the editable timeline to an MP4 using the selected aspect ratio.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Export timeline MP4")));
 
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();

@@ -1817,13 +1817,16 @@ public sealed class MainWindow : Window
         };
         var previewCurrentFrame = new Button { Content = "Preview current frame" };
         AutomationProperties.SetName(previewCurrentFrame, "Preview current timeline frame");
+        ToolTip.SetTip(previewCurrentFrame, "Render the frame at the current playhead position.");
         previewCurrentFrame.Click += async (_, _) => await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None);
         var playTimeline = new Button { Content = "Play timeline" };
         playTimeline.Classes.Add("primary");
         AutomationProperties.SetName(playTimeline, "Play timeline preview");
+        ToolTip.SetTip(playTimeline, "Play the timeline from the current playhead position.");
         playTimeline.Click += async (_, _) => await viewModel.PlayTimelinePreviewAsync(CancellationToken.None);
         var stopTimeline = new Button { Content = "Stop playback" };
         AutomationProperties.SetName(stopTimeline, "Stop timeline preview");
+        ToolTip.SetTip(stopTimeline, "Stop timeline playback and keep the current playhead position.");
         stopTimeline.Click += (_, _) => viewModel.StopTimelinePreview();
         var usePreviewProxy = new CheckBox { Content = "Use bounded preview proxy" };
         usePreviewProxy.Bind(ToggleButton.IsCheckedProperty, new Binding(nameof(MainWindowViewModel.UseTimelinePreviewProxy))
@@ -2349,6 +2352,7 @@ public sealed class MainWindow : Window
         var export = new Button { Content = "Export composite MP4" };
         export.Classes.Add("primary");
         AutomationProperties.SetName(export, "Export timeline MP4");
+        ToolTip.SetTip(export, "Render the editable timeline to an MP4 using the selected aspect ratio.");
         var batchExport = new Button { Content = "Export all social targets" };
         AutomationProperties.SetName(batchExport, "Export all social video targets");
         batchExport.Click += async (_, _) =>
@@ -2374,6 +2378,7 @@ public sealed class MainWindow : Window
         cancelExport.Click += (_, _) => viewModel.CancelTimelineExport();
         var saveProject = new Button { Content = "Save timeline project" };
         AutomationProperties.SetName(saveProject, "Save timeline project");
+        ToolTip.SetTip(saveProject, "Save the timeline, edits and media references to a portable project file.");
         saveProject.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(saveProject);
@@ -2395,6 +2400,7 @@ public sealed class MainWindow : Window
         };
         var openProject = new Button { Content = "Open timeline project" };
         AutomationProperties.SetName(openProject, "Open timeline project");
+        ToolTip.SetTip(openProject, "Open a Frame Theory project and restore its editable timeline.");
         openProject.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(openProject);
