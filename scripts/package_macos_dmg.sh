@@ -22,6 +22,7 @@ case "$rid" in
 esac
 output="${2:-artifacts/installer}"
 version="${3:-0.1.0}"
+ffmpeg_directory="${4:-}"
 if ! printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$'; then
   printf 'Invalid package version: %s\n' "$version" >&2
   exit 1
@@ -40,6 +41,20 @@ dotnet publish src/FrameTheory.Desktop/FrameTheory.Desktop.csproj \
 cp -R "$publish"/. "$app/Contents/MacOS/"
 mv "$app/Contents/MacOS/FrameTheory.Desktop" "$app/Contents/MacOS/FrameTheoryStudio"
 chmod +x "$app/Contents/MacOS/FrameTheoryStudio"
+if [ -n "$ffmpeg_directory" ]; then
+  if [ ! -d "$ffmpeg_directory" ]; then
+    printf 'FFmpeg directory does not exist: %s\n' "$ffmpeg_directory" >&2
+    exit 1
+  fi
+  for tool in ffmpeg ffprobe; do
+    if [ ! -f "$ffmpeg_directory/$tool" ]; then
+      printf 'FFmpeg directory must contain %s\n' "$tool" >&2
+      exit 1
+    fi
+    cp "$ffmpeg_directory/$tool" "$app/Contents/MacOS/$tool"
+    chmod +x "$app/Contents/MacOS/$tool"
+  done
+fi
 cat > "$app/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
