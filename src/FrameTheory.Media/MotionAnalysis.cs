@@ -2,6 +2,8 @@ namespace FrameTheory.Media;
 
 public sealed record MotionFrame
 {
+    private readonly byte[] _rgbBytes;
+
     public MotionFrame(int frameIndex, int width, int height, ReadOnlyMemory<byte> rgbBytes)
     {
         if (frameIndex < 0)
@@ -27,7 +29,7 @@ public sealed record MotionFrame
         FrameIndex = frameIndex;
         Width = width;
         Height = height;
-        RgbBytes = rgbBytes.ToArray();
+        _rgbBytes = rgbBytes.ToArray();
     }
 
     public int FrameIndex { get; }
@@ -36,7 +38,9 @@ public sealed record MotionFrame
 
     public int Height { get; }
 
-    public byte[] RgbBytes { get; }
+    public byte[] RgbBytes => _rgbBytes.ToArray();
+
+    internal ReadOnlyMemory<byte> RgbMemory => _rgbBytes;
 }
 
 public sealed record MotionVector
@@ -169,7 +173,8 @@ public sealed class TranslationMotionTracker
     private static int Luma(MotionFrame frame, int x, int y)
     {
         var offset = (y * frame.Width + x) * 3;
-        return (int)MathF.Round(0.2126f * frame.RgbBytes[offset] + 0.7152f * frame.RgbBytes[offset + 1] + 0.0722f * frame.RgbBytes[offset + 2]);
+        var rgb = frame.RgbMemory.Span;
+        return (int)MathF.Round(0.2126f * rgb[offset] + 0.7152f * rgb[offset + 1] + 0.0722f * rgb[offset + 2]);
     }
 }
 

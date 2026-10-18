@@ -61,6 +61,17 @@ public sealed class MotionAnalysisTests
     }
 
     [Xunit.Fact]
+    public void PixelSnapshotCannotMutateMotionFrame()
+    {
+        var frame = new MotionFrame(0, 1, 1, new byte[] { 10, 20, 30 });
+
+        var pixels = frame.RgbBytes;
+        pixels[0] = 255;
+
+        Xunit.Assert.Equal(new byte[] { 10, 20, 30 }, frame.RgbBytes);
+    }
+
+    [Xunit.Fact]
     public void StabilizationPlanSnapshotsItsTransforms()
     {
         var transforms = new List<StabilizationTransform> { new(1, 2, 3) };
