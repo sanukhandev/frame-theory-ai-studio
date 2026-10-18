@@ -74,7 +74,13 @@ public sealed record ProjectSnapshot
         CanvasWidth = canvasWidth;
         CanvasHeight = canvasHeight;
         WorkingColorSpace = workingColorSpace.Trim();
-        MediaReferences = Array.AsReadOnly(mediaReferences?.ToArray() ?? []);
+        var references = mediaReferences?.ToArray() ?? [];
+        if (references.Any(reference => reference is null) || references.GroupBy(reference => reference.Id).Any(group => group.Count() > 1))
+        {
+            throw new ArgumentException("Media references must be non-null and have unique IDs.", nameof(mediaReferences));
+        }
+
+        MediaReferences = Array.AsReadOnly(references);
         ColorPresetName = string.IsNullOrWhiteSpace(colorPresetName) ? null : colorPresetName.Trim();
         TimelineStateJson = string.IsNullOrWhiteSpace(timelineStateJson) ? null : timelineStateJson;
         PhotoStateJson = string.IsNullOrWhiteSpace(photoStateJson) ? null : photoStateJson;

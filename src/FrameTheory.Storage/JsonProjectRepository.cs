@@ -185,7 +185,9 @@ public sealed class JsonProjectRepository : IProjectRepository
 
             try
             {
-                var mediaReferences = (Media ?? []).Select(media => media.ToReference()).ToArray();
+                var mediaReferences = (Media ?? []).Select(media => media is null
+                    ? throw new InvalidDataException("A project media entry cannot be null.")
+                    : media.ToReference()).ToArray();
                 return new ProjectSnapshot(
                     ProjectId ?? throw new InvalidDataException("Project ID is required."),
                     new RationalFrameRate(FrameRateNumerator, FrameRateDenominator),

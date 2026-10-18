@@ -139,6 +139,42 @@ public sealed class ProjectRepositoryTests
     }
 
     [Xunit.Fact]
+    public async Task ProjectRepositoryRejectsNullAndDuplicateMediaEntries()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-project-media-boundary-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "project.ftstudio");
+            var mediaId = new string('a', 64);
+            var media = $$"""
+                {
+                  "schemaVersion": 1,
+                  "projectId": "project",
+                  "frameRateNumerator": 24,
+                  "frameRateDenominator": 1,
+                  "canvasWidth": 640,
+                  "canvasHeight": 480,
+                  "workingColorSpace": "sRGB",
+                  "media": [
+                    { "id": "{{mediaId}}", "relativePath": "media/one.mov", "contentFingerprint": "sha256:one" },
+                    { "id": "{{mediaId}}", "relativePath": "media/two.mov", "contentFingerprint": "sha256:two" }
+                  ]
+                }
+                """;
+            await File.WriteAllTextAsync(path, media);
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => new JsonProjectRepository().LoadAsync(path, CancellationToken.None));
+
+            await File.WriteAllTextAsync(path, media.Replace("{ \"id\": \"" + mediaId, "null, { \"id\": \"", StringComparison.Ordinal));
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => new JsonProjectRepository().LoadAsync(path, CancellationToken.None));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task ProjectRepositoryRejectsReparsePointProjectPaths()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-project-boundary-");
