@@ -37,6 +37,8 @@ def run() -> int:
     assert "Avalonia.Headless" in ci and "Avalonia.Headless' -and $_.licenseExpression -eq 'MIT'" in ci, "CI must verify headless test-package license metadata"
     assert "Test headless desktop shell" in ci and "FullyQualifiedName~FoundationTests" in ci, "CI must expose the headless desktop shell test"
     assert "$missingLicenseMetadata" in ci and "metadataFound" in ci, "CI must fail closed on missing NuGet license metadata"
+    sbom = (ROOT / "docs/SBOM.md").read_text(encoding="utf-8")
+    assert "Avalonia.Headless" in sbom and "CI fails closed" in sbom, "SBOM must document the headless package and metadata guard"
     solution = (ROOT/"FrameTheory.sln").read_text(encoding="utf-8")
     assert "FrameTheory.LocalWhisperSmoke" in solution, "Local Whisper acceptance smoke must remain in the solution"
     development = (ROOT/"docs/DEVELOPMENT.md").read_text(encoding="utf-8")
