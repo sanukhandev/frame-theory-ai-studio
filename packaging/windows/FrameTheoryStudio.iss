@@ -10,6 +10,9 @@
 #ifndef OutputDir
   #define OutputDir "artifacts\installer"
 #endif
+#ifndef OutputBaseFilename
+  #define OutputBaseFilename "FrameTheoryStudioAI-win-x64"
+#endif
 
 [Setup]
 AppId={{D91E3794-DB26-4C66-9E7F-4CBF4BB4C51F}
@@ -19,7 +22,7 @@ AppPublisher={#AppPublisher}
 DefaultDirName={localappdata}\Programs\FrameTheoryStudioAI
 DefaultGroupName={#AppName}
 OutputDir={#OutputDir}
-OutputBaseFilename=FrameTheoryStudioAI-win-x64
+OutputBaseFilename={#OutputBaseFilename}
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 PrivilegesRequired=lowest

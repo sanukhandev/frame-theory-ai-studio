@@ -35,7 +35,7 @@ if (-not $compiler) {
 
 $outputPath = [IO.Path]::GetFullPath($OutputDirectory)
 New-Item -ItemType Directory -Force -Path $outputPath | Out-Null
-& $compilerPath "/DPublishDir=$publishPath" "/DOutputDir=$outputPath" "/DAppVersion=$Version" "packaging/windows/FrameTheoryStudio.iss"
+& $compilerPath "/DPublishDir=$publishPath" "/DOutputDir=$outputPath" "/DAppVersion=$Version" "/DOutputBaseFilename=FrameTheoryStudioAI-$RuntimeIdentifier" "packaging/windows/FrameTheoryStudio.iss"
 if ($LASTEXITCODE -ne 0) {
     throw "Inno Setup failed with exit code $LASTEXITCODE."
 }
