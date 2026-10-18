@@ -269,7 +269,7 @@ public sealed class TimelineProjectPersistenceTests
             await viewModel.ImportFilesAsync([sourcePath], CancellationToken.None);
 
             Xunit.Assert.Empty(viewModel.ImportedMedia);
-            Xunit.Assert.Contains("reparse", viewModel.MediaImportStatusText, StringComparison.OrdinalIgnoreCase);
+            Xunit.Assert.Contains("symlink", viewModel.MediaImportStatusText, StringComparison.OrdinalIgnoreCase);
         }
         catch (UnauthorizedAccessException)
         {
