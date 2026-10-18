@@ -33,9 +33,14 @@ public sealed record MotionVector
 {
     public MotionVector(int frameIndex, int offsetX, int offsetY, float confidence)
     {
-        if (frameIndex < 0 || float.IsNaN(confidence) || float.IsInfinity(confidence) || confidence is < 0 or > 1)
+        if (frameIndex < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(frameIndex));
+        }
+
+        if (float.IsNaN(confidence) || float.IsInfinity(confidence) || confidence is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(confidence));
         }
 
         FrameIndex = frameIndex;
@@ -73,9 +78,14 @@ public sealed class TranslationMotionTracker
 
     public TranslationMotionTracker(int searchRadius = 8, int sampleStride = 4)
     {
-        if (searchRadius is < 1 or > 64 || sampleStride is < 1 or > 32)
+        if (searchRadius is < 1 or > 64)
         {
             throw new ArgumentOutOfRangeException(nameof(searchRadius));
+        }
+
+        if (sampleStride is < 1 or > 32)
+        {
+            throw new ArgumentOutOfRangeException(nameof(sampleStride));
         }
 
         _searchRadius = searchRadius;
@@ -158,9 +168,14 @@ public static class StabilizationPlanner
     public static StabilizationPlan Plan(IReadOnlyList<MotionVector> vectors, int smoothingRadius = 2, int maximumCompensation = 64)
     {
         ArgumentNullException.ThrowIfNull(vectors);
-        if (smoothingRadius is < 0 or > 32 || maximumCompensation is < 0 or > 4096)
+        if (smoothingRadius is < 0 or > 32)
         {
             throw new ArgumentOutOfRangeException(nameof(smoothingRadius));
+        }
+
+        if (maximumCompensation is < 0 or > 4096)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maximumCompensation));
         }
 
         var cumulative = new List<(int FrameIndex, int X, int Y)>(vectors.Count);

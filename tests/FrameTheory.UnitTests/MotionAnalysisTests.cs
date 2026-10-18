@@ -50,6 +50,14 @@ public sealed class MotionAnalysisTests
         Xunit.Assert.True(vectors[0].Confidence > 0.99f);
     }
 
+    [Xunit.Fact]
+    public void MotionAnalysisValidationIdentifiesInvalidArguments()
+    {
+        Xunit.Assert.Equal("confidence", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new MotionVector(0, 0, 0, 2)).ParamName);
+        Xunit.Assert.Equal("sampleStride", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TranslationMotionTracker(sampleStride: 33)).ParamName);
+        Xunit.Assert.Equal("maximumCompensation", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => StabilizationPlanner.Plan([], maximumCompensation: 4097)).ParamName);
+    }
+
     private static MotionFrame Frame(int index, int width, int height, int shiftX)
     {
         var pixels = new byte[width * height * 3];
