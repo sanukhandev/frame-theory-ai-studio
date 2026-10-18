@@ -75,6 +75,23 @@ public sealed class DesktopAiAnalysisTests
     }
 
     [Xunit.Fact]
+    public async Task DesktopAnalysisReportsSecureStoreAccessFailure()
+    {
+        var settings = new GeminiSettingsViewModel(new GeminiConfigurationService(new FailingSecretStore()));
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new TestCapabilityDetector(),
+            new ImageImporter(),
+            geminiSettings: settings,
+            analysisSampler: new SampleSampler());
+
+        await viewModel.ImportFilesAsync(["photo.png"], CancellationToken.None);
+        Xunit.Assert.True(await viewModel.PrepareLocalAnalysisAsync(GeminiAnalysisScope.PhotoPreview, true, CancellationToken.None));
+        Xunit.Assert.False(await viewModel.RequestAiAnalysisAsync(CancellationToken.None));
+        Xunit.Assert.Contains("analysis failed", viewModel.AnalysisStatusText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Xunit.Fact]
     public async Task DesktopPlanRejectsPhotoMediaTargetForTimelineOnlyActions()
     {
         var viewModel = new MainWindowViewModel(
@@ -151,6 +168,18 @@ public sealed class DesktopAiAnalysisTests
             _secret = null;
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class FailingSecretStore : ISecretStore
+    {
+        public Task StoreAsync(string name, string secret, CancellationToken cancellationToken = default) =>
+            throw new UnauthorizedAccessException("credential store unavailable");
+
+        public Task<string?> ReadAsync(string name, CancellationToken cancellationToken = default) =>
+            throw new UnauthorizedAccessException("credential store unavailable");
+
+        public Task DeleteAsync(string name, CancellationToken cancellationToken = default) =>
+            throw new UnauthorizedAccessException("credential store unavailable");
     }
 
     private sealed class TestCapabilityDetector : ICapabilityDetector

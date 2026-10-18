@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Current Gemini-analysis increment: secure-store access failures are reported without escaping analysis or reference-grade commands; focused analysis coverage remains green. Live provider and native acceptance remain open.
+
 - Current Gemini-revision increment: secure-store access failures are reported without escaping the optional AI command; focused revision coverage remains green. Live provider and native acceptance remain open.
 
 - Current path-security increment: attribute access/IO failures are rejected conservatively as unsafe paths rather than escaping callers; automated security/storage coverage remains green. Native and clean-host acceptance remain open.

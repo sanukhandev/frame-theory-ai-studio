@@ -1418,7 +1418,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             AnalysisStatusText = "Gemini analysis canceled; no project mutation occurred.";
             return false;
         }
-        catch (Exception exception) when (exception is ArgumentException or InvalidDataException or InvalidOperationException or HttpRequestException)
+        catch (Exception exception) when (exception is ArgumentException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException or HttpRequestException)
         {
             _diagnosticsLog.Record("gemini-analysis-failed", exception);
             RefreshGeminiActivityLog();
@@ -1478,7 +1478,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             ReferenceAnalysisStatusText = "Gemini reference matching canceled; no grade was applied.";
             return false;
         }
-        catch (Exception exception) when (exception is ArgumentException or InvalidDataException or InvalidOperationException or HttpRequestException)
+        catch (Exception exception) when (exception is ArgumentException or InvalidDataException or InvalidOperationException or UnauthorizedAccessException or HttpRequestException)
         {
             _diagnosticsLog.Record("gemini-reference-analysis-failed", exception);
             RefreshGeminiActivityLog();

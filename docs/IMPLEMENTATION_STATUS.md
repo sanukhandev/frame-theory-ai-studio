@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Gemini-analysis storage checkpoint (2026-10-19):** Credential-store access failures during optional Gemini analysis and reference-grade requests now remain status results without escaping the AI command. Focused analysis coverage passes; offline/manual editing remains available.
+
 **Gemini-revision storage checkpoint (2026-10-19):** Credential-store access failures during optional Gemini revision requests now remain ordinary status results, preserving offline/manual editing instead of escaping the AI workspace command. Focused revision coverage passes.
 
 **Path-security checkpoint (2026-10-19):** Reparse-point checks now treat attribute IO and access failures as unsafe paths instead of leaking an OS exception through the security boundary. Existing path-security and storage coverage remains green.
