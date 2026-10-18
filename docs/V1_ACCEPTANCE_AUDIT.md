@@ -1,6 +1,6 @@
 # V1 Acceptance Audit
 
-Audit checkpoint: 2026-10-18, commit `8fd2242`, Windows 11 x64 plus hosted CI run `39091946675` and the preceding implementation matrix runs recorded in `docs/IMPLEMENTATION_STATUS.md`.
+Audit checkpoint: 2026-10-18, commit `f2915ce`, Windows 11 x64 plus hosted CI run `39092893198` and the preceding implementation matrix runs recorded in `docs/IMPLEMENTATION_STATUS.md`.
 
 ## Evidence
 
@@ -10,7 +10,7 @@ Audit checkpoint: 2026-10-18, commit `8fd2242`, Windows 11 x64 plus hosted CI ru
 - Real media evidence: Windows FFmpeg/ffprobe photo/video import, extracted transcription audio, color, timeline, audio, AI edit, Reel and queue-retry smoke outputs are recorded in the implementation checkpoint and E2E matrix. Hosted Windows/macOS/Linux native-media import, still-image conversion/import/PNG export, extracted-audio, repeated-seek and deterministic two-video/two-audio timeline exports passed in `39056614730`, including AI and before/after Reel outputs. The additional local smoke confirms the same export path with FFmpeg 9.0.2 outside the repository.
 - Packaging evidence: framework-dependent and self-contained per-OS publish artifacts, SHA-256 manifests, and unsigned Windows/macOS/Linux validation installers plus packaged relaunch checks are verified by hosted run `39086502910`; no native FFmpeg bundle, signed artifact or notarized artifact is claimed.
 - Current hosted update: run `39088633198` passed documentation plus Windows, macOS and Linux build/test/package jobs. It includes the Windows native UI automation smoke: real desktop launch, 1280x800 bounds, all four workspace selections and 14 reachable controls. The smoke uses stable Avalonia automation names with visible-label fallback; this is not a substitute for manual macOS/Linux GUI, HiDPI or clean-host acceptance. Earlier run `39080954139` remains the native social batch/AI recipe evidence.
-- Latest hosted update: run `39091946675` passed documentation and Windows/macOS/Linux build/test jobs after the reviewed Gemini reference-matching UI slice. Its Windows job also passed the native UI and media/package validation steps; the reference flow remains limited by missing live-key/reference-semantic acceptance.
+- Latest hosted update: run `39092893198` passed documentation and Windows/macOS/Linux build/test jobs after the Video workspace preview telemetry slice. Its Windows job also passed the native UI and media/package validation steps; telemetry and reference matching remain limited by the manual/live acceptance gates listed below.
 
 ## P0 blockers before V1
 
