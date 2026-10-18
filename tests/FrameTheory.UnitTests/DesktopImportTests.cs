@@ -127,6 +127,7 @@ public sealed class DesktopImportTests
                 Xunit.Assert.Equal(0, Canvas.GetLeft(clips[0]));
                 Xunit.Assert.Equal(30, Canvas.GetLeft(clips[1]));
                 Xunit.Assert.All(clips, clip => Xunit.Assert.Equal(128, clip.MinWidth));
+                Xunit.Assert.NotEmpty(clips[0].GetVisualDescendants().OfType<Canvas>().Single().Children);
             }
             finally
             {
@@ -457,7 +458,7 @@ public sealed class DesktopImportTests
                 new RationalFrameRate(30, 1),
                 30,
                 TimeSpan.FromSeconds(1));
-            return Task.FromResult(new ImportedMedia(metadata, null, []));
+            return Task.FromResult(new ImportedMedia(metadata, null, [0.25f, 0.75f]));
         }
     }
 

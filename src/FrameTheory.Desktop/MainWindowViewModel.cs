@@ -26,7 +26,12 @@ public enum EditorShortcut
     UndoAiEdit
 }
 
-public sealed record ImportedMediaViewModel(string Name, string Summary, byte[]? ThumbnailPpm = null, MediaKind? Kind = null)
+public sealed record ImportedMediaViewModel(
+    string Name,
+    string Summary,
+    byte[]? ThumbnailPpm = null,
+    MediaKind? Kind = null,
+    IReadOnlyList<float>? WaveformPeaks = null)
 {
     public MediaId? Id { get; init; }
 
@@ -758,7 +763,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                     Path.GetFileName(fullPath),
                     $"{media.Metadata.Kind}; {media.Metadata.Width}x{media.Metadata.Height}; thumbnail {media.ThumbnailPpm?.Length ?? 0} bytes; waveform {media.WaveformPeaks.Count} peaks",
                     media.ThumbnailPpm,
-                    media.Metadata.Kind)
+                    media.Metadata.Kind,
+                    media.WaveformPeaks)
                     {
                         Id = media.Metadata.Id
                     });
@@ -1120,7 +1126,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                     Path.GetFileName(item.Source.LocalPath),
                     $"{item.Media.Metadata.Kind}; {item.Media.Metadata.Width}x{item.Media.Metadata.Height}; thumbnail {item.Media.ThumbnailPpm?.Length ?? 0} bytes; waveform {item.Media.WaveformPeaks.Count} peaks",
                     item.Media.ThumbnailPpm,
-                    item.Media.Metadata.Kind)
+                    item.Media.Metadata.Kind,
+                    item.Media.WaveformPeaks)
                 {
                     Id = item.Media.Metadata.Id
                 });

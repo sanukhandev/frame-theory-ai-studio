@@ -2215,18 +2215,19 @@ public sealed class MainWindow : Window
                 var clipCanvas = new Canvas
                 {
                     Width = Math.Max(320, (maxFrame - timeline.ScrollFrame) / timeline.FramesPerPixel + 24),
-                    Height = 40
+                    Height = 52
                 };
                 AutomationProperties.SetName(clipCanvas, $"{item.Kind} timeline clip canvas");
                 foreach (var clip in item.Clips)
                 {
                     var clipWidth = Math.Max(128, clip.DurationFrames / timeline.FramesPerPixel);
                     var clipMedia = viewModel.ImportedMedia.FirstOrDefault(media => media.Id?.Value == clip.MediaId);
+                    var waveform = CreateWaveformCanvas(clipMedia?.WaveformPeaks, clipWidth - 16, 10);
                     var clipButton = new Button
                     {
                         Width = clipWidth,
                         MinWidth = 128,
-                        Height = 32,
+                        Height = 46,
                         HorizontalContentAlignment = HorizontalAlignment.Left,
                         VerticalContentAlignment = VerticalAlignment.Center,
                         Padding = new Thickness(8, 4),
@@ -2239,29 +2240,37 @@ public sealed class MainWindow : Window
                         BorderThickness = new Thickness(1),
                         Content = new StackPanel
                         {
-                            Orientation = Orientation.Horizontal,
-                            Spacing = 6,
+                            Spacing = 2,
                             Children =
                             {
-                                new Border
+                                new StackPanel
                                 {
-                                    Width = 42,
-                                    Height = 24,
-                                    Background = Brushes.Black,
-                                    Child = new Image
+                                    Orientation = Orientation.Horizontal,
+                                    Spacing = 6,
+                                    Children =
                                     {
-                                        Source = CreateBitmap(clipMedia?.ThumbnailPpm),
-                                        Stretch = Stretch.UniformToFill
+                                        new Border
+                                        {
+                                            Width = 42,
+                                            Height = 24,
+                                            Background = Brushes.Black,
+                                            Child = new Image
+                                            {
+                                                Source = CreateBitmap(clipMedia?.ThumbnailPpm),
+                                                Stretch = Stretch.UniformToFill
+                                            }
+                                        },
+                                        new TextBlock
+                                        {
+                                            Text = $"{clip.MediaId[..Math.Min(8, clip.MediaId.Length)]}  {clip.StartFrame}–{clip.StartFrame + clip.DurationFrames - 1}",
+                                            FontSize = 10,
+                                            Foreground = Brushes.White,
+                                            TextTrimming = TextTrimming.CharacterEllipsis,
+                                            VerticalAlignment = VerticalAlignment.Center
+                                        }
                                     }
                                 },
-                                new TextBlock
-                                {
-                                    Text = $"{clip.MediaId[..Math.Min(8, clip.MediaId.Length)]}  {clip.StartFrame}–{clip.StartFrame + clip.DurationFrames - 1}",
-                                    FontSize = 10,
-                                    Foreground = Brushes.White,
-                                    TextTrimming = TextTrimming.CharacterEllipsis,
-                                    VerticalAlignment = VerticalAlignment.Center
-                                }
+                                waveform
                             }
                         }
                     };
@@ -2275,7 +2284,7 @@ public sealed class MainWindow : Window
                 var playheadIndicator = new Border
                 {
                     Width = 2,
-                    Height = 40,
+                    Height = 52,
                     Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(255, 92, 112)),
                     IsHitTestVisible = false
                 };
@@ -3240,6 +3249,38 @@ public sealed class MainWindow : Window
         }
 
         return bitmap;
+    }
+
+    private static Canvas CreateWaveformCanvas(IReadOnlyList<float>? peaks, double width, double height)
+    {
+        var canvas = new Canvas
+        {
+            Width = Math.Max(1, width),
+            Height = Math.Max(1, height),
+            IsHitTestVisible = false
+        };
+        if (peaks is null || peaks.Count == 0)
+        {
+            return canvas;
+        }
+
+        var sampleCount = Math.Min(peaks.Count, (int)Math.Min(2048, Math.Max(8, Math.Round(width))));
+        for (var sampleIndex = 0; sampleIndex < sampleCount; sampleIndex++)
+        {
+            var peakIndex = Math.Min(peaks.Count - 1, (int)Math.Floor((double)sampleIndex / sampleCount * peaks.Count));
+            var amplitude = Math.Clamp(Math.Abs(peaks[peakIndex]), 0, 1);
+            var bar = new Border
+            {
+                Width = 1,
+                Height = Math.Max(1, amplitude * Math.Max(1, height - 2)),
+                Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(235, 161, 82))
+            };
+            Canvas.SetLeft(bar, sampleIndex * Math.Max(1, width - 1) / Math.Max(1, sampleCount - 1));
+            Canvas.SetTop(bar, (height - bar.Height) / 2);
+            canvas.Children.Add(bar);
+        }
+
+        return canvas;
     }
 
     private static Bitmap? CreateScopeBitmap(ColorScopeData? scopes, bool vectorscope)
