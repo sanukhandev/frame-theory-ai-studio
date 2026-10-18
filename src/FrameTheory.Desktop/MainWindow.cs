@@ -2518,13 +2518,14 @@ public sealed class MainWindow : Window
 
                 var trackLabel = new TextBlock
                 {
-                    Text = $"{item.Kind}  ·  {item.Id}",
+                    Text = item.Id,
                     FontSize = 11,
                     FontWeight = FontWeight.SemiBold,
                     Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(186, 193, 207)),
                     VerticalAlignment = VerticalAlignment.Center,
                     TextTrimming = TextTrimming.CharacterEllipsis
                 };
+                AutomationProperties.SetName(trackLabel, $"{item.Kind} timeline track label");
                 var trackAccent = new Border
                 {
                     Width = 4,

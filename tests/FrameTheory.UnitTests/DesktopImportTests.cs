@@ -150,6 +150,12 @@ public sealed class DesktopImportTests
                 var clips = canvas.Children.OfType<Button>().ToArray();
 
                 Xunit.Assert.Equal(2, clips.Length);
+                Xunit.Assert.Equal(
+                    "Video 1",
+                    window.GetVisualDescendants()
+                        .OfType<TextBlock>()
+                        .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Video timeline track label")
+                        .Text);
                 Xunit.Assert.Equal(0, Canvas.GetLeft(clips[0]));
                 Xunit.Assert.Equal(30, Canvas.GetLeft(clips[1]));
                 Xunit.Assert.All(clips, clip => Xunit.Assert.Equal(128, clip.MinWidth));
