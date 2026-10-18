@@ -16,7 +16,7 @@
 ## Version policy
 `0.1.x` technical previews, `0.5.x` feature-complete betas, `1.0.0` only after V1 gate. Use release notes with tested OS/architecture, codecs, known limitations, SBOM, checksums and regressions.
 
-Validation packaging defaults to `0.1.0` and accepts an explicit version override: Windows uses `scripts/package_windows.ps1 -Version`, macOS uses the third `scripts/package_macos_dmg.sh` argument, and Linux uses the third `scripts/package_linux_deb.sh` argument. Each script rejects versions outside the documented numeric preview format before writing package metadata. macOS accepts `osx-x64` and `osx-arm64`; Linux DEB metadata maps `linux-x64` to `amd64` and `linux-arm64` to `arm64`; unsupported RIDs fail before publishing.
+Validation packaging defaults to `0.1.0` and accepts an explicit version override: Windows uses `scripts/package_windows.ps1 -Version`, macOS uses the third `scripts/package_macos_dmg.sh` argument, and Linux uses the third `scripts/package_linux_deb.sh` argument. Each script rejects versions outside the documented numeric preview format before writing package metadata. Windows installer filenames include the requested RID; macOS accepts `osx-x64` and `osx-arm64`; Linux DEB metadata maps `linux-x64` to `amd64` and `linux-arm64` to `arm64`; unsupported RIDs fail before publishing.
 
 ## Release checklist
 - All UC-01..UC-06 smoke paths pass on packaged binaries.
