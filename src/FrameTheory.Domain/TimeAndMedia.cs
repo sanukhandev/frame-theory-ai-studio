@@ -7,9 +7,14 @@ public readonly record struct RationalFrameRate
 {
     public RationalFrameRate(int numerator, int denominator)
     {
-        if (numerator <= 0 || denominator <= 0)
+        if (numerator <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(numerator), "Frame-rate components must be positive.");
+        }
+
+        if (denominator <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(denominator), "Frame-rate components must be positive.");
         }
 
         var greatestCommonDivisor = GreatestCommonDivisor(numerator, denominator);
@@ -167,9 +172,14 @@ public sealed record MediaSourceMetadata
             throw new ArgumentException("The source URI must be absolute.", nameof(sourceUri));
         }
 
-        if (width < 0 || height < 0)
+        if (width < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(width), "Media dimensions cannot be negative.");
+        }
+
+        if (height < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(height), "Media dimensions cannot be negative.");
         }
 
         if (durationFrames < 0)

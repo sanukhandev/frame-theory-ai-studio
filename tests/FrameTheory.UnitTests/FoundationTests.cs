@@ -1854,8 +1854,8 @@ public sealed class FoundationTests
     [Xunit.Fact]
     public void DomainFrameAndMediaTypesRejectInvalidBoundsAndRemainStable()
     {
-        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new FrameTheory.Domain.RationalFrameRate(0, 1));
-        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new FrameTheory.Domain.RationalFrameRate(30, 0));
+        Xunit.Assert.Equal("numerator", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new FrameTheory.Domain.RationalFrameRate(0, 1)).ParamName);
+        Xunit.Assert.Equal("denominator", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new FrameTheory.Domain.RationalFrameRate(30, 0)).ParamName);
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new FrameTheory.Domain.RationalFrameRate(30, 1).FrameIndexAt(TimeSpan.FromSeconds(-1)));
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new FrameTheory.Domain.FrameRange(10, 0));
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new FrameTheory.Domain.FrameRange(long.MaxValue, 2));
@@ -1872,6 +1872,10 @@ public sealed class FoundationTests
         Xunit.Assert.Throws<ArgumentException>(() => FrameTheory.Domain.MediaId.Create(new Uri("file:///media/clip.mov"), ""));
         Xunit.Assert.Throws<ArgumentException>(() => new FrameTheory.Domain.MediaSourceMetadata(
             firstId, source, FrameTheory.Domain.MediaKind.Video, 1920, 1080, null, 30));
+        Xunit.Assert.Equal("height", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new FrameTheory.Domain.MediaSourceMetadata(
+            firstId, source, FrameTheory.Domain.MediaKind.Image, 0, -1, null, 0)).ParamName);
+        Xunit.Assert.Equal("canvasHeight", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new FrameTheory.Domain.ProjectSnapshot(
+            "project", new FrameTheory.Domain.RationalFrameRate(30, 1), 1, 0, "sRGB")).ParamName);
     }
 
     private sealed class TestCapabilityDetector : ICapabilityDetector

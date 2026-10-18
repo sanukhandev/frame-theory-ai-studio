@@ -54,9 +54,14 @@ public sealed record ProjectSnapshot
             throw new ArgumentException("A project ID is required.", nameof(projectId));
         }
 
-        if (canvasWidth <= 0 || canvasHeight <= 0)
+        if (canvasWidth <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(canvasWidth), "Canvas dimensions must be positive.");
+        }
+
+        if (canvasHeight <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(canvasHeight), "Canvas dimensions must be positive.");
         }
 
         if (string.IsNullOrWhiteSpace(workingColorSpace))
