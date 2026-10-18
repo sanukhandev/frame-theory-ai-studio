@@ -36,7 +36,13 @@ public sealed class DesktopAiRevisionTests
                 return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(
-                        $"{{\"id\":\"interactions/{callCount}\",\"status\":\"completed\",\"output_text\":{JsonSerializer.Serialize(plan)}}}",
+                        JsonSerializer.Serialize(new
+                        {
+                            id = $"interactions/{callCount}",
+                            status = "completed",
+                            output_text = plan,
+                            usage = new { total_input_tokens = 12, total_output_tokens = 8, total_tokens = 20 }
+                        }),
                         Encoding.UTF8,
                         "application/json")
                 };
@@ -60,6 +66,7 @@ public sealed class DesktopAiRevisionTests
             Xunit.Assert.Single(viewModel.AiProposal.Actions);
             Xunit.Assert.Empty(viewModel.TimelineEditor.Captions);
             Xunit.Assert.Equal(plan, viewModel.AiProposal.ValidatedJson);
+            Xunit.Assert.Contains("input=12, output=8, total=20", viewModel.GeminiUsageStatusText, StringComparison.Ordinal);
             Xunit.Assert.DoesNotContain("revision-secret", requestBodies[0]);
             var history = await File.ReadAllTextAsync(historyPath);
             Xunit.Assert.DoesNotContain("add a caption", history);

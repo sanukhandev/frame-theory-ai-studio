@@ -59,6 +59,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _timelineExportStatusText = "Timeline export is available after importing video.";
     private string _captionStatusText = "No captions imported.";
     private string _analysisStatusText = "No local AI analysis prepared.";
+    private string _geminiUsageStatusText = "No Gemini usage recorded.";
     private string _roughCutStatusText = "No rough-cut plan prepared.";
     private string _aiRevisionStatusText = "No Gemini revision requested.";
     private string _aiRecipeStatusText = "No AI recipe loaded.";
@@ -309,6 +310,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    public string GeminiUsageStatusText
+    {
+        get => _geminiUsageStatusText;
+        private set
+        {
+            if (value == _geminiUsageStatusText)
+            {
+                return;
+            }
+
+            _geminiUsageStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
     public LocalMediaAnalysisReport? LastLocalAnalysisReport { get; private set; }
 
     public RoughCutPlan? LastRoughCutPlan { get; private set; }
@@ -482,6 +498,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             AiRevisionStatusText = "Requesting a bounded Gemini revision...";
             var result = await client.CreateFollowUpAsync(prompt, _lastGeminiInteractionId, cancellationToken);
             _lastGeminiInteractionId = result.InteractionId;
+            GeminiUsageStatusText = FormatGeminiUsage(result.Usage, result.Attempts);
             ValidateAiPlan(result.OutputText);
             AiRevisionStatusText = AiProposal.Actions.Count == 0
                 ? "Gemini returned a response that failed local plan validation; no mutation occurred."
@@ -1131,6 +1148,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 BuildAiTargetIds(),
                 Math.Max(1, TimelineEditor.TotalFrames),
                 cancellationToken);
+            GeminiUsageStatusText = FormatGeminiUsage(
+                result.Usage,
+                result.Attempts,
+                result.UploadedSampleCount,
+                result.UploadedBytes);
             ValidateAiPlan(result.PlanJson);
             if (AiProposal.ValidatedJson is null)
             {
@@ -1444,6 +1466,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    private static string FormatGeminiUsage(
+        GeminiUsage? usage,
+        int attempts,
+        int uploadedSampleCount = 0,
+        long uploadedBytes = 0)
+    {
+        var tokenSummary = usage is null
+            ? "provider usage unavailable"
+            : $"input={usage.InputTokens?.ToString() ?? "n/a"}, output={usage.OutputTokens?.ToString() ?? "n/a"}, total={usage.TotalTokens?.ToString() ?? "n/a"}";
+        var uploadSummary = uploadedSampleCount > 0
+            ? $", approved samples={uploadedSampleCount}, uploaded bytes={uploadedBytes}"
+            : string.Empty;
+        return $"Gemini usage: {tokenSummary}; attempts={attempts}{uploadSummary}.";
+    }
 }
 
 internal sealed record TimelineExportRequest(

@@ -573,6 +573,9 @@ public sealed class MainWindow : Window
         analyzeApprovedSamples.Click += async (_, _) => await viewModel.RequestAiAnalysisAsync(CancellationToken.None);
         var analysisStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         analysisStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AnalysisStatusText)));
+        var usageStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(usageStatus, "Gemini usage status");
+        usageStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.GeminiUsageStatusText)));
         _ = settings.LoadAsync(CancellationToken.None);
         return new Border
         {
@@ -594,7 +597,8 @@ public sealed class MainWindow : Window
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { videoFrames, audioWaveform, photoPreview } },
                     uploadConsent,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { prepareAnalysis, analyzeApprovedSamples } },
-                    analysisStatus
+                    analysisStatus,
+                    usageStatus
                 }
             }
         };

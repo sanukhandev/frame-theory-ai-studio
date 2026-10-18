@@ -23,7 +23,7 @@ public sealed class DesktopAiAnalysisTests
             return new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(
-                    $"{{\"id\":\"interactions/plan-1\",\"status\":\"completed\",\"output_text\":{System.Text.Json.JsonSerializer.Serialize(plan)}}}",
+                    $"{{\"id\":\"interactions/plan-1\",\"status\":\"completed\",\"output_text\":{System.Text.Json.JsonSerializer.Serialize(plan)},\"usage\":{{\"total_input_tokens\":12,\"total_output_tokens\":8,\"total_tokens\":20}}}}",
                     Encoding.UTF8,
                     "application/json")
             };
@@ -47,6 +47,8 @@ public sealed class DesktopAiAnalysisTests
         Xunit.Assert.Empty(viewModel.TimelineEditor.Captions);
         Xunit.Assert.Contains("\"type\":\"image\"", body);
         Xunit.Assert.Contains("review 1 editable action", viewModel.AnalysisStatusText, StringComparison.Ordinal);
+        Xunit.Assert.Contains("input=12, output=8, total=20", viewModel.GeminiUsageStatusText, StringComparison.Ordinal);
+        Xunit.Assert.Contains("approved samples=1", viewModel.GeminiUsageStatusText, StringComparison.Ordinal);
     }
 
     private sealed class ImageImporter : IMediaImporter
