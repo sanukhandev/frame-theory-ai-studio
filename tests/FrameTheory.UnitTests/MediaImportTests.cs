@@ -55,6 +55,47 @@ public sealed class MediaImportTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task ImportRejectsLinkedWaveformSource()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-import-link-");
+        var external = Directory.CreateTempSubdirectory("frame-theory-import-link-target-");
+        try
+        {
+            var target = Path.Combine(external.FullName, "clip.mp4");
+            await File.WriteAllTextAsync(target, "source");
+            var linked = Path.Combine(directory.FullName, "clip.mp4");
+            try
+            {
+                File.CreateSymbolicLink(linked, target);
+            }
+            catch (Exception linkException) when (linkException is IOException or UnauthorizedAccessException or PlatformNotSupportedException)
+            {
+                return;
+            }
+
+            var metadata = new MediaSourceMetadata(
+                MediaId.Parse(new string('f', 64)),
+                new Uri(linked),
+                MediaKind.Video,
+                8,
+                4,
+                new RationalFrameRate(30, 1),
+                30,
+                TimeSpan.FromSeconds(1),
+                hasAudio: true);
+            var importer = new FfmpegMediaImporter(new StubProbe(metadata), new StubDecoder(), new StubProcessRunner());
+
+            var exception = await Xunit.Assert.ThrowsAsync<MediaImportException>(() => importer.ImportAsync(new Uri(linked), CancellationToken.None));
+            Xunit.Assert.Contains("Symlinked media paths", exception.Message, StringComparison.Ordinal);
+        }
+        finally
+        {
+            directory.Delete(true);
+            external.Delete(true);
+        }
+    }
+
     private sealed class StubProbe(MediaSourceMetadata metadata) : IMediaProbe
     {
         public Task<MediaSourceMetadata> ProbeAsync(Uri file, CancellationToken cancellationToken) => Task.FromResult(metadata);

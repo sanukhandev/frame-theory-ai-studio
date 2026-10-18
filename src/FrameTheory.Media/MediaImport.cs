@@ -61,6 +61,11 @@ public sealed class FfmpegMediaImporter : IMediaImporter
         }
 
         var path = Path.GetFullPath(file.LocalPath);
+        if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new MediaImportException("Symlinked media paths are not accepted for waveform extraction.");
+        }
+
         var outputPath = Path.Combine(Path.GetTempPath(), $"frame-theory-waveform-{Guid.NewGuid():N}.pcm");
         try
         {

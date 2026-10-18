@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Media import boundary checkpoint (2026-10-18):** Waveform extraction now independently rejects reparse-point media paths before invoking FFmpeg, even when a composed or test probe adapter does not enforce the same rule. Focused media-import coverage passes 3/3, the Release build is warning-free through the focused compile, formatting and diff checks pass, and original source bytes remain untouched.
+
 **Package traversal checkpoint (2026-10-18):** `scripts/verify_package.ps1` now rejects a reparse-point package root or directory entry before recursive discovery, then hashes only entries from the fail-closed walk. Native bundle generation and verification also reject linked manifests, linked entries and unexpected subdirectories. PowerShell parsing, a real one-file package checksum smoke, repository validation and `git diff --check` pass; the hosted package-manifest gate now includes a real directory-symlink rejection regression, pending the next hosted run.
 
 **Timeline status binding checkpoint (2026-10-18):** The read-only timeline preview-performance control now binds to `TextBox.TextProperty`, so measured seek/decode/cache metrics are displayed by the actual control instead of being assigned to an unrelated `TextBlock` property. The Release solution build passes with 0 warnings/errors, the full suite passes 225 unit tests and 2 golden tests, desktop shell smoke passes, and formatting/diff checks are clean. This is implementation hardening for FT-902; manual workspace acceptance remains open.
