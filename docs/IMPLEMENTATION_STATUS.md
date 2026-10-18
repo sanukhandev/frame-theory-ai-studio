@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Hosted revalidation checkpoint (2026-10-18):** Run `39120508948` for pushed `d3bb1dc` passed documentation/schema validation and the Windows, macOS and Linux matrix: restore, vulnerability/dependency checks, build, native FFmpeg media, Windows UI automation, formatting, full tests, headless desktop shell, publish/archive, installer/DMG/DEB, packaged relaunch and SHA-256 verification. Manual HiDPI/view journeys, per-OS manual UC evidence, legal redistribution, signing/clean-host review and final audit remain open; no task was closed from CI alone.
+
 **Exact-ten batch checkpoint (2026-10-18):** The ten local commits after pushed `7c81dd6` are now validated through focused trust-boundary tests; the final desktop caption-I/O slice passes 11/11, with formatting, repository validation and `git diff --check` green. Push is now authorized by the batch policy; hosted cross-platform revalidation remains required.
 
 **Desktop caption-I/O checkpoint (2026-10-18):** Caption import, verified transcript import, local Whisper input and caption export destinations now reject reparse-point paths before reading or writing. A dangling caption-link regression passes; focused desktop caption coverage passes 10/10, with formatting, repository validation and `git diff --check` green. This is local evidence pending the next exact-ten-commit hosted revalidation.
