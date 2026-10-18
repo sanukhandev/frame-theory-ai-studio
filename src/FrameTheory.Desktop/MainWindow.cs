@@ -2220,7 +2220,18 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(timelinePreviewStatus, "Timeline preview status");
         timelinePreviewStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePreviewStatusText)));
-        var timelinePerformanceStatus = new TextBox { IsReadOnly = true, TextWrapping = TextWrapping.Wrap };
+        var timelinePerformanceStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(timelinePerformanceStatus, "Timeline preview performance status");
         timelinePerformanceStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePerformanceStatusText)));
         var analyzeMotion = new Button { Content = "Analyze motion" };

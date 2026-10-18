@@ -402,6 +402,8 @@ public sealed class FoundationTests
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline preview performance status");
                 Xunit.Assert.Equal(viewModel.TimelinePerformanceStatusText, performanceStatus.Text);
+                Xunit.Assert.True(performanceStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, performanceStatus.FontSize);
                 Xunit.Assert.Equal(
                     viewModel.TimelinePreviewStatusText,
                     window.GetVisualDescendants()
