@@ -805,50 +805,61 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         var imported = ImportedMedia.ToList();
         var newlyImported = 0;
         var failures = new List<string>();
-        foreach (var path in paths.Where(path => !string.IsNullOrWhiteSpace(path)).Distinct(StringComparer.OrdinalIgnoreCase))
+        try
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            try
+            foreach (var path in paths.Where(path => !string.IsNullOrWhiteSpace(path)).Distinct(StringComparer.OrdinalIgnoreCase))
             {
-                var fullPath = Path.GetFullPath(path);
-                if (LocalPathSecurity.ContainsReparsePoint(fullPath))
+                cancellationToken.ThrowIfCancellationRequested();
+                try
                 {
-                    throw new InvalidDataException("Symlinked media imports are not accepted.");
-                }
-
-                var media = await _mediaImporter.ImportAsync(new Uri(fullPath), cancellationToken);
-                if (imported.All(item => item.Id != media.Metadata.Id))
-                {
-                    imported.Add(new ImportedMediaViewModel(
-                    Path.GetFileName(fullPath),
-                    $"{media.Metadata.Kind}; {media.Metadata.Width}x{media.Metadata.Height}; thumbnail {media.ThumbnailPpm?.Length ?? 0} bytes; waveform {media.WaveformPeaks.Count} peaks",
-                    media.ThumbnailPpm,
-                    media.Metadata.Kind,
-                    media.WaveformPeaks)
+                    var fullPath = Path.GetFullPath(path);
+                    if (LocalPathSecurity.ContainsReparsePoint(fullPath))
                     {
-                        Id = media.Metadata.Id
-                    });
-                    newlyImported++;
+                        throw new InvalidDataException("Symlinked media imports are not accepted.");
+                    }
+
+                    var media = await _mediaImporter.ImportAsync(new Uri(fullPath), cancellationToken);
+                    if (imported.All(item => item.Id != media.Metadata.Id))
+                    {
+                        imported.Add(new ImportedMediaViewModel(
+                        Path.GetFileName(fullPath),
+                        $"{media.Metadata.Kind}; {media.Metadata.Width}x{media.Metadata.Height}; thumbnail {media.ThumbnailPpm?.Length ?? 0} bytes; waveform {media.WaveformPeaks.Count} peaks",
+                        media.ThumbnailPpm,
+                        media.Metadata.Kind,
+                        media.WaveformPeaks)
+                        {
+                            Id = media.Metadata.Id
+                        });
+                        newlyImported++;
+                    }
+                    _mediaSources[media.Metadata.Id] = new Uri(fullPath);
+                    _analysisAssets[media.Metadata.Id] = media;
+                    if (media.Metadata.Kind == MediaKind.Video && _videoWidth == 0)
+                    {
+                        _videoWidth = media.Metadata.Width;
+                        _videoHeight = media.Metadata.Height;
+                    }
+                    if (media.ThumbnailPpm is not null)
+                    {
+                        ColorInspector.SetSource(media.ThumbnailPpm);
+                    }
+                    TimelineEditor.AddMedia(media.Metadata);
+                    TimelineEditor.AddBeatMarkers(media.Metadata.Id, media.WaveformPeaks);
                 }
-                _mediaSources[media.Metadata.Id] = new Uri(fullPath);
-                _analysisAssets[media.Metadata.Id] = media;
-                if (media.Metadata.Kind == MediaKind.Video && _videoWidth == 0)
+                catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException)
                 {
-                    _videoWidth = media.Metadata.Width;
-                    _videoHeight = media.Metadata.Height;
+                    _diagnosticsLog.Record("media-import-failed", exception);
+                    failures.Add($"{Path.GetFileName(path)} ({exception.Message})");
                 }
-                if (media.ThumbnailPpm is not null)
-                {
-                    ColorInspector.SetSource(media.ThumbnailPpm);
-                }
-                TimelineEditor.AddMedia(media.Metadata);
-                TimelineEditor.AddBeatMarkers(media.Metadata.Id, media.WaveformPeaks);
             }
-            catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException)
-            {
-                _diagnosticsLog.Record("media-import-failed", exception);
-                failures.Add($"{Path.GetFileName(path)} ({exception.Message})");
-            }
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            ImportedMedia = Array.AsReadOnly(imported.ToArray());
+            OnPropertyChanged(nameof(ImportedMedia));
+            OnPropertyChanged(nameof(ImportedMediaSummary));
+            MediaImportStatusText = $"Media import canceled; imported {newlyImported} file(s); {imported.Count} file(s) available.";
+            return;
         }
 
         ImportedMedia = Array.AsReadOnly(imported.ToArray());

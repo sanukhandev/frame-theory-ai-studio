@@ -72,6 +72,24 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task CanceledBatchPublishesSuccessfullyImportedPrefix()
+    {
+        using var cancellation = new CancellationTokenSource();
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new CancelAfterFirstImporter(cancellation));
+
+        await viewModel.ImportFilesAsync(["first.mp4", "second.mp4"], cancellation.Token);
+
+        Xunit.Assert.Single(viewModel.ImportedMedia);
+        Xunit.Assert.Equal("first.mp4", viewModel.ImportedMedia[0].Name);
+        Xunit.Assert.Single(viewModel.TimelineEditor.TrackRows.Single(track => track.Kind == TimelineTrackKind.Video).Clips);
+        Xunit.Assert.Contains("canceled", viewModel.MediaImportStatusText, StringComparison.OrdinalIgnoreCase);
+        Xunit.Assert.Contains("1 file(s) available", viewModel.MediaImportStatusText, StringComparison.Ordinal);
+    }
+
+    [Xunit.Fact]
     public async Task SelectingImportedMediaSelectsItsTimelineClip()
     {
         using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
@@ -687,6 +705,30 @@ public sealed class DesktopImportTests
                 new RationalFrameRate(30, 1),
                 30,
                 TimeSpan.FromSeconds(1));
+            return Task.FromResult(new ImportedMedia(metadata, null, [0.25f, 0.75f]));
+        }
+    }
+
+    private sealed class CancelAfterFirstImporter(CancellationTokenSource cancellation) : IMediaImporter
+    {
+        private int _calls;
+
+        public Task<ImportedMedia> ImportAsync(Uri file, CancellationToken cancellationToken)
+        {
+            var metadata = new MediaSourceMetadata(
+                MediaId.Create(file, "cancel-test"),
+                file,
+                MediaKind.Video,
+                16,
+                9,
+                new RationalFrameRate(30, 1),
+                30,
+                TimeSpan.FromSeconds(1));
+            if (++_calls == 1)
+            {
+                cancellation.Cancel();
+            }
+
             return Task.FromResult(new ImportedMedia(metadata, null, [0.25f, 0.75f]));
         }
     }
