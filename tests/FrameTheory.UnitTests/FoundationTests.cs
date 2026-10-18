@@ -399,6 +399,18 @@ public sealed class FoundationTests
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline preview performance status");
                 Xunit.Assert.Equal(viewModel.TimelinePerformanceStatusText, performanceStatus.Text);
+                Xunit.Assert.Equal(
+                    viewModel.TimelinePreviewStatusText,
+                    window.GetVisualDescendants()
+                        .OfType<TextBox>()
+                        .Single(control => AutomationProperties.GetName(control) == "Timeline preview status")
+                        .Text);
+                Xunit.Assert.Equal(
+                    viewModel.MotionAnalysisStatusText,
+                    window.GetVisualDescendants()
+                        .OfType<TextBox>()
+                        .Single(control => AutomationProperties.GetName(control) == "Timeline motion analysis status")
+                        .Text);
                 Xunit.Assert.True(window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline preview empty state")

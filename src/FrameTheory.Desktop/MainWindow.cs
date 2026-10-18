@@ -2205,18 +2205,36 @@ public sealed class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(timelinePreviewEmptyState, "Timeline preview empty state");
-        var timelinePreviewStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var timelinePreviewStatus = new TextBox
+        {
+            IsReadOnly = true,
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(timelinePreviewStatus, "Timeline preview status");
-        timelinePreviewStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePreviewStatusText)));
+        timelinePreviewStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePreviewStatusText)));
         var timelinePerformanceStatus = new TextBox { IsReadOnly = true, TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(timelinePerformanceStatus, "Timeline preview performance status");
         timelinePerformanceStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePerformanceStatusText)));
         var analyzeMotion = new Button { Content = "Analyze motion" };
         AutomationProperties.SetName(analyzeMotion, "Analyze timeline motion");
         analyzeMotion.Click += async (_, _) => await viewModel.AnalyzeTimelineMotionAsync(CancellationToken.None);
-        var motionAnalysisStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var motionAnalysisStatus = new TextBox
+        {
+            IsReadOnly = true,
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(motionAnalysisStatus, "Timeline motion analysis status");
-        motionAnalysisStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.MotionAnalysisStatusText)));
+        motionAnalysisStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.MotionAnalysisStatusText)));
         void RefreshTimelinePreview()
         {
             var previewPpm = viewModel.TimelinePreviewPpm;
