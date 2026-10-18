@@ -39,6 +39,17 @@ public sealed class MotionAnalysisTests
         Xunit.Assert.Throws<ArgumentException>(() => new TranslationMotionTracker().Track([frame, Frame(1, 7, 8, 0)]));
     }
 
+    [Xunit.Fact]
+    public void TrackerFindsMotionWhenFramesAreSmallerThanTheDefaultSearchRadius()
+    {
+        var vectors = new TranslationMotionTracker().Track([Frame(0, 8, 8, 0), Frame(1, 8, 8, 1)]);
+
+        Xunit.Assert.Single(vectors);
+        Xunit.Assert.Equal(1, vectors[0].OffsetX);
+        Xunit.Assert.Equal(0, vectors[0].OffsetY);
+        Xunit.Assert.True(vectors[0].Confidence > 0.99f);
+    }
+
     private static MotionFrame Frame(int index, int width, int height, int shiftX)
     {
         var pixels = new byte[width * height * 3];

@@ -100,19 +100,21 @@ public sealed class TranslationMotionTracker
                 throw new ArgumentException("Motion frames must have matching dimensions.", nameof(frames));
             }
 
-            var bestScore = long.MaxValue;
+            var bestScore = double.MaxValue;
             var bestX = 0;
             var bestY = 0;
             var sampleCount = 0;
-            for (var offsetY = -_searchRadius; offsetY <= _searchRadius; offsetY++)
+            var verticalRadius = Math.Min(_searchRadius, previous.Height - 1);
+            var horizontalRadius = Math.Min(_searchRadius, previous.Width - 1);
+            for (var offsetY = -verticalRadius; offsetY <= verticalRadius; offsetY++)
             {
-                for (var offsetX = -_searchRadius; offsetX <= _searchRadius; offsetX++)
+                for (var offsetX = -horizontalRadius; offsetX <= horizontalRadius; offsetX++)
                 {
                     long score = 0;
                     var count = 0;
-                    for (var y = _searchRadius; y < previous.Height - _searchRadius; y += _sampleStride)
+                    for (var y = 0; y < previous.Height; y += _sampleStride)
                     {
-                        for (var x = _searchRadius; x < previous.Width - _searchRadius; x += _sampleStride)
+                        for (var x = 0; x < previous.Width; x += _sampleStride)
                         {
                             var currentX = x + offsetX;
                             var currentY = y + offsetY;
@@ -126,9 +128,10 @@ public sealed class TranslationMotionTracker
                         }
                     }
 
-                    if (count > 0 && score < bestScore)
+                    var averageScore = count == 0 ? double.MaxValue : score / (double)count;
+                    if (count > 0 && averageScore < bestScore)
                     {
-                        bestScore = score;
+                        bestScore = averageScore;
                         bestX = offsetX;
                         bestY = offsetY;
                         sampleCount = count;
@@ -136,8 +139,8 @@ public sealed class TranslationMotionTracker
                 }
             }
 
-            var normalizedError = sampleCount == 0 ? 1 : bestScore / (float)(sampleCount * 255);
-            vectors.Add(new MotionVector(current.FrameIndex, bestX, bestY, Math.Clamp(1 - normalizedError, 0, 1)));
+            var normalizedError = sampleCount == 0 ? 1 : bestScore / 255;
+            vectors.Add(new MotionVector(current.FrameIndex, bestX, bestY, Math.Clamp((float)(1 - normalizedError), 0, 1)));
         }
 
         return vectors;
