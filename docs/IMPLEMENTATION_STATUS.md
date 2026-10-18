@@ -90,6 +90,8 @@
 
 **CI correction checkpoint (2026-10-18):** Hosted run `39095947457` stopped in the documentation job because the Windows invalid-version guard asserted provider-specific error text on a Linux PowerShell runner; the guard had already rejected the invalid input. Commit `4c3d718` now asserts the stable nonzero exit contract only. The corrected workflow remains unpushed until the next 10-commit batch is complete.
 
+**Batch checkpoint (2026-10-18):** The corrected packaging batch now contains 10 local commits since pushed commit `851e4ac`, covering Windows/macOS/Linux version and RID guards, CI metadata assertions and the hosted-failure correction. Push only at this boundary after the final local diff check.
+
 **FT-1005 packaged relaunch checkpoint (2026-10-18):** Hosted run `39086502910` repeated the full matrix after adding real packaged-app startup checks. Windows install/relaunch/uninstall remained green; macOS launched the executable from the mounted DMG; Linux extracted the DEB and launched the packaged self-contained executable under Xvfb. This is stronger package reachability evidence, not clean-host or signed-release evidence.
 
 **Manual UI gate checkpoint (2026-10-18):** The Release desktop process launches from the managed `FrameTheory.Desktop.dll` with the expected `Frame Theory Studio AI` window title on this Windows host, but the available CUA inventory still returns zero native Windows applications and only browser tabs. FT-901..FT-904 and FT-1002 remain unverified; no interactive acceptance claim is made.
