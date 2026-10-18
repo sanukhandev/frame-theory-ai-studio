@@ -2392,6 +2392,7 @@ public sealed class MainWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
         AutomationProperties.SetName(presetSelection, "Loaded color styles");
+        ToolTip.SetTip(presetSelection, "Choose a loaded local style before applying it to the preview.");
         var presetStatus = new TextBox
         {
             IsReadOnly = true,
@@ -2527,6 +2528,7 @@ public sealed class MainWindow : Window
             }, supportsRecycling: false)
         };
         AutomationProperties.SetName(referenceSource, "Reference source preview");
+        ToolTip.SetTip(referenceSource, "Choose the local preview whose grade should be matched.");
         var referenceTarget = new ComboBox
         {
             MinWidth = 160,
@@ -2563,7 +2565,10 @@ public sealed class MainWindow : Window
             }, supportsRecycling: false)
         };
         AutomationProperties.SetName(referenceTarget, "Reference target preview");
+        ToolTip.SetTip(referenceTarget, "Choose the approved local visual reference preview.");
         var referenceConsent = new CheckBox { Content = "I approve uploading these exact previews to Gemini" };
+        AutomationProperties.SetName(referenceConsent, "Color reference upload consent");
+        ToolTip.SetTip(referenceConsent, "Required before any selected visual previews can leave this device.");
         var analyzeReference = new Button { Content = "Analyze approved visual reference" };
         analyzeReference.Classes.Add("primary");
         AutomationProperties.SetName(analyzeReference, "Analyze approved visual reference");

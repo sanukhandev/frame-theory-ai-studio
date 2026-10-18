@@ -948,6 +948,9 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Name the local reusable color style before saving it.",
                     ToolTip.GetTip(colorStyleName));
+                Xunit.Assert.Equal(
+                    "Choose a loaded local style before applying it to the preview.",
+                    ToolTip.GetTip(loadedColorStyles));
                 var referenceStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Reference analysis status");
@@ -973,6 +976,15 @@ public sealed class FoundationTests
                     Xunit.Assert.Equal(240, selector.MaxWidth);
                     Xunit.Assert.Equal(HorizontalAlignment.Stretch, selector.HorizontalAlignment);
                 }
+                Xunit.Assert.Equal(
+                    "Choose the local preview whose grade should be matched.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<ComboBox>().Single(control => AutomationProperties.GetName(control) == "Reference source preview")));
+                Xunit.Assert.Equal(
+                    "Choose the approved local visual reference preview.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<ComboBox>().Single(control => AutomationProperties.GetName(control) == "Reference target preview")));
+                Xunit.Assert.Equal(
+                    "Required before any selected visual previews can leave this device.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<CheckBox>().Single(control => AutomationProperties.GetName(control) == "Color reference upload consent")));
                 foreach (var scopeName in new[] { "Color waveform scope", "Color vectorscope" })
                 {
                     var scope = window.GetVisualDescendants()
