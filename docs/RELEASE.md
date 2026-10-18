@@ -17,7 +17,7 @@ pwsh ./scripts/package.ps1 -RuntimeIdentifier win-x64 -OutputDirectory artifacts
 sh ./scripts/package.sh linux-x64 artifacts/package true
 ```
 
-Release owners may provide a separately reviewed native FFmpeg directory as the final argument. It must contain both `ffmpeg` and `ffprobe` for Unix packages, or `ffmpeg.exe` and `ffprobe.exe` for Windows; the scripts copy both beside the application and fail closed when either binary is missing:
+Release owners may provide a separately reviewed native FFmpeg directory as the final argument. It must contain both `ffmpeg` and `ffprobe` for Unix packages, or `ffmpeg.exe` and `ffprobe.exe` for Windows; the scripts copy the pair and adjacent support files beside the application and fail closed when either binary is missing:
 
 ```text
 pwsh ./scripts/package.ps1 -RuntimeIdentifier win-x64 -OutputDirectory artifacts/package -SelfContained -FfmpegDirectory C:\reviewed\ffmpeg
