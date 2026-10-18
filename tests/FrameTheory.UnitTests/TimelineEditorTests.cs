@@ -196,6 +196,18 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void TimelineTrackRowSnapshotsCallerClips()
+    {
+        var clips = new List<TimelineClipRowViewModel> { new("clip", 0, 1, false) };
+        var row = new TimelineTrackRowViewModel("Video 1", TimelineTrackKind.Video, clips);
+
+        clips.Clear();
+
+        Xunit.Assert.Single(row.Clips);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineClipRowViewModel>>(row.Clips).IsReadOnly);
+    }
+
+    [Xunit.Fact]
     public void TimelineEditorCanRebuildMarkersUsingEnergyOnsets()
     {
         var source = new Uri("file:///energy-beats.mp4");

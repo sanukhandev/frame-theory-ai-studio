@@ -22,6 +22,7 @@ Audit checkpoint: 2026-10-18, latest verified green complete matrix run `3911831
 - Current imported-media view hardening: media-card thumbnail bytes and waveform peaks are defensively copied, preserving preview and analysis inputs from downstream mutation. Focused desktop import coverage includes the regression; native UI acceptance remains open.
 - Current timeline-row hardening: nested timeline clip rows now expose read-only snapshots, preserving the visible timeline rail from binding mutation. Focused timeline-editor coverage includes the regression; native UI acceptance remains open.
 - Current batch-export hardening: validated targets are snapshotted before asynchronous export, preserving output ordering and completion counts during caller mutation. Focused batch-export coverage includes the regression; native interruption acceptance remains open.
+- Current timeline row-contract hardening: `TimelineTrackRowViewModel` snapshots caller-provided clips while preserving public deconstruction and formatting. Focused timeline-editor coverage includes the regression; native UI acceptance remains open.
 
 ## Evidence
 

@@ -18,11 +18,28 @@ public sealed record TimelineClipRowViewModel(
     public override string ToString() => $"{MediaId[..Math.Min(8, MediaId.Length)]}  {StartFrame}–{StartFrame + DurationFrames - 1}";
 }
 
-public sealed record TimelineTrackRowViewModel(
-    string Id,
-    TimelineTrackKind Kind,
-    IReadOnlyList<TimelineClipRowViewModel> Clips)
+public sealed record TimelineTrackRowViewModel
 {
+    public TimelineTrackRowViewModel(string Id, TimelineTrackKind Kind, IReadOnlyList<TimelineClipRowViewModel> Clips)
+    {
+        this.Id = Id;
+        this.Kind = Kind;
+        this.Clips = Array.AsReadOnly((Clips ?? throw new ArgumentNullException(nameof(Clips))).ToArray());
+    }
+
+    public string Id { get; }
+
+    public TimelineTrackKind Kind { get; }
+
+    public IReadOnlyList<TimelineClipRowViewModel> Clips { get; }
+
+    public void Deconstruct(out string Id, out TimelineTrackKind Kind, out IReadOnlyList<TimelineClipRowViewModel> Clips)
+    {
+        Id = this.Id;
+        Kind = this.Kind;
+        Clips = this.Clips;
+    }
+
     public override string ToString() => $"{Kind}: {Id} — {string.Join(", ", Clips)}";
 }
 
