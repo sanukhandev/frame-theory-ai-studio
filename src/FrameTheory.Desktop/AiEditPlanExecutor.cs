@@ -143,7 +143,7 @@ public static class AiEditPlanExecutor
                     },
                     action.StartFrame,
                     action.DurationFrames,
-                    ApprovedFont(approvedFontPaths, approvedFontPaths.Keys.FirstOrDefault()));
+                    timeline.CaptionFontPath ?? throw new InvalidOperationException("Select an approved caption font before applying AI captions."));
                 break;
             case "animation.keyframes":
                 SelectClip(timeline, action.TargetId, TimelineTrackKind.Video);

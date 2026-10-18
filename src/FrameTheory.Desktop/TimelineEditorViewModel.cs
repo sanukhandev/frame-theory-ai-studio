@@ -1127,6 +1127,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public IReadOnlyList<TimedCaption> Captions => _captions;
 
+    public string? CaptionFontPath => _captionFontPath;
+
     public string? TranscriptSourceFingerprint => _transcriptSourceFingerprint;
 
     public void ImportCaptions(string content)

@@ -164,6 +164,52 @@ public sealed class AiEditPlanExecutorTests
     }
 
     [Xunit.Fact]
+    public void CaptionActionUsesTheSelectedCaptionFontAndRemainsUndoable()
+    {
+        var editor = CreateEditor(out _);
+        var fontPath = Path.Combine(Path.GetTempPath(), $"frame-theory-caption-font-{Guid.NewGuid():N}.ttf");
+        File.WriteAllBytes(fontPath, [1]);
+        try
+        {
+            editor.SetCaptionFontPath(fontPath);
+            var action = new AiEditAction("caption", "caption.add", "caption-track", 0, 10, new Dictionary<string, JsonElement>
+            {
+                ["text"] = JsonDocument.Parse("\"Hello\"").RootElement.Clone(),
+                ["provenance"] = JsonDocument.Parse("\"authored-caption\"").RootElement.Clone()
+            });
+
+            var result = AiEditPlanExecutor.Execute([action], editor, new Dictionary<string, string>(), new Dictionary<string, FrameTheory.Color.ColorGrade>());
+
+            Xunit.Assert.True(result.IsApplied, result.Message);
+            Xunit.Assert.Single(editor.Captions);
+            Xunit.Assert.Equal(fontPath, editor.CaptureAiState().CaptionFontPath);
+            Xunit.Assert.True(editor.UndoAiEdit());
+            Xunit.Assert.Empty(editor.Captions);
+        }
+        finally
+        {
+            File.Delete(fontPath);
+        }
+    }
+
+    [Xunit.Fact]
+    public void CaptionActionWithoutASelectedFontIsRejectedWithoutMutation()
+    {
+        var editor = CreateEditor(out _);
+        var action = new AiEditAction("caption", "caption.add", "caption-track", 0, 10, new Dictionary<string, JsonElement>
+        {
+            ["text"] = JsonDocument.Parse("\"Hello\"").RootElement.Clone(),
+            ["provenance"] = JsonDocument.Parse("\"authored-caption\"").RootElement.Clone()
+        });
+
+        var result = AiEditPlanExecutor.Execute([action], editor, new Dictionary<string, string>(), new Dictionary<string, FrameTheory.Color.ColorGrade>());
+
+        Xunit.Assert.False(result.IsApplied);
+        Xunit.Assert.Contains("caption font", result.Message, StringComparison.OrdinalIgnoreCase);
+        Xunit.Assert.Empty(editor.Captions);
+    }
+
+    [Xunit.Fact]
     public void ExecutionResultSnapshotsOutcomes()
     {
         var outcomes = new List<AiActionExecutionOutcome> { new("action", true, "Applied.") };
