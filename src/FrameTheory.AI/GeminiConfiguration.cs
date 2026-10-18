@@ -19,6 +19,7 @@ public sealed record GeminiConfiguration(string ModelId, bool HasApiKey);
 public sealed class GeminiConfigurationService
 {
     public const string ApiKeyName = "gemini-api-key";
+    public const string ModelName = "gemini-model-id";
     private readonly ISecretStore _secretStore;
 
     public GeminiConfigurationService(ISecretStore secretStore)
@@ -29,7 +30,11 @@ public sealed class GeminiConfigurationService
     public async Task<GeminiConfiguration> LoadAsync(CancellationToken cancellationToken)
     {
         var apiKey = await _secretStore.ReadAsync(ApiKeyName, cancellationToken);
-        return new GeminiConfiguration(GeminiModelCatalog.Supported[0].Id, !string.IsNullOrEmpty(apiKey));
+        var storedModelId = await _secretStore.ReadAsync(ModelName, cancellationToken);
+        var modelId = GeminiModelCatalog.Contains(storedModelId ?? string.Empty)
+            ? storedModelId!
+            : GeminiModelCatalog.Supported[0].Id;
+        return new GeminiConfiguration(modelId, !string.IsNullOrEmpty(apiKey));
     }
 
     public Task<string?> ReadApiKeyAsync(CancellationToken cancellationToken) => _secretStore.ReadAsync(ApiKeyName, cancellationToken);
@@ -47,6 +52,7 @@ public sealed class GeminiConfigurationService
             throw new ArgumentException("A user-provided Gemini API key is required.", nameof(apiKey));
         }
 
+        await _secretStore.StoreAsync(ModelName, normalizedModelId, cancellationToken);
         await _secretStore.StoreAsync(ApiKeyName, apiKey.Trim(), cancellationToken);
         return new GeminiConfiguration(normalizedModelId, true);
     }
@@ -54,5 +60,6 @@ public sealed class GeminiConfigurationService
     public async Task DeleteAsync(CancellationToken cancellationToken)
     {
         await _secretStore.DeleteAsync(ApiKeyName, cancellationToken);
+        await _secretStore.DeleteAsync(ModelName, cancellationToken);
     }
 }

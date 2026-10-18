@@ -16,10 +16,13 @@ public sealed class GeminiConfigurationTests
         var saved = await configuration.SaveAsync(" gemini-2.5-pro ", "test-key-value", CancellationToken.None);
         var loaded = await configuration.LoadAsync(CancellationToken.None);
         var storedSecret = secrets.Values[GeminiConfigurationService.ApiKeyName];
+        var storedModel = secrets.Values[GeminiConfigurationService.ModelName];
         await configuration.DeleteAsync(CancellationToken.None);
 
         Xunit.Assert.False(offline.HasApiKey);
         Xunit.Assert.Equal("gemini-2.5-pro", saved.ModelId);
+        Xunit.Assert.Equal("gemini-2.5-pro", loaded.ModelId);
+        Xunit.Assert.Equal("gemini-2.5-pro", storedModel);
         Xunit.Assert.True(loaded.HasApiKey);
         Xunit.Assert.Equal("test-key-value", storedSecret);
         Xunit.Assert.False((await configuration.LoadAsync(CancellationToken.None)).HasApiKey);
