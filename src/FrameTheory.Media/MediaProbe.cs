@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text.Json;
 using FrameTheory.Domain;
 
@@ -69,7 +70,8 @@ public sealed class FfprobeMediaProbe : IMediaProbe
         try
         {
             using var document = JsonDocument.Parse(result.StandardOutput);
-            return ParseMetadata(file, document.RootElement);
+            var fingerprint = await ComputeFingerprintAsync(path, cancellationToken);
+            return ParseMetadata(file, document.RootElement, fingerprint);
         }
         catch (JsonException exception)
         {
@@ -77,7 +79,7 @@ public sealed class FfprobeMediaProbe : IMediaProbe
         }
     }
 
-    private static MediaSourceMetadata ParseMetadata(Uri sourceUri, JsonElement root)
+    private static MediaSourceMetadata ParseMetadata(Uri sourceUri, JsonElement root, string fingerprint)
     {
         var streams = root.TryGetProperty("streams", out var streamArray) && streamArray.ValueKind == JsonValueKind.Array
             ? streamArray.EnumerateArray().ToArray()
@@ -96,7 +98,6 @@ public sealed class FfprobeMediaProbe : IMediaProbe
         var height = hasVideo ? GetInt(video, "height") : 0;
         var orientation = hasVideo ? ParseOrientation(video) : 0;
         var colorProfile = hasVideo ? ParseColorProfile(video) : null;
-        var fingerprint = $"probe:{sourceUri.AbsoluteUri}";
         var mediaId = MediaId.Create(sourceUri, fingerprint);
 
         return new MediaSourceMetadata(
@@ -111,6 +112,19 @@ public sealed class FfprobeMediaProbe : IMediaProbe
             orientation,
             colorProfile,
             audio);
+    }
+
+    private static async Task<string> ComputeFingerprintAsync(string path, CancellationToken cancellationToken)
+    {
+        await using var stream = new FileStream(path, new FileStreamOptions
+        {
+            Access = FileAccess.Read,
+            Mode = FileMode.Open,
+            Share = FileShare.Read,
+            Options = FileOptions.Asynchronous | FileOptions.SequentialScan
+        });
+        var hash = await SHA256.HashDataAsync(stream, cancellationToken);
+        return $"sha256:{Convert.ToHexString(hash).ToLowerInvariant()}";
     }
 
     private static TimeSpan ParseDuration(JsonElement root, IReadOnlyList<JsonElement> streams)

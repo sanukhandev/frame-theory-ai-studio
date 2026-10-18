@@ -81,6 +81,34 @@ public sealed class MediaProbeTests
     }
 
     [Xunit.Fact]
+    public async Task FfprobeAdapterChangesMediaIdentityWhenSamePathContentChanges()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-probe-identity-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "clip.mp4");
+            await File.WriteAllTextAsync(path, "first source");
+            var runner = new StubProcessRunner("""
+                {
+                  "streams": [{ "codec_type": "video", "width": 16, "height": 9, "r_frame_rate": "30/1", "nb_frames": "30" }],
+                  "format": { "duration": "1" }
+                }
+                """);
+            var probe = new FfprobeMediaProbe(runner);
+
+            var first = await probe.ProbeAsync(new Uri(path), CancellationToken.None);
+            await File.WriteAllTextAsync(path, "replacement source");
+            var second = await probe.ProbeAsync(new Uri(path), CancellationToken.None);
+
+            Xunit.Assert.NotEqual(first.Id, second.Id);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task FfprobeAdapterRejectsRemoteAndMissingInputs()
     {
         var probe = new FfprobeMediaProbe(new StubProcessRunner("{}"));
