@@ -795,13 +795,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 proxyDescription = proxy.Reused ? " using cached preview proxy" : " using preview proxy";
             }
 
-            var usesTimelineCompositor = _timelinePreviewRenderer is not null && !UseTimelinePreviewProxy;
+            var timelinePreviewRenderer = _timelinePreviewRenderer;
+            var usesTimelineCompositor = timelinePreviewRenderer is not null && !UseTimelinePreviewProxy;
             TimelinePreviewStatusText = usesTimelineCompositor
                 ? $"Rendering timeline frame {TimelineEditor.CurrentFrame} with compositor..."
                 : $"Decoding frame {sourceFrame}{proxyDescription}...";
             var decodeStarted = Stopwatch.GetTimestamp();
             TimelinePreviewPpm = usesTimelineCompositor
-                ? await _timelinePreviewRenderer.RenderFrameAsync(
+                ? await timelinePreviewRenderer!.RenderFrameAsync(
                     TimelineEditor.BuildRenderPlan(_videoWidth, _videoHeight, _mediaSources),
                     TimelineEditor.CurrentFrame,
                     cancellationToken)
