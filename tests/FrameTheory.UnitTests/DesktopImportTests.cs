@@ -69,6 +69,10 @@ public sealed class DesktopImportTests
                 var mediaList = window.GetVisualDescendants()
                     .OfType<ListBox>()
                     .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Imported media");
+                var clipButton = window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control)?.StartsWith("Select Video clip", StringComparison.Ordinal) == true);
+                Xunit.Assert.Contains("frames 0–29", ToolTip.GetTip(clipButton) as string, StringComparison.Ordinal);
                 mediaList.SelectedIndex = 0;
                 Dispatcher.UIThread.RunJobs();
 
