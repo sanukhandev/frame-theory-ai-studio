@@ -39,6 +39,19 @@ jobs:
           if ($LASTEXITCODE -eq 0 -or ($output -notmatch 'ValidatePattern|parameter')) {
             throw "Windows package version validation did not reject an invalid version."
           }
+      - name: Validate Linux package guards
+        shell: bash
+        run: |
+          if output=$(sh scripts/package_linux_deb.sh linux-mips artifacts/installer 0.1.1 2>&1); then
+            echo "$output"
+            exit 1
+          fi
+          echo "$output" | grep -F 'Unsupported Linux runtime identifier'
+          if output=$(sh scripts/package_linux_deb.sh linux-x64 artifacts/installer invalid 2>&1); then
+            echo "$output"
+            exit 1
+          fi
+          echo "$output" | grep -F 'Invalid package version'
       - name: Validate repository docs and schema
         run: python3 scripts/validate_repository.py
 
