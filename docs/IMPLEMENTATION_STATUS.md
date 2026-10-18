@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Desktop input-boundary checkpoint (2026-10-18):** Timeline project reopen, photo-project source capture, brand-font discovery and Gemini transcription now guard resolved paths before existence fallbacks. The desktop transcription regression confirms a dangling source is rejected before upload or caption mutation. Focused desktop/photo/foundation coverage passes 35/35; formatting, repository validation and `git diff --check` pass. This is local evidence pending the next exact-ten-commit hosted revalidation.
+
 **AI font trust-boundary checkpoint (2026-10-18):** AI title and caption actions now validate approved font paths through the shared reparse-point guard before applying an edit; a dangling approved font rolls back the transactional action group. Focused executor coverage passes 5/5; formatting, repository validation and `git diff --check` pass. This is local evidence pending the next exact-ten-commit hosted revalidation.
 
 **Audio/brand dangling-path checkpoint (2026-10-18):** Audio preparation and approved-logo verification now inspect the shared reparse-point guard before existence or hashing fallbacks. A dangling audio-link regression and brand/audio focused coverage pass 8/8; formatting, repository validation and `git diff --check` pass. This is local evidence pending the next exact-ten-commit hosted revalidation.

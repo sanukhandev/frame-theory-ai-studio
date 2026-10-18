@@ -69,6 +69,43 @@ public sealed class DesktopTranscriptionTests
     }
 
     [Xunit.Fact]
+    public async Task DesktopTranscriptionRejectsDanglingSourceBeforeUpload()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-transcription-link-");
+        try
+        {
+            var linkedPath = Path.Combine(directory.FullName, "linked.wav");
+            File.CreateSymbolicLink(linkedPath, Path.Combine(directory.FullName, "missing.wav"));
+            var secretStore = new InMemorySecretStore();
+            var settings = new GeminiSettingsViewModel(new GeminiConfigurationService(secretStore));
+            await settings.SaveAsync("link-secret", CancellationToken.None);
+            var viewModel = new MainWindowViewModel(
+                new WorkspaceCatalog(),
+                new TestCapabilityDetector(),
+                geminiSettings: settings);
+
+            var succeeded = await viewModel.TranscribeAudioAsync(linkedPath, uploadConsent: true, CancellationToken.None);
+
+            Xunit.Assert.False(succeeded);
+            Xunit.Assert.Contains("symlinked", viewModel.CaptionStatusText, StringComparison.OrdinalIgnoreCase);
+            Xunit.Assert.Empty(viewModel.TimelineEditor.Captions);
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task DesktopTranscriptionExtractsVideoAudioBeforeUpload()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-transcription-video-");

@@ -433,6 +433,11 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         }
 
         var path = Path.GetFullPath(source.LocalPath);
+        if (LocalPathSecurity.ContainsReparsePoint(path))
+        {
+            throw new InvalidDataException("Symlinked photo sources are not accepted.");
+        }
+
         if (!File.Exists(path))
         {
             throw new FileNotFoundException("The photo source was not found.", path);

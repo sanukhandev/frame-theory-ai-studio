@@ -517,9 +517,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         var fonts = new Dictionary<string, string>(StringComparer.Ordinal);
         var brandFontPath = Environment.GetEnvironmentVariable("FRAME_THEORY_BRAND_FONT_PATH");
-        if (!string.IsNullOrWhiteSpace(brandFontPath) && File.Exists(brandFontPath))
+        if (!string.IsNullOrWhiteSpace(brandFontPath))
         {
-            fonts["brand-sans"] = Path.GetFullPath(brandFontPath);
+            var fullBrandFontPath = Path.GetFullPath(brandFontPath);
+            if (!LocalPathSecurity.ContainsReparsePoint(fullBrandFontPath) && File.Exists(fullBrandFontPath))
+            {
+                fonts["brand-sans"] = fullBrandFontPath;
+            }
         }
 
         AiProposal.ApplyApproved(actions => AiEditPlanExecutor.Execute(actions, TimelineEditor, fonts, new Dictionary<string, FrameTheory.Color.ColorGrade>(StringComparer.Ordinal)));
@@ -1054,6 +1058,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var sourcePath = Path.GetFullPath(Path.Combine(directory, reference.RelativePath.Replace('/', Path.DirectorySeparatorChar)));
+                if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
+                {
+                    throw new InvalidDataException($"Saved media is beneath a symlinked path: {reference.RelativePath}");
+                }
+
                 if (!File.Exists(sourcePath))
                 {
                     throw new FileNotFoundException($"Saved media is missing: {reference.RelativePath}", sourcePath);
@@ -1645,6 +1654,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         try
         {
             var fullPath = Path.GetFullPath(sourcePath);
+            if (LocalPathSecurity.ContainsReparsePoint(fullPath))
+            {
+                throw new InvalidDataException("Symlinked audio sources are not accepted.");
+            }
+
             if (!File.Exists(fullPath))
             {
                 throw new FileNotFoundException("The selected audio file was not found.", fullPath);
