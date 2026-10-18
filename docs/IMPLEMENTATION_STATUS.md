@@ -4,6 +4,8 @@
 
 **Hosted Release gate checkpoint (2026-10-19):** Quality Gates run `39165037888` passed for `d999179` across documentation/schema validation, Ubuntu, Windows and macOS restore/build/test, native media, headless shell/UI automation, formatting, portable archives, installer/DMG/DEB validation, relaunch and checksums. The six tracked partial P0 gates remain open because manual visual/HiDPI/screen-reader, legal redistribution, signing/clean-host and final-audit evidence are still required.
 
+**GitHub epic-closure checkpoint (2026-10-19):** A live audit confirmed every implementation issue under E00-E06 is closed, so completed umbrella epics E00-E06 were closed with the local Release evidence above. GitHub now reports 62 closed issues and 20 open issues. The six partial P0 gates remain `FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005` and `FT-1006`; E11/E12 work and external/manual release evidence remain open. This is not a V1 completion claim.
+
 **Latest hosted 50-commit gate (2026-10-19):** Quality Gates run `39168203239` passed for `742cd38` across documentation/schema validation, Ubuntu, Windows and macOS restore/build/test, native media, headless shell/UI automation, formatting, portable archives, installer/DMG/DEB validation, packaged relaunch and checksums. This confirms the pushed batch; the six tracked partial P0 gates remain open because manual visual/HiDPI/screen-reader, legal redistribution, signing/clean-host and final-audit evidence are still required.
 
 **Post-push integrity Release gate (2026-10-19):** The 16 verified local hardening commits after `742cd38` pass 305 unit tests and 2 golden tests, a warning-free Release build, format verification, repository validation and `git diff --check`. These commits remain local until the next exact 50-commit push boundary; the six tracked partial P0 gates remain open.
@@ -50,7 +52,7 @@
 
 **50-commit push boundary checkpoint (2026-10-19):** The requested local batch is complete at exactly 50 commits ahead of `origin/main`. The final local Release gate passes 271 unit tests and 2 golden tests, a warning-free Release build, format verification, repository validation and `git diff --check`; hosted revalidation is the next required evidence.
 
-**GitHub issue inventory checkpoint (2026-10-19):** A live `gh issue list` audit reports 55 closed issues and 27 open issues. The six partial P0 gates remain `FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005` and `FT-1006`; no issue is closed from local headless evidence alone.
+**GitHub issue inventory checkpoint (2026-10-19):** Before the completed E00-E06 epic closures, a live `gh issue list` audit reported 55 closed issues and 27 open issues. The current inventory is recorded in the GitHub epic-closure checkpoint above; no partial release issue is closed from local headless evidence alone.
 
 **FT-1102 small-frame tracker checkpoint (2026-10-19):** Translation tracking now bounds its search radius to each decoded frame and compares valid overlap using normalized error, so small media no longer silently produces zero samples. The regression suite passes 4/4 motion tests with format and diff checks clean; the local fix is unpushed until the next exact 50-commit boundary, and FT-1102 remains open for manual visual-quality acceptance.
 
