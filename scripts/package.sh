@@ -4,6 +4,7 @@ set -eu
 rid="${1:-linux-x64}"
 output="${2:-artifacts/package}"
 self_contained="${3:-false}"
+ffmpeg_directory="${4:-}"
 
 case "$self_contained" in
   true|false) ;;
@@ -15,6 +16,21 @@ dotnet publish src/FrameTheory.Desktop/FrameTheory.Desktop.csproj \
   --runtime "$rid" \
   --self-contained "$self_contained" \
   --output "$output"
+
+if [ -n "$ffmpeg_directory" ]; then
+  if [ ! -d "$ffmpeg_directory" ]; then
+    printf 'FFmpeg directory does not exist: %s\n' "$ffmpeg_directory" >&2
+    exit 1
+  fi
+  for tool in ffmpeg ffprobe; do
+    if [ ! -f "$ffmpeg_directory/$tool" ]; then
+      printf 'FFmpeg directory must contain %s\n' "$tool" >&2
+      exit 1
+    fi
+    cp "$ffmpeg_directory/$tool" "$output/$tool"
+    chmod +x "$output/$tool"
+  done
+fi
 
 manifest="$output/SHA256SUMS.txt"
 : > "$manifest"
