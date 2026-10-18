@@ -174,6 +174,16 @@ public sealed class FoundationTests
                     ToolTip.GetTip(window.GetVisualDescendants()
                         .OfType<Button>()
                         .Single(control => AutomationProperties.GetName(control) == "Refresh capability check")));
+                var shortcutHint = window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => AutomationProperties.GetName(control) == "Workspace keyboard shortcuts");
+                Xunit.Assert.True(shortcutHint.IsVisible);
+                window.Width = 960;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.False(shortcutHint.IsVisible);
+                window.Width = 1280;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.True(shortcutHint.IsVisible);
                 var capabilityStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Capability status");

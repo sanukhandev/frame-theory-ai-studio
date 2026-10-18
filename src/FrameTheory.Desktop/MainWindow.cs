@@ -166,6 +166,15 @@ public sealed class MainWindow : Window
         {
             Grid.SetColumn(headerGrid.Children[1], 1);
         }
+        void RefreshHeaderDensity(double width)
+        {
+            var compact = width < 1120;
+            shortcutHint.IsVisible = !compact;
+            header.Padding = compact ? new Thickness(14, 10) : new Thickness(20, 12);
+        }
+
+        header.SizeChanged += (_, args) => RefreshHeaderDensity(args.NewSize.Width);
+        RefreshHeaderDensity(Width);
 
         var layout = new Grid
         {
@@ -181,7 +190,11 @@ public sealed class MainWindow : Window
         Grid.SetRow(layout.Children[2], 2);
         Content = layout;
         NameUnnamedButtonsForAccessibility();
-        Opened += (_, _) => NameUnnamedButtonsForAccessibility();
+        Opened += (_, _) =>
+        {
+            RefreshHeaderDensity(Bounds.Width > 0 ? Bounds.Width : Width);
+            NameUnnamedButtonsForAccessibility();
+        };
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs args)
