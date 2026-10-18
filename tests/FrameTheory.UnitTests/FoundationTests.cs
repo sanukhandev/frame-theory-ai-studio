@@ -635,6 +635,16 @@ public sealed class FoundationTests
                     ToolTip.GetTip(photoComparison));
                 tabs.SelectedIndex = 2;
                 Dispatcher.UIThread.RunJobs();
+                var colorBeforePreview = window.GetVisualDescendants()
+                    .OfType<Image>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color grade before preview");
+                var colorAfterPreview = window.GetVisualDescendants()
+                    .OfType<Image>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color grade after preview");
+                Xunit.Assert.True(double.IsNaN(colorBeforePreview.Width));
+                Xunit.Assert.True(double.IsNaN(colorAfterPreview.Width));
+                Xunit.Assert.Equal(HorizontalAlignment.Stretch, colorBeforePreview.HorizontalAlignment);
+                Xunit.Assert.Equal(HorizontalAlignment.Stretch, colorAfterPreview.HorizontalAlignment);
                 Xunit.Assert.True(window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Color before preview empty state")

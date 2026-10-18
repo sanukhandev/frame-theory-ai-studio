@@ -1922,19 +1922,19 @@ public sealed class MainWindow : Window
         var inspector = viewModel.ColorInspector;
         var beforeImage = new Image
         {
-            Width = 240,
             Height = 135,
+            MaxWidth = 320,
             Stretch = Stretch.Uniform,
-            HorizontalAlignment = HorizontalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(beforeImage, "Color grade before preview");
         var afterImage = new Image
         {
-            Width = 240,
             Height = 135,
+            MaxWidth = 320,
             Stretch = Stretch.Uniform,
-            HorizontalAlignment = HorizontalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(afterImage, "Color grade after preview");
@@ -2287,6 +2287,7 @@ public sealed class MainWindow : Window
         applyReference.Click += (_, _) => viewModel.ApplyPendingReferenceGrade();
         var beforePane = new Border
         {
+            MinWidth = 160,
             Padding = new Thickness(8),
             Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
             BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
@@ -2305,6 +2306,7 @@ public sealed class MainWindow : Window
         };
         var afterPane = new Border
         {
+            MinWidth = 160,
             Padding = new Thickness(8),
             Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
             BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
