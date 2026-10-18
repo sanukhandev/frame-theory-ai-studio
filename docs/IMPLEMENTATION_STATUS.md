@@ -1,6 +1,8 @@
 # Implementation Status — Resume Checkpoint
 
-**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 42 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 44 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+
+**Media import affordance checkpoint (2026-10-19):** The shared media-bin drop surface now explains supported local media, the explicit Import action and the local-only default. Focused production-shell coverage and format/diff checks pass; actual native drag/drop acceptance remains unverified.
 
 **Video/export affordance checkpoint (2026-10-19):** Local motion analysis, export retry, approved/custom watermark selection, watermark clearing and timeline viewport scrolling now explain their scope and side effects. Focused production-shell coverage and format/diff checks pass; native media and hosted release gates remain separate.
 
