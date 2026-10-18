@@ -97,12 +97,12 @@ public sealed class MediaProbeTests
         {
             var path = Path.Combine(directory.FullName, "clip.mp4");
             await File.WriteAllTextAsync(path, "synthetic placeholder");
-            var runner = new StubProcessRunner(string.Empty, 1, "invalid media input");
+            var runner = new StubProcessRunner(string.Empty, 1, new string('x', 2048));
 
             var exception = await Xunit.Assert.ThrowsAsync<MediaProbeException>(() =>
                 new FfprobeMediaProbe(runner).ProbeAsync(new Uri(path), CancellationToken.None));
 
-            Xunit.Assert.Contains("invalid media input", exception.Message);
+            Xunit.Assert.Equal("ffprobe could not read the media file: ".Length + 1024, exception.Message.Length);
         }
         finally
         {
