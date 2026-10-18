@@ -10,7 +10,7 @@ public sealed class CacheIndex
 {
     private readonly Dictionary<string, CacheIndexEntry> _entries = new(StringComparer.Ordinal);
 
-    public IReadOnlyCollection<CacheIndexEntry> Entries => _entries.Values.ToArray();
+    public IReadOnlyCollection<CacheIndexEntry> Entries => Array.AsReadOnly(_entries.Values.ToArray());
 
     public long TotalSizeBytes => _entries.Values.Sum(entry => entry.SizeBytes);
 

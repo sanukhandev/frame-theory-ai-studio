@@ -25,6 +25,7 @@ Audit checkpoint: 2026-10-18, latest verified green complete matrix run `3911831
 - Current timeline row-contract hardening: `TimelineTrackRowViewModel` snapshots caller-provided clips while preserving public deconstruction and formatting. Focused timeline-editor coverage includes the regression; native UI acceptance remains open.
 - Current Gemini settings hardening: the optional model selector exposes a read-only supported-model snapshot, preserving the provider allowlist from UI mutation. Focused desktop AI coverage includes the regression; live-provider acceptance remains open.
 - Current timeline preview hardening: preview PPM bytes are copied on assignment and retrieval, preserving cached frames from UI or decoder mutation. Focused desktop preview coverage includes the regression; native preview acceptance remains open.
+- Current cache-index hardening: recovery entries now expose an actual read-only collection view, preserving cache metadata from caller mutation. Focused recovery coverage includes the regression; clean-host release acceptance remains open.
 
 ## Evidence
 

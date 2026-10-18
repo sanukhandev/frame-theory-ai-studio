@@ -58,6 +58,7 @@ public sealed class RecoveryTests
             var older = DateTimeOffset.UtcNow.AddMinutes(-2);
             index.Register("old", "cache/old.bin", 8, older);
             index.Register("new", "cache/new.bin", 8, older.AddMinutes(1));
+            Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<CacheIndexEntry>>(index.Entries).IsReadOnly);
             var evicted = index.EvictToSize(8);
 
             Xunit.Assert.Equal("old", Xunit.Assert.Single(evicted).Key);
