@@ -163,6 +163,11 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         try
         {
             var fullPath = Path.GetFullPath(path);
+            if (LocalPathSecurity.ContainsReparsePoint(fullPath))
+            {
+                throw new InvalidDataException("Symlinked photo sources are not accepted.");
+            }
+
             var document = await _importer.ImportAsync(new Uri(fullPath), cancellationToken);
             _history = new PhotoEditHistory(new PhotoEditState(document));
             StatusText = $"Opened {Path.GetFileName(fullPath)}; non-destructive history is active.";
@@ -172,7 +177,7 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         {
             StatusText = "Photo import canceled.";
         }
-        catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException)
+        catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException or UnauthorizedAccessException)
         {
             StatusText = $"Photo import failed: {exception.Message}";
         }
@@ -207,7 +212,13 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
 
         try
         {
-            var document = await _importer.ImportAsync(new Uri(Path.GetFullPath(path)), cancellationToken);
+            var fullPath = Path.GetFullPath(path);
+            if (LocalPathSecurity.ContainsReparsePoint(fullPath))
+            {
+                throw new InvalidDataException("Symlinked photo overlays are not accepted.");
+            }
+
+            var document = await _importer.ImportAsync(new Uri(fullPath), cancellationToken);
             _history!.Execute(Current.AddCompositeLayer(new PhotoCompositeLayer(document, offsetX, offsetY, opacity, blendMode)));
             StatusText = $"Added {Path.GetFileName(path)} as a non-destructive {blendMode.ToString().ToLowerInvariant()} overlay.";
             NotifyDocumentChanged();
@@ -216,7 +227,7 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         {
             StatusText = "Photo overlay import canceled.";
         }
-        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException or IOException)
+        catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException or UnauthorizedAccessException)
         {
             StatusText = $"Photo overlay import failed: {exception.Message}";
         }

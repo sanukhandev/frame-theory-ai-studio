@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Photo input-boundary checkpoint (2026-10-18):** The Photo workspace now rejects reparse-point image and overlay paths before handing them to the importer, and reports the rejection through the existing status surface instead of escaping the UI. Focused photo persistence coverage passes 8/8, with formatting, repository validation and `git diff --check` green; hosted cross-platform revalidation remains pending at the next exact-ten-commit push.
+
 **Native GUI availability checkpoint (2026-10-18):** The Windows computer-use inventory returned no native applications (`apps=[]`), only browser tabs. Native UI interaction, HiDPI inspection and cross-platform manual journeys therefore remain unverified; no GUI task is closed from headless or CI evidence alone.
 
 **Capability-probe checkpoint (2026-10-18):** The storage capability probe now rejects a reparse-point temporary path before writing its marker, and repository validation requires the shared guard in that platform entry point. Focused Foundation coverage passes 20/20, with formatting, repository validation and `git diff --check` green. This is local evidence pending the next exact-ten-commit hosted revalidation.

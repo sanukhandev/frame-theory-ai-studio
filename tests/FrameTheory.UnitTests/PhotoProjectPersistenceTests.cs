@@ -187,6 +187,89 @@ public sealed class PhotoProjectPersistenceTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task PhotoOpenRejectsSymlinkedSourceBeforeImport()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-photo-import-boundary-");
+        try
+        {
+            var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-photo-import-external-");
+            try
+            {
+                var externalPath = Path.Combine(externalDirectory.FullName, "photo.png");
+                var linkedPath = Path.Combine(directory.FullName, "photo.png");
+                await File.WriteAllBytesAsync(externalPath, [1, 2, 3]);
+                File.CreateSymbolicLink(linkedPath, externalPath);
+
+                var editor = CreateEditor(new JsonProjectRepository());
+                await editor.OpenAsync(linkedPath, CancellationToken.None);
+
+                Xunit.Assert.Null(editor.Current);
+                Xunit.Assert.Contains("symlink", editor.StatusText, StringComparison.OrdinalIgnoreCase);
+            }
+            finally
+            {
+                externalDirectory.Delete(true);
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
+    public async Task PhotoOverlayRejectsSymlinkedSourceBeforeImport()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-photo-overlay-boundary-");
+        try
+        {
+            var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-photo-overlay-external-");
+            try
+            {
+                var sourcePath = Path.Combine(directory.FullName, "photo.png");
+                var externalPath = Path.Combine(externalDirectory.FullName, "overlay.png");
+                var linkedPath = Path.Combine(directory.FullName, "overlay.png");
+                await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+                await File.WriteAllBytesAsync(externalPath, [4, 5, 6]);
+                File.CreateSymbolicLink(linkedPath, externalPath);
+
+                var editor = CreateEditor(new JsonProjectRepository());
+                await editor.OpenAsync(sourcePath, CancellationToken.None);
+                await editor.ImportOverlayAsync(linkedPath, 0, 0, 1, PhotoBlendMode.Normal, CancellationToken.None);
+
+                Xunit.Assert.Empty(editor.Current!.CompositeLayers);
+                Xunit.Assert.Contains("symlink", editor.StatusText, StringComparison.OrdinalIgnoreCase);
+            }
+            finally
+            {
+                externalDirectory.Delete(true);
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private static PhotoEditorViewModel CreateEditor(IProjectRepository repository) => new(
         new PhotoImporter(new StubProbe(), new StubDecoder()),
         new PhotoExporter(new StubProcessRunner(), new StubProbe()),
