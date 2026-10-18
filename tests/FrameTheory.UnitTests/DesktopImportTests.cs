@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Interactivity;
@@ -612,6 +613,10 @@ public sealed class DesktopImportTests
         {
             Styles.Add(new FluentTheme());
         }
+
+        public static Avalonia.AppBuilder BuildAvaloniaApp() => Avalonia.AppBuilder.Configure<HeadlessTestApplication>()
+            .UseSkia()
+            .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false });
     }
 
     private sealed class ThrowingImporter : IMediaImporter

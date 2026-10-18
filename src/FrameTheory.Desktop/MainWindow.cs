@@ -1735,7 +1735,9 @@ public sealed class MainWindow : Window
         var photoMaskSection = CreateInspectorExpander(
             "Mask and retouch",
             CreateSectionContent(
+                CreateSectionLabel("Overlay mask"),
                 CreateFlow(applyMask, maskX, maskY, maskRadius, maskStrength, clearMask),
+                CreateSectionLabel("Clone retouch"),
                 CreateFlow(applyRetouch, retouchX, retouchY, retouchRadius, retouchOffsetX, retouchOffsetY, retouchStrength, clearRetouch)),
             expanded: false);
         var photoGradeSection = CreateInspectorExpander(

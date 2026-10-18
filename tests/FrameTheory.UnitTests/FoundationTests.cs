@@ -794,6 +794,12 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo export quality value")
                     .Text);
+                photoSections["Layers and blend section"].IsExpanded = false;
+                photoSections["Mask and retouch section"].IsExpanded = true;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "OVERLAY MASK");
+                Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "CLONE RETOUCH");
+                photoSections["Mask and retouch section"].IsExpanded = false;
                 var photoFormat = window.GetVisualDescendants()
                     .OfType<ComboBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo export format");
