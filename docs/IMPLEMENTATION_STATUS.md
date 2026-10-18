@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 6 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 11 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
 
 **FT-901 photo-inspector grouping checkpoint (2026-10-19):** The Photo mask-and-retouch inspector now presents separate `OVERLAY MASK` and `CLONE RETOUCH` groups, reducing control density without changing edit behavior. Headless production-shell coverage verifies both groups are reachable and the full Release gate passes 271 unit tests and 2 golden tests with a warning-free build, format verification, repository validation and `git diff --check`. Native visual and screen-reader acceptance remains open.
 
