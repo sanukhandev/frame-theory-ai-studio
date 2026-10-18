@@ -542,7 +542,7 @@
 ## Next tasks
 1. Exercise timeline playback/save/open/relink through the Avalonia UI on Windows, macOS and Linux, including moved-project recovery. The 2026-10-18 CUA inventory still exposes browsers but no native Windows app surface, so this manual gate remains unverified rather than claimed complete.
 2. Obtain approved live Gemini provider evidence only if the optional remote transcription path is intended for release; the offline local Whisper path is now accepted with a real Windows fixture.
-3. Finish manual/cross-platform FT-901..FT-904 acceptance and hosted FT-1001..FT-1005 gates.
+3. Finish manual/cross-platform FT-901, FT-902 and FT-1002 acceptance; resolve the external FT-1003/FT-1005/FT-1006 release gates. FT-1001 and FT-1004 hosted quality evidence is green.
 4. Resolve approved logo, licensing/native redistribution, installer/signing, and live Gemini prerequisites before closing their GitHub tasks.
 5. Keep MLT deferred unless interactive playback parity or a release licensing decision requires a new native engine spike.
 6. Keep FT-1104 open for live-provider and reference-grade semantic acceptance; do not close it on offline or fake-HTTP evidence alone.
