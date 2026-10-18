@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Selector accessibility checkpoint (2026-10-18):** Photo export format/quality and the Gemini model selector now have explicit automation names and are included in the adaptive-shell contract. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native assistive-technology review remains unverified.
+
 **Input accessibility checkpoint (2026-10-18):** Placeholder-driven text inputs now receive stable automation names after the window is opened, and the adaptive-shell test rejects any placeholder-bearing text box without a name. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native screen-reader review remains unverified.
 
 **Media-selection styling checkpoint (2026-10-18):** Imported-media and timeline-track list rows now share dark hover and selected states, keeping the active clip or asset readable without changing selection behavior. The rebuilt Foundation shell test, Release test-project build, formatting and `git diff --check` pass; native visual selection review remains unverified.

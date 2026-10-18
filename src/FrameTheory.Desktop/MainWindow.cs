@@ -642,7 +642,9 @@ public sealed class MainWindow : Window
         var clearGradeMask = new Button { Content = "Clear grade mask" };
         clearGradeMask.Click += (_, _) => editor.ClearLastAdjustmentLayerMask();
         var format = new ComboBox { ItemsSource = new[] { "PNG", "JPEG" }, SelectedIndex = 0, Width = 90 };
+        AutomationProperties.SetName(format, "Photo export format");
         var quality = new Slider { Minimum = 1, Maximum = 100, Value = 95, Width = 140 };
+        AutomationProperties.SetName(quality, "Photo export quality");
         var socialPreset = new ComboBox { ItemsSource = new[] { "Original", "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
         AutomationProperties.SetName(socialPreset, "Photo export social dimensions");
         var export = new Button { Content = "Export image" };
@@ -720,6 +722,7 @@ public sealed class MainWindow : Window
     {
         var settings = viewModel.GeminiSettings;
         var model = new ComboBox { ItemsSource = settings.Models, SelectedIndex = 0 };
+        AutomationProperties.SetName(model, "Gemini model");
         model.Bind(SelectingItemsControl.SelectedItemProperty, new Binding(nameof(GeminiSettingsViewModel.SelectedModelId))
         {
             Mode = BindingMode.TwoWay
