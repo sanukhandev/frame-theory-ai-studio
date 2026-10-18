@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Explicit action-label checkpoint (2026-10-18):** Photo rotate/undo/overlay-mask/retouch/grade actions, AI proposal clearing, timeline motion/audio/title actions now carry stable action-specific automation names instead of relying on generic content fallback. Release build is warning-free; 261 unit tests, 2 golden tests, formatting and `git diff --check` pass locally. The next hosted run must include the UI-smoke section-navigation correction.
+
 **Local UIA limitation checkpoint (2026-10-18):** Running `scripts/smoke_desktop_ui.ps1` on this host reaches the native process but Windows `SendKeys` fails with the host message `The operation completed successfully`, indicating no interactive desktop input surface. No local shortcut pass is claimed; hosted Windows remains the authoritative UIA environment for this gate.
 
 **Hosted UI smoke correction checkpoint (2026-10-18):** Run `39130580530` passed documentation, Ubuntu and macOS jobs but Windows UI automation failed because the smoke searched for caption/reference/activity controls while their real inspector sections were collapsed. `scripts/smoke_desktop_ui.ps1` now locates and expands the named Avalonia sections through UI Automation before checking their live controls; local PowerShell parsing and `git diff --check` pass. The correction is unpushed and requires the next exact-ten-commit batch before hosted confirmation.
