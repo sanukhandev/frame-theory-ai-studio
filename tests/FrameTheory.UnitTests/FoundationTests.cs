@@ -186,6 +186,10 @@ public sealed class FoundationTests
                     .OfType<ListBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Imported media");
                 Xunit.Assert.NotNull(importedMediaList.ItemTemplate);
+                var importedMediaSummary = window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => AutomationProperties.GetName(control) == "Imported media summary");
+                Xunit.Assert.Equal(viewModel.ImportedMediaSummary, importedMediaSummary.Text);
                 var timelineTracks = window.GetVisualDescendants()
                     .OfType<ListBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline tracks");
