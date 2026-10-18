@@ -382,9 +382,7 @@ public sealed class MainWindow : Window
                     TextWrapping = TextWrapping.Wrap
                 }
             },
-            importZone,
-            importStatus,
-            importedList
+            CreateMediaBin(importZone, importStatus, importedList)
         };
         if (workspace.Name == "Photo")
         {
@@ -427,6 +425,45 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(workspaceScrollViewer, $"{workspace.Name} workspace content");
         return workspaceScrollViewer;
+    }
+
+    private static Control CreateMediaBin(Border importZone, TextBlock importStatus, ListBox importedList)
+    {
+        importZone.Margin = new Thickness(0);
+        var mediaBin = new Border
+        {
+            Margin = new Thickness(0, 18, 0, 0),
+            Padding = new Thickness(12),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(20, 23, 29)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 54, 65)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
+            Child = new Grid
+            {
+                ColumnDefinitions = new ColumnDefinitions("1.25*,*")
+            }
+        };
+        AutomationProperties.SetName(mediaBin, "Media bin");
+        var grid = (Grid)mediaBin.Child;
+        grid.Children.Add(new StackPanel
+        {
+            Spacing = 6,
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = "MEDIA BIN",
+                    FontSize = 10,
+                    FontWeight = FontWeight.SemiBold,
+                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+                },
+                importedList,
+                importStatus
+            }
+        });
+        grid.Children.Add(importZone);
+        Grid.SetColumn(importZone, 1);
+        return mediaBin;
     }
 
     private static Control CreatePhotoRecoveryPanel(MainWindowViewModel viewModel)

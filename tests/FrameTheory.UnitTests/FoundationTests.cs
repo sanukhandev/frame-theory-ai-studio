@@ -214,6 +214,7 @@ public sealed class FoundationTests
                 foreach (var requiredName in new[]
                 {
                     "Imported media",
+                    "Media bin",
                     "Import local media",
                     "Local media import drop zone",
                     "Capability status",
