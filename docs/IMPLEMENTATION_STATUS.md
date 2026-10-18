@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Hosted AI-undo validation checkpoint (2026-10-18):** Quality Gates run `39160407760` for pushed commit `f08c80c` passed documentation/schema validation, Windows/macOS/Linux restore/build/test, native media smoke, formatting, headless shell, Windows UI automation, packaging, relaunch and checksum verification. The AI undo-affordance implementation is hosted-green; manual AI workspace acceptance remains open.
+
 **FT-902 AI-undo-affordance checkpoint (2026-10-18):** The production AI review panel now disables `Undo last AI apply` until a successful transactional AI edit group exists, exposes timeline AI-history availability through `CanUndoAiEdit`, and clears the affordance after undo. Executor/model and headless shell coverage pass; the full Release suite passes 269 unit tests and 2 golden tests with a warning-free build, format verification, repository validation and `git diff --check`. Manual AI workspace acceptance remains open.
 
 **FT-902 AI-approval affordance checkpoint (2026-10-18):** The production AI review panel now disables `Apply approved actions` until a validated proposal contains at least one explicitly checked action, then updates enablement through the existing observable approval state without bypassing validation. Model and headless UI coverage pass; the full Release suite passes 269 unit tests and 2 golden tests with a warning-free build, format verification, repository validation and `git diff --check`. Manual AI workspace acceptance remains open.
