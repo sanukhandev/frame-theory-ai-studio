@@ -332,7 +332,8 @@ public sealed class GeminiInteractionsClient : IGeminiClient
             fileUri.Scheme != Uri.UriSchemeHttps ||
             !string.Equals(fileUri.Host, filesEndpoint.Host, StringComparison.OrdinalIgnoreCase))
         {
-            await DeleteFileAsync(file.Name, cancellationToken);
+            using var cleanupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            await DeleteFileAsync(file.Name, cleanupTimeout.Token);
             throw new GeminiProviderException("Gemini returned an invalid Files API file URI.", GeminiProviderFailureKind.MalformedResponse);
         }
 

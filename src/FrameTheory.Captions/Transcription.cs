@@ -346,7 +346,8 @@ public sealed class GeminiTranscriptionProvider : IProgressiveTranscriptionProvi
             fileUri.Scheme != Uri.UriSchemeHttps ||
             !string.Equals(fileUri.Host, FilesUploadEndpoint.Host, StringComparison.OrdinalIgnoreCase))
         {
-            await DeleteFileAsync(file.Name, cancellationToken);
+            using var cleanupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+            await DeleteFileAsync(file.Name, cleanupTimeout.Token);
             throw new GeminiTranscriptionException("Gemini returned an invalid Files API file URI.");
         }
 
