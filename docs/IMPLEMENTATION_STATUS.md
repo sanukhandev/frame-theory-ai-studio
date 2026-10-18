@@ -6,6 +6,8 @@
 
 **Latest hosted 50-commit gate (2026-10-19):** Quality Gates run `39168203239` passed for `742cd38` across documentation/schema validation, Ubuntu, Windows and macOS restore/build/test, native media, headless shell/UI automation, formatting, portable archives, installer/DMG/DEB validation, packaged relaunch and checksums. This confirms the pushed batch; the six tracked partial P0 gates remain open because manual visual/HiDPI/screen-reader, legal redistribution, signing/clean-host and final-audit evidence are still required.
 
+**Post-push integrity Release gate (2026-10-19):** The 16 verified local hardening commits after `742cd38` pass 305 unit tests and 2 golden tests, a warning-free Release build, format verification, repository validation and `git diff --check`. These commits remain local until the next exact 50-commit push boundary; the six tracked partial P0 gates remain open.
+
 **FT-1102 motion-frame integrity checkpoint (2026-10-19):** `MotionFrame` now returns a defensive pixel snapshot while the tracker reads an internal non-allocating memory view, preventing caller mutation from changing motion-analysis input without adding per-pixel allocations. Focused motion coverage includes the mutation regression; manual visual-quality acceptance remains open.
 
 **Foundation capability-report integrity checkpoint (2026-10-19):** `CapabilityReport` now snapshots capability entries at construction, preventing downstream mutation from changing dependency status or summary text. The focused Foundation suite covers the regression; release and manual platform gates remain distinct.
