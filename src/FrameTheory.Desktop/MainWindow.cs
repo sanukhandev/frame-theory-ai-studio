@@ -1350,7 +1350,57 @@ public sealed class MainWindow : Window
         var selectionContext = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(selectionContext, "Timeline selection context");
         selectionContext.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.SelectionContextText"));
-        var tracks = new ListBox { Height = 100 };
+        var tracks = new ListBox
+        {
+            Height = 100,
+            ItemTemplate = new FuncDataTemplate<TimelineTrackRowViewModel>((item, _) =>
+            {
+                if (item is null)
+                {
+                    return new TextBlock { Text = "Unavailable track" };
+                }
+
+                var clips = new WrapPanel { Orientation = Orientation.Horizontal };
+                foreach (var clip in item.Clips)
+                {
+                    clips.Children.Add(new Border
+                    {
+                        Margin = new Thickness(0, 0, 6, 4),
+                        Padding = new Thickness(8, 4),
+                        CornerRadius = new CornerRadius(4),
+                        Background = new SolidColorBrush(clip.IsSelected
+                            ? Avalonia.Media.Color.FromRgb(49, 67, 111)
+                            : Avalonia.Media.Color.FromRgb(36, 41, 49)),
+                        BorderBrush = new SolidColorBrush(clip.IsSelected
+                            ? Avalonia.Media.Color.FromRgb(95, 125, 255)
+                            : Avalonia.Media.Color.FromRgb(59, 68, 83)),
+                        BorderThickness = new Thickness(1),
+                        Child = new TextBlock
+                        {
+                            Text = $"{clip.MediaId[..Math.Min(8, clip.MediaId.Length)]}  {clip.StartFrame}–{clip.StartFrame + clip.DurationFrames - 1}",
+                            FontSize = 11,
+                            Foreground = Brushes.White
+                        }
+                    });
+                }
+
+                return new StackPanel
+                {
+                    Spacing = 4,
+                    Children =
+                    {
+                        new TextBlock
+                        {
+                            Text = $"{item.Kind}  ·  {item.Id}",
+                            FontSize = 11,
+                            FontWeight = FontWeight.SemiBold,
+                            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(186, 193, 207))
+                        },
+                        clips
+                    }
+                };
+            }, supportsRecycling: false)
+        };
         AutomationProperties.SetName(tracks, "Timeline tracks");
         tracks.Bind(ItemsControl.ItemsSourceProperty, new Binding("TimelineEditor.TrackRows"));
         var beatMarkers = new TextBlock { TextWrapping = TextWrapping.Wrap };
