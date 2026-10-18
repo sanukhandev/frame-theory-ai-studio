@@ -5,7 +5,8 @@ param(
     [string]$PublishDirectory = "artifacts/installer-publish",
     [string]$InnoSetupCompiler = "iscc.exe",
     [ValidatePattern('^\d+\.\d+\.\d+([.-][0-9A-Za-z.-]+)?$')]
-    [string]$Version = "0.1.0"
+    [string]$Version = "0.1.0",
+    [string]$FfmpegDirectory = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -18,6 +19,18 @@ if (-not $publishPath) {
         --self-contained true `
         --output $PublishDirectory
     $publishPath = (Resolve-Path -LiteralPath $PublishDirectory).Path
+}
+
+if (-not [string]::IsNullOrWhiteSpace($FfmpegDirectory)) {
+    $toolRoot = (Resolve-Path -LiteralPath $FfmpegDirectory -ErrorAction Stop).Path
+    foreach ($toolName in @("ffmpeg.exe", "ffprobe.exe")) {
+        $toolPath = Join-Path $toolRoot $toolName
+        if (-not (Test-Path -LiteralPath $toolPath -PathType Leaf)) {
+            throw "FfmpegDirectory must contain $toolName."
+        }
+
+        Copy-Item -LiteralPath $toolPath -Destination (Join-Path $publishPath $toolName) -Force
+    }
 }
 
 $compiler = Get-Command $InnoSetupCompiler -ErrorAction SilentlyContinue
