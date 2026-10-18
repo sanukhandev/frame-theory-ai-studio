@@ -1042,9 +1042,21 @@ public sealed class MainWindow : Window
         {
             Mode = BindingMode.TwoWay
         });
-        var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var status = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(status, "Photo recovery status");
-        status.Bind(TextBlock.TextProperty, new Binding("PhotoRecovery.StatusText"));
+        ToolTip.SetTip(status, "Current local photo project recovery and relink status.");
+        status.Bind(TextBox.TextProperty, new Binding("PhotoRecovery.StatusText"));
         var open = new Button { Content = "Open / recover photo project" };
         AutomationProperties.SetName(open, "Open or recover photo project");
         open.Click += async (_, _) => await viewModel.PhotoRecovery.OpenProjectAsync(CancellationToken.None);

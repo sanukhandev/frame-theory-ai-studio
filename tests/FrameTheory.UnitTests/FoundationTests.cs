@@ -509,6 +509,15 @@ public sealed class FoundationTests
                     .OfType<Expander>()
                     .Single(control => AutomationProperties.GetName(control) == "Project recovery and media relink section");
                 Xunit.Assert.False(photoRecoverySection.IsExpanded);
+                photoRecoverySection.IsExpanded = true;
+                Dispatcher.UIThread.RunJobs();
+                var photoRecoveryStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Photo recovery status");
+                Xunit.Assert.True(photoRecoveryStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, photoRecoveryStatus.FontSize);
+                Xunit.Assert.Equal("Current local photo project recovery and relink status.", ToolTip.GetTip(photoRecoveryStatus));
+                photoRecoverySection.IsExpanded = false;
                 var photoSections = window.GetVisualDescendants()
                     .OfType<Expander>()
                     .ToDictionary(control => AutomationProperties.GetName(control)!, StringComparer.Ordinal);
