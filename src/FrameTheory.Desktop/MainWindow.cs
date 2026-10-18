@@ -3165,9 +3165,9 @@ public sealed class MainWindow : Window
         var aspectRatio = new ComboBox { ItemsSource = new[] { "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
         AutomationProperties.SetName(aspectRatio, "Video export aspect ratio");
         ToolTip.SetTip(aspectRatio, "Choose the output framing used by the local video renderer.");
-        export.Click += async (_, _) =>
+        async Task ExportTimelineFrom(Control source)
         {
-            var topLevel = TopLevel.GetTopLevel(export);
+            var topLevel = TopLevel.GetTopLevel(source);
             if (topLevel is null)
             {
                 return;
@@ -3189,7 +3189,29 @@ public sealed class MainWindow : Window
                 };
                 await viewModel.ExportTimelineAsync(path, CancellationToken.None, selectedAspect);
             }
+        }
+
+        export.Click += async (_, _) => await ExportTimelineFrom(export);
+        var quickExport = new Button { Content = "Export MP4" };
+        quickExport.Classes.Add("primary");
+        AutomationProperties.SetName(quickExport, "Quick export timeline MP4");
+        ToolTip.SetTip(quickExport, "Export the current timeline with the selected aspect ratio.");
+        quickExport.Click += async (_, _) => await ExportTimelineFrom(quickExport);
+        void RefreshExportActionAvailability()
+        {
+            var hasVideo = timeline.TrackRows.Any(row => row.Kind == TimelineTrackKind.Video);
+            export.IsEnabled = hasVideo;
+            quickExport.IsEnabled = hasVideo;
+        }
+
+        timeline.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(TimelineEditorViewModel.TrackRows))
+            {
+                RefreshExportActionAvailability();
+            }
         };
+        RefreshExportActionAvailability();
         var exportStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(exportStatus, "Timeline export status");
         exportStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
@@ -3307,7 +3329,7 @@ public sealed class MainWindow : Window
                         playbackBadge
                     }
                 },
-                CreateFlow(previewCurrentFrame, playTimeline, stopTimeline),
+                CreateFlow(previewCurrentFrame, playTimeline, stopTimeline, quickExport),
                 usePreviewProxy,
                 analyzeMotion,
                 timelinePreviewStatus,
