@@ -127,6 +127,14 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(0, 0, 0, 2))
             }
         });
+        Styles.Add(new Style(selector => selector.OfType<TabItem>().Class(":focus"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BorderBrushProperty, accent),
+                new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(0, 0, 0, 2))
+            }
+        });
         Styles.Add(new Style(selector => selector.OfType<ListBox>())
         {
             Setters =

@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Workspace-focus checkpoint (2026-10-18):** Keyboard focus on the workspace rail now retains a visible blue edge even before selection changes, completing the selected/hover/focus interaction states. Desktop Release build, focused shell test, formatting and `git diff --check` pass; native keyboard and HiDPI visual review remains unverified.
+
 **AI-status accessibility checkpoint (2026-10-18):** Gemini provider/consent scope, analysis, proposal, approval, revision and recipe feedback regions now have stable automation names, preserving the optional-provider boundary while making review states discoverable. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native assistive-technology review remains unverified.
 
 **Color-status accessibility checkpoint (2026-10-18):** Color before/after summaries, deterministic scope output, inspector state, style-library state and reference-analysis feedback now expose stable automation names; the adaptive-shell contract asserts them. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native assistive-technology review remains unverified.
