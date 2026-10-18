@@ -535,7 +535,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public void ValidateAiPlan(string json)
     {
-        AiProposal.Validate(json, new AiPlanValidationContext("active-project", BuildAiTargetIds(), Math.Max(1, TimelineEditor.TotalFrames)));
+        AiProposal.Validate(
+            json,
+            new AiPlanValidationContext(
+                "active-project",
+                BuildAiTargetIds(),
+                Math.Max(1, TimelineEditor.TotalFrames),
+                TimelineEditor.TranscriptSourceFingerprint is not null));
     }
 
     public async Task<bool> SaveAiRecipeAsync(string path, string name, CancellationToken cancellationToken)

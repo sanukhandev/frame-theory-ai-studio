@@ -275,7 +275,11 @@ public static class AiEditPlanParser
 
 public sealed record AiPlanValidationContext
 {
-    public AiPlanValidationContext(string projectId, IReadOnlySet<string> targetIds, long projectDurationFrames)
+    public AiPlanValidationContext(
+        string projectId,
+        IReadOnlySet<string> targetIds,
+        long projectDurationFrames,
+        bool hasVerifiedTranscript = false)
     {
         if (string.IsNullOrWhiteSpace(projectId) || targetIds is null || projectDurationFrames <= 0)
         {
@@ -285,6 +289,7 @@ public sealed record AiPlanValidationContext
         ProjectId = projectId;
         TargetIds = targetIds.ToFrozenSet(StringComparer.Ordinal);
         ProjectDurationFrames = projectDurationFrames;
+        HasVerifiedTranscript = hasVerifiedTranscript;
     }
 
     public string ProjectId { get; }
@@ -292,6 +297,8 @@ public sealed record AiPlanValidationContext
     public IReadOnlySet<string> TargetIds { get; }
 
     public long ProjectDurationFrames { get; }
+
+    public bool HasVerifiedTranscript { get; }
 }
 
 public sealed record AiPlanValidationResult
@@ -352,6 +359,14 @@ public static class AiEditPlanValidator
             }
 
             ValidateActionParameters(action, errors);
+            if (action.Type == "caption.add" &&
+                action.Params.TryGetValue("provenance", out var provenance) &&
+                provenance.ValueKind == JsonValueKind.String &&
+                string.Equals(provenance.GetString(), "verified-transcript", StringComparison.Ordinal) &&
+                !context.HasVerifiedTranscript)
+            {
+                errors.Add($"Action '{action.Id}' claims verified transcript provenance without an imported source-timed transcript.");
+            }
         }
 
         return new AiPlanValidationResult(errors.Count == 0, errors);

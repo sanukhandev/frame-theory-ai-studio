@@ -133,14 +133,20 @@ public static class AiEditPlanExecutor
                     ParsePreset(action.Params["preset"].GetString()));
                 break;
             case "caption.add":
+                var provenance = action.Params["provenance"].GetString() switch
+                {
+                    "verified-transcript" => CaptionProvenance.VerifiedTranscript,
+                    "authored-caption" => CaptionProvenance.AuthoredCaption,
+                    _ => throw new InvalidOperationException("Caption provenance is not supported.")
+                };
+                if (provenance == CaptionProvenance.VerifiedTranscript && timeline.TranscriptSourceFingerprint is null)
+                {
+                    throw new InvalidOperationException("Verified transcript captions require an imported source-timed transcript.");
+                }
+
                 timeline.AddCaptionAt(
                     action.Params["text"].GetString() ?? throw new InvalidOperationException("Caption text is required."),
-                    action.Params["provenance"].GetString() switch
-                    {
-                        "verified-transcript" => CaptionProvenance.VerifiedTranscript,
-                        "authored-caption" => CaptionProvenance.AuthoredCaption,
-                        _ => throw new InvalidOperationException("Caption provenance is not supported.")
-                    },
+                    provenance,
                     action.StartFrame,
                     action.DurationFrames,
                     timeline.CaptionFontPath ?? throw new InvalidOperationException("Select an approved caption font before applying AI captions."));

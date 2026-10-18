@@ -32,6 +32,8 @@
 
 **AI caption execution checkpoint (2026-10-19):** Approved `caption.add` actions now use the caption font explicitly selected in the Video workspace instead of incorrectly requiring the optional title-brand font map. Plans fail clearly without a selected caption font, and success remains one undoable transaction; focused executor coverage includes both paths.
 
+**AI caption provenance checkpoint (2026-10-19):** `verified-transcript` AI captions now require imported source-timed transcript evidence in both plan validation and transactional execution; ungrounded generated copy must use `authored-caption` instead. Focused validator/executor coverage includes the rejection paths.
+
 **Core boundary hardening checkpoint (2026-10-19):** `GeminiClientOptions` now honors its optional timeout/retry-delay parameters with bounded two-minute/one-second defaults, and `MediaSourceMetadata` rejects negative durations. Focused Gemini coverage passes 12/12 and focused Foundation coverage passes 25/25; the next full Release gate remains required before the next 50-commit push.
 
 **Export queue integrity checkpoint (2026-10-19):** Export job cancellation now preserves terminal success/failure state under repeated or late cancellation, with synchronized state and completion transitions. The full local Release gate passes 310 unit tests and 2 golden tests, a warning-free build, format verification, repository validation and `git diff --check`; this evidence remains local until the exact 50-commit push boundary.

@@ -27,7 +27,7 @@ public sealed class AiEditPlanTests
 
         var result = AiEditPlanValidator.Validate(
             plan,
-            new AiPlanValidationContext("project-1", new HashSet<string>(["clip-1", "title-track", "caption-track"]), 120));
+            new AiPlanValidationContext("project-1", new HashSet<string>(["clip-1", "title-track", "caption-track"]), 120, hasVerifiedTranscript: true));
 
         Xunit.Assert.True(result.IsValid, string.Join(Environment.NewLine, result.Errors));
         Xunit.Assert.Equal(3, plan.Actions.Count);
@@ -112,6 +112,23 @@ public sealed class AiEditPlanTests
 
         Xunit.Assert.Single(result.Errors);
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<string>>(result.Errors).IsReadOnly);
+    }
+
+    [Xunit.Fact]
+    public void ValidatorRejectsVerifiedTranscriptWithoutSourceEvidence()
+    {
+        var plan = AiEditPlanParser.Parse("""
+            {"schemaVersion":"1.0","planId":"p","projectId":"project-1","intent":"caption","actions":[
+              {"id":"caption","type":"caption.add","targetId":"caption-track","startFrame":0,"durationFrames":1,
+               "params":{"text":"invented speech","provenance":"verified-transcript"}}]}
+            """);
+
+        var result = AiEditPlanValidator.Validate(
+            plan,
+            new AiPlanValidationContext("project-1", new HashSet<string>(["caption-track"]), 10));
+
+        Xunit.Assert.False(result.IsValid);
+        Xunit.Assert.Contains(result.Errors, error => error.Contains("without an imported source-timed transcript", StringComparison.Ordinal));
     }
 
     [Xunit.Fact]

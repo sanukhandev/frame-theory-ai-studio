@@ -210,6 +210,33 @@ public sealed class AiEditPlanExecutorTests
     }
 
     [Xunit.Fact]
+    public void VerifiedTranscriptCaptionWithoutTranscriptStateIsRejected()
+    {
+        var editor = CreateEditor(out _);
+        var fontPath = Path.Combine(Path.GetTempPath(), $"frame-theory-caption-font-{Guid.NewGuid():N}.ttf");
+        File.WriteAllBytes(fontPath, [1]);
+        try
+        {
+            editor.SetCaptionFontPath(fontPath);
+            var action = new AiEditAction("caption", "caption.add", "caption-track", 0, 10, new Dictionary<string, JsonElement>
+            {
+                ["text"] = JsonDocument.Parse("\"Invented speech\"").RootElement.Clone(),
+                ["provenance"] = JsonDocument.Parse("\"verified-transcript\"").RootElement.Clone()
+            });
+
+            var result = AiEditPlanExecutor.Execute([action], editor, new Dictionary<string, string>(), new Dictionary<string, FrameTheory.Color.ColorGrade>());
+
+            Xunit.Assert.False(result.IsApplied);
+            Xunit.Assert.Contains("source-timed transcript", result.Message, StringComparison.OrdinalIgnoreCase);
+            Xunit.Assert.Empty(editor.Captions);
+        }
+        finally
+        {
+            File.Delete(fontPath);
+        }
+    }
+
+    [Xunit.Fact]
     public void ExecutionResultSnapshotsOutcomes()
     {
         var outcomes = new List<AiActionExecutionOutcome> { new("action", true, "Applied.") };
