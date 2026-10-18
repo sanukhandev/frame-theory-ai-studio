@@ -1539,6 +1539,44 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    public async Task<bool> TranscribeWithLocalWhisperAsync(
+        string sourcePath,
+        string executablePath,
+        string modelPath,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var fullSourcePath = Path.GetFullPath(sourcePath);
+            CaptionStatusText = $"Preparing local Whisper: {Path.GetFileName(fullSourcePath)}.";
+            var provider = new WhisperCliTranscriptionProvider(new LocalWhisperOptions(executablePath, modelPath));
+            var result = await provider.TranscribeAsync(
+                new Uri(fullSourcePath),
+                new Progress<TranscriptionProgress>(update =>
+                {
+                    if (update.Fraction < 1)
+                    {
+                        CaptionStatusText = $"{update.Stage} ({update.Fraction:P0})";
+                    }
+                }),
+                cancellationToken);
+            TimelineEditor.ImportTranscript(result);
+            CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} verified local Whisper caption cue(s).";
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            CaptionStatusText = "Local Whisper transcription canceled; no caption changes were applied.";
+            return false;
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException or ArgumentException or InvalidOperationException)
+        {
+            _diagnosticsLog.Record("local-whisper-transcription-failed", exception);
+            CaptionStatusText = $"Local Whisper transcription failed: {exception.Message}";
+            return false;
+        }
+    }
+
     public async Task<bool> ExportCaptionsAsync(string destinationPath, CancellationToken cancellationToken)
     {
         try

@@ -258,6 +258,34 @@ public sealed class DesktopTranscriptionTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task DesktopLocalWhisperReportsMissingEngineWithoutMutation()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-local-whisper-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "spoken.wav");
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+            var viewModel = new MainWindowViewModel(new WorkspaceCatalog(), new TestCapabilityDetector());
+            viewModel.TimelineEditor.ImportCaptions("1\n00:00:00,100 --> 00:00:00,400\nExisting\n");
+
+            var succeeded = await viewModel.TranscribeWithLocalWhisperAsync(
+                sourcePath,
+                Path.Combine(directory.FullName, "missing-whisper"),
+                Path.Combine(directory.FullName, "missing-model"),
+                CancellationToken.None);
+
+            Xunit.Assert.False(succeeded);
+            Xunit.Assert.Single(viewModel.TimelineEditor.Captions);
+            Xunit.Assert.Equal("Existing", viewModel.TimelineEditor.Captions[0].Text);
+            Xunit.Assert.Contains("local Whisper", viewModel.CaptionStatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private static string Fingerprint(string path)
         => $"sha256:{Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant()}";
 

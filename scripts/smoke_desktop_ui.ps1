@@ -132,6 +132,7 @@ try {
             "Timeline playhead frame",
             "Select at playhead",
             "Import verified transcript JSON",
+            "Transcribe with local Whisper",
             "Save timeline project",
             "Open timeline project",
             "Export composite MP4"

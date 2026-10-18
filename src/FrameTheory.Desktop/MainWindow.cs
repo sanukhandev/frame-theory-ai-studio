@@ -1276,6 +1276,49 @@ public sealed class MainWindow : Window
                 await viewModel.TranscribeAudioAsync(path, transcriptionConsent.IsChecked == true, CancellationToken.None);
             }
         };
+        var transcribeLocalWhisper = new Button { Content = "Transcribe with local Whisper" };
+        AutomationProperties.SetName(transcribeLocalWhisper, "Transcribe with local Whisper");
+        transcribeLocalWhisper.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(transcribeLocalWhisper);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var sourceFiles = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Audio or video source") { Patterns = ["*.wav", "*.mp3", "*.m4a", "*.aac", "*.flac", "*.ogg", "*.opus", "*.aif", "*.aiff", "*.avi", "*.mkv", "*.mp4", "*.mov", "*.mpeg", "*.mpg", "*.webm"] }]
+            });
+            var sourcePath = sourceFiles.SingleOrDefault()?.TryGetLocalPath();
+            if (sourcePath is null)
+            {
+                return;
+            }
+
+            var executableFiles = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Local Whisper executable") { Patterns = ["*"] }]
+            });
+            var executablePath = executableFiles.SingleOrDefault()?.TryGetLocalPath();
+            if (executablePath is null)
+            {
+                return;
+            }
+
+            var modelFiles = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Local Whisper model") { Patterns = ["*"] }]
+            });
+            var modelPath = modelFiles.SingleOrDefault()?.TryGetLocalPath();
+            if (modelPath is not null)
+            {
+                await viewModel.TranscribeWithLocalWhisperAsync(sourcePath, executablePath, modelPath, CancellationToken.None);
+            }
+        };
         var captionFont = new Button { Content = "Choose caption font" };
         captionFont.Click += async (_, _) =>
         {
@@ -1473,7 +1516,7 @@ public sealed class MainWindow : Window
                     titleAnimationStatus,
                     CreateFlow(importCaptions, importTranscript, exportCaptions),
                     kineticCaptions,
-                    CreateFlow(transcribeAudio, transcriptionConsent),
+                    CreateFlow(transcribeAudio, transcribeLocalWhisper, transcriptionConsent),
                     CreateFlow(captionFont),
                     captionStatus,
                     CreateFlow(saveProject, openProject),
