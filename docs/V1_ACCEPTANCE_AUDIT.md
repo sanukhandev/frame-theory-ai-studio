@@ -26,7 +26,7 @@ Audit checkpoint: 2026-10-18, latest previously verified green packaging run `39
 
 | Area | Open task(s) | Reason V1 cannot be tagged |
 |---|---|---|
-| Source-grounded transcription | FT-602 | Desktop/provider adapter, byte-verified local transcript provenance, safe video-audio extraction, resumable Files API cleanup and fake-HTTP coverage exist; live approved-key/spoken-fixture verification and local ASR fallback remain open |
+| Source-grounded transcription | FT-602 | Video workspace/provider adapter, byte-verified local transcript provenance, safe video-audio extraction, resumable Files API cleanup and fake-HTTP coverage exist; live approved-key/spoken-fixture verification and local ASR fallback remain open |
 | Gemini production loop | FT-706 live gate | Desktop revision validation, retries, usage and redacted history are implemented; live provider-to-plan execution remains unverified |
 | Creator Reel/export | FT-803 | Multi-clip Reel, social photo dimensions, queue retry and approved branded watermark export are verified; release-owner rights/visual review and manual 9:16 acceptance remain outside the implementation task |
 | UX/performance/reliability | FT-901..FT-902 manual gate | FT-903 telemetry/proxy and FT-904 diagnostics implementation acceptance passes; interactive/manual GUI and long-session sign-off remain open |

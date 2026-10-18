@@ -1504,6 +1504,35 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    public async Task<bool> ImportTranscriptAsync(string sourcePath, string transcriptPath, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var fullSourcePath = Path.GetFullPath(sourcePath);
+            var fullTranscriptPath = Path.GetFullPath(transcriptPath);
+            CaptionStatusText = $"Verifying transcript source: {Path.GetFileName(fullSourcePath)}.";
+            var provider = new JsonTranscriptProvider(fullTranscriptPath);
+            var result = await provider.TranscribeAsync(
+                new Uri(fullSourcePath),
+                new Progress<TranscriptionProgress>(update => CaptionStatusText = $"{update.Stage} ({update.Fraction:P0})"),
+                cancellationToken);
+            TimelineEditor.ImportTranscript(result);
+            CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} verified transcript caption cue(s) from {Path.GetFileName(fullTranscriptPath)}.";
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            CaptionStatusText = "Verified transcript import canceled; no caption changes were applied.";
+            return false;
+        }
+        catch (Exception exception) when (exception is IOException or InvalidDataException or ArgumentException)
+        {
+            _diagnosticsLog.Record("verified-transcript-import-failed", exception);
+            CaptionStatusText = $"Verified transcript import failed: {exception.Message}";
+            return false;
+        }
+    }
+
     public async Task<bool> ExportCaptionsAsync(string destinationPath, CancellationToken cancellationToken)
     {
         try

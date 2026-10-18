@@ -1192,6 +1192,38 @@ public sealed class MainWindow : Window
                 await viewModel.ImportCaptionsAsync(path, CancellationToken.None);
             }
         };
+        var importTranscript = new Button { Content = "Import verified transcript" };
+        AutomationProperties.SetName(importTranscript, "Import verified transcript JSON");
+        importTranscript.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(importTranscript);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var sourceFiles = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Audio or video source") { Patterns = ["*.wav", "*.mp3", "*.m4a", "*.aac", "*.flac", "*.ogg", "*.opus", "*.aif", "*.aiff", "*.avi", "*.mkv", "*.mp4", "*.mov", "*.mpeg", "*.mpg", "*.webm"] }]
+            });
+            var sourcePath = sourceFiles.SingleOrDefault()?.TryGetLocalPath();
+            if (sourcePath is null)
+            {
+                return;
+            }
+
+            var transcriptFiles = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = false,
+                FileTypeFilter = [new FilePickerFileType("Verified transcript JSON") { Patterns = ["*.transcript.json", "*.json"] }]
+            });
+            var transcriptPath = transcriptFiles.SingleOrDefault()?.TryGetLocalPath();
+            if (transcriptPath is not null)
+            {
+                await viewModel.ImportTranscriptAsync(sourcePath, transcriptPath, CancellationToken.None);
+            }
+        };
         var exportCaptions = new Button { Content = "Export SRT" };
         AutomationProperties.SetName(exportCaptions, "Export SRT captions");
         exportCaptions.Click += async (_, _) =>
@@ -1439,7 +1471,7 @@ public sealed class MainWindow : Window
                     CreateFlow(muteAudio, gainAudio, fadeAudio, duckAudio, clearDucking, clearAudio),
                     CreateFlow(titleText, addTitle, fadeTitle, pushTitle),
                     titleAnimationStatus,
-                    CreateFlow(importCaptions, exportCaptions),
+                    CreateFlow(importCaptions, importTranscript, exportCaptions),
                     kineticCaptions,
                     CreateFlow(transcribeAudio, transcriptionConsent),
                     CreateFlow(captionFont),

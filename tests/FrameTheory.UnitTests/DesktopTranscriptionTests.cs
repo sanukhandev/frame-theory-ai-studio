@@ -1,7 +1,9 @@
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using FrameTheory.AI;
 using FrameTheory.Application;
+using FrameTheory.Captions;
 using FrameTheory.Desktop;
 using FrameTheory.Media;
 
@@ -113,6 +115,79 @@ public sealed class DesktopTranscriptionTests
             directory.Delete(true);
         }
     }
+
+    [Xunit.Fact]
+    public async Task DesktopVerifiedTranscriptImportIsOfflineAndSourceBound()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-transcript-import-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "spoken.wav");
+            var transcriptPath = Path.Combine(directory.FullName, "spoken.transcript.json");
+            await File.WriteAllTextAsync(sourcePath, "offline media");
+            var source = new Uri(sourcePath);
+            await File.WriteAllTextAsync(transcriptPath, $$"""
+                {
+                  "Source": "{{source.AbsoluteUri}}",
+                  "SourceFingerprint": "{{Fingerprint(sourcePath)}}",
+                  "Words": [
+                    { "Text": "offline", "StartMs": 100, "EndMs": 400 },
+                    { "Text": "caption", "StartMs": 450, "EndMs": 800 }
+                  ]
+                }
+                """);
+            var viewModel = new MainWindowViewModel(new WorkspaceCatalog(), new TestCapabilityDetector());
+
+            var succeeded = await viewModel.ImportTranscriptAsync(sourcePath, transcriptPath, CancellationToken.None);
+
+            Xunit.Assert.True(succeeded);
+            Xunit.Assert.Single(viewModel.TimelineEditor.Captions);
+            Xunit.Assert.Equal("offline caption", viewModel.TimelineEditor.Captions[0].Text);
+            Xunit.Assert.Equal(CaptionProvenance.VerifiedTranscript, viewModel.TimelineEditor.Captions[0].Provenance);
+            Xunit.Assert.Equal(Fingerprint(sourcePath), viewModel.TimelineEditor.TranscriptSourceFingerprint);
+            Xunit.Assert.Contains("verified transcript", viewModel.CaptionStatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
+    public async Task DesktopVerifiedTranscriptImportRejectsMismatchWithoutMutation()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-transcript-mismatch-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "spoken.wav");
+            var transcriptPath = Path.Combine(directory.FullName, "spoken.transcript.json");
+            await File.WriteAllTextAsync(sourcePath, "offline media");
+            var source = new Uri(sourcePath);
+            await File.WriteAllTextAsync(transcriptPath, $$"""
+                {
+                  "Source": "{{source.AbsoluteUri}}",
+                  "SourceFingerprint": "sha256:wrong",
+                  "Words": [{ "Text": "bad", "StartMs": 100, "EndMs": 400 }]
+                }
+                """);
+            var viewModel = new MainWindowViewModel(new WorkspaceCatalog(), new TestCapabilityDetector());
+            viewModel.TimelineEditor.ImportCaptions("1\n00:00:00,100 --> 00:00:00,400\nExisting\n");
+
+            var succeeded = await viewModel.ImportTranscriptAsync(sourcePath, transcriptPath, CancellationToken.None);
+
+            Xunit.Assert.False(succeeded);
+            Xunit.Assert.Single(viewModel.TimelineEditor.Captions);
+            Xunit.Assert.Equal("Existing", viewModel.TimelineEditor.Captions[0].Text);
+            Xunit.Assert.Contains("fingerprint", viewModel.CaptionStatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    private static string Fingerprint(string path)
+        => $"sha256:{Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant()}";
 
     private sealed class InMemorySecretStore : ISecretStore
     {
