@@ -86,14 +86,14 @@ jobs:
           $windowsScripts = @('scripts/package.ps1', 'scripts/package_windows.ps1')
           foreach ($path in $windowsScripts) {
             $content = Get-Content -LiteralPath $path -Raw
-            if ($content -notmatch 'FfmpegDirectory' -or $content -notmatch 'ffmpeg\.exe' -or $content -notmatch 'ffprobe\.exe') {
+            if ($content -notmatch 'FfmpegDirectory' -or $content -notmatch 'ffmpeg\.exe' -or $content -notmatch 'ffprobe\.exe' -or $content -notmatch 'ReparsePoint') {
               throw "$path does not validate the Windows FFmpeg/ffprobe bundle pair."
             }
           }
           $unixScripts = @('scripts/package.sh', 'scripts/package_macos_dmg.sh', 'scripts/package_linux_deb.sh')
           foreach ($path in $unixScripts) {
             $content = Get-Content -LiteralPath $path -Raw
-            if ($content -notmatch 'ffmpeg_directory' -or $content -notmatch 'ffmpeg' -or $content -notmatch 'ffprobe') {
+            if ($content -notmatch 'ffmpeg_directory' -or $content -notmatch 'ffmpeg' -or $content -notmatch 'ffprobe' -or $content -notmatch '\[ -L ') {
               throw "$path does not validate the Unix FFmpeg/ffprobe bundle pair."
             }
           }

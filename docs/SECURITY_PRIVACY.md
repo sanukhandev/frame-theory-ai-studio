@@ -32,7 +32,7 @@ Threats: prompt injection -> blocked by command allowlist; command injection -> 
 
 ## Supply chain
 - Track SBOM, package vulnerability checks, binaries, native licenses, signing/notarization requirements.
-- Native media bundling is opt-in and fail-closed: package scripts require both reviewed `ffmpeg` and `ffprobe` binaries, place them beside the app, and never download or select binaries from Gemini output.
+- Native media bundling is opt-in and fail-closed: package scripts require both reviewed `ffmpeg` and `ffprobe` binaries, reject symlink/reparse-point inputs, place them beside the app, and never download or select binaries from Gemini output.
 - Package checksum verification resolves manifest entries with path-relative containment; sibling-prefix paths and traversal attempts are rejected before hashing, and every file except the exact manifest path is counted, with hosted regressions covering valid, nested-file and escaping manifests.
 - No executable plugins from Gemini; no arbitrary plugin execution from external downloaded packages.
 - Harden GitHub workflows with least privilege; do not run untrusted release secrets on PRs.
