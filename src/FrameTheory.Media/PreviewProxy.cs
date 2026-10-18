@@ -134,9 +134,18 @@ public sealed class FfmpegPreviewProxyService
             }
             finally
             {
-                if (File.Exists(temporaryPath))
+                try
                 {
-                    File.Delete(temporaryPath);
+                    if (File.Exists(temporaryPath))
+                    {
+                        File.Delete(temporaryPath);
+                    }
+                }
+                catch (IOException)
+                {
+                }
+                catch (UnauthorizedAccessException)
+                {
                 }
             }
         }
@@ -163,8 +172,17 @@ public sealed class FfmpegPreviewProxyService
             }
 
             var fileBytes = file.Length;
-            file.Delete();
-            totalBytes -= fileBytes;
+            try
+            {
+                file.Delete();
+                totalBytes -= fileBytes;
+            }
+            catch (IOException)
+            {
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
         }
     }
 }
