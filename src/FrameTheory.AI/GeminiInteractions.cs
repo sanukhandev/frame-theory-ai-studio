@@ -235,6 +235,7 @@ public interface IGeminiClient
 public sealed class GeminiInteractionsClient : IGeminiClient
 {
     private const int MaximumInlineImageBytes = 20 * 1024 * 1024;
+    private const int MaximumResponseBytes = 4 * 1024 * 1024;
     private static readonly TimeSpan MaximumRetryWait = TimeSpan.FromSeconds(30);
     private static readonly Uri InteractionsEndpoint = new("https://generativelanguage.googleapis.com/v1beta/interactions");
     private readonly HttpClient _httpClient;
@@ -468,7 +469,8 @@ public sealed class GeminiInteractionsClient : IGeminiClient
                     }
 
                     await using var responseStream = await response.Content.ReadAsStreamAsync(timeout.Token);
-                    var interaction = await JsonSerializer.DeserializeAsync<GeminiInteractionResponse>(responseStream, cancellationToken: timeout.Token)
+                    var responseBytes = await ReadBoundedAsync(responseStream, timeout.Token);
+                    var interaction = JsonSerializer.Deserialize<GeminiInteractionResponse>(responseBytes)
                         ?? throw new GeminiProviderException("Gemini returned an empty response.", GeminiProviderFailureKind.MalformedResponse);
                     if (!string.Equals(interaction.Status, "completed", StringComparison.OrdinalIgnoreCase) ||
                         string.IsNullOrWhiteSpace(interaction.Id))
@@ -538,6 +540,24 @@ public sealed class GeminiInteractionsClient : IGeminiClient
         var exhausted = new GeminiProviderException($"Gemini {operationName} exhausted its retry budget.", GeminiProviderFailureKind.Transport);
         RecordFailure(operationName, exhausted, attempts, promptCharacterCount, scopeSummary);
         throw exhausted;
+    }
+
+    private static async Task<byte[]> ReadBoundedAsync(Stream stream, CancellationToken cancellationToken)
+    {
+        using var payload = new MemoryStream();
+        var buffer = new byte[64 * 1024];
+        int bytesRead;
+        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(), cancellationToken)) > 0)
+        {
+            if (payload.Length > MaximumResponseBytes - bytesRead)
+            {
+                throw new GeminiProviderException("Gemini returned a response larger than the supported limit.", GeminiProviderFailureKind.MalformedResponse);
+            }
+
+            payload.Write(buffer, 0, bytesRead);
+        }
+
+        return payload.ToArray();
     }
 
     private void RecordFailure(string operationName, GeminiProviderException exception, int attempts, int promptCharacterCount, string scopeSummary)

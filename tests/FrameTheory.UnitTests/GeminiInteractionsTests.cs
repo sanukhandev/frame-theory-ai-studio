@@ -186,6 +186,18 @@ public sealed class GeminiInteractionsTests
         Xunit.Assert.Equal(0, calls);
     }
 
+    [Xunit.Fact]
+    public async Task ProviderRejectsAnOversizedResponseBeforeDeserialization()
+    {
+        using var client = new HttpClient(new StubHandler(_ => Response(new string('x', 4 * 1024 * 1024 + 1))));
+        var exception = await Xunit.Assert.ThrowsAsync<GeminiProviderException>(() => new GeminiInteractionsClient(
+            client,
+            new GeminiClientOptions("test-secret", "gemini-2.5-flash", TimeSpan.FromSeconds(5), 1, TimeSpan.Zero))
+            .CreateFollowUpAsync("bounded response", null, CancellationToken.None));
+
+        Xunit.Assert.Equal(GeminiProviderFailureKind.MalformedResponse, exception.FailureKind);
+    }
+
     private static HttpResponseMessage Response(string json) => new(HttpStatusCode.OK)
     {
         Content = new StringContent(json, Encoding.UTF8, "application/json")
