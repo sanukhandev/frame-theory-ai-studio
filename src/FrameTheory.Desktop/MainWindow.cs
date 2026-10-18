@@ -1724,9 +1724,21 @@ public sealed class MainWindow : Window
             revisionInstruction.Text ?? string.Empty,
             planJson.Text ?? string.Empty,
             CancellationToken.None);
-        var revisionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var revisionStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(revisionStatus, "AI revision status");
-        revisionStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AiRevisionStatusText)));
+        ToolTip.SetTip(revisionStatus, "Status of the latest bounded AI proposal revision.");
+        revisionStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.AiRevisionStatusText)));
         var approve = new Button { Content = "Apply approved actions" };
         approve.Classes.Add("primary");
         AutomationProperties.SetName(approve, "Apply approved AI actions");
@@ -1783,9 +1795,21 @@ public sealed class MainWindow : Window
                 await viewModel.LoadAiRecipeAsync(path, CancellationToken.None);
             }
         };
-        var recipeStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var recipeStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(recipeStatus, "AI recipe status");
-        recipeStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AiRecipeStatusText)));
+        ToolTip.SetTip(recipeStatus, "Status of local AI recipe save and load operations.");
+        recipeStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.AiRecipeStatusText)));
         var planSection = CreateInspectorExpander(
             "Plan input and revision",
             CreateSectionContent(planJson, CreateFlow(revisionInstruction, requestRevision), revisionStatus),

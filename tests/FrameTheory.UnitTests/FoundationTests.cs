@@ -615,6 +615,23 @@ public sealed class FoundationTests
                 Xunit.Assert.True(aiProposalStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, aiProposalStatus.FontSize);
                 Xunit.Assert.Equal("Current AI proposal review and validation status.", ToolTip.GetTip(aiProposalStatus));
+                var aiRevisionStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "AI revision status");
+                Xunit.Assert.True(aiRevisionStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, aiRevisionStatus.FontSize);
+                Xunit.Assert.Equal("Status of the latest bounded AI proposal revision.", ToolTip.GetTip(aiRevisionStatus));
+                var recipeSection = window.GetVisualDescendants()
+                    .OfType<Expander>()
+                    .Single(control => AutomationProperties.GetName(control) == "Reusable recipe section");
+                recipeSection.IsExpanded = true;
+                Dispatcher.UIThread.RunJobs();
+                var aiRecipeStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "AI recipe status");
+                Xunit.Assert.True(aiRecipeStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, aiRecipeStatus.FontSize);
+                Xunit.Assert.Equal("Status of local AI recipe save and load operations.", ToolTip.GetTip(aiRecipeStatus));
                 var geminiProviderStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Gemini provider status");
