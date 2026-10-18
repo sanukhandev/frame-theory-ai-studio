@@ -3383,7 +3383,7 @@ public sealed class MainWindow : Window
                 timelineReplacementPath,
                 relinkTimelineMedia,
                 projectStatus,
-                CreateFlow(aspectRatio, export, batchExport, cancelExport, retryExport),
+                CreateFlow(export, batchExport, cancelExport, retryExport),
                 exportStatus,
                 CreateFlow(useApprovedWatermark, selectWatermark, clearWatermark),
                 watermarkStatus),
@@ -3414,7 +3414,21 @@ public sealed class MainWindow : Window
                         playbackBadge
                     }
                 },
-                CreateFlow(previewCurrentFrame, playTimeline, stopTimeline, quickSaveProject, quickExport),
+                CreateFlow(
+                    previewCurrentFrame,
+                    playTimeline,
+                    stopTimeline,
+                    new TextBlock
+                    {
+                        Text = "OUTPUT",
+                        FontSize = 10,
+                        FontWeight = FontWeight.SemiBold,
+                        Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190)),
+                        VerticalAlignment = VerticalAlignment.Center
+                    },
+                    aspectRatio,
+                    quickSaveProject,
+                    quickExport),
                 quickActionStatus,
                 usePreviewProxy,
                 analyzeMotion,
