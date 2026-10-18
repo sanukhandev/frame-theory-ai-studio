@@ -376,9 +376,10 @@ public sealed class MainWindow : Window
                     Source = CreateBitmap(item.ThumbnailPpm)
                 };
                 AutomationProperties.SetName(thumbnail, $"Thumbnail for {item.Name}");
-                return new Grid
+                return new StackPanel
                 {
-                    ColumnDefinitions = new ColumnDefinitions("Auto,*"),
+                    Orientation = Orientation.Horizontal,
+                    VerticalAlignment = VerticalAlignment.Center,
                     Children =
                     {
                         new Border
@@ -1431,20 +1432,69 @@ public sealed class MainWindow : Window
         var referenceSource = new ComboBox
         {
             Width = 240,
-            ItemTemplate = new FuncDataTemplate<ImportedMediaViewModel>((item, _) => new TextBlock
+            ItemTemplate = new FuncDataTemplate<ImportedMediaViewModel>((item, _) =>
             {
-                Text = item?.Name ?? "Unavailable media",
-                TextTrimming = TextTrimming.CharacterEllipsis
+                if (item is null)
+                {
+                    return new TextBlock { Text = "Unavailable media" };
+                }
+
+                return new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Children =
+                    {
+                        new Image
+                        {
+                            Width = 36,
+                            Height = 22,
+                            Margin = new Thickness(0, 0, 8, 0),
+                            Stretch = Stretch.UniformToFill,
+                            Source = CreateBitmap(item.ThumbnailPpm)
+                        },
+                        new TextBlock
+                        {
+                            Text = item.Name,
+                            VerticalAlignment = VerticalAlignment.Center,
+                            TextTrimming = TextTrimming.CharacterEllipsis
+                        }
+                    }
+                };
             }, supportsRecycling: false)
         };
         AutomationProperties.SetName(referenceSource, "Reference source preview");
         var referenceTarget = new ComboBox
         {
             Width = 240,
-            ItemTemplate = new FuncDataTemplate<ImportedMediaViewModel>((item, _) => new TextBlock
+            ItemTemplate = new FuncDataTemplate<ImportedMediaViewModel>((item, _) =>
             {
-                Text = item?.Name ?? "Unavailable media",
-                TextTrimming = TextTrimming.CharacterEllipsis
+                if (item is null)
+                {
+                    return new TextBlock { Text = "Unavailable media" };
+                }
+
+                return new Grid
+                {
+                    ColumnDefinitions = new ColumnDefinitions("Auto,*"),
+                    Children =
+                    {
+                        new Image
+                        {
+                            Width = 36,
+                            Height = 22,
+                            Margin = new Thickness(0, 0, 8, 0),
+                            Stretch = Stretch.UniformToFill,
+                            Source = CreateBitmap(item.ThumbnailPpm)
+                        },
+                        new TextBlock
+                        {
+                            Text = item.Name,
+                            VerticalAlignment = VerticalAlignment.Center,
+                            TextTrimming = TextTrimming.CharacterEllipsis
+                        }
+                    }
+                };
             }, supportsRecycling: false)
         };
         AutomationProperties.SetName(referenceTarget, "Reference target preview");
