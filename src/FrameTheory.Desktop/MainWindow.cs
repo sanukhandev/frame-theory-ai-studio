@@ -950,6 +950,7 @@ public sealed class MainWindow : Window
             Child = selectedMediaSummary
         };
         AutomationProperties.SetName(selectedMediaChip, "Selected media chip");
+        ToolTip.SetTip(selectedMediaChip, "Current media selection used by the timeline and color workspace.");
         var mediaHeader = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"),
