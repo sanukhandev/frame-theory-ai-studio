@@ -15,6 +15,7 @@ public sealed class DesktopImportTests
             new StubCapabilityDetector(),
             new ThrowingImporter());
 
+        Xunit.Assert.Equal("No assets", viewModel.ImportedMediaSummary);
         await viewModel.ImportFilesAsync(["corrupt.png"], CancellationToken.None);
 
         Xunit.Assert.Contains("Failed", viewModel.MediaImportStatusText);
@@ -33,6 +34,7 @@ public sealed class DesktopImportTests
         await viewModel.ImportFilesAsync(["second.mp4", "first.mp4"], CancellationToken.None);
 
         Xunit.Assert.Equal(2, viewModel.ImportedMedia.Count);
+        Xunit.Assert.Equal("2 assets", viewModel.ImportedMediaSummary);
         Xunit.Assert.Equal(2, viewModel.TimelineEditor.TrackRows.Single(track => track.Kind == TimelineTrackKind.Video).Clips.Count);
         Xunit.Assert.Contains("2 file(s) available", viewModel.MediaImportStatusText, StringComparison.Ordinal);
     }
