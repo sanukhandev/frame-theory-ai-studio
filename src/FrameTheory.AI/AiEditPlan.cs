@@ -293,7 +293,18 @@ public sealed record AiPlanValidationContext
     public long ProjectDurationFrames { get; }
 }
 
-public sealed record AiPlanValidationResult(bool IsValid, IReadOnlyList<string> Errors);
+public sealed record AiPlanValidationResult
+{
+    public AiPlanValidationResult(bool isValid, IReadOnlyList<string> errors)
+    {
+        IsValid = isValid;
+        Errors = Array.AsReadOnly((errors ?? throw new ArgumentNullException(nameof(errors))).ToArray());
+    }
+
+    public bool IsValid { get; }
+
+    public IReadOnlyList<string> Errors { get; }
+}
 
 public static class AiEditPlanValidator
 {

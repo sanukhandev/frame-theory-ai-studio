@@ -101,4 +101,16 @@ public sealed class AiEditPlanTests
         Xunit.Assert.Contains(result.Errors, error => error.Contains("fontId", StringComparison.Ordinal));
         Xunit.Assert.Contains(result.Errors, error => error.Contains("provenance", StringComparison.Ordinal));
     }
+
+    [Xunit.Fact]
+    public void ValidationResultSnapshotsErrors()
+    {
+        var errors = new List<string> { "unsafe action" };
+        var result = new AiPlanValidationResult(false, errors);
+
+        errors.Clear();
+
+        Xunit.Assert.Single(result.Errors);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<string>>(result.Errors).IsReadOnly);
+    }
 }
