@@ -1,6 +1,8 @@
 # Implementation Status — Resume Checkpoint
 
-**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 37 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 39 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+
+**AI recipe affordance checkpoint (2026-10-19):** AI proposal clearing now states that the project is unchanged, while recipe naming, save and load actions explain local reviewability and that loading never auto-applies a plan. Focused production-shell coverage and format/diff checks pass; optional Gemini remains a bounded planning layer.
 
 **Photo affordance checkpoint (2026-10-19):** Photo overlay import/clear, circular masking, clone retouch and exposure-grade actions now expose concise effect guidance in the inspector. The focused production-shell test and format/diff checks pass; the source remains non-destructive and native visual acceptance remains open.
 
