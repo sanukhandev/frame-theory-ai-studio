@@ -204,6 +204,15 @@ public sealed class FoundationTests
                     .OfType<ListBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline tracks");
                 Xunit.Assert.NotNull(timelineTracks.ItemTemplate);
+                var timelineSections = window.GetVisualDescendants()
+                    .OfType<Expander>()
+                    .Where(control => AutomationProperties.GetName(control)?.EndsWith(" section", StringComparison.Ordinal) == true)
+                    .ToDictionary(control => AutomationProperties.GetName(control)!);
+                Xunit.Assert.Equal(7, timelineSections.Count);
+                Xunit.Assert.False(timelineSections["Analysis and rough cut section"].IsExpanded);
+                Xunit.Assert.True(timelineSections["Clip editing section"].IsExpanded);
+                Xunit.Assert.True(timelineSections["Project and export section"].IsExpanded);
+                Xunit.Assert.All(timelineSections.Values, section => Xunit.Assert.NotNull(ToolTip.GetTip(section)));
                 Xunit.Assert.All(
                     window.GetVisualDescendants()
                         .OfType<ComboBox>()
@@ -247,6 +256,11 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "AI proposal empty state")
                     .IsVisible);
                 tabs.SelectedIndex = 0;
+                Dispatcher.UIThread.RunJobs();
+                foreach (var section in timelineSections.Values)
+                {
+                    section.IsExpanded = true;
+                }
                 Dispatcher.UIThread.RunJobs();
                 var automationNames = new HashSet<string>(StringComparer.Ordinal);
                 automationNames.UnionWith(window.GetVisualDescendants()

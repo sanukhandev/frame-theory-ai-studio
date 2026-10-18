@@ -10,6 +10,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using FrameTheory.AI;
 using FrameTheory.Color;
@@ -209,19 +210,29 @@ public sealed class MainWindow : Window
 
     private void NameUnnamedButtonsForAccessibility()
     {
-        foreach (var button in this.GetVisualDescendants().OfType<Button>())
-        {
-            if (button.Content is string text && !string.IsNullOrWhiteSpace(text) && string.IsNullOrWhiteSpace(AutomationProperties.GetName(button)))
-            {
-                AutomationProperties.SetName(button, text);
-            }
-        }
-
+        NameUnnamedButtons(this);
         foreach (var textBox in this.GetVisualDescendants().OfType<TextBox>())
         {
             if (!string.IsNullOrWhiteSpace(textBox.PlaceholderText) && string.IsNullOrWhiteSpace(AutomationProperties.GetName(textBox)))
             {
                 AutomationProperties.SetName(textBox, textBox.PlaceholderText);
+            }
+        }
+    }
+
+    private static void NameUnnamedButtons(Control root)
+    {
+        foreach (var button in root.GetVisualDescendants().OfType<Button>())
+        {
+            if (string.IsNullOrWhiteSpace(AutomationProperties.GetName(button)) && button.Content is not null)
+            {
+                var text = button.Content switch
+                {
+                    string value => value,
+                    TextBlock value => value.Text,
+                    _ => null
+                };
+                AutomationProperties.SetName(button, string.IsNullOrWhiteSpace(text) ? "Interactive button" : text);
             }
         }
     }
@@ -2273,6 +2284,59 @@ public sealed class MainWindow : Window
         var scrollForward = new Button { Content = "Scroll ▶" };
         AutomationProperties.SetName(scrollForward, "Scroll timeline forward");
         scrollForward.Click += (_, _) => timeline.ScrollBy(30);
+        var analysisSection = CreateInspectorExpander(
+            "Analysis and rough cut",
+            CreateSectionContent(
+                CreateFlow(beatDetection, beatMarkers),
+                CreateFlow(prepareRoughCut, applyRoughCut),
+                roughCutStatus),
+            expanded: false);
+        var clipEditingSection = CreateInspectorExpander(
+            "Clip editing",
+            CreateSectionContent(
+                CreateFlow(back, forward, select, selectAudio, scrollBack, scrollForward),
+                CreateFlow(copy, paste, split, trim, move, rippleDelete),
+                operationStatus),
+            expanded: true);
+        var motionSection = CreateInspectorExpander(
+            "Motion and speed",
+            CreateSectionContent(
+                CreateFlow(fadeIn, pushIn, clearAnimation),
+                CreateFlow(new TextBlock { Text = "Speed" }, speedRampStart, new TextBlock { Text = "to" }, speedRampEnd, applySpeedRamp, clearSpeedRamp),
+                CreateFlow(new TextBlock { Text = "Stabilization radius" }, stabilizationRadius, applyStabilization, clearStabilization)),
+            expanded: false);
+        var audioSection = CreateInspectorExpander(
+            "Audio",
+            CreateSectionContent(CreateFlow(muteAudio, gainAudio, fadeAudio, duckAudio, clearDucking, clearAudio)),
+            expanded: false);
+        var titleCaptionSection = CreateInspectorExpander(
+            "Titles and captions",
+            CreateSectionContent(
+                CreateFlow(titleText, addTitle, fadeTitle, pushTitle),
+                titleAnimationStatus,
+                CreateFlow(importCaptions, importTranscript, exportCaptions),
+                kineticCaptions,
+                CreateFlow(transcribeAudio, transcribeLocalWhisper, transcriptionConsent),
+                CreateFlow(captionFont),
+                captionStatus),
+            expanded: false);
+        var projectExportSection = CreateInspectorExpander(
+            "Project and export",
+            CreateSectionContent(
+                CreateFlow(saveProject, openProject),
+                missingTimelineMedia,
+                timelineReplacementPath,
+                relinkTimelineMedia,
+                projectStatus,
+                CreateFlow(aspectRatio, export, batchExport, cancelExport, retryExport),
+                exportStatus,
+                CreateFlow(useApprovedWatermark, selectWatermark, clearWatermark),
+                watermarkStatus),
+            expanded: true);
+        var timelineViewSection = CreateInspectorExpander(
+            "Timeline view",
+            CreateSectionContent(CreateFlow(snap, new TextBlock { Text = "Zoom" }, zoom)),
+            expanded: true);
         var previewActions = new StackPanel
         {
             Spacing = 8,
@@ -2336,40 +2400,13 @@ public sealed class MainWindow : Window
                     ruler,
                     selectionInspector,
                     tracks,
-                    CreateSectionLabel("Analysis and rough cut"),
-                    CreateFlow(beatDetection, beatMarkers),
-                    CreateFlow(prepareRoughCut, applyRoughCut),
-                    roughCutStatus,
-                    CreateSectionLabel("Clip editing"),
-                    CreateFlow(back, forward, select, selectAudio, scrollBack, scrollForward),
-                    CreateFlow(copy, paste, split, trim, move, rippleDelete),
-                    operationStatus,
-                    CreateSectionLabel("Motion and speed"),
-                    CreateFlow(fadeIn, pushIn, clearAnimation),
-                    CreateFlow(new TextBlock { Text = "Speed" }, speedRampStart, new TextBlock { Text = "to" }, speedRampEnd, applySpeedRamp, clearSpeedRamp),
-                    CreateFlow(new TextBlock { Text = "Stabilization radius" }, stabilizationRadius, applyStabilization, clearStabilization),
-                    CreateSectionLabel("Audio"),
-                    CreateFlow(muteAudio, gainAudio, fadeAudio, duckAudio, clearDucking, clearAudio),
-                    CreateSectionLabel("Titles and captions"),
-                    CreateFlow(titleText, addTitle, fadeTitle, pushTitle),
-                    titleAnimationStatus,
-                    CreateFlow(importCaptions, importTranscript, exportCaptions),
-                    kineticCaptions,
-                    CreateFlow(transcribeAudio, transcribeLocalWhisper, transcriptionConsent),
-                    CreateFlow(captionFont),
-                    captionStatus,
-                    CreateSectionLabel("Project and export"),
-                    CreateFlow(saveProject, openProject),
-                    missingTimelineMedia,
-                    timelineReplacementPath,
-                    relinkTimelineMedia,
-                    projectStatus,
-                    CreateFlow(aspectRatio, export, batchExport, cancelExport, retryExport),
-                    exportStatus,
-                    CreateFlow(useApprovedWatermark, selectWatermark, clearWatermark),
-                    watermarkStatus,
-                    CreateSectionLabel("Timeline view"),
-                    CreateFlow(snap, new TextBlock { Text = "Zoom" }, zoom)
+                    analysisSection,
+                    clipEditingSection,
+                    motionSection,
+                    audioSection,
+                    titleCaptionSection,
+                    projectExportSection,
+                    timelineViewSection
                 }
             }
         };
@@ -2401,6 +2438,42 @@ public sealed class MainWindow : Window
             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
         }
     };
+
+    private static Expander CreateInspectorExpander(string title, Control content, bool expanded)
+    {
+        var expander = new Expander
+        {
+            Header = new TextBlock
+            {
+                Text = title.ToUpperInvariant(),
+                FontSize = 10,
+                FontWeight = FontWeight.SemiBold,
+                Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+            },
+            Content = content,
+            IsExpanded = expanded,
+            Margin = new Thickness(0, 8, 0, 0),
+            Padding = new Thickness(0, 0, 0, 4)
+        };
+        AutomationProperties.SetName(expander, $"{title} section");
+        ToolTip.SetTip(expander, $"Show or hide {title.ToLowerInvariant()} controls.");
+        expander.AttachedToVisualTree += (_, _) => Dispatcher.UIThread.Post(() => NameUnnamedButtons(expander));
+        expander.PropertyChanged += (_, args) =>
+        {
+            if (args.Property == Expander.IsExpandedProperty && expander.IsExpanded)
+            {
+                Dispatcher.UIThread.Post(() => NameUnnamedButtons(expander));
+            }
+        };
+        return expander;
+    }
+
+    private static StackPanel CreateSectionContent(params Control[] children)
+    {
+        var panel = new StackPanel { Spacing = 4 };
+        panel.Children.AddRange(children);
+        return panel;
+    }
 
     private static Control? CreateApprovedLogo()
     {
