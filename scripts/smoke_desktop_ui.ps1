@@ -37,6 +37,22 @@ $windowCondition = New-Object System.Windows.Automation.PropertyCondition(
 $window = $null
 
 try {
+    function Find-NamedControl([string]$name) {
+        $condition = New-Object System.Windows.Automation.PropertyCondition(
+            [System.Windows.Automation.AutomationElement]::NameProperty,
+            $name)
+        while ([DateTime]::UtcNow -lt $deadline) {
+            $control = $window.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condition)
+            if ($null -ne $control) {
+                return $control
+            }
+
+            Start-Sleep -Milliseconds 100
+        }
+
+        return $null
+    }
+
     while ([DateTime]::UtcNow -lt $deadline -and $null -eq $window) {
         if ($process.HasExited) {
             throw "Desktop UI process exited before exposing its window (exit code $($process.ExitCode))."
@@ -96,17 +112,14 @@ try {
     foreach ($tab in $tabs) {
         $selection = $tab.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern)
         $selection.Select()
-        Start-Sleep -Milliseconds 150
+        Start-Sleep -Milliseconds 500
         $selected = $tab.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern)
         if (-not $selected.Current.IsSelected) {
             throw "Workspace tab selection did not stick: $($tab.Current.Name)."
         }
 
         foreach ($name in $controlsByTab[$tab.Current.Name]) {
-            $controlCondition = New-Object System.Windows.Automation.PropertyCondition(
-                [System.Windows.Automation.AutomationElement]::NameProperty,
-                $name)
-            if ($null -eq $window.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $controlCondition)) {
+            if ($null -eq (Find-NamedControl $name)) {
                 throw "Required UI automation control was not found in $($tab.Current.Name): $name."
             }
 
@@ -114,14 +127,11 @@ try {
         }
     }
 
-    $refreshCondition = New-Object System.Windows.Automation.PropertyCondition(
-        [System.Windows.Automation.AutomationElement]::NameProperty,
-        "Refresh capability check")
-    if ($null -eq $window.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $refreshCondition)) {
+    $refresh = Find-NamedControl "Refresh capability check"
+    if ($null -eq $refresh) {
         throw "Required UI automation control was not found: Refresh capability check."
     }
 
-    $refresh = $window.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $refreshCondition)
     $refresh.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
     Write-Output "Desktop UI automation passed: bounds=$($bounds.Width)x$($bounds.Height), tabs=$($tabs.Count), controls=$($observedControls.Count)."
 } finally {
