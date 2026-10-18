@@ -1,4 +1,5 @@
 using System.Globalization;
+using FrameTheory.Domain;
 
 namespace FrameTheory.Media;
 
@@ -41,6 +42,11 @@ public sealed class FfmpegTimelinePreviewRenderer : ITimelinePreviewRenderer
             : $"{graph.FilterComplex};[{graph.AudioOutputLabel}]anullsink";
         var outputDirectory = Path.GetTempPath();
         var outputPath = Path.Combine(outputDirectory, $"frame-theory-timeline-preview-{Guid.NewGuid():N}.ppm");
+        if (LocalPathSecurity.ContainsReparsePoint(outputPath))
+        {
+            throw new MediaDecodeException("The temporary timeline preview output must not be a reparse point.");
+        }
+
         try
         {
             var arguments = new List<string>();
@@ -62,7 +68,7 @@ public sealed class FfmpegTimelinePreviewRenderer : ITimelinePreviewRenderer
 
             cancellationToken.ThrowIfCancellationRequested();
             var result = await _processRunner.RunAsync("ffmpeg", arguments, cancellationToken);
-            if (result.ExitCode != 0 || !File.Exists(outputPath))
+            if (result.ExitCode != 0 || LocalPathSecurity.ContainsReparsePoint(outputPath) || !File.Exists(outputPath))
             {
                 var diagnostics = string.IsNullOrWhiteSpace(result.StandardError)
                     ? "no diagnostic output"

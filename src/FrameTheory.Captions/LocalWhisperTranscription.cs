@@ -81,6 +81,11 @@ public sealed class WhisperCliTranscriptionProvider : IProgressiveTranscriptionP
         var sourceFingerprint = await TranscriptSourceFingerprint.ComputeAsync(source, cancellationToken);
         var outputDirectory = Path.Combine(Path.GetTempPath(), $"frame-theory-whisper-{Guid.NewGuid():N}");
         Directory.CreateDirectory(outputDirectory);
+        if (LocalPathSecurity.ContainsReparsePoint(outputDirectory))
+        {
+            throw new InvalidDataException("The temporary local Whisper output directory must not be a reparse point.");
+        }
+
         try
         {
             progress?.Report(new TranscriptionProgress("Running local Whisper", 0));
@@ -135,7 +140,7 @@ public sealed class WhisperCliTranscriptionProvider : IProgressiveTranscriptionP
             }
 
             var outputPath = Path.Combine(outputDirectory, $"{Path.GetFileNameWithoutExtension(sourcePath)}.json");
-            if (!File.Exists(outputPath))
+            if (LocalPathSecurity.ContainsReparsePoint(outputPath) || !File.Exists(outputPath))
             {
                 throw new InvalidDataException("Local Whisper completed without producing a JSON word-timing file.");
             }

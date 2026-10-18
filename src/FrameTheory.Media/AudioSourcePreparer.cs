@@ -98,6 +98,11 @@ public sealed class FfmpegAudioSourcePreparer : IAudioSourcePreparer
         }
 
         var outputPath = Path.Combine(Path.GetTempPath(), $"frame-theory-transcription-{Guid.NewGuid():N}.wav");
+        if (LocalPathSecurity.ContainsReparsePoint(outputPath))
+        {
+            throw new InvalidDataException("The temporary audio output must not be a reparse point.");
+        }
+
         try
         {
             var result = await _processRunner.RunAsync(
@@ -110,7 +115,7 @@ public sealed class FfmpegAudioSourcePreparer : IAudioSourcePreparer
                     "-f", "wav", outputPath
                 ],
                 cancellationToken);
-            if (result.ExitCode != 0 || !File.Exists(outputPath))
+            if (result.ExitCode != 0 || LocalPathSecurity.ContainsReparsePoint(outputPath) || !File.Exists(outputPath))
             {
                 throw new InvalidDataException("FFmpeg could not extract an audio track from the selected video.");
             }

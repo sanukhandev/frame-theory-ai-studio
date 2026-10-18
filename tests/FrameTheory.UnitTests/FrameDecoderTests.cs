@@ -86,6 +86,36 @@ public sealed class FrameDecoderTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task DecoderRejectsSymlinkedTemporaryOutputBeforeReadingIt()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-decode-output-link-");
+        try
+        {
+            var targetPath = Path.Combine(directory.FullName, "target.ppm");
+            await File.WriteAllBytesAsync(targetPath, "P6\n1 1\n255\n\0\0\0"u8.ToArray());
+            var decoder = new FfmpegFrameDecoder(new SymlinkOutputProcessRunner(targetPath));
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            await File.WriteAllTextAsync(sourcePath, "source");
+
+            await Xunit.Assert.ThrowsAsync<MediaDecodeException>(() =>
+                decoder.DecodeFrameAsync(new Uri(sourcePath), new RationalFrameRate(30, 1), 0, CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private sealed class StubProcessRunner : IMediaProcessRunner
     {
         public int InvocationCount { get; private set; }
@@ -100,6 +130,28 @@ public sealed class FrameDecoderTests
             File.WriteAllBytes(arguments[^1], pam
                 ? [.. "P7\nWIDTH 1\nHEIGHT 1\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n"u8, 0, 0, 0, 128]
                 : "P6\n1 1\n255\n\0\0\0"u8.ToArray());
+            return Task.FromResult(new MediaProcessResult(0, string.Empty, string.Empty));
+        }
+    }
+
+    private sealed class SymlinkOutputProcessRunner(string targetPath) : IMediaProcessRunner
+    {
+        public Task<MediaProcessResult> RunAsync(string executable, IReadOnlyList<string> arguments, CancellationToken cancellationToken)
+        {
+            try
+            {
+                File.CreateSymbolicLink(arguments[^1], targetPath);
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
+            catch (PlatformNotSupportedException)
+            {
+            }
+            catch (IOException)
+            {
+            }
+
             return Task.FromResult(new MediaProcessResult(0, string.Empty, string.Empty));
         }
     }

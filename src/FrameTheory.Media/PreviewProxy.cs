@@ -99,6 +99,11 @@ public sealed class FfmpegPreviewProxyService
             }
 
             var temporaryPath = Path.Combine(_cacheDirectory, $".{cacheKey}.{Guid.NewGuid():N}.tmp.mp4");
+            if (LocalPathSecurity.ContainsReparsePoint(temporaryPath))
+            {
+                throw new PreviewProxyException("Symlinked preview temporary outputs are not accepted.");
+            }
+
             try
             {
                 var filter = $"scale=trunc(min(iw\\,{maximumWidth})/2)*2:trunc(min(ih\\,{maximumHeight})/2)*2:force_original_aspect_ratio=decrease";
@@ -110,7 +115,7 @@ public sealed class FfmpegPreviewProxyService
                         "-preset", "ultrafast", "-crf", "28", "-pix_fmt", "yuv420p", temporaryPath
                     ],
                     cancellationToken);
-                if (result.ExitCode != 0 || !File.Exists(temporaryPath))
+                if (result.ExitCode != 0 || LocalPathSecurity.ContainsReparsePoint(temporaryPath) || !File.Exists(temporaryPath))
                 {
                     throw new PreviewProxyException("FFmpeg could not create the preview proxy.");
                 }

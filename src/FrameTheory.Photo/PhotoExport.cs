@@ -127,6 +127,8 @@ public sealed class PhotoExporter
         var inputExtension = exportImage.Length > 1 && exportImage[1] == (byte)'7' ? ".pam" : ".ppm";
         var temporaryPpm = Path.Combine(outputDirectory, $".{Path.GetFileName(outputPath)}.{jobId:N}{inputExtension}");
         var temporaryOutput = Path.Combine(outputDirectory, $".{Path.GetFileName(outputPath)}.{jobId:N}.tmp{options.Extension}");
+        EnsureNotReparsePoint(temporaryPpm, "Temporary photo input");
+        EnsureNotReparsePoint(temporaryOutput, "Temporary photo output");
         try
         {
             progress?.Report(new ExportProgress("Rendering", 0));
@@ -136,7 +138,7 @@ public sealed class PhotoExporter
                 "ffmpeg",
                 BuildArguments(state, sourcePath, options, temporaryPpm, temporaryOutput, inputExtension == ".pam"),
                 cancellationToken);
-            if (result.ExitCode != 0 || !File.Exists(temporaryOutput))
+            if (result.ExitCode != 0 || LocalPathSecurity.ContainsReparsePoint(temporaryOutput) || !File.Exists(temporaryOutput))
             {
                 throw new PhotoExportException("FFmpeg could not complete the photo export.");
             }

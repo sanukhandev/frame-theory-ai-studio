@@ -802,6 +802,7 @@ public sealed class FfmpegTimelineVideoExporter : ITimelineVideoExporter
         var graph = _graphBuilder.Build(plan);
         var jobId = Guid.NewGuid();
         var temporaryPath = Path.Combine(outputDirectory, $".{Path.GetFileName(outputPath)}.{jobId:N}.tmp");
+        EnsureNotReparsePoint(temporaryPath, "Temporary timeline export");
         try
         {
             progress?.Report(new ExportProgress("Encoding", 0));
@@ -833,7 +834,7 @@ public sealed class FfmpegTimelineVideoExporter : ITimelineVideoExporter
                 arguments.Insert(arguments.IndexOf("-c:v"), "-an");
             }
             var result = await _processRunner.RunAsync("ffmpeg", arguments, cancellationToken);
-            if (result.ExitCode != 0 || !File.Exists(temporaryPath))
+            if (result.ExitCode != 0 || LocalPathSecurity.ContainsReparsePoint(temporaryPath) || !File.Exists(temporaryPath))
             {
                 throw new MediaExportException($"FFmpeg could not complete the timeline export: {result.StandardError.Trim()}");
             }
@@ -861,6 +862,14 @@ public sealed class FfmpegTimelineVideoExporter : ITimelineVideoExporter
             {
                 File.Delete(temporaryPath);
             }
+        }
+    }
+
+    private static void EnsureNotReparsePoint(string path, string description)
+    {
+        if (LocalPathSecurity.ContainsReparsePoint(path))
+        {
+            throw new MediaExportException($"{description} symlink paths are not accepted.");
         }
     }
 }

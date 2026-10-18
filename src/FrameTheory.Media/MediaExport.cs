@@ -102,6 +102,7 @@ public sealed class FfmpegMediaExporter : IMediaExporter
         cancellationToken.ThrowIfCancellationRequested();
         var jobId = Guid.NewGuid();
         var temporaryPath = Path.Combine(outputDirectory, $".{Path.GetFileName(outputPath)}.{jobId:N}.tmp");
+        EnsureNotReparsePoint(temporaryPath, "Temporary export");
         try
         {
             progress?.Report(new ExportProgress("Encoding", 0));
@@ -131,7 +132,7 @@ public sealed class FfmpegMediaExporter : IMediaExporter
 
             arguments.AddRange(["-movflags", "+faststart", "-shortest", "-f", "mp4", temporaryPath]);
             var result = await _processRunner.RunAsync("ffmpeg", arguments, cancellationToken);
-            if (result.ExitCode != 0 || !File.Exists(temporaryPath))
+            if (result.ExitCode != 0 || LocalPathSecurity.ContainsReparsePoint(temporaryPath) || !File.Exists(temporaryPath))
             {
                 throw new MediaExportException("FFmpeg could not complete the export.");
             }

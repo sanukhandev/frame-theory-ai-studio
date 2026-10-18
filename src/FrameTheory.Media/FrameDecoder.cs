@@ -105,6 +105,11 @@ public sealed class FfmpegFrameDecoder : IPreviewFrameDecoder, IRgbaPreviewFrame
         cancellationToken.ThrowIfCancellationRequested();
         var outputExtension = rgba ? "pam" : "ppm";
         var outputPath = Path.Combine(Path.GetTempPath(), $"frame-theory-preview-{Guid.NewGuid():N}.{outputExtension}");
+        if (LocalPathSecurity.ContainsReparsePoint(outputPath))
+        {
+            throw new MediaDecodeException("The temporary preview output must not be a reparse point.");
+        }
+
         try
         {
             var arguments = new List<string>
@@ -123,7 +128,7 @@ public sealed class FfmpegFrameDecoder : IPreviewFrameDecoder, IRgbaPreviewFrame
 
             arguments.Add(outputPath);
             var result = await _processRunner.RunAsync("ffmpeg", arguments, cancellationToken);
-            if (result.ExitCode != 0 || !File.Exists(outputPath))
+            if (result.ExitCode != 0 || LocalPathSecurity.ContainsReparsePoint(outputPath) || !File.Exists(outputPath))
             {
                 throw new MediaDecodeException("FFmpeg could not decode the requested frame.");
             }

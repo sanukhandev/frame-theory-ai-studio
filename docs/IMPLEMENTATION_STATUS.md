@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Temporary-output trust-boundary checkpoint (2026-10-18):** FFmpeg frame/timeline previews, waveform/audio extraction, proxy creation, media/photo/timeline exports and local Whisper now reject reparse-point temporary outputs before reading, probing or moving them. Decoder coverage includes a redirected-output regression; focused media/caption/export coverage passes 66/66, with formatting, repository validation and `git diff --check` green. This is local evidence pending the next exact-ten-commit hosted revalidation.
+
 **Hosted revalidation checkpoint (2026-10-18):** Run `39120508948` for pushed `d3bb1dc` passed documentation/schema validation and the Windows, macOS and Linux matrix: restore, vulnerability/dependency checks, build, native FFmpeg media, Windows UI automation, formatting, full tests, headless desktop shell, publish/archive, installer/DMG/DEB, packaged relaunch and SHA-256 verification. Manual HiDPI/view journeys, per-OS manual UC evidence, legal redistribution, signing/clean-host review and final audit remain open; no task was closed from CI alone.
 
 **Exact-ten batch checkpoint (2026-10-18):** The ten local commits after pushed `7c81dd6` are now validated through focused trust-boundary tests; the final desktop caption-I/O slice passes 11/11, with formatting, repository validation and `git diff --check` green. Push is now authorized by the batch policy; hosted cross-platform revalidation remains required.

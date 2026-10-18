@@ -67,6 +67,11 @@ public sealed class FfmpegMediaImporter : IMediaImporter
         }
 
         var outputPath = Path.Combine(Path.GetTempPath(), $"frame-theory-waveform-{Guid.NewGuid():N}.pcm");
+        if (LocalPathSecurity.ContainsReparsePoint(outputPath))
+        {
+            throw new MediaImportException("The temporary waveform output must not be a reparse point.");
+        }
+
         try
         {
             var result = await _processRunner.RunAsync(
@@ -78,7 +83,7 @@ public sealed class FfmpegMediaImporter : IMediaImporter
                     "-f", "s16le", outputPath
                 ],
                 cancellationToken);
-            if (result.ExitCode != 0 || !File.Exists(outputPath))
+            if (result.ExitCode != 0 || LocalPathSecurity.ContainsReparsePoint(outputPath) || !File.Exists(outputPath))
             {
                 throw new MediaImportException("FFmpeg could not extract the audio waveform.");
             }
