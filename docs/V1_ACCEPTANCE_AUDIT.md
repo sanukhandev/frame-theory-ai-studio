@@ -9,6 +9,7 @@ Audit checkpoint: 2026-10-18, latest verified green complete matrix run `3911831
 - Current FT-1102 integrity hardening: `MotionFrame` exposes defensive pixel snapshots while preserving a non-allocating internal tracker path; focused motion coverage includes caller-mutation protection. This is local evidence and does not replace manual visual-quality acceptance.
 - Current foundation integrity hardening: `CapabilityReport` snapshots its entries, preserving dependency status after caller-owned collections are changed. Focused Foundation coverage includes the regression; this does not close any manual release gate.
 - Current timeline integrity hardening: `TimelineSeekResult` snapshots synchronized samples, preserving seek results after caller-owned collections are changed. Focused timeline coverage includes the regression; manual view synchronization remains open.
+- Current compositor integrity hardening: `TimelineFilterGraph` snapshots its input URIs, preserving the generated FFmpeg input set after caller-owned collection mutation. Focused compositor coverage includes the regression; native export acceptance remains separate.
 
 ## Evidence
 

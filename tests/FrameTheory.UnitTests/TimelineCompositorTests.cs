@@ -120,6 +120,18 @@ public sealed class TimelineCompositorTests
     }
 
     [Xunit.Fact]
+    public void FilterGraphSnapshotsInputs()
+    {
+        var inputs = new List<Uri> { new("file:///source.mp4") };
+        var graph = new TimelineFilterGraph("[0:v]null[outv]", inputs, "outv", null);
+
+        inputs.Clear();
+
+        Xunit.Assert.Single(graph.Inputs);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<Uri>>(graph.Inputs).IsReadOnly);
+    }
+
+    [Xunit.Fact]
     public void StabilizationGraphUsesTheConfiguredSearchRadius()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-stabilization-");

@@ -12,6 +12,8 @@
 
 **Timeline seek-result integrity checkpoint (2026-10-19):** `TimelineSeekResult` now snapshots synchronized track samples at construction, protecting seek/selection state from caller-owned collection mutation. Focused timeline coverage includes the regression; manual view-synchronization acceptance remains open.
 
+**Timeline filter-graph integrity checkpoint (2026-10-19):** `TimelineFilterGraph` now snapshots its media inputs at construction, preserving the exact FFmpeg input set after caller-owned collection mutation. Focused compositor coverage includes the regression; native export and manual acceptance remain separate gates.
+
 **50-commit push boundary checkpoint (2026-10-19):** The requested local batch is complete at exactly 50 commits ahead of `origin/main`. The final local Release gate passes 271 unit tests and 2 golden tests, a warning-free Release build, format verification, repository validation and `git diff --check`; hosted revalidation is the next required evidence.
 
 **GitHub issue inventory checkpoint (2026-10-19):** A live `gh issue list` audit reports 55 closed issues and 27 open issues. The six partial P0 gates remain `FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005` and `FT-1006`; no issue is closed from local headless evidence alone.

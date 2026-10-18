@@ -93,7 +93,24 @@ public sealed record TimelineVideoRenderPlan
     public TimelineWatermark? Watermark { get; }
 }
 
-public sealed record TimelineFilterGraph(string FilterComplex, IReadOnlyList<Uri> Inputs, string OutputLabel, string? AudioOutputLabel);
+public sealed record TimelineFilterGraph
+{
+    public TimelineFilterGraph(string filterComplex, IReadOnlyList<Uri> inputs, string outputLabel, string? audioOutputLabel)
+    {
+        FilterComplex = filterComplex;
+        Inputs = Array.AsReadOnly((inputs ?? throw new ArgumentNullException(nameof(inputs))).ToArray());
+        OutputLabel = outputLabel;
+        AudioOutputLabel = audioOutputLabel;
+    }
+
+    public string FilterComplex { get; }
+
+    public IReadOnlyList<Uri> Inputs { get; }
+
+    public string OutputLabel { get; }
+
+    public string? AudioOutputLabel { get; }
+}
 
 public sealed class TimelineFilterGraphBuilder
 {
