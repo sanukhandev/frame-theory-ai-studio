@@ -51,6 +51,20 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task PermissionDeniedMediaIsReportedInTheImportStatusInsteadOfEscapingTheUi()
+    {
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new PermissionDeniedImporter());
+
+        await viewModel.ImportFilesAsync(["private.mp4"], CancellationToken.None);
+
+        Xunit.Assert.Contains("Failed", viewModel.MediaImportStatusText);
+        Xunit.Assert.Contains("access denied", viewModel.MediaImportStatusText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Xunit.Fact]
     public async Task ImportingInBatchesKeepsEarlierMediaVisibleWithoutDuplicatingIt()
     {
         var viewModel = new MainWindowViewModel(
@@ -662,6 +676,12 @@ public sealed class DesktopImportTests
     {
         public Task<ImportedMedia> ImportAsync(Uri file, CancellationToken cancellationToken) =>
             throw new MediaProbeException("corrupt input");
+    }
+
+    private sealed class PermissionDeniedImporter : IMediaImporter
+    {
+        public Task<ImportedMedia> ImportAsync(Uri file, CancellationToken cancellationToken) =>
+            throw new UnauthorizedAccessException("access denied");
     }
 
     private sealed class CountingImporter : IMediaImporter

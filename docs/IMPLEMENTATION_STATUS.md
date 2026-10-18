@@ -44,6 +44,8 @@
 
 **AI approval path checkpoint (2026-10-19):** Optional `FRAME_THEORY_BRAND_FONT_PATH` resolution now ignores malformed, inaccessible or symlinked paths instead of allowing an invalid environment value to escape from the approval UI action. Focused desktop AI coverage includes the rejected-path contract; full release validation remains required before the next 50-commit push.
 
+**Media permission checkpoint (2026-10-19):** Permission-denied imports now remain ordinary per-file failures in the desktop media-bin workflow instead of escaping the import command and interrupting the UI. Focused import coverage includes the access-denied contract; full release validation remains required before the next 50-commit push.
+
 **Gemini upload cleanup checkpoint (2026-10-19):** Temporary Files API cleanup after an invalid provider URI now uses an independent bounded timeout instead of the caller's potentially canceled token, so cancellation cannot skip deletion of an already-uploaded sample. Existing provider cleanup coverage remains green; full release validation is required before the next 50-commit push.
 
 **AI caption execution checkpoint (2026-10-19):** Approved `caption.add` actions now use the caption font explicitly selected in the Video workspace instead of incorrectly requiring the optional title-brand font map. Plans fail clearly without a selected caption font, and success remains one undoable transaction; focused executor coverage includes both paths.
