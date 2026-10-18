@@ -1613,6 +1613,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         try
         {
+            EnsureCurrentMediaSources(request.Plan.Sources.Keys);
             var job = retryOf is null
                 ? _exportQueue.Enqueue(queueCancellation => _timelineExporter!.ExportAsync(
                     request.Plan,

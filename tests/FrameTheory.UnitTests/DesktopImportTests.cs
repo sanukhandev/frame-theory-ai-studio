@@ -532,6 +532,36 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task RetryingTimelineExportRejectsMediaReplacedAfterInitialFailure()
+    {
+        var sourcePath = Path.Combine(Path.GetTempPath(), $"frame-theory-export-retry-{Guid.NewGuid():N}.mp4");
+        var destinationPath = Path.Combine(Path.GetTempPath(), $"frame-theory-export-retry-{Guid.NewGuid():N}.mp4");
+        await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+        try
+        {
+            var exporter = new FailOnceTimelineExporter();
+            var viewModel = new MainWindowViewModel(
+                new WorkspaceCatalog(),
+                new StubCapabilityDetector(),
+                new VideoImporter(),
+                timelineExporter: exporter);
+            await viewModel.ImportFilesAsync([sourcePath], CancellationToken.None);
+
+            Xunit.Assert.False(await viewModel.ExportTimelineAsync(destinationPath, CancellationToken.None));
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3, 4]);
+
+            Xunit.Assert.False(await viewModel.RetryLastTimelineExportAsync(CancellationToken.None));
+            Xunit.Assert.Equal(1, exporter.Calls);
+            Xunit.Assert.Contains("changed since import", viewModel.TimelineExportStatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            File.Delete(sourcePath);
+            File.Delete(destinationPath);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task TimelinePreviewCanUseAndReuseBoundedProxy()
     {
         var sourcePath = Path.Combine(Path.GetTempPath(), $"frame-theory-preview-source-{Guid.NewGuid():N}.mp4");
@@ -840,6 +870,36 @@ public sealed class DesktopImportTests
                 3,
                 TimeSpan.FromSeconds(0.1));
             return Task.FromResult(new ImportedMedia(metadata, null, []));
+        }
+    }
+
+    private sealed class FailOnceTimelineExporter : ITimelineVideoExporter
+    {
+        public int Calls { get; private set; }
+
+        public Task<ExportReceipt> ExportAsync(
+            TimelineVideoRenderPlan plan,
+            string destinationPath,
+            ExportPreset preset,
+            IProgress<ExportProgress>? progress,
+            CancellationToken cancellationToken)
+        {
+            Calls++;
+            if (Calls == 1)
+            {
+                throw new MediaExportException("first export failed");
+            }
+
+            var metadata = new MediaSourceMetadata(
+                plan.Sources.Keys.Single(),
+                new Uri(destinationPath),
+                MediaKind.Video,
+                preset.Width,
+                preset.Height,
+                preset.FrameRate,
+                plan.DurationFrames,
+                preset.FrameRate.TimeAtFrame(plan.DurationFrames));
+            return Task.FromResult(new ExportReceipt(Guid.NewGuid(), destinationPath, 1, metadata));
         }
     }
 
