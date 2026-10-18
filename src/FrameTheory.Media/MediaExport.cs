@@ -6,9 +6,14 @@ public sealed class ExportPreset
 {
     public ExportPreset(int width, int height, RationalFrameRate frameRate, bool includeAudio = true)
     {
-        if (width <= 0 || height <= 0)
+        if (width <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(width));
+        }
+
+        if (height <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(height));
         }
 
         Width = width;

@@ -23,9 +23,19 @@ public sealed record TimelineVideoRenderPlan
         long beforeAfterRevealFrame = 0,
         TimelineWatermark? watermark = null)
     {
-        if (width <= 0 || height <= 0 || durationFrames <= 0)
+        if (width <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(width));
+        }
+
+        if (height <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(height));
+        }
+
+        if (durationFrames <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(durationFrames));
         }
 
         ArgumentNullException.ThrowIfNull(sources);

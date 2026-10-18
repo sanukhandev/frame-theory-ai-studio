@@ -11,9 +11,14 @@ public sealed class ColorScopeData
         IReadOnlyList<int> waveform,
         IReadOnlyList<int> vectorscope)
     {
-        if (width <= 0 || height <= 0)
+        if (width <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(width));
+        }
+
+        if (height <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(height));
         }
 
         ValidateBins(redHistogram, 256, nameof(redHistogram));
@@ -60,9 +65,19 @@ public static class ColorScopeAnalyzer
 {
     public static ColorScopeData Analyze(int width, int height, ReadOnlySpan<byte> rgbBytes)
     {
-        if (width <= 0 || height <= 0 || (long)width * height > 64 * 1024 * 1024)
+        if (width <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(width));
+        }
+
+        if (height <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(height));
+        }
+
+        if ((long)width * height > 64 * 1024 * 1024)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), "Scope dimensions exceed the bounded analysis size.");
         }
 
         if (rgbBytes.Length != checked(width * height * 3))

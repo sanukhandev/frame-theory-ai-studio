@@ -7,6 +7,15 @@ namespace FrameTheory.UnitTests;
 public sealed class MediaExportTests
 {
     [Xunit.Fact]
+    public void ExportPresetReportsTheInvalidDimension()
+    {
+        var frameRate = new RationalFrameRate(30, 1);
+
+        Xunit.Assert.Equal("width", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ExportPreset(0, 4, frameRate)).ParamName);
+        Xunit.Assert.Equal("height", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ExportPreset(8, 0, frameRate)).ParamName);
+    }
+
+    [Xunit.Fact]
     public async Task ExportVerifiesStreamsAndAtomicallyReplacesDestination()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-export-");

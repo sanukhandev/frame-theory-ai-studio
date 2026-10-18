@@ -38,6 +38,17 @@ public sealed class TimelineCompositorTests
     }
 
     [Xunit.Fact]
+    public void RenderPlanReportsTheInvalidDimensionOrDuration()
+    {
+        var frameRate = new RationalFrameRate(30, 1);
+        var sources = new Dictionary<MediaId, Uri>();
+        var layers = Array.Empty<TimelineVideoLayer>();
+
+        Xunit.Assert.Equal("height", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineVideoRenderPlan(frameRate, 16, 0, 30, sources, layers)).ParamName);
+        Xunit.Assert.Equal("durationFrames", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineVideoRenderPlan(frameRate, 16, 8, 0, sources, layers)).ParamName);
+    }
+
+    [Xunit.Fact]
     public void SpeedRampGraphKeepsVideoAndAudioOnTheSameTimelineDuration()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-speed-ramp-");

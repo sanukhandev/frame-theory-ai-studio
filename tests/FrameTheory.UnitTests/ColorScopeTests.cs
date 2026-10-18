@@ -28,6 +28,15 @@ public sealed class ColorScopeTests
     }
 
     [Xunit.Fact]
+    public void ScopeDimensionsReportTheInvalidParameter()
+    {
+        Xunit.Assert.Equal("height", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => ColorScopeAnalyzer.Analyze(2, 0, [])).ParamName);
+        var bins = new int[256];
+        var scopeBins = new int[64 * 64];
+        Xunit.Assert.Equal("height", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ColorScopeData(1, 0, bins, bins, bins, scopeBins, scopeBins)).ParamName);
+    }
+
+    [Xunit.Fact]
     public void ScopeDataSnapshotsValidatedBins()
     {
         var red = new int[256];

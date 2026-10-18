@@ -4,9 +4,19 @@ public sealed record MotionFrame
 {
     public MotionFrame(int frameIndex, int width, int height, ReadOnlyMemory<byte> rgbBytes)
     {
-        if (frameIndex < 0 || width <= 0 || height <= 0)
+        if (frameIndex < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(frameIndex));
+        }
+
+        if (width <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width));
+        }
+
+        if (height <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(height));
         }
 
         if (rgbBytes.Length != checked(width * height * 3))
