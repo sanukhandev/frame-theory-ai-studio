@@ -122,6 +122,18 @@ public sealed class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(shortcutHint, "Workspace keyboard shortcuts");
+        var projectTitle = new TextBlock
+        {
+            FontSize = 12,
+            FontWeight = FontWeight.SemiBold,
+            Foreground = Brushes.White,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            MaxWidth = 220,
+            HorizontalAlignment = HorizontalAlignment.Center
+        };
+        AutomationProperties.SetName(projectTitle, "Current project title");
+        ToolTip.SetTip(projectTitle, "Current editable project name. It changes after a successful local save or reopen.");
+        projectTitle.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.ProjectTitleText)));
 
         var header = new Border
         {
@@ -132,10 +144,20 @@ public sealed class MainWindow : Window
             BorderThickness = new Thickness(0, 0, 0, 1),
             Child = new Grid
             {
-                ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                ColumnDefinitions = new ColumnDefinitions("*,Auto,*"),
                 Children =
                 {
                     brand,
+                    new Border
+                    {
+                        Padding = new Thickness(12, 6),
+                        CornerRadius = new CornerRadius(5),
+                        Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
+                        BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+                        BorderThickness = new Thickness(1),
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Child = projectTitle
+                    },
                     new StackPanel
                     {
                         Orientation = Orientation.Horizontal,
@@ -165,6 +187,7 @@ public sealed class MainWindow : Window
         if (header.Child is Grid headerGrid)
         {
             Grid.SetColumn(headerGrid.Children[1], 1);
+            Grid.SetColumn(headerGrid.Children[2], 2);
         }
         void RefreshHeaderDensity(double width)
         {

@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Project chrome checkpoint (2026-10-18):** The top editor chrome now exposes a real `Current project title` bound to the timeline project lifecycle. It starts honestly as `Untitled project` and changes only after a successful local save or reopen, keeping the compact CapCut-inspired shell informative without presenting fabricated save state. Focused adaptive-shell coverage includes the title and tooltip; native visual acceptance remains open.
+
 **Compact header checkpoint (2026-10-18):** The production shell now hides the non-essential workspace shortcut legend and tightens header padding below 1120 logical pixels, preventing the minimum 960x640 window from presenting a cramped top bar. The headless adaptive-shell test covers 1280-to-960-to-1280 transitions; focused Release test passes 1/1. Native visual and HiDPI review remains open.
 
 **P0 audit guard checkpoint (2026-10-18):** `py scripts/validate_repository.py` now parses every `[P0]` epic section, requires each P0 task to have a status entry, requires every partial P0 task to appear in `docs/V1_ACCEPTANCE_AUDIT.md`, and rejects an unsupported V1-complete claim. The validator passes and reports six partial P0 tasks: FT-901, FT-902, FT-1002, FT-1003, FT-1005 and FT-1006. This is a release-audit safeguard, not task closure; manual, legal, clean-host and final-audit evidence remains open.

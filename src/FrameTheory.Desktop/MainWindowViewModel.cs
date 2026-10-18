@@ -97,6 +97,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _timelinePreviewStatusText = "No timeline frame preview requested.";
     private string _motionAnalysisStatusText = "No timeline motion analysis requested.";
     private string _timelineProjectStatusText = "No timeline project opened.";
+    private string _projectTitleText = "Untitled project";
     private ProjectSnapshot? _pendingTimelineSnapshot;
     private string? _pendingTimelineProjectPath;
     private MissingMediaViewModel? _selectedMissingTimelineMedia;
@@ -239,6 +240,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             _timelineProjectStatusText = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(ActiveWorkspaceStatusText));
+        }
+    }
+
+    public string ProjectTitleText
+    {
+        get => _projectTitleText;
+        private set
+        {
+            if (value == _projectTitleText)
+            {
+                return;
+            }
+
+            _projectTitleText = value;
+            OnPropertyChanged();
         }
     }
 
@@ -1041,6 +1057,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 mediaReferences,
                 timelineStateJson: timelineState);
             await new JsonProjectRepository().SaveAtomicAsync(fullPath, snapshot, cancellationToken);
+            ProjectTitleText = Path.GetFileNameWithoutExtension(fullPath);
             TimelineProjectStatusText = $"Saved timeline project {Path.GetFileName(fullPath)}.";
             return true;
         }
@@ -1149,6 +1166,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             TimelinePreviewPpm = null;
             TimelinePreviewStatusText = "Project reopened; preview a current timeline frame to decode it.";
             MediaImportStatusText = $"Reopened {imported.Count} project media file(s).";
+            ProjectTitleText = Path.GetFileNameWithoutExtension(fullPath);
             TimelineProjectStatusText = $"Opened timeline project {Path.GetFileName(fullPath)}.";
             _pendingTimelineProjectPath = null;
             _pendingTimelineSnapshot = null;

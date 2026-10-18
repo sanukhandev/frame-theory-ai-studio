@@ -156,6 +156,13 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal("Frame Theory Studio AI", AutomationProperties.GetName(window));
                 Xunit.Assert.Equal("Workspaces", AutomationProperties.GetName(tabs));
                 Xunit.Assert.Equal(Dock.Left, tabs.TabStripPlacement);
+                var projectTitle = window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => AutomationProperties.GetName(control) == "Current project title");
+                Xunit.Assert.Equal("Untitled project", projectTitle.Text);
+                Xunit.Assert.Equal(
+                    "Current editable project name. It changes after a successful local save or reopen.",
+                    ToolTip.GetTip(projectTitle));
                 var navigationLabels = tabItems
                     .Select(tab => Xunit.Assert.IsType<Grid>(tab.Header).Children
                         .OfType<StackPanel>()

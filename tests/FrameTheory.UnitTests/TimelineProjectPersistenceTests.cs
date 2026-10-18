@@ -167,8 +167,10 @@ public sealed class TimelineProjectPersistenceTests
 
             await first.ImportFilesAsync([mediaPath], CancellationToken.None);
             Xunit.Assert.True(await first.SaveTimelineProjectAsync(projectPath, CancellationToken.None));
+            Xunit.Assert.Equal("project", first.ProjectTitleText);
 
             var second = CreateViewModel();
+            Xunit.Assert.Equal("Untitled project", second.ProjectTitleText);
             var summaryChanged = false;
             second.PropertyChanged += (_, args) =>
             {
@@ -183,6 +185,7 @@ public sealed class TimelineProjectPersistenceTests
             Xunit.Assert.Equal("1 asset", second.ImportedMediaSummary);
             Xunit.Assert.True(summaryChanged);
             Xunit.Assert.Single(second.TimelineEditor.TrackRows.Single(row => row.Kind == TimelineTrackKind.Video).Clips);
+            Xunit.Assert.Equal("project", second.ProjectTitleText);
             Xunit.Assert.Contains("Opened timeline project", second.TimelineProjectStatusText, StringComparison.Ordinal);
         }
         finally
