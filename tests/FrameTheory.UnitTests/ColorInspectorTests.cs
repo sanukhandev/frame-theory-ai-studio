@@ -26,6 +26,19 @@ public sealed class ColorInspectorTests
     }
 
     [Xunit.Fact]
+    public void InspectorScopesFollowTheAppliedGrade()
+    {
+        byte[] source = [.. "P6\n2 1\n255\n"u8, 32, 64, 128, 200, 100, 40];
+        var inspector = new ColorGradeInspectorViewModel();
+        inspector.SetSource(source);
+        var before = inspector.Scopes!.RedHistogram.ToArray();
+
+        inspector.ExposureEV = 1;
+
+        Xunit.Assert.NotEqual(before, inspector.Scopes!.RedHistogram);
+    }
+
+    [Xunit.Fact]
     public void InspectorReportsInvalidPreviewInsteadOfFabricatingAResult()
     {
         var inspector = new ColorGradeInspectorViewModel();

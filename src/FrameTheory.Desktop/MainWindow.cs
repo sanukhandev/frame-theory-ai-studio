@@ -1493,7 +1493,7 @@ public sealed class MainWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
         AutomationProperties.SetName(waveformScope, "Color waveform scope");
-        ToolTip.SetTip(waveformScope, "Luminance distribution calculated from the selected local preview.");
+        ToolTip.SetTip(waveformScope, "Luminance distribution calculated from the graded local preview.");
         var vectorscope = new Image
         {
             Width = 240,
@@ -1502,7 +1502,7 @@ public sealed class MainWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
         AutomationProperties.SetName(vectorscope, "Color vectorscope");
-        ToolTip.SetTip(vectorscope, "Chrominance distribution calculated from the selected local preview.");
+        ToolTip.SetTip(vectorscope, "Chrominance distribution calculated from the graded local preview.");
         void RefreshPreviews()
         {
             beforeImage.Source = CreateBitmap(inspector.BeforePreviewPpm);

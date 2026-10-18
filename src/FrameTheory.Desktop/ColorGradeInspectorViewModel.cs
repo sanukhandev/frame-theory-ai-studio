@@ -21,7 +21,19 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
 
     public byte[]? AfterPreviewPpm => _source?.Apply(ColorGraph.ForSrgb(), _grade, _lut).ToPpm();
 
-    public ColorScopeData? Scopes => _source is null ? null : ColorScopeAnalyzer.Analyze(_source.Width, _source.Height, _source.RgbBytes);
+    public ColorScopeData? Scopes
+    {
+        get
+        {
+            if (_source is null)
+            {
+                return null;
+            }
+
+            var graded = _source.Apply(ColorGraph.ForSrgb(), _grade, _lut);
+            return ColorScopeAnalyzer.Analyze(graded.Width, graded.Height, graded.RgbBytes);
+        }
+    }
 
     public string StatusText
     {
