@@ -808,7 +808,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                     sourceFrame,
                     cancellationToken);
             RecordTimelinePreviewPerformance(Stopwatch.GetElapsedTime(decodeStarted).TotalMilliseconds);
-            TimelinePreviewStatusText = $"Previewed frame {sourceFrame} from {Path.GetFileName(source.LocalPath)}{proxyDescription}.";
+            var modeDescription = _timelinePreviewRenderer is not null && !UseTimelinePreviewProxy
+                ? " using timeline compositor"
+                : proxyDescription;
+            TimelinePreviewStatusText = $"Previewed frame {sourceFrame} from {Path.GetFileName(source.LocalPath)}{modeDescription}.";
             return true;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

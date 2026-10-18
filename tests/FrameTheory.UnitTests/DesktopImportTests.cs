@@ -112,6 +112,21 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task TimelineCompositorPreviewReportsItsRenderMode()
+    {
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new VideoImporter(),
+            timelinePreviewRenderer: new SuccessfulTimelinePreviewRenderer());
+
+        await viewModel.ImportFilesAsync(["preview-compositor.mp4"], CancellationToken.None);
+
+        Xunit.Assert.True(await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None));
+        Xunit.Assert.Contains("timeline compositor", viewModel.TimelinePreviewStatusText, StringComparison.Ordinal);
+    }
+
+    [Xunit.Fact]
     public async Task TimelineMotionAnalysisUsesDecodedFramesAndRestoresThePlayhead()
     {
         var decoder = new StubPreviewDecoder();
@@ -279,5 +294,11 @@ public sealed class DesktopImportTests
     {
         public Task<byte[]> RenderFrameAsync(TimelineVideoRenderPlan plan, long frameIndex, CancellationToken cancellationToken) =>
             throw new MediaExportException("invalid preview graph");
+    }
+
+    private sealed class SuccessfulTimelinePreviewRenderer : ITimelinePreviewRenderer
+    {
+        public Task<byte[]> RenderFrameAsync(TimelineVideoRenderPlan plan, long frameIndex, CancellationToken cancellationToken) =>
+            Task.FromResult("P6\n1 1\n255\n\0\0\0"u8.ToArray());
     }
 }
