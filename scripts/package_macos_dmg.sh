@@ -7,6 +7,13 @@ if [ -z "$rid" ]; then
   rid="osx-arm64"
   [ "$machine" = "x86_64" ] && rid="osx-x64"
 fi
+case "$rid" in
+  osx-x64|osx-arm64) ;;
+  *)
+    printf 'Unsupported macOS runtime identifier for DMG packaging: %s\n' "$rid" >&2
+    exit 1
+    ;;
+esac
 output="${2:-artifacts/installer}"
 version="${3:-0.1.0}"
 if ! printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$'; then
