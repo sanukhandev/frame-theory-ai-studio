@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Media bin presentation checkpoint (2026-10-18):** The shared media bin now uses real thumbnail cards with kind badges, filename/metadata hierarchy and compact wrapping suitable for an editor asset browser. Selection still drives the existing Color and Timeline models; no import or media-processing behavior changed. Release build is warning-free, the adaptive shell test passes, formatting and `git diff --check` pass locally. Hosted/native visual validation remains pending.
+
 **Native status smoke checkpoint (2026-10-18):** Windows UI Automation now requires the live `Active workspace status` region in addition to the existing Video/Photo/Color/AI control checks. Run `39132281248` exposed that Avalonia `TextBlock` was not discoverable through the hosted UIA tree even though the headless binding test passed. The status presenter is now a borderless read-only `TextBox`, which keeps the same live binding while using the already verified UIA text-control path. Unit tests pass 261/261, golden tests pass 2/2, formatting and `git diff --check` pass locally; the correction is unpushed and requires hosted revalidation.
 
 **Status affordance regression checkpoint (2026-10-18):** The shell test now verifies the live workspace status tooltip and its text after switching Video, Photo, Color and AI tabs. Focused and full local gates pass: 261 unit tests, 2 golden tests, warning-free Release build, formatting and `git diff --check`.
