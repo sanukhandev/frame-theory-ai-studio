@@ -1,5 +1,6 @@
 param(
-    [string]$OutputPath = "artifacts/sbom/nuget-packages.json"
+    [string]$OutputPath = "artifacts/sbom/nuget-packages.json",
+    [string]$LicenseOutputPath = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -20,3 +21,62 @@ if ($null -eq $report.projects -or $report.projects.Count -eq 0) {
 
 $reportText.Trim() | Set-Content -LiteralPath $OutputPath
 Write-Output "Wrote NuGet dependency inventory for $($report.projects.Count) project(s) to $OutputPath."
+
+if ([string]::IsNullOrWhiteSpace($LicenseOutputPath)) {
+    $directory = Split-Path -Parent $OutputPath
+    $LicenseOutputPath = Join-Path $directory "nuget-licenses.json"
+}
+
+$nugetRoot = if ([string]::IsNullOrWhiteSpace($env:NUGET_PACKAGES)) {
+    Join-Path $env:USERPROFILE ".nuget/packages"
+} else {
+    $env:NUGET_PACKAGES
+}
+
+$packages = foreach ($project in @($report.projects)) {
+    foreach ($framework in @($project.frameworks)) {
+        foreach ($package in @($framework.topLevelPackages) + @($framework.transitivePackages)) {
+            if ($null -ne $package -and $package.id -and $package.resolvedVersion) {
+                [PSCustomObject]@{
+                    Id = [string]$package.id
+                    Version = [string]$package.resolvedVersion
+                }
+            }
+        }
+    }
+}
+
+$licenseReport = foreach ($package in $packages | Sort-Object Id, Version -Unique) {
+    $packageDirectory = Join-Path (Join-Path $nugetRoot $package.Id.ToLowerInvariant()) $package.Version
+    $nuspec = Get-ChildItem -LiteralPath $packageDirectory -Filter "*.nuspec" -File -ErrorAction SilentlyContinue |
+        Select-Object -First 1
+    $licenseExpression = $null
+    $licenseUrl = $null
+    if ($nuspec) {
+        [xml]$metadataDocument = Get-Content -LiteralPath $nuspec.FullName
+        $metadata = $metadataDocument.package.metadata
+        if ($metadata.license) {
+            $licenseExpression = [string]$metadata.license.'#text'
+            if ([string]::IsNullOrWhiteSpace($licenseExpression)) {
+                $licenseExpression = [string]$metadata.license
+            }
+        }
+        $licenseUrl = [string]$metadata.licenseUrl
+    }
+
+    [ordered]@{
+        id = $package.Id
+        version = $package.Version
+        licenseExpression = $licenseExpression
+        licenseUrl = $licenseUrl
+        metadataFound = $null -ne $nuspec
+        source = if ($nuspec) { $nuspec.FullName } else { $null }
+    }
+}
+
+$licenseDirectory = Split-Path -Parent $LicenseOutputPath
+if (-not [string]::IsNullOrWhiteSpace($licenseDirectory)) {
+    New-Item -ItemType Directory -Force -Path $licenseDirectory | Out-Null
+}
+$licenseReport | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $LicenseOutputPath
+Write-Output "Wrote NuGet license metadata for $(@($licenseReport).Count) package version(s) to $LicenseOutputPath."
