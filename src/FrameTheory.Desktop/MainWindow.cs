@@ -2126,6 +2126,15 @@ public sealed class MainWindow : Window
         var positionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(positionStatus, "Timeline position status");
         positionStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentPosition"));
+        var monitorTimecode = new TextBlock
+        {
+            FontSize = 11,
+            FontWeight = FontWeight.SemiBold,
+            Foreground = Brushes.White
+        };
+        AutomationProperties.SetName(monitorTimecode, "Timeline monitor timecode");
+        ToolTip.SetTip(monitorTimecode, "Current program monitor position.");
+        monitorTimecode.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentPosition"));
         var frameReadout = new Border
         {
             Padding = new Thickness(8, 5),
@@ -3050,7 +3059,24 @@ public sealed class MainWindow : Window
             MinHeight = 190,
             Margin = new Thickness(0, 0, 12, 0),
             Background = Brushes.Black,
-            Child = new Grid { Children = { timelinePreviewEmptyState, timelinePreview } }
+            Child = new Grid
+            {
+                Children =
+                {
+                    timelinePreviewEmptyState,
+                    timelinePreview,
+                    new Border
+                    {
+                        Margin = new Thickness(8),
+                        Padding = new Thickness(7, 4),
+                        CornerRadius = new CornerRadius(4),
+                        Background = new SolidColorBrush(Avalonia.Media.Color.FromArgb(210, 13, 15, 18)),
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        Child = monitorTimecode
+                    }
+                }
+            }
         };
         AutomationProperties.SetName(monitorFrame, "Timeline program monitor");
         previewGrid.Children.Add(new StackPanel

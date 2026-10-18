@@ -209,6 +209,10 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Video editor workspace layout");
                 Xunit.Assert.Equal(2, videoEditorLayout.ColumnDefinitions.Count);
                 Xunit.Assert.Equal(300, videoEditorLayout.ColumnDefinitions[0].Width.Value);
+                var monitorTimecode = window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline monitor timecode");
+                Xunit.Assert.Equal(viewModel.TimelineEditor.CurrentPosition.ToString(), monitorTimecode.Text);
                 var activeWorkspaceStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Active workspace status");
