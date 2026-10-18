@@ -341,6 +341,13 @@ jobs:
           mkdir -p "$deb_directory"
           dpkg-deb --extract artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb "$deb_directory"
           xvfb-run -a pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath "$deb_directory/opt/frame-theory-studio/FrameTheory.Desktop"
+          sudo dpkg -i artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb
+          cleanup_deb() { sudo dpkg -r frame-theory-studio-ai >/dev/null 2>&1 || true; }
+          trap cleanup_deb EXIT
+          xvfb-run -a pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath /opt/frame-theory-studio/FrameTheory.Desktop
+          sudo dpkg -r frame-theory-studio-ai
+          trap - EXIT
+          test ! -e /opt/frame-theory-studio/FrameTheory.Desktop
       - name: Launch extracted portable archive smoke
         if: steps.detect.outputs.has_solution == 'true' && runner.os == 'Windows'
         shell: pwsh
