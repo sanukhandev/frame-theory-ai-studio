@@ -88,5 +88,16 @@ cat > "$app/Contents/Info.plist" <<PLIST
 </plist>
 PLIST
 plutil -lint "$app/Contents/Info.plist"
-hdiutil create -volname "Frame Theory Studio AI" -srcfolder "$app" -ov -format UDZO "$output/FrameTheoryStudioAI-$rid.dmg"
+dmg_path="$output/FrameTheoryStudioAI-$rid.dmg"
+for attempt in 1 2 3 4 5; do
+  rm -f "$dmg_path"
+  if hdiutil create -volname "Frame Theory Studio AI" -srcfolder "$app" -ov -format UDZO "$dmg_path"; then
+    break
+  fi
+  if [ "$attempt" -eq 5 ]; then
+    printf 'Unable to create macOS DMG after %s attempts: %s\n' "$attempt" "$dmg_path" >&2
+    exit 1
+  fi
+  sleep 1
+done
 printf 'Built unsigned macOS DMG: %s\n' "$output/FrameTheoryStudioAI-$rid.dmg"

@@ -34,6 +34,8 @@ def run() -> int:
         assert term.lower() in agent.lower(), f"Missing instruction: {term}"
     ci = (ROOT/".github/workflows/ci.yml").read_text(encoding="utf-8")
     assert "detach_dmg()" in ci and "for attempt in 1 2 3 4 5" in ci, "macOS DMG smoke must retry detach cleanup"
+    macos_packager = (ROOT / "scripts/package_macos_dmg.sh").read_text(encoding="utf-8")
+    assert "dmg_path=" in macos_packager and "for attempt in 1 2 3 4 5" in macos_packager, "macOS DMG creation must retry transient hdiutil failures"
     assert "Avalonia.Headless" in ci and "Avalonia.Headless' -and $_.licenseExpression -eq 'MIT'" in ci, "CI must verify headless test-package license metadata"
     assert "Test headless desktop shell" in ci and "FullyQualifiedName~FoundationTests" in ci, "CI must expose the headless desktop shell test"
     assert "$missingLicenseMetadata" in ci and "metadataFound" in ci, "CI must fail closed on missing NuGet license metadata"
