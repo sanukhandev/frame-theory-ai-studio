@@ -21,19 +21,19 @@ The output is a validation publish, not an installer. It must be tested on the m
 
 CI writes `SHA256SUMS.txt` for the complete validation artifact set and verifies every listed file before upload with `pwsh ./scripts/verify_package.ps1`. The verifier rejects malformed, duplicate, escaping, missing or modified entries.
 
-CI also creates `frame-theory-<platform>-portable.zip` from the published desktop tree with `pwsh ./scripts/archive_package.ps1`. This is a portable validation archive, not an installer and not a native FFmpeg bundle.
+CI also creates `frame-theory-<platform>-portable.zip` from the published desktop tree with `pwsh ./scripts/archive_package.ps1`. This is a portable validation archive, not a native FFmpeg bundle. The same matrix now creates unsigned Windows Inno Setup, macOS DMG and Linux DEB validation installers.
 
 ## Current matrix
 
 | Platform | Build/CI compile | Local GUI/media evidence | Installer/signing |
 |---|---|---|---|
-| Windows 11 x64 | Local and hosted CI publish verified; extracted portable archive relaunch passed in `39083944147` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; interactive workspace and clean-host relaunch remain open | Portable validation package available; no installer, signing or notarization |
-| macOS Apple Silicon/Intel | Hosted restore/build/test/publish, native media and extracted portable process-liveness smoke verified in `39084466811` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; local GUI/manual acceptance not run here | Portable validation package path available; no installer or notarization |
-| Linux x64 | Hosted restore/build/test/publish, native media and extracted portable process-liveness smoke verified in `39084466811` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified under Xvfb; local GUI/manual acceptance not run here | Portable validation package path available; no installer or signing |
+| Windows 11 x64 | Local and hosted CI publish verified; extracted portable archive and unsigned Inno installer install/relaunch/uninstall passed in `39086158425` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; interactive workspace and clean-host relaunch remain open | Unsigned validation installer available; no signing, notarization or native FFmpeg bundle |
+| macOS Apple Silicon/Intel | Hosted restore/build/test/publish, native media, extracted portable process-liveness and unsigned DMG mount validation passed in `39086158425` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; local GUI/manual acceptance not run here | Unsigned validation DMG available; no notarization or native FFmpeg bundle |
+| Linux x64 | Hosted restore/build/test/publish, native media, extracted portable process-liveness and unsigned DEB metadata validation passed in `39086158425` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified under Xvfb; local GUI/manual acceptance not run here | Unsigned validation DEB available; no signing or native FFmpeg bundle |
 
 ## Release blockers
 
 - Approved Frame Theory logo bytes are absent from the repository; no replacement asset is allowed.
 - FFmpeg/ffprobe are host dependencies and are not bundled; exact build, license mode, codec notices and redistribution path are not approved.
 - The application license is undecided.
-- Install/relaunch/recover, package checksums on each host, and code-signing/notarization evidence are still required before V1.
+- Clean-host install/relaunch/recover, package checksums on each target host, native media redistribution, and code-signing/notarization evidence are still required before V1.
