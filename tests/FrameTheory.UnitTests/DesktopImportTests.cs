@@ -10,6 +10,12 @@ using FrameTheory.Media;
 
 namespace FrameTheory.UnitTests;
 
+[Xunit.CollectionDefinition("Avalonia headless", DisableParallelization = true)]
+public sealed class AvaloniaHeadlessCollectionDefinition
+{
+}
+
+[Xunit.Collection("Avalonia headless")]
 public sealed class DesktopImportTests
 {
     [Xunit.Fact]
@@ -53,10 +59,9 @@ public sealed class DesktopImportTests
             new WorkspaceCatalog(),
             new StubCapabilityDetector(),
             new BatchImporter());
-        await viewModel.ImportFilesAsync(["clip.mp4"], CancellationToken.None);
-
         await session.Dispatch(() =>
         {
+            viewModel.ImportFilesAsync(["clip.mp4"], CancellationToken.None).GetAwaiter().GetResult();
             var window = new MainWindow(viewModel);
             try
             {

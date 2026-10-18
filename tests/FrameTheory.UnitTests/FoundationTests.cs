@@ -12,6 +12,7 @@ using FrameTheory.Domain;
 
 namespace FrameTheory.UnitTests;
 
+[Xunit.Collection("Avalonia headless")]
 public sealed class FoundationTests
 {
     [Xunit.Fact]
