@@ -62,6 +62,14 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.BorderBrushProperty, accent)
             }
         });
+        Styles.Add(new Style(selector => selector.OfType<Button>().Class(":focus"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BorderBrushProperty, accent),
+                new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(1))
+            }
+        });
         Styles.Add(new Style(selector => selector.OfType<Button>().Class("primary"))
         {
             Setters =
