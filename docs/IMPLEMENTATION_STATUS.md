@@ -16,6 +16,8 @@
 
 **Timeline nested-bound checkpoint (2026-10-19):** Timeline persistence now also bounds nested caption words, speed points and animation keyframes, and rejects invalid beat-marker values. The focused TimelineProjectPersistence suite remains green at 11/11 after the regression correction; the next exact 50-commit gate is still the push boundary.
 
+**Gemini settings persistence checkpoint (2026-10-19):** The selected supported Gemini model now round-trips through the existing OS-backed credential store alongside the key and is removed on clear; whitespace-normalized model IDs remain allowlisted. Focused GeminiConfiguration coverage passes 3/3; live provider acceptance remains separate.
+
 **Latest hosted 50-commit gate (2026-10-19):** Quality Gates run `39168203239` passed for `742cd38` across documentation/schema validation, Ubuntu, Windows and macOS restore/build/test, native media, headless shell/UI automation, formatting, portable archives, installer/DMG/DEB validation, packaged relaunch and checksums. This confirms the pushed batch; the six tracked partial P0 gates remain open because manual visual/HiDPI/screen-reader, legal redistribution, signing/clean-host and final-audit evidence are still required.
 
 **Post-push integrity Release gate (2026-10-19):** The 16 verified local hardening commits after `742cd38` pass 305 unit tests and 2 golden tests, a warning-free Release build, format verification, repository validation and `git diff --check`. These commits remain local until the next exact 50-commit push boundary; the six tracked partial P0 gates remain open.
