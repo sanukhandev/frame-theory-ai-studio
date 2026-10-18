@@ -2231,6 +2231,17 @@ public sealed class MainWindow : Window
         void RefreshRulerVisual()
         {
             rulerCanvas.Children.Clear();
+            var playheadMark = new Border
+            {
+                Width = 2,
+                Height = 30,
+                Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(255, 92, 112)),
+                IsHitTestVisible = false
+            };
+            AutomationProperties.SetName(playheadMark, "Timeline ruler playhead");
+            Canvas.SetLeft(playheadMark, Math.Max(0, (timeline.CurrentFrame - timeline.ScrollFrame) / timeline.FramesPerPixel));
+            Canvas.SetTop(playheadMark, 0);
+            rulerCanvas.Children.Add(playheadMark);
             foreach (var tick in timeline.BuildRulerTicks(640))
             {
                 var left = Math.Max(0, (tick.Frame - timeline.ScrollFrame) / timeline.FramesPerPixel);
