@@ -103,6 +103,7 @@ try {
         "Video workspace" = @(
             "Imported media",
             "Preview current frame",
+            "Timeline preview performance status",
             "Play timeline",
             "Stop playback",
             "Timeline playhead frame",

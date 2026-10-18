@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using FrameTheory.AI;
 using FrameTheory.Application;
@@ -95,6 +96,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private CancellationTokenSource? _timelinePlaybackCancellation;
     private bool _isTimelinePreviewPlaying;
     private bool _useTimelinePreviewProxy;
+    private readonly Queue<double> _timelineDecodeMilliseconds = [];
+    private string _timelinePerformanceStatusText = "No timeline performance samples recorded.";
 
     public MainWindowViewModel(
         IWorkspaceCatalog workspaceCatalog,
@@ -175,6 +178,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             _timelinePreviewStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string TimelinePerformanceStatusText
+    {
+        get => _timelinePerformanceStatusText;
+        private set
+        {
+            if (value == _timelinePerformanceStatusText)
+            {
+                return;
+            }
+
+            _timelinePerformanceStatusText = value;
             OnPropertyChanged();
         }
     }
@@ -756,11 +774,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             TimelinePreviewStatusText = $"Decoding frame {sourceFrame}{proxyDescription}...";
+            var decodeStarted = Stopwatch.GetTimestamp();
             TimelinePreviewPpm = await _timelinePreviewDecoder.DecodeFrameAsync(
                 previewSource,
                 media.Metadata.FrameRate ?? new RationalFrameRate(30, 1),
                 sourceFrame,
                 cancellationToken);
+            RecordTimelinePreviewPerformance(Stopwatch.GetElapsedTime(decodeStarted).TotalMilliseconds);
             TimelinePreviewStatusText = $"Previewed frame {sourceFrame} from {Path.GetFileName(source.LocalPath)}{proxyDescription}.";
             return true;
         }
@@ -830,6 +850,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     }
 
     public void StopTimelinePreview() => _timelinePlaybackCancellation?.Cancel();
+
+    private void RecordTimelinePreviewPerformance(double decodeMilliseconds)
+    {
+        const int maximumSamples = 32;
+        _timelineDecodeMilliseconds.Enqueue(Math.Max(0, decodeMilliseconds));
+        while (_timelineDecodeMilliseconds.Count > maximumSamples)
+        {
+            _timelineDecodeMilliseconds.Dequeue();
+        }
+
+        var averageMilliseconds = _timelineDecodeMilliseconds.Average();
+        var decodeFps = averageMilliseconds > 0 ? 1000 / averageMilliseconds : 0;
+        using var process = Process.GetCurrentProcess();
+        TimelinePerformanceStatusText = $"Preview performance: latest_decode_ms={decodeMilliseconds:0.###}; decode_fps={decodeFps:0.###}; working_set_bytes={process.WorkingSet64}; samples={_timelineDecodeMilliseconds.Count}.";
+    }
 
     public async Task<bool> AnalyzeTimelineMotionAsync(CancellationToken cancellationToken)
     {

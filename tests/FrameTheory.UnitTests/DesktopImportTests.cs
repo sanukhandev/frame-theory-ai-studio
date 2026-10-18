@@ -54,6 +54,8 @@ public sealed class DesktopImportTests
         Xunit.Assert.Equal(5, decoder.FrameIndex);
         Xunit.Assert.Equal("P6\n1 1\n255\n\0\0\0"u8.ToArray(), viewModel.TimelinePreviewPpm);
         Xunit.Assert.Contains("frame 5", viewModel.TimelinePreviewStatusText, StringComparison.Ordinal);
+        Xunit.Assert.Contains("decode_fps=", viewModel.TimelinePerformanceStatusText, StringComparison.Ordinal);
+        Xunit.Assert.Contains("working_set_bytes=", viewModel.TimelinePerformanceStatusText, StringComparison.Ordinal);
     }
 
     [Xunit.Fact]

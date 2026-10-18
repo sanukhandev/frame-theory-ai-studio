@@ -943,6 +943,9 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(timelinePreview, "Timeline current frame preview");
         var timelinePreviewStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         timelinePreviewStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePreviewStatusText)));
+        var timelinePerformanceStatus = new TextBox { IsReadOnly = true, TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(timelinePerformanceStatus, "Timeline preview performance status");
+        timelinePerformanceStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePerformanceStatusText)));
         var analyzeMotion = new Button { Content = "Analyze motion" };
         AutomationProperties.SetName(analyzeMotion, "Analyze timeline motion");
         analyzeMotion.Click += async (_, _) => await viewModel.AnalyzeTimelineMotionAsync(CancellationToken.None);
@@ -1412,7 +1415,7 @@ public sealed class MainWindow : Window
                 Children =
                 {
                     new TextBlock { Text = "Frame-accurate timeline", FontWeight = FontWeight.SemiBold },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { timelinePreview, new StackPanel { Spacing = 8, Children = { previewCurrentFrame, playTimeline, stopTimeline, usePreviewProxy, analyzeMotion, timelinePreviewStatus, motionAnalysisStatus } } } },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { timelinePreview, new StackPanel { Spacing = 8, Children = { previewCurrentFrame, playTimeline, stopTimeline, usePreviewProxy, analyzeMotion, timelinePreviewStatus, timelinePerformanceStatus, motionAnalysisStatus } } } },
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { new TextBlock { Text = "Frame" }, frameStatus, new TextBlock { Text = "Position" }, positionStatus } },
                     playhead,
                     ruler,
