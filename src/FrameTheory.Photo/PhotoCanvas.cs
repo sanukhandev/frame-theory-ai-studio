@@ -23,14 +23,16 @@ public sealed record PhotoDocument
 
         SourceUri = sourceUri;
         Metadata = metadata;
-        PreviewPpm = previewPpm;
+        _previewPpm = previewPpm.ToArray();
     }
+
+    private readonly byte[] _previewPpm;
 
     public Uri SourceUri { get; }
 
     public MediaSourceMetadata Metadata { get; }
 
-    public byte[] PreviewPpm { get; }
+    public byte[] PreviewPpm => _previewPpm.ToArray();
 }
 
 public sealed class PhotoImporter

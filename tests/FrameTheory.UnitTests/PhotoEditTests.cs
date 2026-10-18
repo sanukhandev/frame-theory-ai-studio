@@ -9,9 +9,14 @@ public sealed class PhotoEditTests
     public void EditsRenderNonDestructivelyAndUndoLastOperation()
     {
         var sourcePpm = Ppm(2, 1, [255, 0, 0, 0, 255, 0]);
+        var originalPpm = sourcePpm.ToArray();
         var metadata = new MediaSourceMetadata(
             MediaId.Parse(new string('2', 64)), new Uri("file:///photo.png"), MediaKind.Image, 2, 1, null, 0);
         var document = new PhotoDocument(metadata.SourceUri, metadata, sourcePpm);
+        sourcePpm[^1] = 99;
+        var exposedPreview = document.PreviewPpm;
+        exposedPreview[^1] = 98;
+        Xunit.Assert.Equal((byte)0, document.PreviewPpm[^1]);
         var edits = new PhotoEditState(document)
             .Crop(0, 0, 2, 1)
             .Rotate(90)
@@ -23,7 +28,7 @@ public sealed class PhotoEditTests
         Xunit.Assert.Equal(2, rendered.Height);
         Xunit.Assert.Equal(1, undone.Width);
         Xunit.Assert.Equal(2, undone.Height);
-        Xunit.Assert.Equal(sourcePpm, document.PreviewPpm);
+        Xunit.Assert.Equal(originalPpm, document.PreviewPpm);
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new PhotoEditState(document).Crop(1, 0, 2, 1));
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new PhotoEditState(document).Rotate(45));
     }
