@@ -350,6 +350,16 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Color after preview empty state")
                     .IsVisible);
+                viewModel.ColorInspector.ExposureEV = 1.25f;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(1.25, window.GetVisualDescendants()
+                    .OfType<Slider>()
+                    .Single(control => AutomationProperties.GetName(control) == "Exposure EV")
+                    .Value);
+                Xunit.Assert.Equal("1.25", window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => AutomationProperties.GetName(control) == "Exposure EV value")
+                    .Text);
                 Xunit.Assert.Null(window.GetVisualDescendants()
                     .OfType<Image>()
                     .Single(control => AutomationProperties.GetName(control) == "Color waveform scope")

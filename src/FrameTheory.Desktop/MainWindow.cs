@@ -1634,11 +1634,11 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(status, "Color inspector status");
         status.Bind(TextBlock.TextProperty, new Binding("ColorInspector.StatusText"));
         var controls = new StackPanel { Spacing = 4 };
-        controls.Children.Add(CreateGradeControl("Exposure EV", -8, 8, inspector.ExposureEV, value => inspector.ExposureEV = value));
-        controls.Children.Add(CreateGradeControl("Contrast", -1, 1, inspector.Contrast, value => inspector.Contrast = value));
-        controls.Children.Add(CreateGradeControl("Saturation", -1, 1, inspector.Saturation, value => inspector.Saturation = value));
-        controls.Children.Add(CreateGradeControl("Temperature", -1, 1, inspector.Temperature, value => inspector.Temperature = value));
-        controls.Children.Add(CreateGradeControl("Tint", -1, 1, inspector.Tint, value => inspector.Tint = value));
+        controls.Children.Add(CreateGradeControl("Exposure EV", -8, 8, inspector.ExposureEV, value => inspector.ExposureEV = value, inspector, nameof(ColorGradeInspectorViewModel.ExposureEV), () => inspector.ExposureEV));
+        controls.Children.Add(CreateGradeControl("Contrast", -1, 1, inspector.Contrast, value => inspector.Contrast = value, inspector, nameof(ColorGradeInspectorViewModel.Contrast), () => inspector.Contrast));
+        controls.Children.Add(CreateGradeControl("Saturation", -1, 1, inspector.Saturation, value => inspector.Saturation = value, inspector, nameof(ColorGradeInspectorViewModel.Saturation), () => inspector.Saturation));
+        controls.Children.Add(CreateGradeControl("Temperature", -1, 1, inspector.Temperature, value => inspector.Temperature = value, inspector, nameof(ColorGradeInspectorViewModel.Temperature), () => inspector.Temperature));
+        controls.Children.Add(CreateGradeControl("Tint", -1, 1, inspector.Tint, value => inspector.Tint = value, inspector, nameof(ColorGradeInspectorViewModel.Tint), () => inspector.Tint));
         var reset = new Button { Content = "Reset grade" };
         AutomationProperties.SetName(reset, "Reset color grade");
         ToolTip.SetTip(reset, "Clear the current grade and return the local preview to the shared default pipeline.");
@@ -3099,7 +3099,15 @@ public sealed class MainWindow : Window
         }
     }
 
-    private static Control CreateGradeControl(string label, double minimum, double maximum, float value, Action<float> setter)
+    private static Control CreateGradeControl(
+        string label,
+        double minimum,
+        double maximum,
+        float value,
+        Action<float> setter,
+        ColorGradeInspectorViewModel source,
+        string propertyName,
+        Func<float> valueReader)
     {
         var slider = new Slider
         {
@@ -3121,6 +3129,21 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(valueLabel, $"{label} value");
         slider.ValueChanged += (_, args) => setter((float)args.NewValue);
         slider.ValueChanged += (_, args) => valueLabel.Text = args.NewValue.ToString("0.00", CultureInfo.InvariantCulture);
+        source.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName != propertyName)
+            {
+                return;
+            }
+
+            var nextValue = valueReader();
+            if (Math.Abs(slider.Value - nextValue) > 0.0001)
+            {
+                slider.Value = nextValue;
+            }
+
+            valueLabel.Text = nextValue.ToString("0.00", CultureInfo.InvariantCulture);
+        };
         return new StackPanel
         {
             Orientation = Orientation.Horizontal,
