@@ -27,10 +27,22 @@ if ([string]::IsNullOrWhiteSpace($LicenseOutputPath)) {
     $LicenseOutputPath = Join-Path $directory "nuget-licenses.json"
 }
 
-$nugetRoot = if ([string]::IsNullOrWhiteSpace($env:NUGET_PACKAGES)) {
-    Join-Path $env:USERPROFILE ".nuget/packages"
-} else {
+$nugetRoot = if (-not [string]::IsNullOrWhiteSpace($env:NUGET_PACKAGES)) {
     $env:NUGET_PACKAGES
+} elseif (-not [string]::IsNullOrWhiteSpace($env:USERPROFILE)) {
+    Join-Path $env:USERPROFILE ".nuget/packages"
+} elseif (-not [string]::IsNullOrWhiteSpace($env:HOME)) {
+    Join-Path $env:HOME ".nuget/packages"
+} else {
+    throw "NuGet package cache location is unavailable; set NUGET_PACKAGES or HOME."
+}
+
+if ([string]::IsNullOrWhiteSpace($nugetRoot)) {
+    throw "NuGet package cache location is unavailable."
+}
+
+if (-not (Test-Path -LiteralPath $nugetRoot -PathType Container)) {
+    throw "NuGet package cache directory does not exist: $nugetRoot"
 }
 
 $packages = foreach ($project in @($report.projects)) {
