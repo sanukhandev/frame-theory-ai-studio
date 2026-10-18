@@ -992,12 +992,16 @@ public sealed class MainWindow : Window
         inspector.PropertyChanged += (_, _) => RefreshPreviews();
         RefreshPreviews();
         var beforeSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(beforeSummary, "Color grade before summary");
         beforeSummary.Bind(TextBlock.TextProperty, new Binding("ColorInspector.BeforeSummary"));
         var afterSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(afterSummary, "Color grade after summary");
         afterSummary.Bind(TextBlock.TextProperty, new Binding("ColorInspector.AfterSummary"));
         var scopeSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(scopeSummary, "Color scope summary");
         scopeSummary.Bind(TextBlock.TextProperty, new Binding("ColorInspector.ScopeSummary"));
         var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(status, "Color inspector status");
         status.Bind(TextBlock.TextProperty, new Binding("ColorInspector.StatusText"));
         var controls = new StackPanel { Spacing = 4 };
         controls.Children.Add(CreateGradeControl("Exposure EV", -8, 8, inspector.ExposureEV, value => inspector.ExposureEV = value));
@@ -1015,6 +1019,7 @@ public sealed class MainWindow : Window
         var presetSelection = new ComboBox { Width = 220 };
         AutomationProperties.SetName(presetSelection, "Loaded color styles");
         var presetStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(presetStatus, "Color style library status");
         var savePreset = new Button { Content = "Save style library" };
         AutomationProperties.SetName(savePreset, "Save color style library");
         savePreset.Click += async (_, _) =>
@@ -1105,6 +1110,7 @@ public sealed class MainWindow : Window
         var applyReference = new Button { Content = "Apply reviewed reference grade" };
         AutomationProperties.SetName(applyReference, "Apply reviewed reference grade");
         var referenceStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(referenceStatus, "Reference analysis status");
         referenceStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.ReferenceAnalysisStatusText)));
         void RefreshReferenceSources()
         {

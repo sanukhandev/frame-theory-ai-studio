@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Color-status accessibility checkpoint (2026-10-18):** Color before/after summaries, deterministic scope output, inspector state, style-library state and reference-analysis feedback now expose stable automation names; the adaptive-shell contract asserts them. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native assistive-technology review remains unverified.
+
 **Photo-status accessibility checkpoint (2026-10-18):** Photo recovery now names its missing-media list and recovery status, while the editor exposes a distinct live edit status alongside its real preview. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native assistive-technology review remains unverified.
 
 **Video-status accessibility checkpoint (2026-10-18):** Media import, compositor preview, motion analysis, rough cut, title animation, captions, timeline project/export and watermark feedback regions now expose stable automation names; the adaptive-shell contract asserts them. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native assistive-technology review remains unverified.
