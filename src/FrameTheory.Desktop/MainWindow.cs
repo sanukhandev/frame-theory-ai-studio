@@ -2061,6 +2061,8 @@ public sealed class MainWindow : Window
                     }
                 })
         };
+        AutomationProperties.SetName(scopeCard, "Color scopes preview");
+        ToolTip.SetTip(scopeCard, "Inspect the post-grade waveform and vectorscope generated from the local preview.");
         var scopeSection = CreateInspectorExpander(
             "Scopes",
             CreateSectionContent(scopeCard, scopeSummary),

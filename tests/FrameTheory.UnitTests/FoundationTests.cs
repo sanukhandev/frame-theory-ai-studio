@@ -443,6 +443,12 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Compare the ungraded source with the current shared color grade.",
                     ToolTip.GetTip(colorComparison));
+                var colorScopes = window.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color scopes preview");
+                Xunit.Assert.Equal(
+                    "Inspect the post-grade waveform and vectorscope generated from the local preview.",
+                    ToolTip.GetTip(colorScopes));
                 viewModel.ColorInspector.ExposureEV = 1.25f;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(1.25, window.GetVisualDescendants()
