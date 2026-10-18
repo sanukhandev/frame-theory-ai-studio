@@ -4,7 +4,7 @@ Generated from `dotnet list FrameTheory.sln package --include-transitive` on 202
 
 The reproducible CI/local vulnerability check is `pwsh ./scripts/check_nuget_vulnerabilities.ps1`. The NuGet advisory feed returned no vulnerable package records on 2026-10-17; the generated JSON report is retained as a CI artifact. A clean advisory result does not replace license, codec-patent or native redistribution review.
 
-Each CI runner also generates `artifacts/sbom/nuget-packages.json` with the complete restored direct/transitive package graph and `artifacts/sbom/nuget-licenses.json` from the restored package `.nuspec` metadata, plus `ffmpeg-version.txt`, `ffmpeg-buildconf.txt` and `ffprobe-version.txt` from the installed host tools. Missing package metadata remains visible in the report. These artifacts identify the exact validation environment; they do not authorize redistribution of those binaries or codecs.
+Each CI runner also generates `artifacts/sbom/nuget-packages.json` with the complete restored direct/transitive package graph and `artifacts/sbom/nuget-licenses.json` from the restored package `.nuspec` metadata, plus `ffmpeg-version.txt`, `ffmpeg-buildconf.txt` and `ffprobe-version.txt` from the installed host tools. CI fails closed when any restored package lacks license metadata; these artifacts identify the exact validation environment but do not authorize redistribution of those binaries or codecs.
 
 ## Direct packages
 

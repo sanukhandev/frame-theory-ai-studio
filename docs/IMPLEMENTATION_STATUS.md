@@ -6,7 +6,7 @@
 
 **Headless UI coverage checkpoint (2026-10-18):** The UnitTests project now uses the test-only `Avalonia.Headless` 12.1.2 platform to instantiate the production `MainWindow`, verify 1280x800 and 960x640 bounds, minimum dimensions, two-way workspace synchronization, all four workspace automation names and required Video/Color/AI control names, then exercise the real Avalonia `Ctrl+1..4` input paths. Focused Foundation coverage passes 16/16 and the full Release suite passes 228 unit tests plus 2 golden tests. This strengthens FT-901/FT-902 implementation evidence but does not replace native HiDPI, visual-quality or macOS/Linux manual acceptance.
 
-**Headless dependency evidence checkpoint (2026-10-18):** Local SBOM generation resolves 41 package versions and records `Avalonia.Headless` 12.1.2 with `MIT` metadata and `metadataFound=true`; CI now fails if that test-only license record disappears. This is dependency metadata evidence only and does not clear application licensing or redistribution review.
+**Headless dependency evidence checkpoint (2026-10-18):** Local SBOM generation resolves 41 package versions with no missing license metadata and records `Avalonia.Headless` 12.1.2 with `MIT` metadata and `metadataFound=true`; CI now fails closed on missing metadata and explicitly checks the headless test package. This is dependency metadata evidence only and does not clear application licensing or redistribution review.
 
 **Headless CI visibility checkpoint (2026-10-18):** The quality workflow now runs a named `FoundationTests` headless desktop-shell step on every Windows, macOS and Linux build/test job in addition to the full solution test. Local execution passes 16/16; hosted confirmation is pending the next pushed batch.
 

@@ -20,7 +20,7 @@
 ## Required SBOM process
 Lock application packages; track exact native codec builds; record upstream URLs and versions; create SBOM for each release; scan CVEs/license notices; verify third-party attribution and model weights independently.
 
-The current restore inventory is recorded in [SBOM.md](SBOM.md). It must be regenerated after dependency changes and before packaging; its release blockers are intentionally not presented as cleared.
+The current restore inventory is recorded in [SBOM.md](SBOM.md). It must be regenerated after dependency changes and before packaging; CI fails closed when restored package license metadata is missing, and the remaining release blockers are intentionally not presented as cleared.
 
 ## Implemented dependency baseline
 FT-002 uses `Avalonia`, `Avalonia.Desktop` and `Avalonia.Themes.Fluent` version `12.1.2` from NuGet. The package metadata identifies Avalonia as MIT-licensed; transitive packages and native assets remain part of the release SBOM and must be rechecked before packaging. The UnitTests project also uses the test-only `Avalonia.Headless` 12.1.2 package for production-window control-tree and input coverage; it is not part of application or installer payloads. FT-004 uses `Microsoft.CodeAnalysis.NetAnalyzers` version `10.0.402`, also identified as MIT-licensed.
