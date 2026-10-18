@@ -82,6 +82,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private TimelineExportRequest? _lastTimelineExportRequest;
     private readonly ILocalAnalysisSampler? _analysisSampler;
     private readonly IPreviewFrameDecoder _timelinePreviewDecoder;
+    private readonly ITimelinePreviewRenderer? _timelinePreviewRenderer;
     private readonly FfmpegPreviewProxyService? _timelinePreviewProxy;
     private readonly JsonProjectRepository _timelineProjectRepository = new();
     private readonly ProjectRecoveryService _timelineProjectRecovery;
@@ -118,6 +119,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         IAudioSourcePreparer? audioSourcePreparer = null,
         IPreviewFrameDecoder? timelinePreviewDecoder = null,
         FfmpegPreviewProxyService? timelinePreviewProxy = null,
+        ITimelinePreviewRenderer? timelinePreviewRenderer = null,
         IWorkspaceStateStore? workspaceStateStore = null)
     {
         Workspaces = workspaceCatalog.GetWorkspaces();
@@ -147,6 +149,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         _analysisSampler = analysisSampler;
         _timelinePreviewDecoder = timelinePreviewDecoder ?? new FfmpegFrameDecoder(new FfmpegProcessRunner());
         _timelinePreviewProxy = timelinePreviewProxy;
+        _timelinePreviewRenderer = timelinePreviewRenderer;
         _timelineProjectRecovery = new ProjectRecoveryService(_timelineProjectRepository);
         if (Workspaces.Count == 0)
         {
@@ -794,11 +797,16 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             TimelinePreviewStatusText = $"Decoding frame {sourceFrame}{proxyDescription}...";
             var decodeStarted = Stopwatch.GetTimestamp();
-            TimelinePreviewPpm = await _timelinePreviewDecoder.DecodeFrameAsync(
-                previewSource,
-                media.Metadata.FrameRate ?? new RationalFrameRate(30, 1),
-                sourceFrame,
-                cancellationToken);
+            TimelinePreviewPpm = _timelinePreviewRenderer is not null && !UseTimelinePreviewProxy
+                ? await _timelinePreviewRenderer.RenderFrameAsync(
+                    TimelineEditor.BuildRenderPlan(_videoWidth, _videoHeight, _mediaSources),
+                    TimelineEditor.CurrentFrame,
+                    cancellationToken)
+                : await _timelinePreviewDecoder.DecodeFrameAsync(
+                    previewSource,
+                    media.Metadata.FrameRate ?? new RationalFrameRate(30, 1),
+                    sourceFrame,
+                    cancellationToken);
             RecordTimelinePreviewPerformance(Stopwatch.GetElapsedTime(decodeStarted).TotalMilliseconds);
             TimelinePreviewStatusText = $"Previewed frame {sourceFrame} from {Path.GetFileName(source.LocalPath)}{proxyDescription}.";
             return true;
@@ -1790,6 +1798,7 @@ public sealed class DesktopServices
             diagnosticsLog: _diagnosticsLog,
             timelinePreviewDecoder: decoder,
             timelinePreviewProxy: previewProxy,
+            timelinePreviewRenderer: new FfmpegTimelinePreviewRenderer(processRunner),
             workspaceStateStore: new FileWorkspaceStateStore());
     }
 }

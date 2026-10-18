@@ -25,7 +25,11 @@ var approvedWatermarkPath = Path.Combine(AppContext.BaseDirectory, "assets", "br
 var approvedWatermark = File.Exists(approvedWatermarkPath)
     ? new TimelineWatermark(approvedWatermarkPath, opacity: 0.85f, margin: 1)
     : null;
-var projectViewModel = new MainWindowViewModel(new WorkspaceCatalog(), new SmokeCapabilityDetector(), importer);
+var projectViewModel = new MainWindowViewModel(
+    new WorkspaceCatalog(),
+    new SmokeCapabilityDetector(),
+    importer,
+    timelinePreviewRenderer: new FfmpegTimelinePreviewRenderer(runner));
 await projectViewModel.ImportFilesAsync([sourceA.LocalPath, sourceB.LocalPath], CancellationToken.None);
 if (!projectViewModel.TimelineEditor.SelectFirst(TimelineTrackKind.Video))
 {
@@ -34,6 +38,14 @@ if (!projectViewModel.TimelineEditor.SelectFirst(TimelineTrackKind.Video))
 
 projectViewModel.TimelineEditor.SetApprovedWatermark();
 projectViewModel.TimelineEditor.ApplyStabilizationToSelected(5);
+if (!await projectViewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None) ||
+    projectViewModel.TimelinePreviewPpm is not { Length: > 4 } previewPpm ||
+    !previewPpm.AsSpan().StartsWith("P6\n"u8))
+{
+    throw new InvalidOperationException($"Timeline compositor preview failed: {projectViewModel.TimelinePreviewStatusText}");
+}
+
+Console.WriteLine($"timeline-preview=ok; bytes={projectViewModel.TimelinePreviewPpm.Length}; status={projectViewModel.TimelinePreviewStatusText}");
 if (!await projectViewModel.SaveTimelineProjectAsync(projectPath, CancellationToken.None))
 {
     throw new InvalidOperationException(projectViewModel.TimelineProjectStatusText);

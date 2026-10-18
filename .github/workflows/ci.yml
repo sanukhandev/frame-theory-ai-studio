@@ -302,6 +302,7 @@ jobs:
           grep -F 'rough-cut-output=' artifacts/media-smoke/timeline.txt
           grep -F 'reel-output=' artifacts/media-smoke/timeline.txt
           grep -F 'project-roundtrip=' artifacts/media-smoke/timeline.txt
+          grep -F 'timeline-preview=ok' artifacts/media-smoke/timeline.txt
           grep -F 'watermark=approved' artifacts/media-smoke/timeline.txt
           grep -F 'stabilization=5' artifacts/media-smoke/timeline.txt
           ffmpeg -hide_banner -loglevel error -y \
