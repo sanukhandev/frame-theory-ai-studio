@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
 using Avalonia.Themes.Fluent;
+using Avalonia.Threading;
 using System.Reflection;
 using FrameTheory.Application;
 
@@ -84,6 +85,14 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
                     tabItems.Select(AutomationProperties.GetName));
+
+                tabs.SelectedIndex = 1;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(1, viewModel.SelectedWorkspaceIndex);
+
+                viewModel.SelectedWorkspaceIndex = 2;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(2, tabs.SelectedIndex);
 
                 window.KeyPress(Key.D3, RawInputModifiers.Control, PhysicalKey.Digit3, "3");
                 window.KeyRelease(Key.D3, RawInputModifiers.Control, PhysicalKey.Digit3, "3");
