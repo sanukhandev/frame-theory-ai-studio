@@ -66,6 +66,7 @@ jobs:
             echo 'macOS package plist heredoc must expand the validated version.'
             exit 1
           fi
+          grep -F 'plutil -lint "$app/Contents/Info.plist"' scripts/package_macos_dmg.sh
       - name: Validate macOS package guards
         shell: bash
         run: |
