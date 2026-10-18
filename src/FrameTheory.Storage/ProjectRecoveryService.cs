@@ -17,6 +17,11 @@ public sealed class ProjectRecoveryService
     public async Task<ProjectSnapshot?> TryLoadAutosaveAsync(string projectPath, CancellationToken cancellationToken)
     {
         var autosavePath = GetAutosavePath(projectPath);
+        if (LocalPathSecurity.ContainsReparsePoint(autosavePath))
+        {
+            return null;
+        }
+
         if (!File.Exists(autosavePath))
         {
             return null;
@@ -28,6 +33,11 @@ public sealed class ProjectRecoveryService
     public void ClearAutosave(string projectPath)
     {
         var autosavePath = GetAutosavePath(projectPath);
+        if (LocalPathSecurity.ContainsReparsePoint(autosavePath))
+        {
+            return;
+        }
+
         if (File.Exists(autosavePath))
         {
             File.Delete(autosavePath);
@@ -51,6 +61,11 @@ public sealed class ProjectRecoveryService
     {
         var projectDirectory = GetProjectDirectory(projectPath);
         var replacementFullPath = Path.GetFullPath(replacementPath);
+        if (LocalPathSecurity.ContainsReparsePoint(replacementFullPath))
+        {
+            throw new InvalidDataException("The replacement media path must not be a reparse point.");
+        }
+
         if (!File.Exists(replacementFullPath))
         {
             throw new FileNotFoundException("The replacement media file was not found.", replacementFullPath);

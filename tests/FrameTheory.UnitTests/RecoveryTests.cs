@@ -120,6 +120,47 @@ public sealed class RecoveryTests
     }
 
     [Xunit.Fact]
+    public async Task RelinkRejectsDanglingReplacementBeforeMissingFileFallback()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-recovery-dangling-");
+        try
+        {
+            var projectPath = Path.Combine(directory.FullName, "project.ftstudio");
+            var mediaId = MediaId.Create(new Uri("file:///media/missing.mov"), "sha256:missing");
+            var snapshot = new ProjectSnapshot(
+                "project",
+                new RationalFrameRate(30, 1),
+                1920,
+                1080,
+                "sRGB",
+                [new MediaReference(mediaId, "media/missing.mov", "sha256:missing")]);
+            var linkedReplacement = Path.Combine(directory.FullName, "linked.mov");
+            File.CreateSymbolicLink(linkedReplacement, Path.Combine(directory.FullName, "missing.mov"));
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                new ProjectRecoveryService(new JsonProjectRepository()).RelinkMediaAsync(
+                    projectPath,
+                    snapshot,
+                    mediaId,
+                    linkedReplacement,
+                    CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public void RecoveryRejectsTraversalAndReparsePointDirectories()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-recovery-boundary-");

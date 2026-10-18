@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Recovery dangling-path checkpoint (2026-10-18):** Autosave load/clear and media relink now reject reparse-point paths before missing-file fallbacks; a dangling replacement link is rejected as unsafe rather than reported as an ordinary missing file. Focused recovery coverage passes 6/6; formatting, repository validation and `git diff --check` pass. This is local evidence pending the next exact-ten-commit hosted revalidation.
+
 **Full local security-gate checkpoint (2026-10-18):** After the media, audio, AI and desktop path-boundary fixes, the Release solution passes 251 unit tests and 2 golden tests with 0 failures; repository validation, formatting and `git diff --check` also pass. This is local evidence only; the next hosted cross-platform matrix is held until the exact-ten-commit push.
 
 **Desktop input-boundary checkpoint (2026-10-18):** Timeline project reopen, photo-project source capture, brand-font discovery and Gemini transcription now guard resolved paths before existence fallbacks. The desktop transcription regression confirms a dangling source is rejected before upload or caption mutation. Focused desktop/photo/foundation coverage passes 35/35; formatting, repository validation and `git diff --check` pass. This is local evidence pending the next exact-ten-commit hosted revalidation.
