@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Editor spacing checkpoint (2026-10-18):** Shared `ListBoxItem` padding is now compact enough for thumbnail-card media browsing while keeping timeline track rows readable. Release build with warnings-as-errors, the adaptive shell test, formatting and `git diff --check` pass locally. Hosted/native visual review remains pending.
+
 **Media bin validation checkpoint (2026-10-18):** The thumbnail-card media bin correction passes the full local Release gate: 261 unit tests, 2 golden tests, repository documentation/schema validation, formatting and `git diff --check`. The first validator invocation hit the host's missing `python` alias; the same script passed through the available `py` launcher. Hosted Windows UIA and native visual review remain pending.
 
 **Media bin presentation checkpoint (2026-10-18):** The shared media bin now uses real thumbnail cards with kind badges, filename/metadata hierarchy and compact wrapping suitable for an editor asset browser. Selection still drives the existing Color and Timeline models; no import or media-processing behavior changed. Release build is warning-free, the adaptive shell test passes, formatting and `git diff --check` pass locally. Hosted/native visual validation remains pending.
