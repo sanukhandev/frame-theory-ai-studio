@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Populated media-browser test checkpoint (2026-10-18):** The existing synthetic importer now drives a headless production `MainWindow` test through filename filtering, zero-result messaging and the real Clear button click. The full Release suite passes 262 unit tests and 2 golden tests; repository validation, formatting and `git diff --check` also pass. Next executable work remains manual/cross-platform FT-901/FT-902/FT-1002 and external FT-1003/FT-1005/FT-1006 release evidence; no implementation issue is being closed from this indirect UI evidence.
+
 **Hosted media-browser validation checkpoint (2026-10-18):** Run `39134452039` for pushed commit `d63f0f8` is green across documentation/schema, Windows, macOS and Linux restore/build/test, native FFmpeg media smoke, formatting, headless desktop shell, Windows UI Automation, portable archives, installers, packaged relaunch and checksums. The run validates the real media filename filter, no-match state, disabled-until-needed Clear action, primary action hierarchy and prior timeline/media surfaces. Manual native visual/HiDPI/screen-reader acceptance remains open.
 
 **Media search completion checkpoint (2026-10-18):** The asset browser now supports local filename filtering, an accessible no-match state and a disabled-until-needed Clear action. Full local validation passes 261 unit tests, 2 golden tests, repository validation, formatting and `git diff --check`; this is the tenth commit since the last push and is ready for hosted revalidation.
