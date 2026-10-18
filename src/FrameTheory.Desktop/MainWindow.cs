@@ -1852,10 +1852,19 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(ruler, "Timeline ruler");
         ToolTip.SetTip(ruler, "Current frame and timeline position.");
         ruler.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.RulerText"));
-        var selectionContext = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var selectionContext = new TextBox
+        {
+            IsReadOnly = true,
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(selectionContext, "Timeline selection context");
         ToolTip.SetTip(selectionContext, "Selected clip, track and playhead context.");
-        selectionContext.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.SelectionContextText"));
+        selectionContext.Bind(TextBox.TextProperty, new Binding("TimelineEditor.SelectionContextText"));
         var selectionInspector = new Border
         {
             MinHeight = 52,

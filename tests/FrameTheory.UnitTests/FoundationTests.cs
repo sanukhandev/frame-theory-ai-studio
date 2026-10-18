@@ -252,6 +252,10 @@ public sealed class FoundationTests
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBlock>().Single(control => AutomationProperties.GetName(control) == "Timeline ruler")));
                 Xunit.Assert.True(window.GetVisualDescendants()
                     .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline selection context")
+                    .IsReadOnly);
+                Xunit.Assert.True(window.GetVisualDescendants()
+                    .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline operation status")
                     .IsReadOnly);
                 var timelineSectionNames = new HashSet<string>(StringComparer.Ordinal)
@@ -309,7 +313,7 @@ public sealed class FoundationTests
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline selection inspector");
                 Xunit.Assert.Contains(
-                    selectionInspector.GetVisualDescendants().OfType<TextBlock>(),
+                    selectionInspector.GetVisualDescendants().OfType<TextBox>(),
                     control => AutomationProperties.GetName(control) == "Timeline selection context");
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
