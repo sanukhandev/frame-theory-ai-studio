@@ -568,7 +568,14 @@ public sealed class MainWindow : Window
 
     private static Control CreatePhotoEditorPanel(PhotoEditorViewModel editor)
     {
-        var preview = new Image { Width = 320, Height = 180, Stretch = Stretch.Uniform };
+        var preview = new Image
+        {
+            Width = 320,
+            Height = 180,
+            Stretch = Stretch.Uniform,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
         AutomationProperties.SetName(preview, "Photo edit preview");
         void RefreshPreview() => preview.Source = CreateBitmap(editor.PreviewPpm);
         editor.PropertyChanged += (_, args) =>
@@ -793,12 +800,13 @@ public sealed class MainWindow : Window
         var photoPreviewCard = new Border
         {
             Padding = new Thickness(12),
-            HorizontalAlignment = HorizontalAlignment.Left,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            MinHeight = 204,
             CornerRadius = new CornerRadius(8),
             Background = Brushes.Black,
             BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
             BorderThickness = new Thickness(1),
-            Child = preview
+            Child = new Grid { Children = { preview } }
         };
         return new Border
         {
@@ -1080,9 +1088,23 @@ public sealed class MainWindow : Window
     private static Control CreateColorInspectorPanel(MainWindowViewModel viewModel)
     {
         var inspector = viewModel.ColorInspector;
-        var beforeImage = new Image { Width = 240, Height = 135, Stretch = Stretch.Uniform };
+        var beforeImage = new Image
+        {
+            Width = 240,
+            Height = 135,
+            Stretch = Stretch.Uniform,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
         AutomationProperties.SetName(beforeImage, "Color grade before preview");
-        var afterImage = new Image { Width = 240, Height = 135, Stretch = Stretch.Uniform };
+        var afterImage = new Image
+        {
+            Width = 240,
+            Height = 135,
+            Stretch = Stretch.Uniform,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
         AutomationProperties.SetName(afterImage, "Color grade after preview");
         void RefreshPreviews()
         {
@@ -1290,7 +1312,14 @@ public sealed class MainWindow : Window
     private static Control CreateTimelinePanel(MainWindowViewModel viewModel)
     {
         var timeline = viewModel.TimelineEditor;
-        var timelinePreview = new Image { Width = 320, Height = 180, Stretch = Stretch.Uniform };
+        var timelinePreview = new Image
+        {
+            Width = 320,
+            Height = 180,
+            Stretch = Stretch.Uniform,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
         AutomationProperties.SetName(timelinePreview, "Timeline current frame preview");
         var timelinePreviewStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(timelinePreviewStatus, "Timeline preview status");
