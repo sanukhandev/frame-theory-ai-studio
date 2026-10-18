@@ -15,6 +15,7 @@ REQUIRED = [
     "docs/TEST_STRATEGY.md", "docs/CODEX_MASTER_PROMPT.md",
     "docs/IMPLEMENTATION_STATUS.md", "docs/RELEASE_AND_CI.md",
     "docs/DEPENDENCIES_AND_LICENSES.md", "docs/GEMINI_PROVIDER.md",
+    "docs/adr/0008-caption-transcription-engine.md",
     "schemas/ai-edit-plan.v1.schema.json"
 ]
 
@@ -33,6 +34,10 @@ def run() -> int:
         assert term.lower() in agent.lower(), f"Missing instruction: {term}"
     ci = (ROOT/".github/workflows/ci.yml").read_text(encoding="utf-8")
     assert "detach_dmg()" in ci and "for attempt in 1 2 3 4 5" in ci, "macOS DMG smoke must retry detach cleanup"
+    solution = (ROOT/"FrameTheory.sln").read_text(encoding="utf-8")
+    assert "FrameTheory.LocalWhisperSmoke" in solution, "Local Whisper acceptance smoke must remain in the solution"
+    development = (ROOT/"docs/DEVELOPMENT.md").read_text(encoding="utf-8")
+    assert "FrameTheory.LocalWhisperSmoke" in development, "Local Whisper acceptance command must remain documented"
     asset = ROOT / "assets/brand/frame-theory-original.png"
     assert asset.is_file() and not asset.is_symlink(), "Approved Frame Theory logo asset must be a regular file"
     assert hashlib.sha256(asset.read_bytes()).hexdigest().upper() == "0BD29D37FBCC4C753B8870A65E3A02E23460C1A5C305E53E6CD2D9D2F151F388", "Approved Frame Theory logo checksum changed"
