@@ -9,8 +9,7 @@ public static class LocalPathSecurity
         while (!string.IsNullOrWhiteSpace(current))
         {
             var normalizedCurrent = Path.TrimEndingDirectorySeparator(current);
-            if (!IsMacOsSystemAlias(normalizedCurrent) && TryGetAttributes(current, out var attributes) &&
-                (attributes & FileAttributes.ReparsePoint) != 0)
+            if (!IsMacOsSystemAlias(normalizedCurrent) && IsReparsePointOrLink(current))
             {
                 return true;
             }
@@ -25,6 +24,35 @@ public static class LocalPathSecurity
         }
 
         return false;
+    }
+
+    private static bool IsReparsePointOrLink(string path)
+    {
+        if (TryGetAttributes(path, out var attributes) && (attributes & FileAttributes.ReparsePoint) != 0)
+        {
+            return true;
+        }
+
+        try
+        {
+            return new FileInfo(path).LinkTarget is not null || new DirectoryInfo(path).LinkTarget is not null;
+        }
+        catch (FileNotFoundException)
+        {
+            return false;
+        }
+        catch (DirectoryNotFoundException)
+        {
+            return false;
+        }
+        catch (IOException)
+        {
+            return true;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return true;
+        }
     }
 
     private static bool TryGetAttributes(string path, out FileAttributes attributes)
