@@ -68,6 +68,7 @@ public sealed class FfmpegPreviewProxyService
             throw new FileNotFoundException("The preview source was not found.", sourcePath);
         }
 
+        var sourceInfo = new FileInfo(sourcePath);
         Directory.CreateDirectory(_cacheDirectory);
         if (LocalPathSecurity.ContainsReparsePoint(_cacheDirectory))
         {
@@ -75,7 +76,7 @@ public sealed class FfmpegPreviewProxyService
         }
 
         var cacheKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(
-            $"{source.AbsoluteUri}\n{sourceFingerprint.Trim()}\n{maximumWidth}x{maximumHeight}\npreview-proxy-v1")));
+            $"{source.AbsoluteUri}\n{sourceFingerprint.Trim()}\nsize={sourceInfo.Length}\nlast-write={sourceInfo.LastWriteTimeUtc.Ticks}\n{maximumWidth}x{maximumHeight}\npreview-proxy-v1")));
         var outputPath = Path.Combine(_cacheDirectory, $"{cacheKey}.mp4");
 
         await _gate.WaitAsync(cancellationToken);

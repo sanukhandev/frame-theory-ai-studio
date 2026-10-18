@@ -54,6 +54,32 @@ public sealed class PreviewProxyTests
     }
 
     [Xunit.Fact]
+    public async Task SourceReplacementDoesNotReuseOldProxyForSameFingerprint()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-proxy-change-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            await File.WriteAllTextAsync(sourcePath, "source-v1");
+            var runner = new StubProcessRunner();
+            var service = new FfmpegPreviewProxyService(runner, Path.Combine(directory.FullName, "cache"));
+
+            var first = await service.CreateAsync(new Uri(sourcePath), "stable-id", 8, 8, CancellationToken.None);
+            await File.WriteAllTextAsync(sourcePath, "source-v2-with-a-different-length");
+            var second = await service.CreateAsync(new Uri(sourcePath), "stable-id", 8, 8, CancellationToken.None);
+
+            Xunit.Assert.False(first.Reused);
+            Xunit.Assert.False(second.Reused);
+            Xunit.Assert.NotEqual(first.OutputPath, second.OutputPath);
+            Xunit.Assert.Equal(2, runner.InvocationCount);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task RejectsRemoteSourcesAndPreCanceledWork()
     {
         var service = new FfmpegPreviewProxyService(new StubProcessRunner(), Path.GetTempPath());

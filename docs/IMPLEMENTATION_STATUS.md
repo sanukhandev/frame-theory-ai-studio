@@ -24,6 +24,8 @@
 
 **Preview cache invalidation checkpoint (2026-10-19):** Decoded frame cache keys now include source file size and last-write time, so replacing media at the same path invalidates stale preview pixels without hashing the source on every seek. Focused decoder coverage includes the replacement regression; full release validation is required before the next 50-commit push.
 
+**Proxy cache invalidation checkpoint (2026-10-19):** Optional disk-proxy cache keys now include source file size and last-write time in addition to the caller identity, so same-path source replacement cannot reuse an old proxy. Focused proxy coverage includes the replacement regression; full release validation is required before the next 50-commit push.
+
 **Core boundary hardening checkpoint (2026-10-19):** `GeminiClientOptions` now honors its optional timeout/retry-delay parameters with bounded two-minute/one-second defaults, and `MediaSourceMetadata` rejects negative durations. Focused Gemini coverage passes 12/12 and focused Foundation coverage passes 25/25; the next full Release gate remains required before the next 50-commit push.
 
 **Export queue integrity checkpoint (2026-10-19):** Export job cancellation now preserves terminal success/failure state under repeated or late cancellation, with synchronized state and completion transitions. The full local Release gate passes 310 unit tests and 2 golden tests, a warning-free build, format verification, repository validation and `git diff --check`; this evidence remains local until the exact 50-commit push boundary.
