@@ -1684,6 +1684,8 @@ public sealed class DesktopServices
     public MainWindowViewModel CreateMainWindowViewModel()
     {
         var processRunner = new FfmpegProcessRunner();
+        var ffmpegExecutable = FfmpegExecutableLocator.Resolve("ffmpeg");
+        var ffprobeExecutable = FfmpegExecutableLocator.Resolve("ffprobe");
         var decoder = new FfmpegFrameDecoder(processRunner);
         var importer = new FfmpegMediaImporter(
             new FfprobeMediaProbe(processRunner),
@@ -1697,7 +1699,7 @@ public sealed class DesktopServices
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "FrameTheoryStudio", "preview-cache"));
         return new(
             new WorkspaceCatalog(),
-            new FrameTheory.Platform.SystemCapabilityDetector(),
+            new FrameTheory.Platform.SystemCapabilityDetector(ffmpegExecutable, ffprobeExecutable),
             importer,
             new PhotoRecoveryViewModel(new ProjectRecoveryService(repository), repository),
             new PhotoEditorViewModel(new PhotoImporter(probe, decoder), new PhotoExporter(processRunner, probe), exportQueue, repository),
