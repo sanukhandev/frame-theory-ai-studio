@@ -43,7 +43,7 @@ public sealed class GeminiReferenceAnalysisRequest
             throw new ArgumentException("At least one bounded visual PPM sample is required.", parameterName);
         }
 
-        return visual;
+        return Array.AsReadOnly(visual);
     }
 }
 

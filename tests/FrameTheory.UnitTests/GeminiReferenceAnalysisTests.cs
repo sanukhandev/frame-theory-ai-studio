@@ -52,6 +52,22 @@ public sealed class GeminiReferenceAnalysisTests
     }
 
     [Xunit.Fact]
+    public void ReferenceRequestSnapshotsSelectedSamples()
+    {
+        var source = new List<LocalAnalysisSample> { Sample() };
+        var reference = new List<LocalAnalysisSample> { Sample() };
+        var request = new GeminiReferenceAnalysisRequest(source, reference, uploadConsent: true);
+
+        source.Clear();
+        reference.Clear();
+
+        Xunit.Assert.Single(request.SourceSamples);
+        Xunit.Assert.Single(request.ReferenceSamples);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<LocalAnalysisSample>>(request.SourceSamples).IsReadOnly);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<LocalAnalysisSample>>(request.ReferenceSamples).IsReadOnly);
+    }
+
+    [Xunit.Fact]
     public async Task ReferenceAnalysisUploadsOnlyWithConsentAndReturnsEditableGrade()
     {
         var requests = new List<HttpRequestMessage>();
