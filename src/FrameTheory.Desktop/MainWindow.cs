@@ -2212,11 +2212,35 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(stopTimeline, "Stop timeline preview");
         ToolTip.SetTip(stopTimeline, "Stop timeline playback and keep the current playhead position.");
         stopTimeline.Click += (_, _) => viewModel.StopTimelinePreview();
+        var playbackState = new TextBlock
+        {
+            Text = "READY",
+            FontSize = 9,
+            FontWeight = FontWeight.SemiBold,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(148, 218, 188))
+        };
+        AutomationProperties.SetName(playbackState, "Timeline playback state");
+        var playbackBadge = new Border
+        {
+            Padding = new Thickness(8, 4),
+            CornerRadius = new CornerRadius(4),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 44, 42)),
+            Child = playbackState
+        };
+        AutomationProperties.SetName(playbackBadge, "Timeline playback state badge");
         void RefreshPlaybackControls()
         {
-            playTimeline.IsEnabled = !viewModel.IsTimelinePreviewPlaying;
+            var isPlaying = viewModel.IsTimelinePreviewPlaying;
+            playTimeline.IsEnabled = !isPlaying;
             stopTimeline.IsEnabled = viewModel.IsTimelinePreviewPlaying;
-            playTimeline.Content = viewModel.IsTimelinePreviewPlaying ? "Playing…" : "Play timeline";
+            playTimeline.Content = isPlaying ? "Playing…" : "Play timeline";
+            playbackState.Text = isPlaying ? "PLAYING" : "READY";
+            playbackState.Foreground = new SolidColorBrush(isPlaying
+                ? Avalonia.Media.Color.FromRgb(255, 177, 189)
+                : Avalonia.Media.Color.FromRgb(148, 218, 188));
+            playbackBadge.Background = new SolidColorBrush(isPlaying
+                ? Avalonia.Media.Color.FromRgb(67, 35, 44)
+                : Avalonia.Media.Color.FromRgb(29, 44, 42));
         }
 
         viewModel.PropertyChanged += (_, args) =>
@@ -3252,17 +3276,27 @@ public sealed class MainWindow : Window
             "Timeline view",
             CreateSectionContent(CreateFlow(snap, new TextBlock { Text = "Zoom" }, zoom, zoomValue)),
             expanded: false);
+        Grid.SetColumn(playbackBadge, 1);
         var previewActions = new StackPanel
         {
             Spacing = 8,
             Children =
             {
-                new TextBlock
+                new Grid
                 {
-                    Text = "Preview",
-                    FontSize = 13,
-                    FontWeight = FontWeight.SemiBold,
-                    Foreground = Brushes.White
+                    ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                    Children =
+                    {
+                        new TextBlock
+                        {
+                            Text = "Preview",
+                            FontSize = 13,
+                            FontWeight = FontWeight.SemiBold,
+                            Foreground = Brushes.White,
+                            VerticalAlignment = VerticalAlignment.Center
+                        },
+                        playbackBadge
+                    }
                 },
                 CreateFlow(previewCurrentFrame, playTimeline, stopTimeline),
                 usePreviewProxy,

@@ -388,6 +388,12 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Play timeline preview");
                 Xunit.Assert.False(playTimeline.IsEnabled);
                 Xunit.Assert.Equal("Play timeline", playTimeline.Content);
+                Xunit.Assert.Equal(
+                    "READY",
+                    window.GetVisualDescendants()
+                        .OfType<TextBlock>()
+                        .Single(control => AutomationProperties.GetName(control) == "Timeline playback state")
+                        .Text);
                 Xunit.Assert.False(window.GetVisualDescendants()
                     .OfType<Button>()
                     .Single(control => AutomationProperties.GetName(control) == "Stop timeline preview")
