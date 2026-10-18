@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Media search checkpoint (2026-10-18):** The media browser now has a real local filename filter that refreshes when imports or reopened projects change the source collection. The shell test covers the search control's layout, tooltip and automation contract; the full local gate passes 261 unit tests, 2 golden tests, repository validation, formatting and `git diff --check`. Hosted revalidation is pending the next exact-ten-commit push.
+
 **Primary action hierarchy checkpoint (2026-10-18):** Real import, timeline playback, photo export, color/reference grading, Gemini analysis/approval and video export actions now use the shared accent primary-button treatment. The shell test verifies the class in each selected workspace; the full local gate passes 261 unit tests, 2 golden tests, repository validation, formatting and `git diff --check`. Hosted revalidation is pending the next exact-ten-commit push.
 
 **Hosted editor surface validation checkpoint (2026-10-18):** Run `39133151567` for pushed commit `4ff8410` is green across documentation/schema, Windows, macOS and Linux restore/build/test, native FFmpeg media smoke, formatting, headless desktop shell, Windows UI Automation, portable archives, Windows installer, macOS DMG, Linux DEB, packaged relaunch and checksums. The batch verifies the thumbnail-card media browser, compact list spacing, structured timeline lanes and live status UIA path. Manual native visual/HiDPI/screen-reader acceptance remains open.
