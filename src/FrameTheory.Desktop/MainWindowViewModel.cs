@@ -795,9 +795,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 proxyDescription = proxy.Reused ? " using cached preview proxy" : " using preview proxy";
             }
 
-            TimelinePreviewStatusText = $"Decoding frame {sourceFrame}{proxyDescription}...";
+            var usesTimelineCompositor = _timelinePreviewRenderer is not null && !UseTimelinePreviewProxy;
+            TimelinePreviewStatusText = usesTimelineCompositor
+                ? $"Rendering timeline frame {TimelineEditor.CurrentFrame} with compositor..."
+                : $"Decoding frame {sourceFrame}{proxyDescription}...";
             var decodeStarted = Stopwatch.GetTimestamp();
-            TimelinePreviewPpm = _timelinePreviewRenderer is not null && !UseTimelinePreviewProxy
+            TimelinePreviewPpm = usesTimelineCompositor
                 ? await _timelinePreviewRenderer.RenderFrameAsync(
                     TimelineEditor.BuildRenderPlan(_videoWidth, _videoHeight, _mediaSources),
                     TimelineEditor.CurrentFrame,
@@ -808,7 +811,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                     sourceFrame,
                     cancellationToken);
             RecordTimelinePreviewPerformance(Stopwatch.GetElapsedTime(decodeStarted).TotalMilliseconds);
-            var modeDescription = _timelinePreviewRenderer is not null && !UseTimelinePreviewProxy
+            var modeDescription = usesTimelineCompositor
                 ? " using timeline compositor"
                 : proxyDescription;
             TimelinePreviewStatusText = $"Previewed frame {sourceFrame} from {Path.GetFileName(source.LocalPath)}{modeDescription}.";
