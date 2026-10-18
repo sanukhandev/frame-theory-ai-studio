@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Shared ancestor regression checkpoint (2026-10-18):** Foundation coverage now verifies that a future file beneath a linked directory is rejected by `LocalPathSecurity`, covering the non-existent destination case used by atomic stores. Focused Foundation coverage passes 18/18; formatting and `git diff --check` pass.
+
 **Shared-store guard checkpoint (2026-10-18):** Cache-index, AI-recipe, color-preset and workspace-state stores now use the shared `LocalPathSecurity.ContainsReparsePoint` walk, including existing files and parent ancestors, instead of independent final-entry checks. Focused recovery/recipe/color/foundation coverage passes 29/29; formatting, repository validation and `git diff --check` pass. This is local evidence pending the next exact-ten-commit push and hosted revalidation.
 
 **Current hardening batch checkpoint (2026-10-18):** Full local Release validation passes 235 unit tests and 2 golden tests with 0 failures; repository validation, formatting and `git diff --check` also pass. Hosted run `39116168651` passed the documentation/schema, dependency, Windows/macOS/Linux build/test, native-media, packaging and headless desktop-shell matrix for the pushed ten-commit storage hardening batch. Manual GUI, legal, signing, clean-host and final-audit gates remain open.

@@ -7,6 +7,7 @@ using Avalonia.Threading;
 using Avalonia.VisualTree;
 using System.Reflection;
 using FrameTheory.Application;
+using FrameTheory.Domain;
 
 namespace FrameTheory.UnitTests;
 
@@ -31,6 +32,34 @@ public sealed class FoundationTests
         var loaded = expected.Select(Assembly.Load).Select(assembly => assembly.GetName().Name).ToArray();
 
         Xunit.Assert.Equal(expected, loaded);
+    }
+
+    [Xunit.Fact]
+    public void LocalPathSecurityRejectsReparsePointAncestors()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-path-security-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-path-security-external-");
+        try
+        {
+            var linkedDirectory = Path.Combine(directory.FullName, "linked");
+            Directory.CreateSymbolicLink(linkedDirectory, externalDirectory.FullName);
+
+            Xunit.Assert.True(LocalPathSecurity.ContainsReparsePoint(Path.Combine(linkedDirectory, "future.json")));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
     }
 
     [Xunit.Fact]
