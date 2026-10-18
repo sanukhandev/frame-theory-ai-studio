@@ -93,6 +93,14 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70)))
             }
         });
+        Styles.Add(new Style(selector => selector.OfType<ComboBox>().Class(":pointerover"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 48, 59))),
+                new Setter(TemplatedControl.BorderBrushProperty, accent)
+            }
+        });
         Styles.Add(new Style(selector => selector.OfType<ComboBox>().Class(":focus"))
         {
             Setters =
@@ -143,6 +151,13 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.ForegroundProperty, foreground),
                 new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(45, 50, 60))),
                 new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(1))
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<ListBoxItem>())
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.PaddingProperty, new Thickness(10, 7))
             }
         });
         Styles.Add(new Style(selector => selector.OfType<ListBoxItem>().Class(":pointerover"))
