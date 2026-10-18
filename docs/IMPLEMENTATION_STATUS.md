@@ -1,6 +1,8 @@
 # Implementation Status — Resume Checkpoint
 
-**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 34 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 36 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+
+**Full Release gate checkpoint (2026-10-19):** The 35-commit local batch passes 271 unit tests and 2 golden tests, builds with 0 warnings/errors, passes `dotnet format --verify-no-changes`, repository validation and `git diff --check`. The validator correctly retains six tracked partial P0 gates; application, native-media, manual and hosted release acceptance remain distinct.
 
 **Audio and caption affordance checkpoint (2026-10-19):** Audio mute, gain, fades, ducking, title animation, SRT import/export, verified transcript import, Gemini transcription consent and local Whisper actions now expose concise side-effect guidance. The focused production-shell test and format/diff checks pass; native and hosted acceptance remain separate.
 
