@@ -191,6 +191,9 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Active workspace status");
                 Xunit.Assert.Equal(viewModel.ActiveWorkspaceStatusText, activeWorkspaceStatus.Text);
+                Xunit.Assert.Equal(
+                    "Live save, export, edit or provider status for the active workspace.",
+                    ToolTip.GetTip(activeWorkspaceStatus));
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(viewModel.ActiveWorkspaceStatusText, activeWorkspaceStatus.Text);
