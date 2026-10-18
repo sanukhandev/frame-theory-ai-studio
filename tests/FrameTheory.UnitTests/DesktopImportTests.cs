@@ -158,6 +158,16 @@ public sealed class DesktopImportTests
 
                 Xunit.Assert.Equal(second.Id?.Value, viewModel.TimelineEditor.SelectedMediaId);
                 Xunit.Assert.Same(second, mediaList.SelectedItem);
+                var selectionContext = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Timeline selection context");
+                Xunit.Assert.Contains("playhead 0", selectionContext.Text, StringComparison.Ordinal);
+                viewModel.TimelineEditor.SeekFrame(30);
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Contains("playhead 30", selectionContext.Text, StringComparison.Ordinal);
+                viewModel.TimelineEditor.Step(5);
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Contains("playhead 35", selectionContext.Text, StringComparison.Ordinal);
                 Xunit.Assert.Contains(
                     "(selected)",
                     Avalonia.Automation.AutomationProperties.GetName(window.GetVisualDescendants()
