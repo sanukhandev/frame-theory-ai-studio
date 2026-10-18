@@ -1845,6 +1845,42 @@ public sealed class MainWindow : Window
             referenceConsent.IsChecked == true,
             CancellationToken.None);
         applyReference.Click += (_, _) => viewModel.ApplyPendingReferenceGrade();
+        var beforePane = new Border
+        {
+            Padding = new Thickness(8),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(6),
+            Child = new StackPanel
+            {
+                Spacing = 4,
+                Children =
+                {
+                    new TextBlock { Text = "BEFORE", FontSize = 10, FontWeight = FontWeight.SemiBold, Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(172, 181, 196)) },
+                    new Grid { Children = { beforeEmptyState, beforeImage } },
+                    beforeSummary
+                }
+            }
+        };
+        var afterPane = new Border
+        {
+            Padding = new Thickness(8),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(6),
+            Child = new StackPanel
+            {
+                Spacing = 4,
+                Children =
+                {
+                    new TextBlock { Text = "AFTER", FontSize = 10, FontWeight = FontWeight.SemiBold, Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(172, 181, 196)) },
+                    new Grid { Children = { afterEmptyState, afterImage } },
+                    afterSummary
+                }
+            }
+        };
         var colorPreviewCard = new Border
         {
             Padding = new Thickness(12),
@@ -1852,9 +1888,7 @@ public sealed class MainWindow : Window
             Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(16, 18, 22)),
             BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
             BorderThickness = new Thickness(1),
-            Child = CreateFlow(
-                new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "BEFORE", FontSize = 10, FontWeight = FontWeight.SemiBold }, new Grid { Children = { beforeEmptyState, beforeImage } }, beforeSummary } },
-                new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "AFTER", FontSize = 10, FontWeight = FontWeight.SemiBold }, new Grid { Children = { afterEmptyState, afterImage } }, afterSummary } })
+            Child = CreateFlow(beforePane, afterPane)
         };
         var referenceSection = CreateInspectorExpander(
             "Reference match",
