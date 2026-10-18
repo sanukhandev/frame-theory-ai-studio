@@ -17,7 +17,7 @@ pwsh ./scripts/package.ps1 -RuntimeIdentifier win-x64 -OutputDirectory artifacts
 sh ./scripts/package.sh linux-x64 artifacts/package true
 ```
 
-The output is a validation publish, not an installer. It must be tested on the matching host before distribution.
+The output is a validation publish, not an installer. Windows installer packaging is currently x64-only (`win-x64`); it must be tested on the matching host before distribution.
 
 CI writes `SHA256SUMS.txt` for the complete validation artifact set and verifies every listed file before upload with `pwsh ./scripts/verify_package.ps1`. The verifier rejects malformed, duplicate, escaping, missing or modified entries.
 
