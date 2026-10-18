@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Primary action hierarchy checkpoint (2026-10-18):** Real import, timeline playback, photo export, color/reference grading, Gemini analysis/approval and video export actions now use the shared accent primary-button treatment. The shell test verifies the class in each selected workspace; the full local gate passes 261 unit tests, 2 golden tests, repository validation, formatting and `git diff --check`. Hosted revalidation is pending the next exact-ten-commit push.
+
 **Hosted editor surface validation checkpoint (2026-10-18):** Run `39133151567` for pushed commit `4ff8410` is green across documentation/schema, Windows, macOS and Linux restore/build/test, native FFmpeg media smoke, formatting, headless desktop shell, Windows UI Automation, portable archives, Windows installer, macOS DMG, Linux DEB, packaged relaunch and checksums. The batch verifies the thumbnail-card media browser, compact list spacing, structured timeline lanes and live status UIA path. Manual native visual/HiDPI/screen-reader acceptance remains open.
 
 **Editor surface regression checkpoint (2026-10-18):** The headless shell contract now guards the thumbnail-card media bin's wrapping template and height plus the structured timeline lane surface. The focused adaptive shell test passes, formatting and `git diff --check` pass; this completes the current ten-commit local UI batch and requires the mandated hosted push before citing cross-platform evidence.
