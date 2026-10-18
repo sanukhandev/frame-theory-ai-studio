@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Hosted compact-shell validation checkpoint (2026-10-18):** Quality Gates run `39155435600` for pushed commit `3208e9d` passed documentation/schema validation plus Windows, macOS and Linux restore/build/test, native FFmpeg smoke, formatting, headless shell, Windows UI automation, portable archive, installers/DMG/DEB, packaged relaunch and checksums. It validates the responsive media rail, compact workspace frame/footer, offline mode metadata, accessible action discovery and social-export hierarchy. Manual native visual, 1280x800/HiDPI and screen-reader acceptance remains open; no partial GitHub task is closed from automated evidence alone.
+
 **Responsive width-lifecycle checkpoint (2026-10-18):** The media rail now uses the attached top-level window width when available, with a measured-layout fallback, preventing an early startup pass from applying the compact width to the standard shell. Foundation coverage remains green at 960px and 1280px.
 
 **Responsive workspace-frame checkpoint (2026-10-18):** Each editor workspace now reduces outer margin and padding below the 1120px window breakpoint, preserving the dense media/inspector composition at the 960px minimum while retaining the spacious standard shell. Foundation coverage verifies standard and compact frame geometry across the production workspaces; native visual and HiDPI acceptance remains open.
