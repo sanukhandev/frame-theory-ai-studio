@@ -543,6 +543,9 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Enter a contained replacement path relative to the current project folder.",
                     ToolTip.GetTip(timelineReplacementPath));
+                Xunit.Assert.Equal(
+                    "Validate and relink the selected media within the current project folder.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Relink selected timeline media")));
                 var rulerPlayhead = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline ruler playhead");

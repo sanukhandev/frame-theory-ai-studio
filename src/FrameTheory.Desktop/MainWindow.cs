@@ -3978,6 +3978,7 @@ public sealed class MainWindow : Window
         });
         var relinkTimelineMedia = new Button { Content = "Relink selected timeline media" };
         AutomationProperties.SetName(relinkTimelineMedia, "Relink selected timeline media");
+        ToolTip.SetTip(relinkTimelineMedia, "Validate and relink the selected media within the current project folder.");
         relinkTimelineMedia.Click += async (_, _) => await viewModel.RelinkSelectedTimelineMediaAsync(timelineReplacementPath.Text ?? string.Empty, CancellationToken.None);
         var projectStatus = new TextBox
         {
