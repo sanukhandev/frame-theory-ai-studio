@@ -45,6 +45,8 @@ CI also creates `frame-theory-<platform>-portable.zip` from the published deskto
 
 The subsequent native-bundle run `39099250089` reached successful macOS/Linux package validation and proved the Windows bundled importer could read video and audio, but failed on a multiline PowerShell assertion. Run `39099847174` passed the corrected assertion and support-file package checks on all three OS jobs; legal, signing, clean-host and production redistribution gates remain open.
 
+The next validation batch runs the packaged media importer with an empty `PATH` on each OS while explicitly selecting the adjacent bundle. This is runtime-independence evidence, not production clean-host or redistribution approval.
+
 ## Release blockers
 
 - Approved Frame Theory logo bytes are absent from the repository; no replacement asset is allowed.
