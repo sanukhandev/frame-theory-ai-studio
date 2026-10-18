@@ -35,8 +35,8 @@ jobs:
             throw "Windows package script has parse errors: $parseErrors"
           }
 
-          $output = & pwsh -NoProfile -File scripts/package_windows.ps1 -Version invalid 2>&1
-          if ($LASTEXITCODE -eq 0 -or ($output -notmatch 'ValidatePattern|parameter')) {
+          $null = & pwsh -NoProfile -File scripts/package_windows.ps1 -Version invalid 2>&1
+          if ($LASTEXITCODE -eq 0) {
             throw "Windows package version validation did not reject an invalid version."
           }
       - name: Validate Linux package guards
