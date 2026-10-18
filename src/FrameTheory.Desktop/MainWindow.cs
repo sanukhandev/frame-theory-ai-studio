@@ -1253,10 +1253,30 @@ public sealed class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(afterImage, "Color grade after preview");
+        var beforeEmptyState = new TextBlock
+        {
+            Text = "Import media to compare",
+            FontSize = 12,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        AutomationProperties.SetName(beforeEmptyState, "Color before preview empty state");
+        var afterEmptyState = new TextBlock
+        {
+            Text = "Import media to compare",
+            FontSize = 12,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        AutomationProperties.SetName(afterEmptyState, "Color after preview empty state");
         void RefreshPreviews()
         {
             beforeImage.Source = CreateBitmap(inspector.BeforePreviewPpm);
             afterImage.Source = CreateBitmap(inspector.AfterPreviewPpm);
+            beforeEmptyState.IsVisible = inspector.BeforePreviewPpm is null;
+            afterEmptyState.IsVisible = inspector.AfterPreviewPpm is null;
         }
 
         inspector.PropertyChanged += (_, _) => RefreshPreviews();
@@ -1435,8 +1455,8 @@ public sealed class MainWindow : Window
             BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
             BorderThickness = new Thickness(1),
             Child = CreateFlow(
-                new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "BEFORE", FontSize = 10, FontWeight = FontWeight.SemiBold }, beforeImage, beforeSummary } },
-                new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "AFTER", FontSize = 10, FontWeight = FontWeight.SemiBold }, afterImage, afterSummary } })
+                new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "BEFORE", FontSize = 10, FontWeight = FontWeight.SemiBold }, new Grid { Children = { beforeEmptyState, beforeImage } }, beforeSummary } },
+                new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "AFTER", FontSize = 10, FontWeight = FontWeight.SemiBold }, new Grid { Children = { afterEmptyState, afterImage } }, afterSummary } })
         };
         return new Border
         {
