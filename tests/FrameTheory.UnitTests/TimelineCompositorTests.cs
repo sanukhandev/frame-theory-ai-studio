@@ -216,6 +216,7 @@ public sealed class TimelineCompositorTests
             var graph = new TimelineFilterGraphBuilder().Build(plan);
 
             Xunit.Assert.Equal(2, graph.Inputs.Count);
+            Xunit.Assert.Contains("scale=w='min(iw,4)':h='min(ih,2)':force_original_aspect_ratio=decrease", graph.FilterComplex, StringComparison.Ordinal);
             Xunit.Assert.Contains("colorchannelmixer=aa=0.5,loop=loop=-1:size=1:start=0", graph.FilterComplex, StringComparison.Ordinal);
             Xunit.Assert.Contains("overlay=x=W-w-12:y=H-h-12", graph.FilterComplex, StringComparison.Ordinal);
         }

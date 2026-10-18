@@ -185,7 +185,9 @@ public sealed class TimelineFilterGraphBuilder
         {
             var watermarkLabel = "timeline_watermark";
             var watermarkedLabel = "timeline_watermarked";
-            filters.Add($"[{watermarkInputIndex}:v:0]format=rgba,colorchannelmixer=aa={Format(plan.Watermark.Opacity)},loop=loop=-1:size=1:start=0[{watermarkLabel}]");
+            var watermarkWidth = Format(plan.Width * 0.25);
+            var watermarkHeight = Format(plan.Height * 0.25);
+            filters.Add($"[{watermarkInputIndex}:v:0]format=rgba,scale=w='min(iw,{watermarkWidth})':h='min(ih,{watermarkHeight})':force_original_aspect_ratio=decrease,colorchannelmixer=aa={Format(plan.Watermark.Opacity)},loop=loop=-1:size=1:start=0[{watermarkLabel}]");
             filters.Add($"[{currentBase}][{watermarkLabel}]overlay=x=W-w-{plan.Watermark.Margin}:y=H-h-{plan.Watermark.Margin}:eof_action=pass:shortest=0:format=auto[{watermarkedLabel}]");
             currentBase = watermarkedLabel;
         }
