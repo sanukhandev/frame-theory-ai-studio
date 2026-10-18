@@ -1336,6 +1336,16 @@ public sealed class FoundationTests
                 Xunit.Assert.NotNull(standardFrame);
                 Xunit.Assert.Equal(new Avalonia.PixelSize(1280, 800), standardFrame.PixelSize);
 
+                window.Width = 960;
+                window.Height = 640;
+                Dispatcher.UIThread.RunJobs();
+                AvaloniaHeadlessPlatform.ForceRenderTimerTick(3);
+                using var compactFrame = window.CaptureRenderedFrame();
+                Xunit.Assert.NotNull(compactFrame);
+                Xunit.Assert.Equal(new Avalonia.PixelSize(960, 640), compactFrame.PixelSize);
+
+                window.Width = 1280;
+                window.Height = 800;
                 window.SetRenderScaling(1.5);
                 using var hiDpiFrame = window.CaptureRenderedFrame();
                 Xunit.Assert.NotNull(hiDpiFrame);
