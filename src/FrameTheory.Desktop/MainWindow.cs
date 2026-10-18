@@ -1463,6 +1463,13 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(overlayOpacityValue, "Photo overlay opacity value");
         overlayOpacity.ValueChanged += (_, args) => overlayOpacityValue.Text = $"{args.NewValue:P0}";
+        var overlayOpacityField = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+            ColumnSpacing = 6,
+            Children = { overlayOpacity, overlayOpacityValue }
+        };
+        Grid.SetColumn(overlayOpacityValue, 1);
         var overlayBlend = new ComboBox
         {
             ItemsSource = new[] { "Normal", "Multiply", "Screen" },
@@ -1740,7 +1747,11 @@ public sealed class MainWindow : Window
             expanded: true);
         var photoLayersSection = CreateInspectorExpander(
             "Layers and blend",
-            CreateSectionContent(CreateFlow(importOverlay, clearOverlays, overlayBlend, overlayOpacity, overlayOpacityValue)),
+            CreateSectionContent(CreateFlow(
+                importOverlay,
+                clearOverlays,
+                CreateLabeledField("Blend mode", overlayBlend),
+                CreateLabeledField("Opacity", overlayOpacityField))),
             expanded: false);
         var photoMaskSection = CreateInspectorExpander(
             "Mask and retouch",

@@ -806,6 +806,8 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Choose how the imported overlay blends with the photo.",
                     ToolTip.GetTip(overlayBlend));
+                Xunit.Assert.Contains(photoSections["Layers and blend section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Blend mode");
+                Xunit.Assert.Contains(photoSections["Layers and blend section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Opacity");
                 Xunit.Assert.Equal("100%", window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo overlay opacity value")
