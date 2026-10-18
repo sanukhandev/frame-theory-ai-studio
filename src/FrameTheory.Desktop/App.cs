@@ -175,6 +175,14 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.ForegroundProperty, accent)
             }
         });
+        Styles.Add(new Style(selector => selector.OfType<CheckBox>())
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.ForegroundProperty, foreground),
+                new Setter(TemplatedControl.PaddingProperty, new Thickness(4, 3))
+            }
+        });
     }
 
     public override void OnFrameworkInitializationCompleted()
