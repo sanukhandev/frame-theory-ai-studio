@@ -1,6 +1,8 @@
 # Implementation Status — Resume Checkpoint
 
-**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 41 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 42 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+
+**Video/export affordance checkpoint (2026-10-19):** Local motion analysis, export retry, approved/custom watermark selection, watermark clearing and timeline viewport scrolling now explain their scope and side effects. Focused production-shell coverage and format/diff checks pass; native media and hosted release gates remain separate.
 
 **Full Release gate checkpoint (2026-10-19):** The 40-commit local batch passes 271 unit tests and 2 golden tests, builds with 0 warnings/errors, and passes format verification, repository validation and `git diff --check`. The validator remains correctly blocked by six tracked partial P0 tasks; this is not a V1 completion claim.
 
