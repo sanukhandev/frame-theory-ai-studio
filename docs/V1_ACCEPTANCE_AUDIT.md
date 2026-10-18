@@ -1,9 +1,10 @@
 # V1 Acceptance Audit
 
-Audit checkpoint: 2026-10-18, latest verified green complete matrix run `39116168651`.
+Audit checkpoint: 2026-10-18, latest verified green complete matrix run `39118310628`.
 
 ## Evidence
 
+- Latest hosted path-security revalidation: run `39118310628` for commit `807230f` passed documentation/schema validation, Windows/macOS/Linux restore/build/native-media/format/full-test/headless-shell, publish/archive, installer/DMG/DEB, packaged relaunch and checksum gates. No task is closed from this run because the remaining P0 gates require manual GUI/HiDPI journeys, live-provider evidence, legal/native redistribution approval, signing/notarization, clean-host production recovery or final audit.
 - Current shared-store security increment: cache-index, AI-recipe, color-preset and workspace-state stores use the shared ancestor-aware reparse-point guard; focused recovery/recipe/color/foundation coverage passes 29/29, with formatting, repository validation and diff checks clean. Hosted confirmation remains pending.
 
 - GitHub task visibility: 54 implementation issues are closed, including FT-602 and FT-803, and aggregate E08 is closed; remaining implementation issues are partial, blocked, or future P1/P2 work; other epic issues remain open until their aggregate gates pass.

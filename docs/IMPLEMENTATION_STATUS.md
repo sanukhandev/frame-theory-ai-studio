@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Latest hosted revalidation checkpoint (2026-10-18):** Run `39118310628` for pushed commit `807230f` passed documentation/schema validation plus Windows, macOS and Linux restore, build, native FFmpeg media smoke, formatting, full tests, headless desktop shell, publish/archive, installer/DMG/DEB, packaged relaunch and SHA-256 verification. The run validates the ten-commit path-security batch; manual GUI, live-provider, legal, signing, clean-host and final-audit gates remain open.
+
 **Gemini history path checkpoint (2026-10-18):** Redacted Gemini interaction history now refuses linked log files and parent directories on record/read, preserving the existing best-effort offline failure behavior without following redirected paths. Focused Gemini interaction coverage passes 10/10, repository validation, formatting and `git diff --check` pass. This completes the tenth local commit since `e95f5cb`; push is now due.
 
 **Full local gate checkpoint (2026-10-18):** The current path-security batch passes the full Release solution gate with 244 unit tests and 2 golden tests, 0 failures, repository validation, formatting and `git diff --check`. Native FFmpeg smoke and three-OS packaging remain hosted-only evidence; manual, legal, signing, clean-host and final-audit gates remain open.
