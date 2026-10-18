@@ -20,7 +20,40 @@ REQUIRED = [
     "schemas/ai-edit-plan.v1.schema.json"
 ]
 
+def _p0_tasks(epics: str) -> list[str]:
+    tasks = []
+    p0_section = False
+    for line in epics.splitlines():
+        if line.startswith("## "):
+            p0_section = re.search(r"\[P0(?:,|\])", line) is not None
+        if p0_section:
+            tasks.extend(re.findall(r"\*\*(FT-\d+)\*\*", line))
+    return sorted(set(tasks))
+
+def _audit_p0_status(epics: str, status: str, audit: str) -> list[str]:
+    p0_tasks = _p0_tasks(epics)
+    status_entries = {
+        task: marker
+        for marker, task in re.findall(r"^- \[([ x~])\] (FT-\d+)\b", status, re.MULTILINE)
+    }
+    missing_p0_status = sorted(set(p0_tasks) - status_entries.keys())
+    assert not missing_p0_status, f"P0 tasks missing implementation status: {', '.join(missing_p0_status)}"
+    partial_p0 = sorted(task for task in p0_tasks if status_entries[task] == "~")
+    blocker_section = audit.split("## P0 blockers before V1", 1)[-1]
+    missing_blockers = [task for task in partial_p0 if task not in blocker_section]
+    assert not missing_blockers, f"Partial P0 tasks missing V1 blocker evidence: {', '.join(missing_blockers)}"
+    assert "V1 remains **not complete**" in audit, "Acceptance audit must not claim V1 completion while blockers remain"
+    return partial_p0
+
+def _audit_p0_parser_self_check() -> None:
+    epics = "## E00 [P0]\n- **FT-001**\n## E01 [P0, depends E00]\n- **FT-002**\n## E11 [P1]\n- **FT-1101**"
+    status = "- [~] FT-001\n- [x] FT-002"
+    audit = "## P0 blockers before V1\nFT-001\nV1 remains **not complete**"
+    assert _p0_tasks(epics) == ["FT-001", "FT-002"]
+    assert _audit_p0_status(epics, status, audit) == ["FT-001"]
+
 def run() -> int:
+    _audit_p0_parser_self_check()
     absent = [p for p in REQUIRED if not (ROOT / p).is_file()]
     if absent:
         print("Missing required paths:", *absent, sep="\n- ", file=sys.stderr)
@@ -56,24 +89,7 @@ def run() -> int:
     epics = (ROOT / "docs/EPICS_AND_TASKS.md").read_text(encoding="utf-8")
     status = (ROOT / "docs/IMPLEMENTATION_STATUS.md").read_text(encoding="utf-8")
     audit = (ROOT / "docs/V1_ACCEPTANCE_AUDIT.md").read_text(encoding="utf-8")
-    p0_tasks = []
-    p0_section = False
-    for line in epics.splitlines():
-        if line.startswith("## "):
-            p0_section = re.search(r"\[P0(?:,|\])", line) is not None
-        if p0_section:
-            p0_tasks.extend(re.findall(r"\*\*(FT-\d+)\*\*", line))
-    status_entries = {
-        task: marker
-        for marker, task in re.findall(r"^- \[([ x~])\] (FT-\d+)\b", status, re.MULTILINE)
-    }
-    missing_p0_status = sorted(set(p0_tasks) - status_entries.keys())
-    assert not missing_p0_status, f"P0 tasks missing implementation status: {', '.join(missing_p0_status)}"
-    partial_p0 = sorted(task for task in set(p0_tasks) if status_entries[task] == "~")
-    blocker_section = audit.split("## P0 blockers before V1", 1)[-1]
-    missing_blockers = [task for task in partial_p0 if task not in blocker_section]
-    assert not missing_blockers, f"Partial P0 tasks missing V1 blocker evidence: {', '.join(missing_blockers)}"
-    assert "V1 remains **not complete**" in audit, "Acceptance audit must not claim V1 completion while blockers remain"
+    partial_p0 = _audit_p0_status(epics, status, audit)
     print(f"V1 acceptance audit: BLOCKED by {len(partial_p0)} tracked partial P0 task(s); no unsupported completion claim detected.")
     path_security = (ROOT / "src/FrameTheory.Domain/LocalPathSecurity.cs").read_text(encoding="utf-8")
     assert "ContainsReparsePoint" in path_security, "Shared local path security guard must remain present"
