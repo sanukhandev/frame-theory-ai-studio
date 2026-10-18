@@ -6,6 +6,8 @@
 
 **GitHub epic-closure checkpoint (2026-10-19):** A live audit confirmed every implementation issue under E00-E07 is closed, so completed umbrella epics E00-E07 were closed with the local Release evidence above. GitHub now reports 63 closed issues and 19 open issues. The six partial P0 gates remain `FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005` and `FT-1006`; E11/E12 work and external/manual release evidence remain open. This is not a V1 completion claim.
 
+**Core boundary hardening checkpoint (2026-10-19):** `GeminiClientOptions` now honors its optional timeout/retry-delay parameters with bounded two-minute/one-second defaults, and `MediaSourceMetadata` rejects negative durations. Focused Gemini coverage passes 12/12 and focused Foundation coverage passes 25/25; the next full Release gate remains required before the next 50-commit push.
+
 **Latest hosted 50-commit gate (2026-10-19):** Quality Gates run `39168203239` passed for `742cd38` across documentation/schema validation, Ubuntu, Windows and macOS restore/build/test, native media, headless shell/UI automation, formatting, portable archives, installer/DMG/DEB validation, packaged relaunch and checksums. This confirms the pushed batch; the six tracked partial P0 gates remain open because manual visual/HiDPI/screen-reader, legal redistribution, signing/clean-host and final-audit evidence are still required.
 
 **Post-push integrity Release gate (2026-10-19):** The 16 verified local hardening commits after `742cd38` pass 305 unit tests and 2 golden tests, a warning-free Release build, format verification, repository validation and `git diff --check`. These commits remain local until the next exact 50-commit push boundary; the six tracked partial P0 gates remain open.
