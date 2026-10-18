@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Monitor action-rail checkpoint (2026-10-18):** The Video program monitor now keeps frame preview/playback transport in one row and places the output framing, quick-save and MP4 export controls under a separate `OUTPUT` label. This reduces mixed-action density without changing command wiring; the adaptive-shell contract verifies the live output label and existing export controls. Native visual acceptance remains open.
+
 **Project chrome checkpoint (2026-10-18):** The top editor chrome now exposes a real `Current project title` bound to the timeline project lifecycle. It starts honestly as `Untitled project` and changes only after a successful local save or reopen, keeping the compact CapCut-inspired shell informative without presenting fabricated save state. Focused adaptive-shell coverage includes the title and tooltip; native visual acceptance remains open.
 
 **Compact header checkpoint (2026-10-18):** The production shell now hides the non-essential workspace shortcut legend and tightens header padding below 1120 logical pixels, preventing the minimum 960x640 window from presenting a cramped top bar. The headless adaptive-shell test covers 1280-to-960-to-1280 transitions; focused Release test passes 1/1. Native visual and HiDPI review remains open.

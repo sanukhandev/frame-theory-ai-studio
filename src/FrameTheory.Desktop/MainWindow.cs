@@ -3841,21 +3841,16 @@ public sealed class MainWindow : Window
                         playbackBadge
                     }
                 },
-                CreateFlow(
-                    previewCurrentFrame,
-                    playTimeline,
-                    stopTimeline,
-                    new TextBlock
-                    {
-                        Text = "OUTPUT",
-                        FontSize = 10,
-                        FontWeight = FontWeight.SemiBold,
-                        Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190)),
-                        VerticalAlignment = VerticalAlignment.Center
-                    },
-                    aspectRatio,
-                    quickSaveProject,
-                    quickExport),
+                CreateFlow(previewCurrentFrame, playTimeline, stopTimeline),
+                new TextBlock
+                {
+                    Text = "OUTPUT",
+                    Margin = new Thickness(0, 4, 0, 0),
+                    FontSize = 10,
+                    FontWeight = FontWeight.SemiBold,
+                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+                },
+                CreateFlow(aspectRatio, quickSaveProject, quickExport),
                 quickActionStatus,
                 usePreviewProxy,
                 analyzeMotion,

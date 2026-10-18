@@ -481,6 +481,13 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Play timeline preview");
                 Xunit.Assert.False(playTimeline.IsEnabled);
                 Xunit.Assert.Equal("Play timeline", playTimeline.Content);
+                var outputLabel = window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => control.Text == "OUTPUT");
+                Xunit.Assert.Equal(10, outputLabel.FontSize);
+                Xunit.Assert.Equal(
+                    Avalonia.Media.Color.FromRgb(126, 143, 190),
+                    Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(outputLabel.Foreground).Color);
                 Xunit.Assert.Equal(
                     "READY",
                     window.GetVisualDescendants()
