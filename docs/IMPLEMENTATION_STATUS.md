@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Native status smoke checkpoint (2026-10-18):** Windows UI Automation now requires the live `Active workspace status` region in addition to the existing Video/Photo/Color/AI control checks. PowerShell parsing, repository validation and diff checks pass locally. This is the tenth commit since the last push and is ready for hosted validation.
+
 **Status affordance regression checkpoint (2026-10-18):** The shell test now verifies the live workspace status tooltip and its text after switching Video, Photo, Color and AI tabs. Focused and full local gates pass: 261 unit tests, 2 golden tests, warning-free Release build, formatting and `git diff --check`.
 
 **Live workspace status checkpoint (2026-10-18):** The top of every workspace now exposes a real bound status line for project/export state, photo edits, color grading, or AI proposal review. It updates when the active workspace changes and when the underlying view model reports a new state; it is automation-named and ellipsis-safe for compact layouts. Release build, 261 unit tests, 2 golden tests, formatting and `git diff --check` pass locally; hosted validation is pending for the next exact-ten-commit push.
