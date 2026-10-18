@@ -3247,9 +3247,21 @@ public sealed class MainWindow : Window
         var relinkTimelineMedia = new Button { Content = "Relink selected timeline media" };
         AutomationProperties.SetName(relinkTimelineMedia, "Relink selected timeline media");
         relinkTimelineMedia.Click += async (_, _) => await viewModel.RelinkSelectedTimelineMediaAsync(timelineReplacementPath.Text ?? string.Empty, CancellationToken.None);
-        var projectStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var projectStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(projectStatus, "Timeline project status");
-        projectStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineProjectStatusText)));
+        ToolTip.SetTip(projectStatus, "Current local timeline project save status.");
+        projectStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineProjectStatusText)));
         var aspectRatio = new ComboBox
         {
             ItemsSource = new[] { "16:9 landscape", "1:1 square", "9:16 portrait" },
@@ -3306,9 +3318,21 @@ public sealed class MainWindow : Window
             }
         };
         RefreshExportActionAvailability();
-        var exportStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var exportStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(exportStatus, "Timeline export status");
-        exportStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
+        ToolTip.SetTip(exportStatus, "Current local timeline video export status.");
+        exportStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
         var quickExportStatus = new TextBox
         {
             IsReadOnly = true,

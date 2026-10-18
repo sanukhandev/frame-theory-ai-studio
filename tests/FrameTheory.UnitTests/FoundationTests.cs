@@ -452,6 +452,16 @@ public sealed class FoundationTests
                         .OfType<TextBox>()
                         .Single(control => AutomationProperties.GetName(control) == "Quick export status")
                         .Text);
+                var projectStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline project status");
+                Xunit.Assert.Equal(viewModel.TimelineProjectStatusText, projectStatus.Text);
+                Xunit.Assert.Equal("Current local timeline project save status.", ToolTip.GetTip(projectStatus));
+                var exportStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline export status");
+                Xunit.Assert.Equal(viewModel.TimelineExportStatusText, exportStatus.Text);
+                Xunit.Assert.Equal("Current local timeline video export status.", ToolTip.GetTip(exportStatus));
                 Xunit.Assert.Equal(
                     viewModel.TimelineProjectStatusText,
                     window.GetVisualDescendants()
