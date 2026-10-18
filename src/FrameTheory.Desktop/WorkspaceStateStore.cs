@@ -30,6 +30,11 @@ public sealed class FileWorkspaceStateStore : IWorkspaceStateStore
                 return 0;
             }
 
+            if (IsReparsePoint(_path))
+            {
+                return 0;
+            }
+
             var state = JsonSerializer.Deserialize<WorkspaceState>(File.ReadAllText(_path));
             return state?.SelectedWorkspaceIndex ?? 0;
         }
@@ -58,6 +63,11 @@ public sealed class FileWorkspaceStateStore : IWorkspaceStateStore
         try
         {
             Directory.CreateDirectory(directory);
+            if (IsReparsePoint(directory) || (File.Exists(_path) && IsReparsePoint(_path)))
+            {
+                return;
+            }
+
             var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(_path)}.{Guid.NewGuid():N}.tmp");
             try
             {
@@ -106,6 +116,9 @@ public sealed class FileWorkspaceStateStore : IWorkspaceStateStore
         {
         }
     }
+
+    private static bool IsReparsePoint(string path) =>
+        (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
 
     private sealed record WorkspaceState(int SelectedWorkspaceIndex);
 }

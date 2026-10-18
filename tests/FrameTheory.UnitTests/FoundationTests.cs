@@ -225,6 +225,39 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public void FileWorkspaceStateStoreIgnoresReparsePointStateFiles()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-workspace-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-workspace-external-");
+        try
+        {
+            var externalPath = Path.Combine(externalDirectory.FullName, "state.json");
+            File.WriteAllText(externalPath, "{\"SelectedWorkspaceIndex\":3}");
+            var linkedPath = Path.Combine(directory.FullName, "state.json");
+            File.CreateSymbolicLink(linkedPath, externalPath);
+            var store = new FrameTheory.Desktop.FileWorkspaceStateStore(linkedPath);
+
+            Xunit.Assert.Equal(0, store.LoadSelectedWorkspaceIndex());
+            store.SaveSelectedWorkspaceIndex(2);
+            Xunit.Assert.Equal("{\"SelectedWorkspaceIndex\":3}", File.ReadAllText(externalPath));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public void CapabilitySummaryProvidesActionableMediaDependencyGuidance()
     {
         var report = new CapabilityReport("Test", "x64",

@@ -20,6 +20,8 @@
 
 **Color preset path boundary checkpoint (2026-10-18):** `JsonColorPresetStore` now rejects reparse-point preset directories and existing linked preset files before atomic save or load. Focused color-preset coverage passes 3/3, preserving the offline shared color pipeline without following redirected style-library paths.
 
+**Workspace state path boundary checkpoint (2026-10-18):** The local workspace-selection store now ignores reparse-point state files and directories on both load and atomic save, preserving the existing safe-default startup behavior without following redirected user settings. Focused Foundation coverage passes 17/17; this is local evidence pending hosted revalidation.
+
 **Media import boundary checkpoint (2026-10-18):** Waveform extraction now independently rejects reparse-point media paths before invoking FFmpeg, even when a composed or test probe adapter does not enforce the same rule, and best-effort cleanup cannot mask the original import failure. Focused media-import coverage passes 4/4, the Release build is warning-free through the focused compile, formatting and diff checks pass, and original source bytes remain untouched.
 
 **Package traversal checkpoint (2026-10-18):** `scripts/verify_package.ps1` now rejects a reparse-point package root or directory entry before recursive discovery, then hashes only entries from the fail-closed walk. Native bundle generation and verification also reject linked manifests, linked entries and unexpected subdirectories. PowerShell parsing, a real one-file package checksum smoke, repository validation and `git diff --check` pass; the hosted package-manifest gate now includes a real directory-symlink rejection regression, pending the next hosted run.
