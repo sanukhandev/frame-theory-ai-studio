@@ -1,6 +1,8 @@
 # Implementation Status — Resume Checkpoint
 
-**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 46 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 48 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+
+**Final local Release gate checkpoint (2026-10-19):** The 47-commit local implementation batch passes 271 unit tests and 2 golden tests, builds with 0 warnings/errors, and passes format verification, repository validation and `git diff --check`. Hosted revalidation is intentionally deferred to the owner-requested 50-commit push boundary.
 
 **Workspace navigation affordance checkpoint (2026-10-19):** The adaptive shell's Ctrl+1 through Ctrl+4 workspace shortcut hint now has an explicit accessible tooltip explaining each destination. Focused production-shell coverage and format/diff checks pass; native keyboard acceptance remains unverified.
 
