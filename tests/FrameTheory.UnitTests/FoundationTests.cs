@@ -233,7 +233,7 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Timeline position status");
                 Xunit.Assert.Equal(viewModel.TimelineEditor.CurrentTimecode, positionStatus.Text);
                 var activeWorkspaceStatus = window.GetVisualDescendants()
-                    .OfType<TextBox>()
+                    .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Active workspace status");
                 Xunit.Assert.Equal(viewModel.ActiveWorkspaceStatusText, activeWorkspaceStatus.Text);
                 Xunit.Assert.Equal(
