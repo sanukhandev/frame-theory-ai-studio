@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Workspace-rail checkpoint (2026-10-18):** The left workspace rail now has deterministic graphite, hover and selected states with a blue active edge and readable focus contrast, keeping Video/Photo/Color/AI navigation visually legible at compact widths. The rebuilt Foundation shell test, Release test-project build, formatting and `git diff --check` pass; native visual/HiDPI inspection remains unverified.
+
 **Editor interaction-state checkpoint (2026-10-18):** Shared Avalonia styles now give buttons deterministic graphite hover/pressed/disabled states and give text/combo inputs a blue focus border, preserving the dark Frame Theory palette across host themes. The rebuilt Foundation shell test, Release test-project build, formatting and `git diff --check` pass; native pointer/keyboard visual review remains unverified.
 
 **Deterministic dark-theme checkpoint (2026-10-18):** The Avalonia Fluent theme is now explicitly requested as dark before the shared editor styles are installed, preventing host OS theme defaults from producing inconsistent light controls. The rebuilt Foundation shell test passes, the Release test-project build is warning-free, and formatting/diff checks are green. Native visual inspection remains unverified.
