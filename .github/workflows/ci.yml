@@ -343,7 +343,7 @@ jobs:
           }
           $env:FRAME_THEORY_FFMPEG_DIR = $installDirectory
           $mediaSmoke = dotnet tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4
-          if ($LASTEXITCODE -ne 0 -or -not ($mediaSmoke -match 'kind=Video')) {
+          if ($LASTEXITCODE -ne 0 -or -not ($mediaSmoke -match 'kind=Video') -or -not ($mediaSmoke -match 'has_audio=True')) {
             throw "Windows packaged FFmpeg runtime smoke failed: $mediaSmoke"
           }
           ./scripts/smoke_desktop.ps1 -AssemblyPath (Join-Path $installDirectory "FrameTheory.Desktop.exe") -RequireWindowTitle
