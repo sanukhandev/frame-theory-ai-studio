@@ -4,7 +4,7 @@
 1. **Unit:** pure Domain frame math, clip ranges, undo/redo, schema parse+semantic validation, color transformations, LUT parsing, subtitle timecodes, project migrations.
 2. **Integration:** real ffprobe decode, media composite render, project save/reload, native host and subprocess failure/retry, Gemini mocked HTTP against real deserializer, OS secure-store adapters, and the CI native-media smoke that generates distinct H.264/AAC fixtures then verifies import, extracted audio, repeated exact-frame seeks, two-video/two-audio timeline export, queue retry, approved AI export and Reel export.
 3. **Golden:** synthetic color wedges, known LUTs, moving timecode counters, mixed-rate source video, title/captions/transition composite and expected pixel/frame/audio results.
-4. **End-to-end:** interactive workflows UC-01..UC-06 through the actual desktop UI and exported media; run with network blocked, then user-approved Gemini integration.
+4. **End-to-end:** interactive workflows UC-01..UC-06 through the actual desktop UI and exported media; run with network blocked, then user-approved Gemini integration. The Windows UI smoke launches the real desktop process, verifies 1280x800 bounds, resizes to 960x640, selects all four workspaces, exercises `Ctrl+3`, and checks the reachable controls; HiDPI hardware and non-Windows GUI runs remain separate evidence requirements.
 5. **Release:** dependency/license matrix, package/install/uninstall, keychain, OS/CPU compatibility, code signing where possible, smoke on real hardware.
 
 ## Required golden fixtures (generated locally, licensed)
