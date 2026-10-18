@@ -1523,11 +1523,10 @@ public sealed class MainWindow : Window
                 var clips = new WrapPanel { Orientation = Orientation.Horizontal };
                 foreach (var clip in item.Clips)
                 {
-                    clips.Children.Add(new Border
+                    var clipButton = new Button
                     {
                         Margin = new Thickness(0, 0, 6, 4),
                         Padding = new Thickness(8, 4),
-                        CornerRadius = new CornerRadius(4),
                         Background = new SolidColorBrush(clip.IsSelected
                             ? Avalonia.Media.Color.FromRgb(49, 67, 111)
                             : Avalonia.Media.Color.FromRgb(36, 41, 49)),
@@ -1535,13 +1534,16 @@ public sealed class MainWindow : Window
                             ? Avalonia.Media.Color.FromRgb(95, 125, 255)
                             : Avalonia.Media.Color.FromRgb(59, 68, 83)),
                         BorderThickness = new Thickness(1),
-                        Child = new TextBlock
+                        Content = new TextBlock
                         {
                             Text = $"{clip.MediaId[..Math.Min(8, clip.MediaId.Length)]}  {clip.StartFrame}–{clip.StartFrame + clip.DurationFrames - 1}",
                             FontSize = 11,
                             Foreground = Brushes.White
                         }
-                    });
+                    };
+                    AutomationProperties.SetName(clipButton, $"Select {item.Kind} clip {clip.MediaId}");
+                    clipButton.Click += (_, _) => timeline.SelectMedia(clip.MediaId, item.Kind);
+                    clips.Children.Add(clipButton);
                 }
 
                 return new StackPanel
