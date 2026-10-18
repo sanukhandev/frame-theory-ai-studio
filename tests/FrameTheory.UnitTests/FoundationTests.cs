@@ -166,6 +166,9 @@ public sealed class FoundationTests
                     .OfType<Control>()
                     .Select(AutomationProperties.GetName)
                     .Where(name => !string.IsNullOrWhiteSpace(name))!);
+                Xunit.Assert.DoesNotContain(window.GetVisualDescendants()
+                    .OfType<Button>(),
+                    button => button.Content is not null && string.IsNullOrWhiteSpace(AutomationProperties.GetName(button)));
 
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();

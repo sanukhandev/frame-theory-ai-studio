@@ -393,8 +393,10 @@ public sealed class MainWindow : Window
         var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
         status.Bind(TextBlock.TextProperty, new Binding("PhotoRecovery.StatusText"));
         var open = new Button { Content = "Open / recover photo project" };
+        AutomationProperties.SetName(open, "Open or recover photo project");
         open.Click += async (_, _) => await viewModel.PhotoRecovery.OpenProjectAsync(CancellationToken.None);
         var relink = new Button { Content = "Relink selected media" };
+        AutomationProperties.SetName(relink, "Relink selected photo media");
         relink.Click += async (_, _) => await viewModel.PhotoRecovery.RelinkSelectedAsync(replacementPath.Text ?? string.Empty, CancellationToken.None);
         return new Border
         {
@@ -437,6 +439,7 @@ public sealed class MainWindow : Window
         var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
         status.Bind(TextBlock.TextProperty, new Binding(nameof(PhotoEditorViewModel.StatusText)));
         var open = new Button { Content = "Open image" };
+        AutomationProperties.SetName(open, "Open photo");
         open.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(open);
@@ -457,6 +460,7 @@ public sealed class MainWindow : Window
             }
         };
         var openProject = new Button { Content = "Open photo project" };
+        AutomationProperties.SetName(openProject, "Open photo project");
         openProject.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(openProject);
@@ -477,6 +481,7 @@ public sealed class MainWindow : Window
             }
         };
         var saveProject = new Button { Content = "Save photo project" };
+        AutomationProperties.SetName(saveProject, "Save photo project");
         saveProject.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(saveProject);
@@ -505,6 +510,7 @@ public sealed class MainWindow : Window
         var overlayBlend = new ComboBox { ItemsSource = new[] { "Normal", "Multiply", "Screen" }, SelectedIndex = 0, Width = 110 };
         AutomationProperties.SetName(overlayBlend, "Photo overlay blend mode");
         var importOverlay = new Button { Content = "Import overlay" };
+        AutomationProperties.SetName(importOverlay, "Import photo overlay");
         importOverlay.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(importOverlay);
@@ -541,6 +547,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(maskRadius, "Photo mask brush radius");
         AutomationProperties.SetName(maskStrength, "Photo mask brush strength");
         var applyMask = new Button { Content = "Mask last overlay" };
+        AutomationProperties.SetName(applyMask, "Mask last photo overlay");
         applyMask.Click += (_, _) =>
         {
             if (int.TryParse(maskX.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var centerX) &&
@@ -566,6 +573,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(retouchOffsetY, "Photo retouch source offset Y");
         AutomationProperties.SetName(retouchStrength, "Photo retouch brush strength");
         var applyRetouch = new Button { Content = "Apply clone retouch" };
+        AutomationProperties.SetName(applyRetouch, "Apply photo clone retouch");
         applyRetouch.Click += (_, _) =>
         {
             if (int.TryParse(retouchX.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var centerX) &&
@@ -609,6 +617,7 @@ public sealed class MainWindow : Window
         var socialPreset = new ComboBox { ItemsSource = new[] { "Original", "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
         AutomationProperties.SetName(socialPreset, "Photo export social dimensions");
         var export = new Button { Content = "Export image" };
+        AutomationProperties.SetName(export, "Export photo image");
         export.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(export);
@@ -690,18 +699,21 @@ public sealed class MainWindow : Window
         var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
         status.Bind(TextBlock.TextProperty, new Binding(nameof(GeminiSettingsViewModel.StatusText)));
         var save = new Button { Content = "Store Gemini key" };
+        AutomationProperties.SetName(save, "Store Gemini key securely");
         save.Click += async (_, _) =>
         {
             await settings.SaveAsync(apiKey.Text ?? string.Empty, CancellationToken.None);
             apiKey.Text = string.Empty;
         };
         var clear = new Button { Content = "Remove Gemini key" };
+        AutomationProperties.SetName(clear, "Remove Gemini key");
         clear.Click += async (_, _) => await settings.ClearAsync(CancellationToken.None);
         var videoFrames = new CheckBox { Content = "Video frames", IsChecked = true };
         var audioWaveform = new CheckBox { Content = "Audio waveform" };
         var photoPreview = new CheckBox { Content = "Photo preview" };
         var uploadConsent = new CheckBox { Content = "I approve uploading this exact sample scope to Gemini" };
         var prepareAnalysis = new Button { Content = "Prepare local analysis samples" };
+        AutomationProperties.SetName(prepareAnalysis, "Prepare local Gemini analysis samples");
         prepareAnalysis.Click += async (_, _) =>
         {
             var scopes = GeminiAnalysisScope.None;
@@ -939,6 +951,7 @@ public sealed class MainWindow : Window
         controls.Children.Add(CreateGradeControl("Temperature", -1, 1, inspector.Temperature, value => inspector.Temperature = value));
         controls.Children.Add(CreateGradeControl("Tint", -1, 1, inspector.Tint, value => inspector.Tint = value));
         var reset = new Button { Content = "Reset grade" };
+        AutomationProperties.SetName(reset, "Reset color grade");
         reset.Click += (_, _) => inspector.ResetGrade();
         controls.Children.Add(reset);
         var presetStore = new JsonColorPresetStore();
@@ -1250,8 +1263,10 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(trim, "Trim selected clip at playhead");
         trim.Click += (_, _) => RunTimelineAction(() => timeline.TrimSelectedEndAt(timeline.CurrentFrame));
         var move = new Button { Content = "Move to playhead" };
+        AutomationProperties.SetName(move, "Move selected clip to playhead");
         move.Click += (_, _) => RunTimelineAction(() => timeline.MoveSelected(timeline.CurrentFrame));
         var rippleDelete = new Button { Content = "Ripple delete" };
+        AutomationProperties.SetName(rippleDelete, "Ripple delete selected clip");
         rippleDelete.Click += (_, _) => RunTimelineAction(timeline.RippleDeleteSelected);
         var fadeIn = new Button { Content = "Fade in preset" };
         fadeIn.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToSelected(TimelineAnimationPreset.FadeIn));
@@ -1297,10 +1312,13 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(clearStabilization, "Clear stabilization");
         clearStabilization.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedStabilization);
         var muteAudio = new Button { Content = "Mute audio" };
+        AutomationProperties.SetName(muteAudio, "Mute selected audio");
         muteAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioSettingsToSelected(0, muted: true));
         var gainAudio = new Button { Content = "Audio +3 dB" };
+        AutomationProperties.SetName(gainAudio, "Increase selected audio by 3 dB");
         gainAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioSettingsToSelected(3, muted: false));
         var fadeAudio = new Button { Content = "Audio fades" };
+        AutomationProperties.SetName(fadeAudio, "Apply selected audio fades");
         fadeAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioSettingsToSelected(0, muted: false, fadeInFrames: 2, fadeOutFrames: 2));
         var duckAudio = new Button { Content = "Duck audio -12 dB" };
         duckAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioDuckingToSelected());
@@ -1495,6 +1513,7 @@ public sealed class MainWindow : Window
             }
         };
         var captionFont = new Button { Content = "Choose caption font" };
+        AutomationProperties.SetName(captionFont, "Choose caption font");
         captionFont.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(captionFont);
@@ -1657,8 +1676,10 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(clearWatermark, "Clear watermark");
         clearWatermark.Click += (_, _) => timeline.ClearWatermark();
         var scrollBack = new Button { Content = "Scroll ◀" };
+        AutomationProperties.SetName(scrollBack, "Scroll timeline backward");
         scrollBack.Click += (_, _) => timeline.ScrollBy(-30);
         var scrollForward = new Button { Content = "Scroll ▶" };
+        AutomationProperties.SetName(scrollForward, "Scroll timeline forward");
         scrollForward.Click += (_, _) => timeline.ScrollBy(30);
         var previewActions = new StackPanel
         {

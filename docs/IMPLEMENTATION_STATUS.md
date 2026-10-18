@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**UI accessibility checkpoint (2026-10-18):** Every visible editor button with an action now has an explicit automation name, including Photo recovery/editor, Color, Gemini settings, timeline editing/audio/caption controls and timeline navigation. The Foundation shell test fails if a content-bearing button is unnamed; Desktop Release build, focused shell test, formatting and `git diff --check` pass. Native visual, keyboard and HiDPI review remains unverified.
+
 **Explicit import control checkpoint (2026-10-18):** Every workspace now exposes a real multi-select `Import media` file-picker action alongside drag/drop, limited to supported local media patterns and routed through the existing path-safe importer. The new control is automation-named and covered by the headless shell test; Desktop Release build, formatting and diff checks pass.
 
 **Desktop drag/drop boundary checkpoint (2026-10-18):** Main-window media import now rejects reparse-point paths before invoking the importer and reports a user-facing failure. The regression proves a redirected file never reaches a custom importer; focused desktop import coverage passes 11/11, repository validation, formatting, diff checks and the Release Desktop build are green.
