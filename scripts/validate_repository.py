@@ -3,6 +3,7 @@
 from __future__ import annotations
 import json
 import hashlib
+import re
 from pathlib import Path
 import sys
 
@@ -52,6 +53,28 @@ def run() -> int:
     assert "FrameTheory.LocalWhisperSmoke" in solution, "Local Whisper acceptance smoke must remain in the solution"
     development = (ROOT/"docs/DEVELOPMENT.md").read_text(encoding="utf-8")
     assert "FrameTheory.LocalWhisperSmoke" in development, "Local Whisper acceptance command must remain documented"
+    epics = (ROOT / "docs/EPICS_AND_TASKS.md").read_text(encoding="utf-8")
+    status = (ROOT / "docs/IMPLEMENTATION_STATUS.md").read_text(encoding="utf-8")
+    audit = (ROOT / "docs/V1_ACCEPTANCE_AUDIT.md").read_text(encoding="utf-8")
+    p0_tasks = []
+    p0_section = False
+    for line in epics.splitlines():
+        if line.startswith("## "):
+            p0_section = re.search(r"\[P0(?:,|\])", line) is not None
+        if p0_section:
+            p0_tasks.extend(re.findall(r"\*\*(FT-\d+)\*\*", line))
+    status_entries = {
+        task: marker
+        for marker, task in re.findall(r"^- \[([ x~])\] (FT-\d+)\b", status, re.MULTILINE)
+    }
+    missing_p0_status = sorted(set(p0_tasks) - status_entries.keys())
+    assert not missing_p0_status, f"P0 tasks missing implementation status: {', '.join(missing_p0_status)}"
+    partial_p0 = sorted(task for task in set(p0_tasks) if status_entries[task] == "~")
+    blocker_section = audit.split("## P0 blockers before V1", 1)[-1]
+    missing_blockers = [task for task in partial_p0 if task not in blocker_section]
+    assert not missing_blockers, f"Partial P0 tasks missing V1 blocker evidence: {', '.join(missing_blockers)}"
+    assert "V1 remains **not complete**" in audit, "Acceptance audit must not claim V1 completion while blockers remain"
+    print(f"V1 acceptance audit: BLOCKED by {len(partial_p0)} tracked partial P0 task(s); no unsupported completion claim detected.")
     path_security = (ROOT / "src/FrameTheory.Domain/LocalPathSecurity.cs").read_text(encoding="utf-8")
     assert "ContainsReparsePoint" in path_security, "Shared local path security guard must remain present"
     for relative_path in [
