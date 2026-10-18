@@ -2936,9 +2936,21 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(tracks, "Timeline tracks");
         ToolTip.SetTip(tracks, "Select clips in the video and audio edit lanes.");
         tracks.Bind(ItemsControl.ItemsSourceProperty, new Binding("TimelineEditor.TrackRows"));
-        var beatMarkers = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var beatMarkers = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(beatMarkers, "Timeline beat markers");
-        beatMarkers.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.BeatMarkersText"));
+        ToolTip.SetTip(beatMarkers, "Local waveform beat markers detected for the active timeline.");
+        beatMarkers.Bind(TextBox.TextProperty, new Binding("TimelineEditor.BeatMarkersText"));
         var beatDetection = new ComboBox { ItemsSource = new[] { "Amplitude peaks", "Energy onsets" }, SelectedIndex = 0, Width = 150 };
         AutomationProperties.SetName(beatDetection, "Beat detection mode");
         ToolTip.SetTip(beatDetection, "Choose the local waveform analysis used for beat markers.");

@@ -512,6 +512,12 @@ public sealed class FoundationTests
                 Xunit.Assert.True(roughCutStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, roughCutStatus.FontSize);
                 Xunit.Assert.Equal("Status of the latest waveform activity rough-cut plan.", ToolTip.GetTip(roughCutStatus));
+                var beatMarkers = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline beat markers");
+                Xunit.Assert.True(beatMarkers.IsReadOnly);
+                Xunit.Assert.Equal(11, beatMarkers.FontSize);
+                Xunit.Assert.Equal("Local waveform beat markers detected for the active timeline.", ToolTip.GetTip(beatMarkers));
                 var titleAnimationStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Title animation status");
