@@ -55,7 +55,15 @@ public sealed class FfprobeMediaProbe : IMediaProbe
             cancellationToken);
         if (result.ExitCode != 0)
         {
-            throw new MediaProbeException("ffprobe could not read the media file.");
+            var details = result.StandardError.Trim();
+            if (details.Length > 1024)
+            {
+                details = details[..1024];
+            }
+
+            throw new MediaProbeException(details.Length == 0
+                ? "ffprobe could not read the media file."
+                : $"ffprobe could not read the media file: {details}");
         }
 
         try

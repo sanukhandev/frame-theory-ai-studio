@@ -89,7 +89,28 @@ public sealed class MediaProbeTests
         }
     }
 
-    private sealed class StubProcessRunner(string standardOutput) : IMediaProcessRunner
+    [Xunit.Fact]
+    public async Task FfprobeAdapterIncludesBoundedProcessErrorDetails()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-probe-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "clip.mp4");
+            await File.WriteAllTextAsync(path, "synthetic placeholder");
+            var runner = new StubProcessRunner(string.Empty, 1, "invalid media input");
+
+            var exception = await Xunit.Assert.ThrowsAsync<MediaProbeException>(() =>
+                new FfprobeMediaProbe(runner).ProbeAsync(new Uri(path), CancellationToken.None));
+
+            Xunit.Assert.Contains("invalid media input", exception.Message);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    private sealed class StubProcessRunner(string standardOutput, int exitCode = 0, string standardError = "") : IMediaProcessRunner
     {
         public string? Executable { get; private set; }
 
@@ -99,7 +120,7 @@ public sealed class MediaProbeTests
         {
             Executable = executable;
             Arguments = arguments;
-            return Task.FromResult(new MediaProcessResult(0, standardOutput, string.Empty));
+            return Task.FromResult(new MediaProcessResult(exitCode, standardOutput, standardError));
         }
     }
 }
