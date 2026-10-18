@@ -733,6 +733,23 @@ public sealed class FoundationTests
                 Xunit.Assert.True(photoSections["Export section"].IsExpanded);
                 photoSections["Layers and blend section"].IsExpanded = true;
                 Dispatcher.UIThread.RunJobs();
+                var overlayOpacity = window.GetVisualDescendants()
+                    .OfType<Slider>()
+                    .Single(control => AutomationProperties.GetName(control) == "Photo overlay opacity");
+                Xunit.Assert.True(double.IsNaN(overlayOpacity.Width));
+                Xunit.Assert.Equal(100, overlayOpacity.MinWidth);
+                Xunit.Assert.Equal(180, overlayOpacity.MaxWidth);
+                Xunit.Assert.Equal(HorizontalAlignment.Stretch, overlayOpacity.HorizontalAlignment);
+                var overlayBlend = window.GetVisualDescendants()
+                    .OfType<ComboBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Photo overlay blend mode");
+                Xunit.Assert.True(double.IsNaN(overlayBlend.Width));
+                Xunit.Assert.Equal(100, overlayBlend.MinWidth);
+                Xunit.Assert.Equal(140, overlayBlend.MaxWidth);
+                Xunit.Assert.Equal(HorizontalAlignment.Stretch, overlayBlend.HorizontalAlignment);
+                Xunit.Assert.Equal(
+                    "Choose how the imported overlay blends with the photo.",
+                    ToolTip.GetTip(overlayBlend));
                 Xunit.Assert.Equal("100%", window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo overlay opacity value")

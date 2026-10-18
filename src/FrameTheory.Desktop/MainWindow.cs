@@ -1388,7 +1388,15 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(redo, "Redo last photo edit");
         ToolTip.SetTip(redo, "Redo the latest photo operation that was undone.");
         redo.Click += (_, _) => editor.Redo();
-        var overlayOpacity = new Slider { Minimum = 0, Maximum = 1, Value = 1, Width = 120 };
+        var overlayOpacity = new Slider
+        {
+            Minimum = 0,
+            Maximum = 1,
+            Value = 1,
+            MinWidth = 100,
+            MaxWidth = 180,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
         AutomationProperties.SetName(overlayOpacity, "Photo overlay opacity");
         ToolTip.SetTip(overlayOpacity, "Set the imported overlay opacity from 0% to 100%.");
         var overlayOpacityValue = new TextBlock
@@ -1401,8 +1409,16 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(overlayOpacityValue, "Photo overlay opacity value");
         overlayOpacity.ValueChanged += (_, args) => overlayOpacityValue.Text = $"{args.NewValue:P0}";
-        var overlayBlend = new ComboBox { ItemsSource = new[] { "Normal", "Multiply", "Screen" }, SelectedIndex = 0, Width = 110 };
+        var overlayBlend = new ComboBox
+        {
+            ItemsSource = new[] { "Normal", "Multiply", "Screen" },
+            SelectedIndex = 0,
+            MinWidth = 100,
+            MaxWidth = 140,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
         AutomationProperties.SetName(overlayBlend, "Photo overlay blend mode");
+        ToolTip.SetTip(overlayBlend, "Choose how the imported overlay blends with the photo.");
         var importOverlay = new Button { Content = "Import overlay" };
         AutomationProperties.SetName(importOverlay, "Import photo overlay");
         importOverlay.Click += async (_, _) =>
