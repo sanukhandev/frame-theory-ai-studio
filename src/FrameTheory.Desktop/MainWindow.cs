@@ -439,7 +439,7 @@ public sealed class MainWindow : Window
         diagnostics.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.DiagnosticsStatusText)));
         AutomationProperties.SetName(diagnostics, "Diagnostics status");
         ToolTip.SetTip(diagnostics, "Local diagnostics log and failure-reporting status.");
-        return new Border
+        var footer = new Border
         {
             Height = 48,
             Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(18, 20, 25)),
@@ -456,6 +456,19 @@ public sealed class MainWindow : Window
                 }
             }
         };
+        void RefreshFooterDensity(double width)
+        {
+            var topLevel = TopLevel.GetTopLevel(footer);
+            var windowWidth = topLevel is Window window && !double.IsNaN(window.Width)
+                ? window.Width
+                : topLevel?.Bounds.Width ?? width;
+            diagnostics.IsVisible = windowWidth >= 1120;
+        }
+
+        footer.SizeChanged += (_, args) => RefreshFooterDensity(args.NewSize.Width);
+        footer.AttachedToVisualTree += (_, _) => Dispatcher.UIThread.Post(() => RefreshFooterDensity(footer.Bounds.Width));
+        RefreshFooterDensity(footer.Width);
+        return footer;
     }
 
     private static Control CreateWorkspaceContent(WorkspaceViewModel workspace, MainWindowViewModel viewModel)

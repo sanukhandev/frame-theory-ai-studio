@@ -216,6 +216,13 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Diagnostics status");
                 Xunit.Assert.True(diagnosticsStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, diagnosticsStatus.FontSize);
+                Xunit.Assert.True(diagnosticsStatus.IsVisible);
+                window.Width = 960;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.False(diagnosticsStatus.IsVisible);
+                window.Width = 1280;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.True(diagnosticsStatus.IsVisible);
                 var importStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Media import status");

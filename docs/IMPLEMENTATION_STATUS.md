@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive footer checkpoint (2026-10-18):** The bottom capability bar now hides the secondary diagnostics readout below the 1120px window breakpoint while retaining its tooltip/log path, keeping the primary capability status and refresh action readable at the 960px minimum. Attached-window initialization is covered by Foundation geometry tests; native visual and HiDPI acceptance remains open.
+
 **Mode-discovery checkpoint (2026-10-18):** The global `LOCAL MODE · GEMINI OPTIONAL` badge and each workspace mode badge now expose accessible names and explicit offline/consent guidance, making the offline-first boundary visible without relying on color alone. Foundation coverage verifies the shell metadata; live screen-reader acceptance remains open.
 
 **Local responsive-shell gate checkpoint (2026-10-18):** The UI follow-up batch passes `dotnet build FrameTheory.sln --configuration Release --no-restore --warnaserror` with 0 warnings/errors, 266 unit tests, 2 golden tests, repository/schema validation, `dotnet format --verify-no-changes` and `git diff --check`. Hosted revalidation is intentionally deferred until the next exact-ten push; native visual, HiDPI and screen-reader acceptance remains open.
