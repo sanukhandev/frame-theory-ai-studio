@@ -508,6 +508,14 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(clearMediaSearch, "Clear media search");
         ToolTip.SetTip(clearMediaSearch, "Clear the media filename filter.");
+        var mediaTypeFilter = new ComboBox
+        {
+            Width = 100,
+            ItemsSource = new[] { "All media", "Video", "Photo", "Audio" },
+            SelectedIndex = 0
+        };
+        AutomationProperties.SetName(mediaTypeFilter, "Filter imported media by type");
+        ToolTip.SetTip(mediaTypeFilter, "Show all imported assets or filter the media bin by type.");
         var mediaSearchEmptyState = new TextBlock
         {
             Text = "No matching media.",
@@ -534,9 +542,17 @@ public sealed class MainWindow : Window
         {
             var query = mediaSearch.Text?.Trim();
             var selectedId = preservedSelection?.Id;
-            var filtered = string.IsNullOrEmpty(query)
-                ? viewModel.ImportedMedia
-                : viewModel.ImportedMedia.Where(item => item.Name.Contains(query, StringComparison.OrdinalIgnoreCase)).ToArray();
+            var selectedKind = mediaTypeFilter.SelectedIndex switch
+            {
+                1 => MediaKind.Video,
+                2 => MediaKind.Image,
+                3 => MediaKind.Audio,
+                _ => (MediaKind?)null
+            };
+            var filtered = viewModel.ImportedMedia
+                .Where(item => selectedKind is null || item.Kind == selectedKind)
+                .Where(item => string.IsNullOrEmpty(query) || item.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
             mediaCards.Clear();
             importedList.ItemsSource = filtered;
             if (selectedId is { } id)
@@ -544,7 +560,7 @@ public sealed class MainWindow : Window
                 importedList.SelectedItem = filtered.FirstOrDefault(item => item.Id == id);
             }
             clearMediaSearch.IsEnabled = !string.IsNullOrEmpty(query);
-            mediaSearchEmptyState.IsVisible = !string.IsNullOrEmpty(query) && filtered.Count == 0;
+            mediaSearchEmptyState.IsVisible = filtered.Length == 0 && (!string.IsNullOrEmpty(query) || selectedKind is not null);
             mediaEmptyState.IsVisible = viewModel.ImportedMedia.Count == 0;
             Dispatcher.UIThread.Post(RefreshSelectedMediaCard);
         }
@@ -565,6 +581,7 @@ public sealed class MainWindow : Window
         }
 
         mediaSearch.TextChanged += (_, _) => RefreshMediaList();
+        mediaTypeFilter.SelectionChanged += (_, _) => RefreshMediaList();
         clearMediaSearch.Click += (_, _) => mediaSearch.Text = string.Empty;
         viewModel.PropertyChanged += (_, args) =>
         {
@@ -676,7 +693,7 @@ public sealed class MainWindow : Window
             }
         };
         AutomationProperties.SetName(importZone, "Local media import drop zone");
-        var mediaBinPanel = CreateMediaBin(importZone, importStatus, importedList, mediaSearch, clearMediaSearch, mediaSearchEmptyState, mediaEmptyState);
+        var mediaBinPanel = CreateMediaBin(importZone, importStatus, importedList, mediaSearch, mediaTypeFilter, clearMediaSearch, mediaSearchEmptyState, mediaEmptyState);
         var children = new List<Control>
         {
             CreateWorkspaceHeader(workspace, viewModel),
@@ -827,6 +844,7 @@ public sealed class MainWindow : Window
         TextBlock importStatus,
         ListBox importedList,
         TextBox mediaSearch,
+        ComboBox mediaTypeFilter,
         Button clearMediaSearch,
         TextBlock mediaSearchEmptyState,
         TextBlock mediaEmptyState)
@@ -872,10 +890,11 @@ public sealed class MainWindow : Window
         grid.Children.Add(mediaHeader);
         var mediaSearchRow = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
-            Children = { mediaSearch, clearMediaSearch }
+            ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"),
+            Children = { mediaSearch, mediaTypeFilter, clearMediaSearch }
         };
-        Grid.SetColumn(clearMediaSearch, 1);
+        Grid.SetColumn(mediaTypeFilter, 1);
+        Grid.SetColumn(clearMediaSearch, 2);
         grid.Children.Add(mediaSearchRow);
         grid.Children.Add(new Grid
         {

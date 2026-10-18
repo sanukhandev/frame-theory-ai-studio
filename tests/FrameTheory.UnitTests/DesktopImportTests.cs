@@ -215,6 +215,9 @@ public sealed class DesktopImportTests
                 var search = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Search imported media");
+                var typeFilter = window.GetVisualDescendants()
+                    .OfType<ComboBox>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Filter imported media by type");
                 var clear = window.GetVisualDescendants()
                     .OfType<Button>()
                     .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Clear media search");
@@ -222,6 +225,13 @@ public sealed class DesktopImportTests
                     .OfType<TextBlock>()
                     .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Media search empty state");
 
+                Xunit.Assert.Equal(2, mediaList.Items.Count);
+                typeFilter.SelectedIndex = 2;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Empty(mediaList.Items);
+                Xunit.Assert.True(emptyState.IsVisible);
+                typeFilter.SelectedIndex = 1;
+                Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(2, mediaList.Items.Count);
                 mediaList.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
