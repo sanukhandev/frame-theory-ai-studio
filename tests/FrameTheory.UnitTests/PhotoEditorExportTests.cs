@@ -52,6 +52,32 @@ public sealed class PhotoEditorExportTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task InvalidPhotoExportPathIsReportedWithoutEscapingTheUi()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-photo-export-path-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.png");
+            await File.WriteAllTextAsync(sourcePath, "source");
+            await using var queue = new ExportQueueService();
+            var editor = new PhotoEditorViewModel(
+                new PhotoImporter(new StubProbe(), new StubDecoder()),
+                new PhotoExporter(new RecordingProcessRunner(), new StubProbe()),
+                queue,
+                new JsonProjectRepository());
+            await editor.OpenAsync(sourcePath, CancellationToken.None);
+
+            await editor.ExportAsync("bad\0output.png", PhotoExportFormat.Png, 95, CancellationToken.None);
+
+            Xunit.Assert.Contains("Photo export failed", editor.StatusText, StringComparison.Ordinal);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private static ExportReceipt Receipt(string name) => new(
         Guid.NewGuid(),
         Path.Combine(Path.GetTempPath(), name + ".mp4"),

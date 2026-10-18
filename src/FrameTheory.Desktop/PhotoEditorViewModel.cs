@@ -445,7 +445,7 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         {
             StatusText = "Photo export canceled.";
         }
-        catch (Exception exception) when (exception is IOException or InvalidOperationException or PhotoExportException or MediaProbeException)
+        catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException or UnauthorizedAccessException or InvalidOperationException or PhotoExportException or MediaProbeException)
         {
             StatusText = $"Photo export failed: {exception.Message}";
         }
