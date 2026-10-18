@@ -137,6 +137,21 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(1))
             }
         });
+        Styles.Add(new Style(selector => selector.OfType<ListBoxItem>().Class(":pointerover"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 33, 40)))
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<ListBoxItem>().Class(":selected"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(35, 43, 66))),
+                new Setter(TemplatedControl.ForegroundProperty, foreground)
+            }
+        });
         Styles.Add(new Style(selector => selector.OfType<Slider>())
         {
             Setters =

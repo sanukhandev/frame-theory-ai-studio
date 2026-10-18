@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Media-selection styling checkpoint (2026-10-18):** Imported-media and timeline-track list rows now share dark hover and selected states, keeping the active clip or asset readable without changing selection behavior. The rebuilt Foundation shell test, Release test-project build, formatting and `git diff --check` pass; native visual selection review remains unverified.
+
 **Status-region accessibility checkpoint (2026-10-18):** The live capability and diagnostics footer regions now expose explicit automation names alongside the existing refresh action, and the adaptive-shell test asserts both names. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native screen-reader review remains unverified.
 
 **Compact status-bar checkpoint (2026-10-18):** The footer diagnostics message now uses bounded width and ellipsis trimming, preserving the capability status and refresh action when the editor is resized toward its supported minimum. Desktop Release build, focused shell test, formatting and `git diff --check` pass; native resize/HiDPI review remains unverified.
