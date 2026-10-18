@@ -253,7 +253,7 @@ public sealed class TimelineProjectPersistenceTests
     }
 
     [Xunit.Fact]
-    public async Task TimelineProjectSaveRejectsSymlinkedMediaDirectory()
+    public async Task TimelineProjectImportRejectsSymlinkedMediaDirectory()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-timeline-boundary-");
         var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-timeline-external-");
@@ -268,10 +268,8 @@ public sealed class TimelineProjectPersistenceTests
 
             await viewModel.ImportFilesAsync([sourcePath], CancellationToken.None);
 
-            Xunit.Assert.False(await viewModel.SaveTimelineProjectAsync(
-                Path.Combine(projectDirectory.FullName, "project.ftstudio"),
-                CancellationToken.None));
-            Xunit.Assert.Contains("reparse", viewModel.TimelineProjectStatusText, StringComparison.OrdinalIgnoreCase);
+            Xunit.Assert.Empty(viewModel.ImportedMedia);
+            Xunit.Assert.Contains("reparse", viewModel.MediaImportStatusText, StringComparison.OrdinalIgnoreCase);
         }
         catch (UnauthorizedAccessException)
         {
