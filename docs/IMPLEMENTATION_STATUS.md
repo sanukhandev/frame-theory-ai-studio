@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Explicit label regression checkpoint (2026-10-18):** The adaptive shell contract now asserts stable names for Photo edit/reset/mask/retouch actions, AI proposal clearing, and timeline motion/audio/title actions. Focused shell coverage and the full local Release gate pass: 261 unit tests, 2 golden tests, formatting and `git diff --check`. Hosted UI smoke remains pending on the next exact-ten-commit push.
+
 **Explicit action-label checkpoint (2026-10-18):** Photo rotate/undo/overlay-mask/retouch/grade actions, AI proposal clearing, timeline motion/audio/title actions now carry stable action-specific automation names instead of relying on generic content fallback. Release build is warning-free; 261 unit tests, 2 golden tests, formatting and `git diff --check` pass locally. The next hosted run must include the UI-smoke section-navigation correction.
 
 **Local UIA limitation checkpoint (2026-10-18):** Running `scripts/smoke_desktop_ui.ps1` on this host reaches the native process but Windows `SendKeys` fails with the host message `The operation completed successfully`, indicating no interactive desktop input surface. No local shortcut pass is claimed; hosted Windows remains the authoritative UIA environment for this gate.
