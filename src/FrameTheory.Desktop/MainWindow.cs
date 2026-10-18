@@ -370,9 +370,14 @@ public sealed class MainWindow : Window
         importStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.MediaImportStatusText)));
         var importedList = new ListBox
         {
-            Height = 132,
+            Height = 176,
             Margin = new Thickness(0, 8, 0, 0),
             Padding = new Thickness(4),
+            ItemsPanel = new FuncTemplate<Panel?>(() => new WrapPanel
+            {
+                Orientation = Orientation.Horizontal,
+                HorizontalAlignment = HorizontalAlignment.Stretch
+            }),
             ItemTemplate = new FuncDataTemplate<ImportedMediaViewModel>((item, _) =>
             {
                 if (item is null)
@@ -382,71 +387,75 @@ public sealed class MainWindow : Window
 
                 var thumbnail = new Image
                 {
-                    Width = 84,
-                    Height = 48,
+                    Width = 158,
+                    Height = 64,
                     Stretch = Stretch.UniformToFill,
                     Source = CreateBitmap(item.ThumbnailPpm)
                 };
                 AutomationProperties.SetName(thumbnail, $"Thumbnail for {item.Name}");
-                return new StackPanel
+                var card = new Border
                 {
-                    Orientation = Orientation.Horizontal,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Children =
+                    Width = 172,
+                    Height = 112,
+                    Margin = new Thickness(2, 2, 6, 6),
+                    Padding = new Thickness(6),
+                    CornerRadius = new CornerRadius(5),
+                    Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 33, 40)),
+                    BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(59, 68, 83)),
+                    BorderThickness = new Thickness(1),
+                    Child = new StackPanel
                     {
-                        new Border
+                        Spacing = 4,
+                        Children =
                         {
-                            Width = 84,
-                            Height = 48,
-                            Margin = new Thickness(0, 0, 10, 0),
-                            Background = Brushes.Black,
-                            Child = new Grid
+                            new Border
                             {
-                                Children =
+                                Width = 158,
+                                Height = 64,
+                                Background = Brushes.Black,
+                                Child = new Grid
                                 {
-                                    thumbnail,
-                                    new Border
+                                    Children =
                                     {
-                                        Margin = new Thickness(3),
-                                        Padding = new Thickness(3, 1),
-                                        CornerRadius = new CornerRadius(3),
-                                        Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(13, 15, 18)),
-                                        HorizontalAlignment = HorizontalAlignment.Left,
-                                        VerticalAlignment = VerticalAlignment.Bottom,
-                                        Child = new TextBlock
+                                        thumbnail,
+                                        new Border
                                         {
-                                            Text = item.Kind?.ToString().ToUpperInvariant() ?? "MEDIA",
-                                            FontSize = 8,
-                                            FontWeight = FontWeight.SemiBold,
-                                            Foreground = Brushes.White
+                                            Margin = new Thickness(4),
+                                            Padding = new Thickness(3, 1),
+                                            CornerRadius = new CornerRadius(3),
+                                            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(13, 15, 18)),
+                                            HorizontalAlignment = HorizontalAlignment.Left,
+                                            VerticalAlignment = VerticalAlignment.Bottom,
+                                            Child = new TextBlock
+                                            {
+                                                Text = item.Kind?.ToString().ToUpperInvariant() ?? "MEDIA",
+                                                FontSize = 8,
+                                                FontWeight = FontWeight.SemiBold,
+                                                Foreground = Brushes.White
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        },
-                        new StackPanel
-                        {
-                            Spacing = 2,
-                            VerticalAlignment = VerticalAlignment.Center,
-                            Children =
+                            },
+                            new TextBlock
                             {
-                                new TextBlock
-                                {
-                                    Text = item.Name,
-                                    FontWeight = FontWeight.SemiBold,
-                                    TextTrimming = TextTrimming.CharacterEllipsis
-                                },
-                                new TextBlock
-                                {
-                                    Text = item.Summary,
-                                    FontSize = 11,
-                                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
-                                    TextTrimming = TextTrimming.CharacterEllipsis
-                                }
+                                Text = item.Name,
+                                FontSize = 11,
+                                FontWeight = FontWeight.SemiBold,
+                                TextTrimming = TextTrimming.CharacterEllipsis
+                            },
+                            new TextBlock
+                            {
+                                Text = item.Summary,
+                                FontSize = 10,
+                                Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+                                TextTrimming = TextTrimming.CharacterEllipsis
                             }
                         }
                     }
                 };
+                AutomationProperties.SetName(card, $"Imported media card: {item.Name}");
+                return card;
             }, supportsRecycling: false)
         };
         AutomationProperties.SetName(importedList, "Imported media");
