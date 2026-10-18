@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Media search empty-state checkpoint (2026-10-18):** The local media filter now presents an accessible `No matching media.` state when a query returns zero assets and hides it for an empty query or populated results. The full local gate passes 261 unit tests, 2 golden tests, repository validation, formatting and `git diff --check`; hosted revalidation is pending the next exact-ten-commit push.
+
 **Media search checkpoint (2026-10-18):** The media browser now has a real local filename filter that refreshes when imports or reopened projects change the source collection. The shell test covers the search control's layout, tooltip and automation contract; the full local gate passes 261 unit tests, 2 golden tests, repository validation, formatting and `git diff --check`. Hosted revalidation is pending the next exact-ten-commit push.
 
 **Primary action hierarchy checkpoint (2026-10-18):** Real import, timeline playback, photo export, color/reference grading, Gemini analysis/approval and video export actions now use the shared accent primary-button treatment. The shell test verifies the class in each selected workspace; the full local gate passes 261 unit tests, 2 golden tests, repository validation, formatting and `git diff --check`. Hosted revalidation is pending the next exact-ten-commit push.
