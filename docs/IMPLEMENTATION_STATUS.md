@@ -1,6 +1,8 @@
 # Implementation Status — Resume Checkpoint
 
-**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 32 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 34 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+
+**Audio and caption affordance checkpoint (2026-10-19):** Audio mute, gain, fades, ducking, title animation, SRT import/export, verified transcript import, Gemini transcription consent and local Whisper actions now expose concise side-effect guidance. The focused production-shell test and format/diff checks pass; native and hosted acceptance remain separate.
 
 **Timeline affordance checkpoint (2026-10-19):** Timeline analysis, navigation, clip editing, animation, speed-ramp and stabilization actions now expose concise guidance tooltips alongside their automation names. The focused production-shell test and format/diff checks pass; the full Release gate remains scheduled at the next batch checkpoint.
 
