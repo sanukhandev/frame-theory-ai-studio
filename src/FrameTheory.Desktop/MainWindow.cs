@@ -1117,9 +1117,21 @@ public sealed class MainWindow : Window
             }
         };
         RefreshPreview();
-        var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var status = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(status, "Photo editor status");
-        status.Bind(TextBlock.TextProperty, new Binding(nameof(PhotoEditorViewModel.StatusText)));
+        ToolTip.SetTip(status, "Current local non-destructive photo edit status.");
+        status.Bind(TextBox.TextProperty, new Binding(nameof(PhotoEditorViewModel.StatusText)));
         var open = new Button { Content = "Open image" };
         AutomationProperties.SetName(open, "Open image");
         ToolTip.SetTip(open, "Open a local image for non-destructive editing.");

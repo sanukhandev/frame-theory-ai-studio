@@ -534,6 +534,12 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo original preview empty state")
                     .IsVisible);
+                var photoEditorStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Photo editor status");
+                Xunit.Assert.True(photoEditorStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, photoEditorStatus.FontSize);
+                Xunit.Assert.Equal("Current local non-destructive photo edit status.", ToolTip.GetTip(photoEditorStatus));
                 var photoComparison = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo before and after preview");
