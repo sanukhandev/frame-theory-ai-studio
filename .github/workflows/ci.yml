@@ -44,6 +44,11 @@ jobs:
           if (-not (Select-String -Path packaging/windows/FrameTheoryStudio.iss -Pattern 'OutputBaseFilename=\{#OutputBaseFilename\}')) {
             throw "Windows installer does not use the runtime-specific output filename macro."
           }
+          $null = & pwsh -NoProfile -File scripts/package_windows.ps1 -RuntimeIdentifier win-arm64 2>&1
+          if ($LASTEXITCODE -eq 0) {
+            throw "Windows package runtime validation accepted an unsupported RID."
+          }
+          $global:LASTEXITCODE = 0
       - name: Validate Linux package guards
         shell: bash
         run: |

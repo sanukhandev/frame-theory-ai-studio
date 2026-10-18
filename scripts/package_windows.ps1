@@ -1,4 +1,5 @@
 param(
+    [ValidateSet("win-x64")]
     [string]$RuntimeIdentifier = "win-x64",
     [string]$OutputDirectory = "artifacts/installer",
     [string]$PublishDirectory = "artifacts/installer-publish",
