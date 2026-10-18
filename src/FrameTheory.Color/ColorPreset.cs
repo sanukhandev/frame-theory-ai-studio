@@ -125,7 +125,7 @@ public sealed class JsonColorPresetStore
                 throw new InvalidDataException("Preset names must be unique.");
             }
 
-            return presets;
+            return Array.AsReadOnly(presets);
         }
         catch (JsonException exception)
         {

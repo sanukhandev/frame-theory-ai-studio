@@ -23,6 +23,7 @@ public sealed class ColorPresetTests
             var command = new SetColorPresetCommand("Warm");
 
             Xunit.Assert.Equal("Warm", loaded.Single().Name);
+            Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<ColorPreset>>(loaded).IsReadOnly);
             Xunit.Assert.NotEqual(source, photoOutput);
             Xunit.Assert.NotEqual(source, videoOutput);
             Xunit.Assert.Equal("Warm", command.Apply(project).ColorPresetName);
