@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Status affordance regression checkpoint (2026-10-18):** The shell test now verifies the live workspace status tooltip and its text after switching Video, Photo, Color and AI tabs. Focused and full local gates pass: 261 unit tests, 2 golden tests, warning-free Release build, formatting and `git diff --check`.
+
 **Live workspace status checkpoint (2026-10-18):** The top of every workspace now exposes a real bound status line for project/export state, photo edits, color grading, or AI proposal review. It updates when the active workspace changes and when the underlying view model reports a new state; it is automation-named and ellipsis-safe for compact layouts. Release build, 261 unit tests, 2 golden tests, formatting and `git diff --check` pass locally; hosted validation is pending for the next exact-ten-commit push.
 
 **GitHub backlog audit checkpoint (2026-10-18):** `gh issue list` reports 55 closed issues and 27 open issues. The closed implementation set covers FT-001 through FT-804, FT-903/FT-904, FT-1001/FT-1004, and FT-1101/FT-1103; the remaining open implementation/release items are manual UI/platform acceptance, legal/native redistribution, signing, live-provider or approved-asset gates, plus deferred E11/E12 scope. No open issue is being closed from indirect evidence.
