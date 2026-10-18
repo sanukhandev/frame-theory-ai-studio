@@ -2115,6 +2115,7 @@ public sealed class MainWindow : Window
                 foreach (var clip in item.Clips)
                 {
                     var clipWidth = Math.Max(128, clip.DurationFrames / timeline.FramesPerPixel);
+                    var clipMedia = viewModel.ImportedMedia.FirstOrDefault(media => media.Id?.Value == clip.MediaId);
                     var clipButton = new Button
                     {
                         Width = clipWidth,
@@ -2130,12 +2131,32 @@ public sealed class MainWindow : Window
                             ? Avalonia.Media.Color.FromRgb(95, 125, 255)
                             : Avalonia.Media.Color.FromRgb(59, 68, 83)),
                         BorderThickness = new Thickness(1),
-                        Content = new TextBlock
+                        Content = new StackPanel
                         {
-                            Text = $"{clip.MediaId[..Math.Min(8, clip.MediaId.Length)]}  {clip.StartFrame}–{clip.StartFrame + clip.DurationFrames - 1}",
-                            FontSize = 11,
-                            Foreground = Brushes.White,
-                            TextTrimming = TextTrimming.CharacterEllipsis
+                            Orientation = Orientation.Horizontal,
+                            Spacing = 6,
+                            Children =
+                            {
+                                new Border
+                                {
+                                    Width = 42,
+                                    Height = 24,
+                                    Background = Brushes.Black,
+                                    Child = new Image
+                                    {
+                                        Source = CreateBitmap(clipMedia?.ThumbnailPpm),
+                                        Stretch = Stretch.UniformToFill
+                                    }
+                                },
+                                new TextBlock
+                                {
+                                    Text = $"{clip.MediaId[..Math.Min(8, clip.MediaId.Length)]}  {clip.StartFrame}–{clip.StartFrame + clip.DurationFrames - 1}",
+                                    FontSize = 10,
+                                    Foreground = Brushes.White,
+                                    TextTrimming = TextTrimming.CharacterEllipsis,
+                                    VerticalAlignment = VerticalAlignment.Center
+                                }
+                            }
                         }
                     };
                     AutomationProperties.SetName(clipButton, $"Select {item.Kind} clip {clip.MediaId}");
