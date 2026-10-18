@@ -18,14 +18,19 @@ if ($rootItem.Attributes -band [IO.FileAttributes]::ReparsePoint) {
 }
 
 $rootPath = $rootItem.FullName
-$files = @(Get-ChildItem -LiteralPath $rootPath -File | Sort-Object Name)
+$entries = @(Get-ChildItem -LiteralPath $rootPath -Force)
+foreach ($entry in $entries) {
+    if ($entry.PSIsContainer) {
+        throw "Native media bundle must contain files only: $($entry.Name)."
+    }
+    if ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+        throw "Native media bundle cannot contain a reparse-point file: $($entry.Name)."
+    }
+}
+
+$files = @($entries | Sort-Object Name)
 if ($files.Count -eq 0) {
     throw "Native media bundle directory is empty: $Directory"
-}
-foreach ($file in $files) {
-    if ($file.Attributes -band [IO.FileAttributes]::ReparsePoint) {
-        throw "Native media bundle cannot contain a reparse-point file: $($file.Name)."
-    }
 }
 
 function Get-RequiredTool([string]$name) {

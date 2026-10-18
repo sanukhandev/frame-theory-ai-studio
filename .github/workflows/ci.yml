@@ -106,7 +106,7 @@ jobs:
             throw 'Installer validation does not include a clean-PATH bundled media smoke.'
           }
           $manifestScript = Get-Content -LiteralPath 'scripts/generate_native_media_manifest.ps1' -Raw
-          foreach ($needle in @('schemaVersion', 'Get-FileHash', '-version', 'ReparsePoint')) {
+          foreach ($needle in @('schemaVersion', 'Get-FileHash', '-version', 'Get-ChildItem -LiteralPath $rootPath -Force', 'ReparsePoint')) {
             if ($manifestScript -notmatch [regex]::Escape($needle)) {
               throw "Native media manifest script is missing required guard: $needle"
             }
@@ -117,7 +117,7 @@ jobs:
             }
           }
           $manifestVerifier = Get-Content -LiteralPath 'scripts/verify_native_media_manifest.ps1' -Raw
-          foreach ($needle in @('ConvertFrom-Json', 'Get-FileHash', 'Get-Item -LiteralPath $ManifestPath', 'ReparsePoint', 'schemaVersion')) {
+          foreach ($needle in @('ConvertFrom-Json', 'Get-FileHash', 'Get-Item -LiteralPath $ManifestPath', 'Get-ChildItem -LiteralPath $rootItem.FullName -Force', 'ReparsePoint', 'schemaVersion')) {
             if ($manifestVerifier -notmatch [regex]::Escape($needle)) {
               throw "Native media manifest verifier is missing required check: $needle"
             }

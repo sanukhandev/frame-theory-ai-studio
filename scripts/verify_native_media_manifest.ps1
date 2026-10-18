@@ -25,7 +25,17 @@ if ($null -eq $manifest.files -or $manifest.files.Count -eq 0) {
     throw "Native media manifest contains no files."
 }
 
-$files = @(Get-ChildItem -LiteralPath $rootItem.FullName -File | Sort-Object Name)
+$entries = @(Get-ChildItem -LiteralPath $rootItem.FullName -Force)
+foreach ($entry in $entries) {
+    if ($entry.PSIsContainer) {
+        throw "Native media bundle must contain files only: $($entry.Name)."
+    }
+    if ($entry.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+        throw "Native media bundle contains a reparse-point entry: $($entry.Name)."
+    }
+}
+
+$files = @($entries | Sort-Object Name)
 $records = @($manifest.files | Sort-Object name)
 if ($files.Count -ne $records.Count) {
     throw "Native media manifest file count does not match the bundle."
@@ -36,9 +46,6 @@ for ($index = 0; $index -lt $files.Count; $index++) {
     $record = $records[$index]
     if ($file.Name -ne $record.name) {
         throw "Native media manifest file set does not match the bundle."
-    }
-    if ($file.Attributes -band [IO.FileAttributes]::ReparsePoint) {
-        throw "Native media bundle contains a reparse-point file: $($file.Name)."
     }
     $hash = (Get-FileHash -Algorithm SHA256 -LiteralPath $file.FullName).Hash.ToLowerInvariant()
     if ($hash -ne $record.sha256 -or $file.Length -ne [int64]$record.bytes) {
