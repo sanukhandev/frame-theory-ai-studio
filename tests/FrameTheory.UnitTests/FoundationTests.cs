@@ -578,6 +578,7 @@ public sealed class FoundationTests
                 });
                 timelineSections["Analysis and rough cut section"].IsExpanded = true;
                 Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Contains(timelineSections["Analysis and rough cut section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Detection");
                 Xunit.Assert.Contains(
                     window.GetVisualDescendants().OfType<Button>(),
                     button => AutomationProperties.GetName(button) == "Analyze timeline motion" && button.IsVisible);

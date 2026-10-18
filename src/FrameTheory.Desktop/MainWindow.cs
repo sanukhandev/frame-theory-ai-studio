@@ -4180,7 +4180,7 @@ public sealed class MainWindow : Window
         var analysisSection = CreateInspectorExpander(
             "Analysis and rough cut",
             CreateSectionContent(
-                CreateFlow(beatDetection, beatMarkers),
+                CreateFlow(CreateLabeledField("Detection", beatDetection), beatMarkers),
                 CreateFlow(prepareRoughCut, applyRoughCut),
                 roughCutStatus),
             expanded: false);
