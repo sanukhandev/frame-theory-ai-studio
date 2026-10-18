@@ -92,7 +92,7 @@ public sealed class ExportQueueService : IAsyncDisposable
         {
             lock (_history)
             {
-                return _history.Select(job => new ExportQueueHistoryEntry(job.Id, job.State, job.Attempts, job.ErrorMessage)).ToArray();
+                return Array.AsReadOnly(_history.Select(job => new ExportQueueHistoryEntry(job.Id, job.State, job.Attempts, job.ErrorMessage)).ToArray());
             }
         }
     }

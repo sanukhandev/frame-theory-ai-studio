@@ -46,6 +46,8 @@
 
 **AI/photo state-integrity checkpoint (2026-10-19):** Approved AI actions, local analysis payloads, reference samples, caption words, transcript words, photo edit history, layer masks and raster pixels now expose defensive snapshots at mutation boundaries. Focused AI/reference coverage passes 13/7/6 and focused photo coverage passes 21; format and diff checks are clean. The local changes remain unpushed until the next exact 50-commit boundary.
 
+**50-commit batch integrity checkpoint (2026-10-19):** Imported captions, color presets, AI operation catalogs and export-queue history now also expose read-only snapshots. The final focused queue coverage passes with format and diff checks clean; this commit completes exactly 50 verified local commits ahead of `origin/main`. Full Release validation and the push are the next actions.
+
 **Post-rough-cut Release gate checkpoint (2026-10-19):** The local changes pass 277 unit tests and 2 golden tests, build with 0 warnings/errors, pass `dotnet format --verify-no-changes`, repository validation through `py scripts/validate_repository.py` and `git diff --check`. The validator correctly remains blocked by six tracked partial P0 tasks; this is not a V1 completion claim. The local commits remain unpushed until the next exact 50-commit boundary.
 
 **Workspace navigation affordance checkpoint (2026-10-19):** The adaptive shell's Ctrl+1 through Ctrl+4 workspace shortcut hint now has an explicit accessible tooltip explaining each destination. Focused production-shell coverage and format/diff checks pass; native keyboard acceptance remains unverified.

@@ -84,6 +84,7 @@ Audit checkpoint: 2026-10-18, latest verified green complete matrix run `3911831
 - Local branded project evidence: the same smoke saved and reopened the approved watermark as the portable bundled reference rather than an install-specific absolute path; custom watermark paths remain explicitly local assets.
 - Current media-import integrity hardening: commit `b2731e7` protects imported thumbnails and waveform peaks from caller mutation; focused media-import coverage passes 5/5. This remains local evidence pending the next 50-commit push.
 - Current AI/photo state-integrity hardening: commits `a1da5f8`, `9318f76`, `20852cc`, `b564253` and `fb7413d` protect approved plan parameters, local/reference analysis payloads, timed words, photo edit collections and raster pixels; focused suites pass 13, 7, 6 and 21 tests respectively. These local changes remain pending the next 50-commit push.
+- Final pre-push integrity hardening: commits `66a036f`, `3406c6b`, `e98f751`, `38623ad` and the current queue fix protect imported captions, loaded presets, AI catalogs/parameters and export history; focused coverage is green. The batch is ready for the exact 50-commit Release gate, without changing the six open P0 manual/release gates.
 
 ## P0 blockers before V1
 

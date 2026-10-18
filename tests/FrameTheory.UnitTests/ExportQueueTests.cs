@@ -37,6 +37,7 @@ public sealed class ExportQueueTests
         Xunit.Assert.Equal(1, order[0]);
         Xunit.Assert.Equal(ExportQueueJobState.Canceled, second.State);
         Xunit.Assert.Contains(queue.History, item => item.Id == second.Id && item.State == ExportQueueJobState.Canceled);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<ExportQueueHistoryEntry>>(queue.History).IsReadOnly);
     }
 
     [Xunit.Fact]
