@@ -3,10 +3,25 @@ using FrameTheory.Domain;
 
 namespace FrameTheory.Media;
 
-public sealed record ImportedMedia(
-    MediaSourceMetadata Metadata,
-    byte[]? ThumbnailPpm,
-    IReadOnlyList<float> WaveformPeaks);
+public sealed record ImportedMedia
+{
+    public ImportedMedia(MediaSourceMetadata metadata, byte[]? thumbnailPpm, IReadOnlyList<float> waveformPeaks)
+    {
+        ArgumentNullException.ThrowIfNull(metadata);
+        ArgumentNullException.ThrowIfNull(waveformPeaks);
+        Metadata = metadata;
+        _thumbnailPpm = thumbnailPpm?.ToArray();
+        WaveformPeaks = Array.AsReadOnly(waveformPeaks.ToArray());
+    }
+
+    private readonly byte[]? _thumbnailPpm;
+
+    public MediaSourceMetadata Metadata { get; }
+
+    public byte[]? ThumbnailPpm => _thumbnailPpm?.ToArray();
+
+    public IReadOnlyList<float> WaveformPeaks { get; }
+}
 
 public interface IMediaImporter
 {

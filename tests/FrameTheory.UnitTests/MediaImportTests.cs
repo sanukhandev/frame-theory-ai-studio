@@ -6,6 +6,26 @@ namespace FrameTheory.UnitTests;
 public sealed class MediaImportTests
 {
     [Xunit.Fact]
+    public void ImportedMediaExposesImmutableAnalysisSnapshots()
+    {
+        var metadata = new MediaSourceMetadata(
+            MediaId.Parse(new string('c', 64)), new Uri("file:///clip.mp4"), MediaKind.Video, 1, 1,
+            new RationalFrameRate(30, 1), 1);
+        var thumbnail = new byte[] { 1, 2, 3 };
+        var peaks = new List<float> { 0.5f };
+        var imported = new ImportedMedia(metadata, thumbnail, peaks);
+
+        thumbnail[0] = 9;
+        peaks[0] = 0;
+        var exposedThumbnail = imported.ThumbnailPpm!;
+        exposedThumbnail[0] = 8;
+
+        Xunit.Assert.Equal((byte)1, imported.ThumbnailPpm![0]);
+        Xunit.Assert.Equal(0.5f, imported.WaveformPeaks[0]);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<float>>(imported.WaveformPeaks).IsReadOnly);
+    }
+
+    [Xunit.Fact]
     public async Task ImportBuildsThumbnailAndWaveformWithoutMutatingSource()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-import-");
