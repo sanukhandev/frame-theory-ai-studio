@@ -30,5 +30,5 @@ public static class LocalPathSecurity
     }
 
     private static bool IsMacOsSystemAlias(string path) =>
-        OperatingSystem.IsMacOS() && path is "/var" or "/tmp" or "/etc";
+        OperatingSystem.IsMacOS() && path is "/var" or "/tmp" or "/etc" or "/Users";
 }
