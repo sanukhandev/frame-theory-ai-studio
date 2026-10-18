@@ -141,6 +141,8 @@ public sealed class DesktopImportTests
             var window = new MainWindow(viewModel);
             try
             {
+                window.Width = 960;
+                window.Height = 640;
                 window.Show();
                 var canvas = window.GetVisualDescendants()
                     .OfType<Canvas>()
@@ -154,6 +156,15 @@ public sealed class DesktopImportTests
                 var waveform = clips[0].GetVisualDescendants().OfType<Canvas>().Single();
                 Xunit.Assert.Contains("waveform for", Avalonia.Automation.AutomationProperties.GetName(waveform), StringComparison.Ordinal);
                 Xunit.Assert.NotEmpty(waveform.Children);
+
+                viewModel.TimelineEditor.SetZoom(0.05);
+                Dispatcher.UIThread.RunJobs();
+                var viewport = window.GetVisualDescendants()
+                    .OfType<ScrollViewer>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Video timeline clip viewport");
+                viewport.Offset = new Avalonia.Vector(30, 0);
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(2, viewModel.TimelineEditor.ScrollFrame);
             }
             finally
             {

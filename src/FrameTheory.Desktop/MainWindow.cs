@@ -2451,7 +2451,7 @@ public sealed class MainWindow : Window
                     applyingTimelineScroll = false;
                 }
 
-                clipViewport.ScrollChanged += (_, _) =>
+                void ApplyViewportScroll()
                 {
                     if (applyingTimelineScroll || !clipViewport.IsAttachedToVisualTree())
                     {
@@ -2465,6 +2465,15 @@ public sealed class MainWindow : Window
                     if (requestedFrame != timeline.ScrollFrame)
                     {
                         timeline.ScrollBy(requestedFrame - timeline.ScrollFrame);
+                    }
+                }
+
+                clipViewport.ScrollChanged += (_, _) => ApplyViewportScroll();
+                clipViewport.PropertyChanged += (_, args) =>
+                {
+                    if (args.Property == ScrollViewer.OffsetProperty)
+                    {
+                        ApplyViewportScroll();
                     }
                 };
                 clipViewport.AttachedToVisualTree += (_, _) => Dispatcher.UIThread.Post(AlignClipViewport);
