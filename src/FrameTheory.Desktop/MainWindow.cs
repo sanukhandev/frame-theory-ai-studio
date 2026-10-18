@@ -2752,7 +2752,12 @@ public sealed class MainWindow : Window
             expanded: true);
         var styleSection = CreateInspectorExpander(
             "Style library",
-            CreateSectionContent(CreateFlow(presetName, savePreset, loadPreset, presetSelection, applyPreset), presetStatus),
+            CreateSectionContent(CreateFlow(
+                CreateLabeledField("Style name", presetName),
+                savePreset,
+                loadPreset,
+                CreateLabeledField("Loaded styles", presetSelection),
+                applyPreset), presetStatus),
             expanded: false);
         return new Border
         {

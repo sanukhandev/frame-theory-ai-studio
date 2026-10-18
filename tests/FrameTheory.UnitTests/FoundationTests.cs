@@ -969,6 +969,8 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Choose a loaded local style before applying it to the preview.",
                     ToolTip.GetTip(loadedColorStyles));
+                Xunit.Assert.Contains(colorSections["Style library section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Style name");
+                Xunit.Assert.Contains(colorSections["Style library section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Loaded styles");
                 var referenceStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Reference analysis status");
