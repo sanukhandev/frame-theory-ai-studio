@@ -20,6 +20,8 @@
 
 **Normalized-path boundary checkpoint (2026-10-19):** Cache and project media references now validate rooted paths after trimming and separator normalization, closing whitespace-prefixed absolute-path bypasses. Focused Recovery coverage passes 7/7; full Release validation is reserved for the exact 50-commit boundary.
 
+**50-commit boundary preparation checkpoint (2026-10-19):** Timeline beat-marker ingestion now rejects non-finite or out-of-range waveform peaks before mutating editor state; focused TimelineEditor coverage passes 17/17. The next commit reaches the owner-requested exact 50-commit local batch; full Release validation and hosted revalidation remain required before any completion claim.
+
 **Latest hosted 50-commit gate (2026-10-19):** Quality Gates run `39168203239` passed for `742cd38` across documentation/schema validation, Ubuntu, Windows and macOS restore/build/test, native media, headless shell/UI automation, formatting, portable archives, installer/DMG/DEB validation, packaged relaunch and checksums. This confirms the pushed batch; the six tracked partial P0 gates remain open because manual visual/HiDPI/screen-reader, legal redistribution, signing/clean-host and final-audit evidence are still required.
 
 **Post-push integrity Release gate (2026-10-19):** The 16 verified local hardening commits after `742cd38` pass 305 unit tests and 2 golden tests, a warning-free Release build, format verification, repository validation and `git diff --check`. These commits remain local until the next exact 50-commit push boundary; the six tracked partial P0 gates remain open.
