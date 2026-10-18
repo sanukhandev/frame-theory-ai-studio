@@ -19,6 +19,7 @@ Audit checkpoint: 2026-10-18, latest previously verified green packaging run `39
 - Latest provenance evidence: run `39101406586` passed per-OS native-bundle manifest generation and pre-package verification with bounded tool versions, byte lengths and SHA-256 for every staged file, supporting FT-1003 review without closing its legal/redistribution gate.
 - Latest branding evidence: the policy-named source attachment is imported at `assets/brand/frame-theory-original.png`, byte-verified in the unit suite and guarded in CI; hosted branded-output and release-owner rights/visual review remain open.
 - Local branded-output evidence: the 2026-10-18 FFmpeg 9.0.2 synthetic timeline smoke reported `watermark=approved`, ffprobe verified video/audio streams, and branded batch outputs covered landscape/square/portrait dimensions; this does not replace hosted three-OS or release-owner review.
+- Local branded project evidence: the same smoke saved and reopened the approved watermark as the portable bundled reference rather than an install-specific absolute path; custom watermark paths remain explicitly local assets.
 
 ## P0 blockers before V1
 
