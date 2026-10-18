@@ -26,6 +26,21 @@ dotnet tools/FrameTheory.PhotoExportSmoke/bin/Release/net10.0/FrameTheory.PhotoE
 For a video fixture, the media-import smoke also extracts its first audio track through the transcription preparer, probes the owned temporary WAV, and deletes it on completion.
 The solution targets .NET 10. The desktop shell uses Avalonia 12.1.2 with code-only controls and the Fluent theme; media tasks beginning with FT-003/FT-006 still require FFmpeg/ffprobe.
 
+## Offline verified transcript import
+The Video workspace's **Import verified transcript JSON** action accepts a local audio/video source followed by a JSON sidecar with this shape:
+
+```json
+{
+  "Source": "file:///absolute/path/to/source.wav",
+  "SourceFingerprint": "sha256:<lowercase-source-sha256>",
+  "Words": [
+    { "Text": "hello", "StartMs": 100, "EndMs": 400 }
+  ]
+}
+```
+
+The source URI must match the selected file and the provider recomputes the source SHA-256 before importing editable verified caption cues. Linked source or sidecar files, mismatched fingerprints, invalid timing and cancellation leave the current timeline unchanged. This is an offline interchange path for a separately licensed local ASR tool; no ASR executable or model is bundled by this repository.
+
 ## Repository target layout
 ```text
 src/
