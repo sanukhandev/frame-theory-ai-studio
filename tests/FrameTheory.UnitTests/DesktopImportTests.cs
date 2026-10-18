@@ -116,6 +116,9 @@ public sealed class DesktopImportTests
                 secondWindowClipButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal("clip.mp4", Xunit.Assert.IsType<ImportedMediaViewModel>(mediaList.SelectedItem).Name);
+                Xunit.Assert.Equal(
+                    Avalonia.Media.Color.FromRgb(49, 67, 111),
+                    Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(mediaCard.Background).Color);
             }
             finally
             {
