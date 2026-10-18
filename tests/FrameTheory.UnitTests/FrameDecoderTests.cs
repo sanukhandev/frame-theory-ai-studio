@@ -87,6 +87,30 @@ public sealed class FrameDecoderTests
     }
 
     [Xunit.Fact]
+    public async Task DecoderInvalidatesCachedFramesWhenSourceChanges()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-decode-change-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "clip.mp4");
+            await File.WriteAllTextAsync(path, "original");
+            var runner = new StubProcessRunner();
+            var decoder = new FfmpegFrameDecoder(runner);
+            var uri = new Uri(path);
+
+            await decoder.DecodeFrameAsync(uri, new RationalFrameRate(30, 1), 0, CancellationToken.None);
+            await File.WriteAllTextAsync(path, "replacement with different length");
+            await decoder.DecodeFrameAsync(uri, new RationalFrameRate(30, 1), 0, CancellationToken.None);
+
+            Xunit.Assert.Equal(2, runner.InvocationCount);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task DecoderRejectsSymlinkedTemporaryOutputBeforeReadingIt()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-decode-output-link-");

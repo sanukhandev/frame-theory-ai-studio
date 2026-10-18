@@ -95,7 +95,8 @@ public sealed class FfmpegFrameDecoder : IPreviewFrameDecoder, IRgbaPreviewFrame
             throw new FileNotFoundException("The media file was not found.", path);
         }
 
-        var cacheKey = $"{file.AbsoluteUri}|{frameRate}|{frameIndex}|rgba={rgba}";
+        var fileInfo = new FileInfo(path);
+        var cacheKey = $"{file.AbsoluteUri}|size={fileInfo.Length}|last-write={fileInfo.LastWriteTimeUtc.Ticks}|{frameRate}|{frameIndex}|rgba={rgba}";
         var cached = TryGetCached(cacheKey);
         if (cached is not null)
         {
