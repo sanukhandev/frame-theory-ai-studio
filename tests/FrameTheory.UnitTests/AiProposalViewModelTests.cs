@@ -49,6 +49,19 @@ public sealed class AiProposalViewModelTests
     }
 
     [Xunit.Fact]
+    public void ValidatedActionsExposeAReadOnlySnapshot()
+    {
+        var viewModel = new AiProposalViewModel();
+        viewModel.Validate(
+            """
+            {"schemaVersion":"1.0","planId":"p","projectId":"project-1","intent":"x","actions":[{"id":"a","type":"clip.split","targetId":"clip-1","startFrame":0,"durationFrames":1,"params":{}}]}
+            """,
+            new AiPlanValidationContext("project-1", new HashSet<string>(["clip-1"]), 20));
+
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<AiProposalActionViewModel>>(viewModel.Actions).IsReadOnly);
+    }
+
+    [Xunit.Fact]
     public void InvalidPlanClearsAnyPreviousProposal()
     {
         var viewModel = new AiProposalViewModel();

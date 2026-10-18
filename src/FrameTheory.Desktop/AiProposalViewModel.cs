@@ -55,7 +55,7 @@ public sealed class AiProposalViewModel : INotifyPropertyChanged
                 action.PropertyChanged -= OnActionPropertyChanged;
             }
 
-            _actions = value;
+            _actions = Array.AsReadOnly(value.ToArray());
             foreach (var action in _actions)
             {
                 action.PropertyChanged += OnActionPropertyChanged;
