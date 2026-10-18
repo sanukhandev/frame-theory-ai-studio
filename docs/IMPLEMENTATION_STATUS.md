@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Hosted editor surface validation checkpoint (2026-10-18):** Run `39133151567` for pushed commit `4ff8410` is green across documentation/schema, Windows, macOS and Linux restore/build/test, native FFmpeg media smoke, formatting, headless desktop shell, Windows UI Automation, portable archives, Windows installer, macOS DMG, Linux DEB, packaged relaunch and checksums. The batch verifies the thumbnail-card media browser, compact list spacing, structured timeline lanes and live status UIA path. Manual native visual/HiDPI/screen-reader acceptance remains open.
+
 **Editor surface regression checkpoint (2026-10-18):** The headless shell contract now guards the thumbnail-card media bin's wrapping template and height plus the structured timeline lane surface. The focused adaptive shell test passes, formatting and `git diff --check` pass; this completes the current ten-commit local UI batch and requires the mandated hosted push before citing cross-platform evidence.
 
 **Timeline lane checkpoint (2026-10-18):** Video tracks now render as labeled, bordered lanes with real selectable clip chips and frame ranges instead of an unstructured button stack. The existing timeline model, selection actions and accessibility names are unchanged. Release build with warnings-as-errors, the adaptive shell test, formatting and `git diff --check` pass locally; hosted/native visual validation remains pending.
