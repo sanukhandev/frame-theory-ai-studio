@@ -9,8 +9,21 @@ public enum CapabilityState
 
 public sealed record CapabilityStatus(string Name, CapabilityState State, string Detail);
 
-public sealed record CapabilityReport(string Platform, string Architecture, IReadOnlyList<CapabilityStatus> Entries)
+public sealed record CapabilityReport
 {
+    public CapabilityReport(string platform, string architecture, IReadOnlyList<CapabilityStatus> entries)
+    {
+        Platform = platform;
+        Architecture = architecture;
+        Entries = Array.AsReadOnly((entries ?? throw new ArgumentNullException(nameof(entries))).ToArray());
+    }
+
+    public string Platform { get; }
+
+    public string Architecture { get; }
+
+    public IReadOnlyList<CapabilityStatus> Entries { get; }
+
     public string Summary =>
         $"{Platform} {Architecture} · " +
         string.Join(" · ", Entries.Where(entry => entry.Name is "FFmpeg" or "ffprobe" or "Storage")

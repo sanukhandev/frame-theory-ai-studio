@@ -1749,6 +1749,18 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public void CapabilityReportSnapshotsEntries()
+    {
+        var entries = new List<CapabilityStatus> { new("Storage", CapabilityState.Available, "ready") };
+        var report = new CapabilityReport("Test", "x64", entries);
+
+        entries.Clear();
+
+        Xunit.Assert.Single(report.Entries);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<CapabilityStatus>>(report.Entries).IsReadOnly);
+    }
+
+    [Xunit.Fact]
     public async Task CapabilityDetectorReportsHostAndHonorsCancellation()
     {
         var detector = new FrameTheory.Platform.SystemCapabilityDetector();
