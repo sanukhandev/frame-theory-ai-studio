@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Current batch checkpoint (2026-10-18):** Local Release validation passes 225 unit tests and 2 golden tests with 0 failures; repository documentation/schema validation, formatting and `git diff --check` also pass. This checkpoint covers the recovery, storage, workspace-state, color-golden, capability-cancellation, credential-cancellation, package-integrity and relink-fingerprint increments in the current nine-commit batch. The batch is being pushed only after its tenth commit; hosted revalidation is required before treating these changes as cross-platform evidence.
+
 **Storage recovery boundary checkpoint (2026-10-18):** `ProjectRecoveryService` now rejects reparse-point project directories, parent media directories and final media entries before missing-media detection or relink resolution. Domain-level relative-path validation remains enforced. Focused recovery coverage passes 3/3 and the Release solution build passes with 0 warnings/errors; unsupported local symlink creation is skipped by the test on hosts without the required privilege.
 
 **Workspace-state persistence checkpoint (2026-10-18):** `FileWorkspaceStateStore` now writes a unique temporary file with write-through flushing, atomically replaces the selected-workspace state and cleans temporary artifacts on success or failure. Focused Foundation coverage passes 15/15; the Release solution build and formatting verification pass with 0 warnings/errors. Cross-platform interactive GUI acceptance remains separately open under FT-901/FT-902.
