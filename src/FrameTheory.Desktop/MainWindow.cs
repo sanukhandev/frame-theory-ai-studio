@@ -1939,7 +1939,7 @@ public sealed class MainWindow : Window
                 };
                 Grid.SetColumn(trackLabel, 1);
                 Grid.SetColumn(clips, 2);
-                return new Border
+                var trackLane = new Border
                 {
                     MinHeight = 48,
                     Margin = new Thickness(0, 0, 0, 4),
@@ -1950,6 +1950,9 @@ public sealed class MainWindow : Window
                     BorderThickness = new Thickness(1),
                     Child = trackGrid
                 };
+                AutomationProperties.SetName(trackLane, $"{item.Kind} timeline lane");
+                ToolTip.SetTip(trackLane, $"{item.Kind} track {item.Id} · {item.Clips.Count} clip(s).");
+                return trackLane;
             }, supportsRecycling: false)
         };
         AutomationProperties.SetName(tracks, "Timeline tracks");

@@ -77,8 +77,18 @@ public sealed class DesktopImportTests
                 var mediaCard = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Imported media card: clip.mp4");
+                var videoLane = window.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Video timeline lane");
+                var videoAccent = videoLane.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => control.Width == 4);
                 Xunit.Assert.Contains("frames 0–29", ToolTip.GetTip(clipButton) as string, StringComparison.Ordinal);
                 Xunit.Assert.Contains("Video · clip.mp4", ToolTip.GetTip(mediaCard) as string, StringComparison.Ordinal);
+                Xunit.Assert.Contains("Video track Video 1", ToolTip.GetTip(videoLane) as string, StringComparison.Ordinal);
+                Xunit.Assert.Equal(
+                    Avalonia.Media.Color.FromRgb(95, 125, 255),
+                    Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(videoAccent.Background).Color);
                 Xunit.Assert.Equal(128, clipButton.MinWidth);
                 Xunit.Assert.Equal(HorizontalAlignment.Left, clipButton.HorizontalContentAlignment);
                 mediaList.SelectedIndex = 0;
