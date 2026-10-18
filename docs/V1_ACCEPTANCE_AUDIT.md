@@ -5,6 +5,7 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 Audit checkpoint: 2026-10-18, latest verified green complete matrix run `39118310628`.
 
 - Latest green hosted responsive-shell revalidation: run `39152462667` for commit `afe2490` passed documentation/schema validation plus Windows, macOS and Linux restore/build/test, native FFmpeg smoke, formatting, headless shell, Windows UI automation, portable archive, Windows installer, macOS DMG, Linux DEB, packaged relaunch and checksum gates. This confirms automated evidence for the responsive editor-shell increment but does not close manual native visual, 1280x800/HiDPI, screen-reader, legal, signing or clean-host release gates.
+- Latest hosted 50-commit gate: run `39168203239` for commit `742cd38` passed documentation/schema validation plus Ubuntu, Windows and macOS restore/build/test, native media, headless shell/UI automation, formatting, portable archives, installer/DMG/DEB validation, packaged relaunch and checksums. The six partial P0 gates remain open; this is not a V1-complete claim.
 
 ## Evidence
 
