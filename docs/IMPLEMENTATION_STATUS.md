@@ -6,6 +6,8 @@
 
 **GitHub epic-closure checkpoint (2026-10-19):** A live audit confirmed every implementation issue under E00-E07 is closed, so completed umbrella epics E00-E07 were closed with the local Release evidence above. GitHub now reports 63 closed issues and 19 open issues. The six partial P0 gates remain `FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005` and `FT-1006`; E11/E12 work and external/manual release evidence remain open. This is not a V1 completion claim.
 
+**FT-901 compact-header checkpoint (2026-10-19):** Workspace headers now stack their status and local/optional-AI mode metadata below the title at the compact 960px shell width, then restore the two-column layout at standard width. Avalonia headless coverage verifies both layouts; the full local gate passes 314 unit tests and 2 golden tests with format and diff checks clean. Native visual, HiDPI and screen-reader acceptance remains open.
+
 **Core boundary hardening checkpoint (2026-10-19):** `GeminiClientOptions` now honors its optional timeout/retry-delay parameters with bounded two-minute/one-second defaults, and `MediaSourceMetadata` rejects negative durations. Focused Gemini coverage passes 12/12 and focused Foundation coverage passes 25/25; the next full Release gate remains required before the next 50-commit push.
 
 **Export queue integrity checkpoint (2026-10-19):** Export job cancellation now preserves terminal success/failure state under repeated or late cancellation, with synchronized state and completion transitions. The full local Release gate passes 310 unit tests and 2 golden tests, a warning-free build, format verification, repository validation and `git diff --check`; this evidence remains local until the exact 50-commit push boundary.

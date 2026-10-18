@@ -1015,41 +1015,72 @@ public sealed class MainWindow : Window
         ToolTip.SetTip(mode, workspace.Name == "AI"
             ? "Gemini is optional and only runs after explicit consent."
             : "This workspace runs locally without Gemini.");
+        var title = new StackPanel
+        {
+            Spacing = 3,
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = workspace.Name,
+                    FontSize = 24,
+                    FontWeight = FontWeight.SemiBold,
+                    Foreground = Brushes.White
+                },
+                new TextBlock
+                {
+                    Text = workspace.Description,
+                    FontSize = 13,
+                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+                    TextWrapping = TextWrapping.Wrap
+                }
+            }
+        };
+        var meta = new StackPanel
+        {
+            Spacing = 3,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            Children = { status, mode }
+        };
         var header = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("*,Auto"),
             Children =
             {
-                new StackPanel
-                {
-                    Spacing = 3,
-                    Children =
-                    {
-                        new TextBlock
-                        {
-                            Text = workspace.Name,
-                            FontSize = 24,
-                            FontWeight = FontWeight.SemiBold,
-                            Foreground = Brushes.White
-                        },
-                        new TextBlock
-                        {
-                            Text = workspace.Description,
-                            FontSize = 13,
-                            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
-                            TextWrapping = TextWrapping.Wrap
-                        }
-                    }
-                },
-                new StackPanel
-                {
-                    Spacing = 3,
-                    HorizontalAlignment = HorizontalAlignment.Right,
-                    Children = { status, mode }
-                }
+                title,
+                meta
             }
         };
-        Grid.SetColumn(header.Children[1], 1);
+        AutomationProperties.SetName(header, $"{workspace.Name} workspace header");
+        Grid.SetColumn(meta, 1);
+        void RefreshHeaderLayout(double width)
+        {
+            var topLevel = TopLevel.GetTopLevel(header);
+            var windowWidth = topLevel is Window window && !double.IsNaN(window.Width)
+                ? window.Width
+                : topLevel?.Bounds.Width ?? width;
+            var compact = windowWidth > 0 && windowWidth < 1120;
+            header.ColumnDefinitions = compact
+                ? new ColumnDefinitions("*")
+                : new ColumnDefinitions("*,Auto");
+            header.RowDefinitions = compact
+                ? new RowDefinitions("Auto,Auto")
+                : new RowDefinitions("Auto");
+            Grid.SetColumn(title, 0);
+            Grid.SetRow(title, 0);
+            Grid.SetColumn(meta, compact ? 0 : 1);
+            Grid.SetRow(meta, compact ? 1 : 0);
+            meta.Orientation = compact ? Orientation.Horizontal : Orientation.Vertical;
+            meta.HorizontalAlignment = compact ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+            meta.Spacing = compact ? 8 : 3;
+            status.HorizontalAlignment = compact ? HorizontalAlignment.Left : HorizontalAlignment.Right;
+            status.MaxWidth = compact ? 320 : 240;
+            mode.Margin = compact ? new Thickness(0, 2, 0, 0) : new Thickness(12, 2, 0, 0);
+        }
+
+        header.SizeChanged += (_, args) => RefreshHeaderLayout(args.NewSize.Width);
+        header.AttachedToVisualTree += (_, _) => Dispatcher.UIThread.Post(() => RefreshHeaderLayout(header.Bounds.Width));
+        RefreshHeaderLayout(header.Width);
         return header;
     }
 
