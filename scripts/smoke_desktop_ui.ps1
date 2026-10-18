@@ -76,8 +76,8 @@ try {
     $uiDeadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
 
     $bounds = $window.Current.BoundingRectangle
-    if ($bounds.Width -lt 960 -or $bounds.Height -lt 640) {
-        throw "Desktop window bounds were too small: $($bounds.Width)x$($bounds.Height)."
+    if ($bounds.Width -lt 1280 -or $bounds.Height -lt 800) {
+        throw "Desktop window launch bounds were too small for the 1280x800 contract: $($bounds.Width)x$($bounds.Height)."
     }
 
     $transformPattern = $null

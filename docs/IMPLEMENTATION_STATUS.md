@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Native launch-size checkpoint (2026-10-18):** Windows UI automation now fails closed unless the real desktop window launches at least the documented `1280x800` bounds before exercising the supported `960x640` resize. PowerShell parsing and diff checks pass; hosted native UI confirmation is pending.
+
 **Native shortcut smoke checkpoint (2026-10-18):** `scripts/smoke_desktop_ui.ps1` now drives and verifies real `Ctrl+1..4` workspace selection through Windows UI Automation instead of checking only `Ctrl+3`. PowerShell parsing passes and focused Foundation coverage passes 19/19; hosted confirmation is pending the next exact-ten-commit push.
 
 **Latest hosted revalidation checkpoint (2026-10-18):** Run `39118310628` for pushed commit `807230f` passed documentation/schema validation plus Windows, macOS and Linux restore, build, native FFmpeg media smoke, formatting, full tests, headless desktop shell, publish/archive, installer/DMG/DEB, packaged relaunch and SHA-256 verification. The run validates the ten-commit path-security batch; manual GUI, live-provider, legal, signing, clean-host and final-audit gates remain open.
