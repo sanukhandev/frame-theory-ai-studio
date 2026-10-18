@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**AI workspace hierarchy checkpoint (2026-10-18):** The optional Gemini surface now separates Provider, Consent and analysis scope, Activity, Plan input and revision, Review and apply, and Reusable recipe sections. Existing secure key storage, explicit upload consent, schema validation and transactional actions remain functional; desktop build, headless shell and formatting checks pass. Hosted visual revalidation remains pending.
+
 **Color workspace hierarchy checkpoint (2026-10-18):** The Color workspace now groups reference matching, before/after preview, grade controls and reusable style-library actions, with the real image previews and consent-gated Gemini actions preserved. Desktop build, headless shell coverage and formatting checks pass; hosted visual revalidation remains pending.
 
 **Photo workspace hierarchy checkpoint (2026-10-18):** The Photo workspace now leads with a contained canvas surface and labels Project, Layers and blend, Mask and retouch, Grade and Export tool groups. The real import, non-destructive edit, recovery and export handlers remain unchanged; the desktop Release build, headless shell test and formatting checks pass. Hosted visual revalidation remains pending.

@@ -718,16 +718,19 @@ public sealed class MainWindow : Window
                 Spacing = 8,
                 Children =
                 {
-                    new TextBlock { Text = "Optional Gemini Creative Director", FontWeight = FontWeight.SemiBold },
+                    new TextBlock { Text = "Optional Gemini Creative Director", FontSize = 14, FontWeight = FontWeight.SemiBold, Foreground = Brushes.White },
                     new TextBlock { Text = "Manual import, editing, preview and export never require a key.", TextWrapping = TextWrapping.Wrap },
+                    CreateSectionLabel("Provider"),
                     model,
                     apiKey,
                     CreateFlow(save, clear),
                     status,
-                    new TextBlock { Text = "Analysis scope (prepared locally; no upload occurs here):", FontWeight = FontWeight.SemiBold },
+                    CreateSectionLabel("Consent and analysis scope"),
+                    new TextBlock { Text = "Samples are prepared locally; upload occurs only after explicit consent.", TextWrapping = TextWrapping.Wrap },
                     CreateFlow(videoFrames, audioWaveform, photoPreview),
                     uploadConsent,
                     CreateFlow(prepareAnalysis, analyzeApprovedSamples),
+                    CreateSectionLabel("Activity"),
                     analysisStatus,
                     usageStatus,
                     activityLog
@@ -858,12 +861,15 @@ public sealed class MainWindow : Window
                 Spacing = 8,
                 Children =
                 {
-                    new TextBlock { Text = "AI proposal review", FontWeight = FontWeight.SemiBold },
+                    new TextBlock { Text = "AI proposal review", FontSize = 14, FontWeight = FontWeight.SemiBold, Foreground = Brushes.White },
                     new TextBlock { Text = "Plans are untrusted data. Only checked actions are applied, atomically, through editable timeline operations; failures roll back the whole group.", TextWrapping = TextWrapping.Wrap },
+                    CreateSectionLabel("Plan input and revision"),
                     planJson,
                     CreateFlow(revisionInstruction, requestRevision),
                     revisionStatus,
+                    CreateSectionLabel("Review and apply"),
                     CreateFlow(validate, approve, undo, clear),
+                    CreateSectionLabel("Reusable recipe"),
                     CreateFlow(recipeName, saveRecipe, loadRecipe),
                     recipeStatus,
                     approvalSummary,
