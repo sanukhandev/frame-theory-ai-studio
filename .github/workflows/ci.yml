@@ -64,7 +64,15 @@ jobs:
       - name: Generate NuGet dependency inventory
         if: steps.detect.outputs.has_solution == 'true'
         shell: pwsh
-        run: ./scripts/generate_sbom.ps1 -OutputPath artifacts/sbom/nuget-packages.json
+        run: |
+          ./scripts/generate_sbom.ps1 -OutputPath artifacts/sbom/nuget-packages.json
+          $licenses = @(Get-Content artifacts/sbom/nuget-licenses.json | ConvertFrom-Json)
+          if ($licenses.Count -eq 0) {
+            throw "NuGet license metadata report is empty."
+          }
+          if (-not ($licenses | Where-Object { $_.id -eq 'Avalonia' -and $_.licenseExpression -eq 'MIT' -and $_.metadataFound })) {
+            throw "NuGet license metadata report did not include Avalonia MIT metadata."
+          }
       - name: Build
         if: steps.detect.outputs.has_solution == 'true'
         run: dotnet build --no-restore -c Release
