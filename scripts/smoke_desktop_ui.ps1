@@ -183,6 +183,7 @@ try {
         "Select at playhead" = @("Select video clip at playhead", "Select at playhead")
         "Export composite MP4" = @("Export timeline MP4", "Export composite MP4")
         "Timeline selection inspector" = @("Timeline selection inspector", "Timeline selection context")
+        "Timeline action status" = @("Timeline action status", "Quick save status", "Quick export status")
         "Before" = @("Color grade before preview", "Before")
         "After" = @("Color grade after preview", "After")
     }
