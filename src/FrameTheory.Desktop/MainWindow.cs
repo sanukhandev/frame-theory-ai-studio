@@ -934,12 +934,23 @@ public sealed class MainWindow : Window
             FontWeight = FontWeight.SemiBold,
             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
         };
+        var selectedMediaChip = new Border
+        {
+            MaxWidth = 180,
+            Padding = new Thickness(7, 3),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 33, 40)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(59, 68, 83)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(4),
+            Child = selectedMediaSummary
+        };
+        AutomationProperties.SetName(selectedMediaChip, "Selected media chip");
         var mediaHeader = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"),
-            Children = { mediaTitle, selectedMediaSummary, assetSummary }
+            Children = { mediaTitle, selectedMediaChip, assetSummary }
         };
-        Grid.SetColumn(selectedMediaSummary, 1);
+        Grid.SetColumn(selectedMediaChip, 1);
         Grid.SetColumn(assetSummary, 2);
         grid.Children.Add(mediaHeader);
         var mediaSearchRow = new Grid
