@@ -1993,8 +1993,20 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(presetName, "Color style name");
         var presetSelection = new ComboBox { Width = 220 };
         AutomationProperties.SetName(presetSelection, "Loaded color styles");
-        var presetStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var presetStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(presetStatus, "Color style library status");
+        ToolTip.SetTip(presetStatus, "Status of local reusable color style save and load operations.");
         var savePreset = new Button { Content = "Save style library" };
         AutomationProperties.SetName(savePreset, "Save color style library");
         ToolTip.SetTip(savePreset, "Save the current grade as a reusable local style library.");
@@ -2157,9 +2169,21 @@ public sealed class MainWindow : Window
         applyReference.Classes.Add("primary");
         AutomationProperties.SetName(applyReference, "Apply reviewed reference grade");
         ToolTip.SetTip(applyReference, "Apply the reviewed reference grade to the local preview without uploading it again.");
-        var referenceStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var referenceStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(referenceStatus, "Reference analysis status");
-        referenceStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.ReferenceAnalysisStatusText)));
+        ToolTip.SetTip(referenceStatus, "Status of the latest bounded visual-reference analysis.");
+        referenceStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.ReferenceAnalysisStatusText)));
         void RefreshReferenceSources()
         {
             referenceSource.ItemsSource = viewModel.ImportedMedia;

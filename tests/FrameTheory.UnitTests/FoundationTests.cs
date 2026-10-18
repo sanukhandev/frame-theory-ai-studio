@@ -580,6 +580,24 @@ public sealed class FoundationTests
                 Xunit.Assert.True(colorInspectorStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, colorInspectorStatus.FontSize);
                 Xunit.Assert.Equal("Current local color grade and preview status.", ToolTip.GetTip(colorInspectorStatus));
+                var colorSections = window.GetVisualDescendants()
+                    .OfType<Expander>()
+                    .ToDictionary(control => AutomationProperties.GetName(control)!, StringComparer.Ordinal);
+                colorSections["Style library section"].IsExpanded = true;
+                colorSections["Reference match section"].IsExpanded = true;
+                Dispatcher.UIThread.RunJobs();
+                var colorStyleStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color style library status");
+                Xunit.Assert.True(colorStyleStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, colorStyleStatus.FontSize);
+                Xunit.Assert.Equal("Status of local reusable color style save and load operations.", ToolTip.GetTip(colorStyleStatus));
+                var referenceStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Reference analysis status");
+                Xunit.Assert.True(referenceStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, referenceStatus.FontSize);
+                Xunit.Assert.Equal("Status of the latest bounded visual-reference analysis.", ToolTip.GetTip(referenceStatus));
                 Xunit.Assert.Equal(
                     "Compare the ungraded source with the current shared color grade.",
                     ToolTip.GetTip(colorComparison));
