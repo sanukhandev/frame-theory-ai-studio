@@ -1226,17 +1226,22 @@ public sealed class MainWindow : Window
             }
         };
         var frameStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(frameStatus, "Timeline frame status");
         frameStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentFrame"));
         var positionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(positionStatus, "Timeline position status");
         positionStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentPosition"));
         var ruler = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(ruler, "Timeline ruler");
         ruler.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.RulerText"));
         var selectionContext = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(selectionContext, "Timeline selection context");
         selectionContext.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.SelectionContextText"));
         var tracks = new ListBox { Height = 100 };
         AutomationProperties.SetName(tracks, "Timeline tracks");
         tracks.Bind(ItemsControl.ItemsSourceProperty, new Binding("TimelineEditor.TrackRows"));
         var beatMarkers = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(beatMarkers, "Timeline beat markers");
         beatMarkers.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.BeatMarkersText"));
         var beatDetection = new ComboBox { ItemsSource = new[] { "Amplitude peaks", "Energy onsets" }, SelectedIndex = 0, Width = 150 };
         AutomationProperties.SetName(beatDetection, "Beat detection mode");
@@ -1270,6 +1275,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(selectAudio, "Select audio clip at playhead");
         selectAudio.Click += (_, _) => timeline.SelectAt(timeline.CurrentFrame, "Audio 1");
         var operationStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(operationStatus, "Timeline operation status");
         void RunTimelineAction(Action action)
         {
             try
