@@ -26,6 +26,49 @@ public sealed class GeminiInteractionsTests
     }
 
     [Xunit.Fact]
+    public void FileHistoryDoesNotFollowReparsePointLogPath()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-history-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-gemini-history-external-");
+        try
+        {
+            var externalPath = Path.Combine(externalDirectory.FullName, "usage.jsonl");
+            File.WriteAllText(externalPath, "original");
+            var linkedPath = Path.Combine(directory.FullName, "usage.jsonl");
+            File.CreateSymbolicLink(linkedPath, externalPath);
+            var history = new FileGeminiInteractionHistory(linkedPath);
+
+            history.Record(new GeminiInteractionRecord(
+                DateTimeOffset.UtcNow,
+                "gemini-2.5-flash",
+                null,
+                true,
+                null,
+                null,
+                1,
+                1,
+                null));
+
+            Xunit.Assert.Equal("original", File.ReadAllText(externalPath));
+            Xunit.Assert.Empty(history.ReadRecent());
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task FollowUpParsesUsageAndKeepsPromptAndSecretOutOfLocalHistory()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-history-");

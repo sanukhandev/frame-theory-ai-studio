@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Gemini history path checkpoint (2026-10-18):** Redacted Gemini interaction history now refuses linked log files and parent directories on record/read, preserving the existing best-effort offline failure behavior without following redirected paths. Focused Gemini interaction coverage passes 10/10, repository validation, formatting and `git diff --check` pass. This completes the tenth local commit since `e95f5cb`; push is now due.
+
 **Full local gate checkpoint (2026-10-18):** The current path-security batch passes the full Release solution gate with 244 unit tests and 2 golden tests, 0 failures, repository validation, formatting and `git diff --check`. Native FFmpeg smoke and three-OS packaging remain hosted-only evidence; manual, legal, signing, clean-host and final-audit gates remain open.
 
 **Path-guard regression contract checkpoint (2026-10-18):** Documentation-stage validation now rejects any production C# reintroduction of `FileAttributes.ReparsePoint` outside `LocalPathSecurity`, while requiring every protected entry point to call the shared guard. Validator, formatting and `git diff --check` pass.

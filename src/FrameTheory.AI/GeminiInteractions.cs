@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using FrameTheory.Application;
+using FrameTheory.Domain;
 
 namespace FrameTheory.AI;
 
@@ -166,6 +167,11 @@ public sealed class FileGeminiInteractionHistory : IGeminiInteractionHistory, IG
                 return;
             }
 
+            if (LocalPathSecurity.ContainsReparsePoint(LogPath))
+            {
+                return;
+            }
+
             Directory.CreateDirectory(directory);
             var line = JsonSerializer.Serialize(record) + Environment.NewLine;
             lock (_sync)
@@ -187,6 +193,11 @@ public sealed class FileGeminiInteractionHistory : IGeminiInteractionHistory, IG
 
         try
         {
+            if (LocalPathSecurity.ContainsReparsePoint(LogPath))
+            {
+                return [];
+            }
+
             lock (_sync)
             {
                 if (!File.Exists(LogPath))
