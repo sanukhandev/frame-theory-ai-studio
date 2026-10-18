@@ -1,6 +1,6 @@
 # V1 Acceptance Audit
 
-Audit checkpoint: 2026-10-18, latest previously verified green packaging run `39097200292` plus the preceding implementation matrix runs recorded in `docs/IMPLEMENTATION_STATUS.md`.
+Audit checkpoint: 2026-10-18, latest verified green packaging run `39105543584` plus the preceding implementation matrix runs recorded in `docs/IMPLEMENTATION_STATUS.md`.
 
 ## Evidence
 
@@ -18,7 +18,7 @@ Audit checkpoint: 2026-10-18, latest previously verified green packaging run `39
 - Latest clean-`PATH` evidence: run `39100413937` passed bundled media import/audio probing with host FFmpeg removed from `PATH` on Windows, macOS and Linux, alongside support-file packaging, relaunch, uninstall and checksum jobs. This strengthens runtime independence evidence but does not clear legal, clean-host production, signing or V1 gates.
 - Latest provenance evidence: run `39101406586` passed per-OS native-bundle manifest generation and pre-package verification with bounded tool versions, byte lengths and SHA-256 for every staged file, supporting FT-1003 review without closing its legal/redistribution gate.
 - Latest branding evidence: the policy-named source attachment is imported at `assets/brand/frame-theory-original.png`, byte-verified in the unit suite and guarded in CI; hosted run `39102849779` asserted `watermark=approved` and the packaged asset on Windows, macOS and Linux. Release-owner rights/visual review remains open.
-- Latest post-push gate: run `39104297945` passed documentation, Windows, macOS and Linux jobs, including the corrected macOS DMG detach retry and process teardown path. The earlier `39103650378` failure was isolated to the first `hdiutil detach` returning `Resource busy`; commits `7a4c394`, `f69db0f` and `2f34e1f` address and guard that cleanup path.
+- Latest post-push gate: run `39105543584` passed documentation/schema validation plus Windows, macOS and Linux build, native-media, formatting, test, portable archive, installer/DMG/DEB and checksum jobs. Windows also passed the desktop UI automation smoke with `Import verified transcript JSON`; macOS and Linux passed their platform packaging and relaunch checks. The earlier `39103650378` failure was isolated to the first `hdiutil detach` returning `Resource busy`; commits `7a4c394`, `f69db0f` and `2f34e1f` address and guard that cleanup path.
 - Local branded-output evidence: the 2026-10-18 FFmpeg 9.0.2 synthetic timeline smoke reported `watermark=approved`, ffprobe verified video/audio streams, and branded batch outputs covered landscape/square/portrait dimensions; this does not replace hosted three-OS or release-owner review.
 - Local branded project evidence: the same smoke saved and reopened the approved watermark as the portable bundled reference rather than an install-specific absolute path; custom watermark paths remain explicitly local assets.
 
