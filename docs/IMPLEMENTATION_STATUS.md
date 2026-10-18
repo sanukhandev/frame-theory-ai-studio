@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Local responsive-shell gate checkpoint (2026-10-18):** The UI follow-up batch passes `dotnet build FrameTheory.sln --configuration Release --no-restore --warnaserror` with 0 warnings/errors, 266 unit tests, 2 golden tests, repository/schema validation, `dotnet format --verify-no-changes` and `git diff --check`. Hosted revalidation is intentionally deferred until the next exact-ten push; native visual, HiDPI and screen-reader acceptance remains open.
+
 **Accessible input-discovery checkpoint (2026-10-18):** Editable fields that receive an accessible name now also receive a fallback tooltip when no control-specific guidance is configured. Existing secure-key, consent and workflow tooltips remain authoritative; the focused Foundation shell suite remains green.
 
 **Export action hierarchy checkpoint (2026-10-18):** The multi-target social export action now uses the same production primary-action treatment as single-target timeline export, photo export and approved-edit actions. Foundation coverage verifies the reachable action class; export behavior and cancellation remain unchanged.
