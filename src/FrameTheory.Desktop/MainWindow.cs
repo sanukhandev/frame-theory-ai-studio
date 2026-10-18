@@ -737,8 +737,8 @@ public sealed class MainWindow : Window
             CreateWorkspaceHeader(workspace, viewModel),
             new Border
             {
-                Margin = new Thickness(0, 14, 0, 0),
-                Padding = new Thickness(12, 10),
+                Margin = new Thickness(0, 8, 0, 0),
+                Padding = new Thickness(10, 7),
                 CornerRadius = new CornerRadius(6),
                 Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(28, 46, 45)),
                 BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(47, 84, 76)),
@@ -746,12 +746,13 @@ public sealed class MainWindow : Window
                 Child = new TextBlock
                 {
                     Text = workspace.OfflineMessage,
-                    FontSize = 12,
+                    FontSize = 11,
                     Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(171, 218, 198)),
                     TextWrapping = TextWrapping.Wrap
                 }
             }
         };
+        AutomationProperties.SetName(children[1], $"{workspace.Name} offline status");
         if (workspace.Name == "Photo")
         {
             var photoEditor = new StackPanel { Spacing = 12 };
