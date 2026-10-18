@@ -112,14 +112,17 @@ try {
     }
 
     Add-Type -AssemblyName System.Windows.Forms
-    $window.SetFocus()
-    [System.Windows.Forms.SendKeys]::SendWait("^3")
-    Start-Sleep -Milliseconds 250
-    $selectedAfterShortcut = @($tabs | Where-Object {
-        $_.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Current.IsSelected
-    }) | Select-Object -First 1
-    if ($null -eq $selectedAfterShortcut -or $selectedAfterShortcut.Current.Name -ne "Color workspace") {
-        throw "Ctrl+3 did not select the Color workspace."
+    for ($shortcut = 1; $shortcut -le $expectedTabs.Count; $shortcut++) {
+        $window.SetFocus()
+        [System.Windows.Forms.SendKeys]::SendWait("^$shortcut")
+        Start-Sleep -Milliseconds 250
+        $selectedAfterShortcut = @($tabs | Where-Object {
+            $_.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Current.IsSelected
+        }) | Select-Object -First 1
+        $expectedWorkspace = $expectedTabs[$shortcut - 1]
+        if ($null -eq $selectedAfterShortcut -or $selectedAfterShortcut.Current.Name -ne $expectedWorkspace) {
+            throw "Ctrl+$shortcut did not select the $expectedWorkspace workspace."
+        }
     }
 
     $controlsByTab = @{
