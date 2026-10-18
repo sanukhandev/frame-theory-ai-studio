@@ -114,15 +114,18 @@ public sealed class DesktopImportTests
     [Xunit.Fact]
     public async Task TimelineCompositorPreviewReportsItsRenderMode()
     {
+        var renderer = new SuccessfulTimelinePreviewRenderer();
         var viewModel = new MainWindowViewModel(
             new WorkspaceCatalog(),
             new StubCapabilityDetector(),
             new VideoImporter(),
-            timelinePreviewRenderer: new SuccessfulTimelinePreviewRenderer());
+            timelinePreviewRenderer: renderer);
 
         await viewModel.ImportFilesAsync(["preview-compositor.mp4"], CancellationToken.None);
+        viewModel.TimelineEditor.SeekFrame(4);
 
         Xunit.Assert.True(await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None));
+        Xunit.Assert.Equal(4, renderer.FrameIndex);
         Xunit.Assert.Contains("timeline compositor", viewModel.TimelinePreviewStatusText, StringComparison.Ordinal);
     }
 
@@ -313,8 +316,16 @@ public sealed class DesktopImportTests
 
     private sealed class SuccessfulTimelinePreviewRenderer : ITimelinePreviewRenderer
     {
+        public long FrameIndex { get; private set; }
+
         public Task<byte[]> RenderFrameAsync(TimelineVideoRenderPlan plan, long frameIndex, CancellationToken cancellationToken) =>
-            Task.FromResult("P6\n1 1\n255\n\0\0\0"u8.ToArray());
+            RenderAsync(frameIndex);
+
+        private Task<byte[]> RenderAsync(long frameIndex)
+        {
+            FrameIndex = frameIndex;
+            return Task.FromResult("P6\n1 1\n255\n\0\0\0"u8.ToArray());
+        }
     }
 
     private sealed class ArgumentFailingTimelinePreviewRenderer : ITimelinePreviewRenderer
