@@ -51,7 +51,7 @@ public sealed class TimelineTransformKeyframes
             throw new ArgumentException("At least one keyframe with unique frame positions is required.", nameof(keyframes));
         }
 
-        Keyframes = ordered;
+        Keyframes = Array.AsReadOnly(ordered);
     }
 
     public IReadOnlyList<TimelineTransformKeyframe> Keyframes { get; }

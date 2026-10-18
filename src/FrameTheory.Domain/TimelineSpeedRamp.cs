@@ -34,7 +34,7 @@ public sealed class TimelineSpeedRamp
             throw new ArgumentException("A speed ramp requires at least two strictly increasing points.", nameof(points));
         }
 
-        Points = orderedPoints;
+        Points = Array.AsReadOnly(orderedPoints);
     }
 
     public IReadOnlyList<TimelineSpeedPoint> Points { get; }

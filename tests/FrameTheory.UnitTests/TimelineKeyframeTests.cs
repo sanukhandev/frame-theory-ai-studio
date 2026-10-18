@@ -35,4 +35,16 @@ public sealed class TimelineKeyframeTests
             new TimelineTransformKeyframe(1, baseTransform),
             new TimelineTransformKeyframe(1, baseTransform)]));
     }
+
+    [Xunit.Fact]
+    public void KeyframesExposeAnImmutableSnapshot()
+    {
+        var source = new List<TimelineTransformKeyframe> { new(2, new TimelineVideoTransform()) };
+        var animation = new TimelineTransformKeyframes(source);
+
+        source.Clear();
+
+        Xunit.Assert.Single(animation.Keyframes);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineTransformKeyframe>>(animation.Keyframes).IsReadOnly);
+    }
 }

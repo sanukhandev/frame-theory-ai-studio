@@ -108,6 +108,18 @@ public sealed class TimelineCompositorTests
     }
 
     [Xunit.Fact]
+    public void SpeedRampExposesAnImmutableSnapshot()
+    {
+        var source = new List<TimelineSpeedPoint> { new(0, 1), new(30, 1) };
+        var ramp = new TimelineSpeedRamp(source);
+
+        source.Clear();
+
+        Xunit.Assert.Equal(2, ramp.Points.Count);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineSpeedPoint>>(ramp.Points).IsReadOnly);
+    }
+
+    [Xunit.Fact]
     public void StabilizationGraphUsesTheConfiguredSearchRadius()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-stabilization-");
