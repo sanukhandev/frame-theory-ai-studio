@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Explicit import control checkpoint (2026-10-18):** Every workspace now exposes a real multi-select `Import media` file-picker action alongside drag/drop, limited to supported local media patterns and routed through the existing path-safe importer. The new control is automation-named and covered by the headless shell test; Desktop Release build, formatting and diff checks pass.
+
 **Desktop drag/drop boundary checkpoint (2026-10-18):** Main-window media import now rejects reparse-point paths before invoking the importer and reports a user-facing failure. The regression proves a redirected file never reaches a custom importer; focused desktop import coverage passes 11/11, repository validation, formatting, diff checks and the Release Desktop build are green.
 
 **AI workspace hierarchy checkpoint (2026-10-18):** The optional Gemini surface now separates Provider, Consent and analysis scope, Activity, Plan input and revision, Review and apply, and Reusable recipe sections. Existing secure key storage, explicit upload consent, schema validation and transactional actions remain functional; desktop build, headless shell and formatting checks pass. Hosted visual revalidation remains pending.

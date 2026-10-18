@@ -244,6 +244,34 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(importedList, "Imported media");
         importedList.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(MainWindowViewModel.ImportedMedia)));
+        var importMedia = new Button { Content = "Import media", HorizontalAlignment = HorizontalAlignment.Left };
+        AutomationProperties.SetName(importMedia, "Import local media");
+        importMedia.Click += async (_, _) =>
+        {
+            var topLevel = TopLevel.GetTopLevel(importMedia);
+            if (topLevel is null)
+            {
+                return;
+            }
+
+            var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+            {
+                AllowMultiple = true,
+                FileTypeFilter =
+                [
+                    new FilePickerFileType("Frame Theory media")
+                    {
+                        Patterns = ["*.mp4", "*.mov", "*.mkv", "*.webm", "*.avi", "*.mp3", "*.wav", "*.m4a", "*.png", "*.jpg", "*.jpeg", "*.webp", "*.bmp", "*.tif", "*.tiff"]
+                    }
+                ]
+            });
+            var paths = files
+                .Select(file => file.TryGetLocalPath())
+                .Where(path => path is not null)
+                .Select(path => path!)
+                .ToArray();
+            await viewModel.ImportFilesAsync(paths, CancellationToken.None);
+        };
         var importZone = new Border
         {
             Margin = new Thickness(0, 18, 0, 0),
@@ -271,7 +299,8 @@ public sealed class MainWindow : Window
                         FontSize = 12,
                         Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
                         TextWrapping = TextWrapping.Wrap
-                    }
+                    },
+                    importMedia
                 }
             }
         };

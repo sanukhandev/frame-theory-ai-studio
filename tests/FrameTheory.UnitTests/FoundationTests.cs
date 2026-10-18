@@ -196,6 +196,7 @@ public sealed class FoundationTests
                 foreach (var requiredName in new[]
                 {
                     "Imported media",
+                    "Import local media",
                     "Preview current timeline frame",
                     "Save timeline project",
                     "Open timeline project",
