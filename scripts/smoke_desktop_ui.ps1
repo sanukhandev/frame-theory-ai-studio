@@ -206,6 +206,10 @@ try {
         }
     }
 
+    if ($null -eq (Find-NamedControl "Active workspace status")) {
+        throw "Required UI automation control was not found: Active workspace status."
+    }
+
     $refresh = Find-NamedControl "Refresh capability check"
     if ($null -eq $refresh) {
         throw "Required UI automation control was not found: Refresh capability check."
