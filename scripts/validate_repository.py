@@ -30,6 +30,8 @@ def run() -> int:
     agent = (ROOT/"AGENTS.md").read_text(encoding="utf-8")
     for term in ["transaction", "Gemini", "undo", "offline"]:
         assert term.lower() in agent.lower(), f"Missing instruction: {term}"
+    ci = (ROOT/".github/workflows/ci.yml").read_text(encoding="utf-8")
+    assert "detach_dmg()" in ci and "for attempt in 1 2 3 4 5" in ci, "macOS DMG smoke must retry detach cleanup"
     print("Documentation and edit-plan schema syntax checks passed.")
     print("NOTE: Application code, installers and media exports have not been tested by this script.")
     return 0
