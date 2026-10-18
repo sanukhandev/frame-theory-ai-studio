@@ -17,9 +17,19 @@ public sealed record TimelineCaptionStyle
             throw new ArgumentException("A local caption font path is required.", nameof(fontPath));
         }
 
-        if (fontSize <= 0 || fontSize > 4096 || marginBottom < 0 || maximumCharactersPerLine is < 1 or > 200)
+        if (fontSize <= 0 || fontSize > 4096)
         {
             throw new ArgumentOutOfRangeException(nameof(fontSize));
+        }
+
+        if (marginBottom < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(marginBottom));
+        }
+
+        if (maximumCharactersPerLine is < 1 or > 200)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maximumCharactersPerLine));
         }
 
         FontPath = fontPath;

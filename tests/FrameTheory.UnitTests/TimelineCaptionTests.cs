@@ -7,6 +7,14 @@ namespace FrameTheory.UnitTests;
 public sealed class TimelineCaptionTests
 {
     [Xunit.Fact]
+    public void CaptionStyleReportsTheInvalidNumericParameter()
+    {
+        Xunit.Assert.Equal("fontSize", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineCaptionStyle("font.ttf", fontSize: 0)).ParamName);
+        Xunit.Assert.Equal("marginBottom", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineCaptionStyle("font.ttf", marginBottom: -1)).ParamName);
+        Xunit.Assert.Equal("maximumCharactersPerLine", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineCaptionStyle("font.ttf", maximumCharactersPerLine: 201)).ParamName);
+    }
+
+    [Xunit.Fact]
     public void CaptionGraphWrapsTextAndUsesTimedSafePlacement()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-caption-graph-");
