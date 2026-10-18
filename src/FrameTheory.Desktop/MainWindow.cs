@@ -289,6 +289,7 @@ public sealed class MainWindow : Window
     private static Control CreatePhotoEditorPanel(PhotoEditorViewModel editor)
     {
         var preview = new Image { Width = 320, Height = 180, Stretch = Stretch.Uniform };
+        AutomationProperties.SetName(preview, "Photo edit preview");
         void RefreshPreview() => preview.Source = CreateBitmap(editor.PreviewPpm);
         editor.PropertyChanged += (_, args) =>
         {
@@ -735,7 +736,9 @@ public sealed class MainWindow : Window
     {
         var inspector = viewModel.ColorInspector;
         var beforeImage = new Image { Width = 240, Height = 135, Stretch = Stretch.Uniform };
+        AutomationProperties.SetName(beforeImage, "Color grade before preview");
         var afterImage = new Image { Width = 240, Height = 135, Stretch = Stretch.Uniform };
+        AutomationProperties.SetName(afterImage, "Color grade after preview");
         void RefreshPreviews()
         {
             beforeImage.Source = CreateBitmap(inspector.BeforePreviewPpm);
@@ -887,6 +890,7 @@ public sealed class MainWindow : Window
     {
         var timeline = viewModel.TimelineEditor;
         var timelinePreview = new Image { Width = 320, Height = 180, Stretch = Stretch.Uniform };
+        AutomationProperties.SetName(timelinePreview, "Timeline current frame preview");
         var timelinePreviewStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         timelinePreviewStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePreviewStatusText)));
         var analyzeMotion = new Button { Content = "Analyze motion" };
@@ -903,10 +907,13 @@ public sealed class MainWindow : Window
             }
         };
         var previewCurrentFrame = new Button { Content = "Preview current frame" };
+        AutomationProperties.SetName(previewCurrentFrame, "Preview current timeline frame");
         previewCurrentFrame.Click += async (_, _) => await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None);
         var playTimeline = new Button { Content = "Play timeline" };
+        AutomationProperties.SetName(playTimeline, "Play timeline preview");
         playTimeline.Click += async (_, _) => await viewModel.PlayTimelinePreviewAsync(CancellationToken.None);
         var stopTimeline = new Button { Content = "Stop playback" };
+        AutomationProperties.SetName(stopTimeline, "Stop timeline preview");
         stopTimeline.Click += (_, _) => viewModel.StopTimelinePreview();
         var usePreviewProxy = new CheckBox { Content = "Use bounded preview proxy" };
         usePreviewProxy.Bind(ToggleButton.IsCheckedProperty, new Binding(nameof(MainWindowViewModel.UseTimelinePreviewProxy))
@@ -952,17 +959,22 @@ public sealed class MainWindow : Window
         var roughCutStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         roughCutStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.RoughCutStatusText)));
         var snap = new CheckBox { Content = "Snap to clip boundaries" };
+        AutomationProperties.SetName(snap, "Snap timeline edits to clip boundaries");
         snap.Bind(ToggleButton.IsCheckedProperty, new Binding("TimelineEditor.SnapEnabled") { Mode = BindingMode.TwoWay });
         var zoom = new Slider { Minimum = 0.05, Maximum = 20, Value = timeline.FramesPerPixel };
         AutomationProperties.SetName(zoom, "Timeline zoom");
         zoom.ValueChanged += (_, args) => timeline.SetZoom(args.NewValue);
         var back = new Button { Content = "◀ Frame" };
+        AutomationProperties.SetName(back, "Previous timeline frame");
         back.Click += (_, _) => timeline.Step(-1);
         var forward = new Button { Content = "Frame ▶" };
+        AutomationProperties.SetName(forward, "Next timeline frame");
         forward.Click += (_, _) => timeline.Step(1);
         var select = new Button { Content = "Select at playhead" };
+        AutomationProperties.SetName(select, "Select video clip at playhead");
         select.Click += (_, _) => timeline.SelectAt(timeline.CurrentFrame, "Video 1");
         var selectAudio = new Button { Content = "Select audio" };
+        AutomationProperties.SetName(selectAudio, "Select audio clip at playhead");
         selectAudio.Click += (_, _) => timeline.SelectAt(timeline.CurrentFrame, "Audio 1");
         var operationStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         void RunTimelineAction(Action action)
@@ -984,12 +996,14 @@ public sealed class MainWindow : Window
 
         TimelineClipboard? clipboard = null;
         var copy = new Button { Content = "Copy" };
+        AutomationProperties.SetName(copy, "Copy selected timeline clip");
         copy.Click += (_, _) =>
         {
             clipboard = timeline.CopySelected();
             operationStatus.Text = clipboard is null ? "Select a clip before copying." : "Clip copied.";
         };
         var paste = new Button { Content = "Paste at playhead" };
+        AutomationProperties.SetName(paste, "Paste timeline clip at playhead");
         paste.Click += (_, _) =>
         {
             if (clipboard is null)
@@ -1001,8 +1015,10 @@ public sealed class MainWindow : Window
             RunTimelineAction(() => timeline.Paste(clipboard, timeline.CurrentFrame));
         };
         var split = new Button { Content = "Split" };
+        AutomationProperties.SetName(split, "Split selected timeline clip");
         split.Click += (_, _) => RunTimelineAction(() => timeline.SplitSelectedAt(timeline.CurrentFrame));
         var trim = new Button { Content = "Trim right" };
+        AutomationProperties.SetName(trim, "Trim selected clip at playhead");
         trim.Click += (_, _) => RunTimelineAction(() => timeline.TrimSelectedEndAt(timeline.CurrentFrame));
         var move = new Button { Content = "Move to playhead" };
         move.Click += (_, _) => RunTimelineAction(() => timeline.MoveSelected(timeline.CurrentFrame));
@@ -1064,7 +1080,9 @@ public sealed class MainWindow : Window
         var clearAudio = new Button { Content = "Clear audio" };
         clearAudio.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedAudioSettings);
         var titleText = new TextBox { PlaceholderText = "Title text", Width = 220 };
+        AutomationProperties.SetName(titleText, "Timeline title text");
         var addTitle = new Button { Content = "Add title" };
+        AutomationProperties.SetName(addTitle, "Add timeline title");
         addTitle.Click += async (_, _) =>
         {
             if (string.IsNullOrWhiteSpace(titleText.Text))
@@ -1100,6 +1118,7 @@ public sealed class MainWindow : Window
         var titleAnimationStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         titleAnimationStatus.Bind(TextBlock.TextProperty, new Binding(nameof(TimelineEditorViewModel.TitleAnimationStatus)));
         var importCaptions = new Button { Content = "Import SRT" };
+        AutomationProperties.SetName(importCaptions, "Import SRT captions");
         importCaptions.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(importCaptions);
@@ -1120,6 +1139,7 @@ public sealed class MainWindow : Window
             }
         };
         var exportCaptions = new Button { Content = "Export SRT" };
+        AutomationProperties.SetName(exportCaptions, "Export SRT captions");
         exportCaptions.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(exportCaptions);
@@ -1150,6 +1170,7 @@ public sealed class MainWindow : Window
         var transcriptionConsent = new CheckBox { Content = "I approve uploading this exact local audio file or extracted video audio track to Gemini" };
         AutomationProperties.SetName(transcriptionConsent, "Gemini transcription upload consent");
         var transcribeAudio = new Button { Content = "Transcribe approved audio" };
+        AutomationProperties.SetName(transcribeAudio, "Transcribe approved audio");
         transcribeAudio.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(transcribeAudio);
@@ -1190,6 +1211,7 @@ public sealed class MainWindow : Window
             }
         };
         var export = new Button { Content = "Export composite MP4" };
+        AutomationProperties.SetName(export, "Export timeline MP4");
         var batchExport = new Button { Content = "Export all social targets" };
         AutomationProperties.SetName(batchExport, "Export all social video targets");
         batchExport.Click += async (_, _) =>
@@ -1211,8 +1233,10 @@ public sealed class MainWindow : Window
             }
         };
         var cancelExport = new Button { Content = "Cancel export" };
+        AutomationProperties.SetName(cancelExport, "Cancel timeline export");
         cancelExport.Click += (_, _) => viewModel.CancelTimelineExport();
         var saveProject = new Button { Content = "Save timeline project" };
+        AutomationProperties.SetName(saveProject, "Save timeline project");
         saveProject.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(saveProject);
@@ -1233,6 +1257,7 @@ public sealed class MainWindow : Window
             }
         };
         var openProject = new Button { Content = "Open timeline project" };
+        AutomationProperties.SetName(openProject, "Open timeline project");
         openProject.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(openProject);
@@ -1296,6 +1321,7 @@ public sealed class MainWindow : Window
         var exportStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         exportStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
         var retryExport = new Button { Content = "Retry last export" };
+        AutomationProperties.SetName(retryExport, "Retry last timeline export");
         retryExport.Click += async (_, _) => await viewModel.RetryLastTimelineExportAsync(CancellationToken.None);
         var watermarkStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         watermarkStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.WatermarkStatusText"));
