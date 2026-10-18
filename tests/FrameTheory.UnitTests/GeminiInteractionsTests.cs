@@ -210,6 +210,31 @@ public sealed class GeminiInteractionsTests
         Xunit.Assert.Equal(GeminiProviderFailureKind.MalformedResponse, exception.FailureKind);
     }
 
+    [Xunit.Fact]
+    public async Task PlanInputRejectsAnOversizedPromptBeforeNetworkUse()
+    {
+        var calls = 0;
+        using var client = new HttpClient(new StubHandler(_ =>
+        {
+            calls++;
+            return Response("{\"id\":\"unused\",\"status\":\"completed\",\"output_text\":\"unused\"}");
+        }));
+        var service = new GeminiInteractionsClient(
+            client,
+            new GeminiClientOptions("test-secret", "gemini-2.5-flash", TimeSpan.FromSeconds(5), 1, TimeSpan.Zero));
+        var schema = JsonDocument.Parse("{}").RootElement.Clone();
+
+        await Xunit.Assert.ThrowsAsync<ArgumentException>(() => service.CreatePlanAsync(
+            [
+                GeminiInteractionInput.CreateText(new string('p', 32_001)),
+                GeminiInteractionInput.CreateText("metadata")
+            ],
+            schema,
+            CancellationToken.None));
+
+        Xunit.Assert.Equal(0, calls);
+    }
+
     private static HttpResponseMessage Response(string json) => new(HttpStatusCode.OK)
     {
         Content = new StringContent(json, Encoding.UTF8, "application/json")
