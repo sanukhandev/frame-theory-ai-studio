@@ -463,6 +463,12 @@ public sealed class FoundationTests
                         window.GetVisualDescendants().OfType<Button>(),
                         button => AutomationProperties.GetName(button) == primaryActionName && button.Classes.Contains("primary"));
                 }
+                Xunit.Assert.Equal(
+                    "Apply only checked, validated actions transactionally to the editable project.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Apply approved AI actions")));
+                Xunit.Assert.Equal(
+                    "Undo the last successful AI edit transaction without changing source media.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Undo last AI apply")));
 
                 foreach (var requiredName in new[]
                 {

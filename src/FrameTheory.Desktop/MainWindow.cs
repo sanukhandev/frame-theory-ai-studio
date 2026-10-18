@@ -1195,6 +1195,7 @@ public sealed class MainWindow : Window
         status.Bind(TextBlock.TextProperty, new Binding(nameof(GeminiSettingsViewModel.StatusText)));
         var save = new Button { Content = "Store Gemini key" };
         AutomationProperties.SetName(save, "Store Gemini key securely");
+        ToolTip.SetTip(save, "Store the Gemini key in the platform secret store; it is never written to the project.");
         save.Click += async (_, _) =>
         {
             await settings.SaveAsync(apiKey.Text ?? string.Empty, CancellationToken.None);
@@ -1202,6 +1203,7 @@ public sealed class MainWindow : Window
         };
         var clear = new Button { Content = "Remove Gemini key" };
         AutomationProperties.SetName(clear, "Remove Gemini key");
+        ToolTip.SetTip(clear, "Remove the stored Gemini key and keep manual editing available offline.");
         clear.Click += async (_, _) => await settings.ClearAsync(CancellationToken.None);
         var videoFrames = new CheckBox { Content = "Video frames", IsChecked = true };
         AutomationProperties.SetName(videoFrames, "Gemini video frame scope");
@@ -1213,6 +1215,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(uploadConsent, "Gemini upload consent");
         var prepareAnalysis = new Button { Content = "Prepare local analysis samples" };
         AutomationProperties.SetName(prepareAnalysis, "Prepare local Gemini analysis samples");
+        ToolTip.SetTip(prepareAnalysis, "Build bounded local samples for the selected media scope before any optional upload.");
         prepareAnalysis.Click += async (_, _) =>
         {
             var scopes = GeminiAnalysisScope.None;
@@ -1236,6 +1239,7 @@ public sealed class MainWindow : Window
         var analyzeApprovedSamples = new Button { Content = "Analyze approved samples with Gemini" };
         analyzeApprovedSamples.Classes.Add("primary");
         AutomationProperties.SetName(analyzeApprovedSamples, "Analyze approved samples with Gemini");
+        ToolTip.SetTip(analyzeApprovedSamples, "Send only the explicitly approved sample scope to Gemini for a structured analysis.");
         analyzeApprovedSamples.Click += async (_, _) => await viewModel.RequestAiAnalysisAsync(CancellationToken.None);
         var analysisStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(analysisStatus, "Gemini analysis status");
@@ -1348,10 +1352,12 @@ public sealed class MainWindow : Window
         };
         var validate = new Button { Content = "Validate proposal" };
         AutomationProperties.SetName(validate, "Validate AI proposal");
+        ToolTip.SetTip(validate, "Schema-check the plan and show its allowlisted editable actions before applying.");
         validate.Click += (_, _) => viewModel.ValidateAiPlan(planJson.Text ?? string.Empty);
         var revisionInstruction = new TextBox { PlaceholderText = "Natural-language revision request", Width = 420 };
         var requestRevision = new Button { Content = "Ask Gemini to revise" };
         AutomationProperties.SetName(requestRevision, "Ask Gemini to revise proposal");
+        ToolTip.SetTip(requestRevision, "Request a bounded natural-language revision of the current proposal.");
         requestRevision.Click += async (_, _) => await viewModel.RequestAiRevisionAsync(
             revisionInstruction.Text ?? string.Empty,
             planJson.Text ?? string.Empty,
@@ -1362,9 +1368,11 @@ public sealed class MainWindow : Window
         var approve = new Button { Content = "Apply approved actions" };
         approve.Classes.Add("primary");
         AutomationProperties.SetName(approve, "Apply approved AI actions");
+        ToolTip.SetTip(approve, "Apply only checked, validated actions transactionally to the editable project.");
         approve.Click += (_, _) => viewModel.ApplyApprovedAiPlan();
         var undo = new Button { Content = "Undo last AI apply" };
         AutomationProperties.SetName(undo, "Undo last AI apply");
+        ToolTip.SetTip(undo, "Undo the last successful AI edit transaction without changing source media.");
         undo.Click += (_, _) => viewModel.UndoLastAiEdit();
         var clear = new Button { Content = "Clear proposal" };
         AutomationProperties.SetName(clear, "Clear AI proposal");
