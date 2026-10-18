@@ -217,7 +217,7 @@ public sealed class App : Avalonia.Application
         {
             Setters =
             {
-                new Setter(TemplatedControl.PaddingProperty, new Thickness(10, 7)),
+                new Setter(TemplatedControl.PaddingProperty, new Thickness(4)),
                 new Setter(ContentControl.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch)
             }
         });
