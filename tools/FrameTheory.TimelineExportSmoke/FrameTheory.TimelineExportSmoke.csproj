@@ -11,4 +11,9 @@
     <ProjectReference Include="..\..\src\FrameTheory.Domain\FrameTheory.Domain.csproj" />
     <ProjectReference Include="..\..\src\FrameTheory.Media\FrameTheory.Media.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\brand\frame-theory-original.png" Link="assets\brand\frame-theory-original.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

@@ -21,7 +21,7 @@ var importer = new FfmpegMediaImporter(new FfprobeMediaProbe(runner), decoder, r
 var importedSourceA = await importer.ImportAsync(sourceA, CancellationToken.None);
 var importedSourceB = await importer.ImportAsync(sourceB, CancellationToken.None);
 var projectPath = Path.Combine(Path.GetDirectoryName(destination) ?? ".", "timeline-smoke.ftstudio");
-var approvedWatermarkPath = Path.GetFullPath(Path.Combine("assets", "brand", "frame-theory-original.png"));
+var approvedWatermarkPath = Path.Combine(AppContext.BaseDirectory, "assets", "brand", "frame-theory-original.png");
 var approvedWatermark = File.Exists(approvedWatermarkPath)
     ? new TimelineWatermark(approvedWatermarkPath, opacity: 0.85f, margin: 1)
     : null;
@@ -32,6 +32,7 @@ if (!projectViewModel.TimelineEditor.SelectFirst(TimelineTrackKind.Video))
     throw new InvalidOperationException("The timeline smoke project did not select its first video clip.");
 }
 
+projectViewModel.TimelineEditor.SetApprovedWatermark();
 projectViewModel.TimelineEditor.ApplyStabilizationToSelected(5);
 if (!await projectViewModel.SaveTimelineProjectAsync(projectPath, CancellationToken.None))
 {
@@ -41,7 +42,8 @@ if (!await projectViewModel.SaveTimelineProjectAsync(projectPath, CancellationTo
 var reopenedProjectViewModel = new MainWindowViewModel(new WorkspaceCatalog(), new SmokeCapabilityDetector(), importer);
 if (!await reopenedProjectViewModel.OpenTimelineProjectAsync(projectPath, CancellationToken.None) ||
     reopenedProjectViewModel.ImportedMedia.Count != 2 ||
-    reopenedProjectViewModel.TimelineEditor.TrackRows.All(row => row.Kind != TimelineTrackKind.Video))
+    reopenedProjectViewModel.TimelineEditor.TrackRows.All(row => row.Kind != TimelineTrackKind.Video) ||
+    reopenedProjectViewModel.TimelineEditor.Watermark is null)
 {
     throw new InvalidOperationException(reopenedProjectViewModel.TimelineProjectStatusText);
 }
@@ -54,7 +56,7 @@ if (reopenedStabilization?.SearchRadius != 5)
     throw new InvalidOperationException("Timeline project reopen did not preserve stabilization settings.");
 }
 
-Console.WriteLine($"project-roundtrip={projectPath}; media={reopenedProjectViewModel.ImportedMedia.Count}; stabilization={reopenedStabilization.SearchRadius}; ffmpeg-stabilization={new TimelineStabilizationSettings(reopenedStabilization.SearchRadius).FfmpegSearchRadius}; status={reopenedProjectViewModel.TimelineProjectStatusText}");
+Console.WriteLine($"project-roundtrip={projectPath}; media={reopenedProjectViewModel.ImportedMedia.Count}; stabilization={reopenedStabilization.SearchRadius}; ffmpeg-stabilization={new TimelineStabilizationSettings(reopenedStabilization.SearchRadius).FfmpegSearchRadius}; watermark={(reopenedProjectViewModel.TimelineEditor.Watermark is null ? "none" : "approved")}; status={reopenedProjectViewModel.TimelineProjectStatusText}");
 var proxyDirectory = Path.Combine(Path.GetDirectoryName(destination) ?? ".", "proxy-cache");
 var proxyService = new FfmpegPreviewProxyService(runner, proxyDirectory, maximumCacheBytes: 64L * 1024 * 1024);
 var sourceFingerprint = $"sha256:{Convert.ToHexString(SHA256.HashData(await File.ReadAllBytesAsync(sourceA.LocalPath))).ToLowerInvariant()}";
