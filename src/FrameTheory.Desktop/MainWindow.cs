@@ -831,7 +831,7 @@ public sealed class MainWindow : Window
             CornerRadius = new CornerRadius(8),
             Child = new Grid
             {
-                ColumnDefinitions = new ColumnDefinitions("1.25*,*")
+                RowDefinitions = new RowDefinitions("Auto,Auto,*,Auto,Auto")
             }
         };
         AutomationProperties.SetName(mediaBin, "Media bin");
@@ -845,40 +845,37 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(assetSummary, "Imported media summary");
         assetSummary.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.ImportedMediaSummary)));
-        grid.Children.Add(new StackPanel
+        var mediaTitle = new TextBlock
         {
-            Spacing = 6,
-            Children =
-            {
-                new Grid
-                {
-                    ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto,Auto"),
-                    Children =
-                    {
-                        new TextBlock
-                        {
-                            Text = "MEDIA BIN",
-                            FontSize = 10,
-                            FontWeight = FontWeight.SemiBold,
-                            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
-                        },
-                        mediaSearch,
-                        clearMediaSearch,
-                        assetSummary
-                    }
-                },
-                new Grid
-                {
-                    Children = { importedList, mediaSearchEmptyState, mediaEmptyState }
-                },
-                importStatus
-            }
+            Text = "MEDIA BIN",
+            FontSize = 10,
+            FontWeight = FontWeight.SemiBold,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+        };
+        var mediaHeader = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+            Children = { mediaTitle, assetSummary }
+        };
+        Grid.SetColumn(assetSummary, 1);
+        grid.Children.Add(mediaHeader);
+        var mediaSearchRow = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+            Children = { mediaSearch, clearMediaSearch }
+        };
+        Grid.SetColumn(clearMediaSearch, 1);
+        grid.Children.Add(mediaSearchRow);
+        grid.Children.Add(new Grid
+        {
+            Children = { importedList, mediaSearchEmptyState, mediaEmptyState }
         });
-        Grid.SetColumn(mediaSearch, 1);
-        Grid.SetColumn(clearMediaSearch, 2);
-        Grid.SetColumn(assetSummary, 3);
+        grid.Children.Add(importStatus);
         grid.Children.Add(importZone);
-        Grid.SetColumn(importZone, 1);
+        Grid.SetRow(mediaSearchRow, 1);
+        Grid.SetRow(grid.Children[2], 2);
+        Grid.SetRow(importStatus, 3);
+        Grid.SetRow(importZone, 4);
         return mediaBin;
     }
 

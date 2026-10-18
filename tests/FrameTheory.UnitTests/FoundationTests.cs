@@ -254,8 +254,8 @@ public sealed class FoundationTests
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Media bin");
                 var mediaBinGrid = Xunit.Assert.IsType<Grid>(mediaBin.Child);
-                Xunit.Assert.Equal(2, mediaBinGrid.ColumnDefinitions.Count);
-                Xunit.Assert.Contains(mediaBin.GetVisualDescendants().OfType<Grid>(), control => control.ColumnDefinitions.Count == 4);
+                Xunit.Assert.Equal(5, mediaBinGrid.RowDefinitions.Count);
+                Xunit.Assert.Contains(mediaBin.GetVisualDescendants().OfType<Grid>(), control => control.ColumnDefinitions.Count == 2);
                 var importedMediaList = window.GetVisualDescendants()
                     .OfType<ListBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Imported media");
