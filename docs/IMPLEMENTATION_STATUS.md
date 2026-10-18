@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Hosted compact-inspector validation checkpoint (2026-10-18):** Quality Gates run `39157738274` for pushed commit `88aae80` passed documentation/schema validation plus Windows, macOS and Linux restore/build/test, native FFmpeg smoke, formatting, headless shell, Windows UI automation, portable archives, Windows installer, macOS DMG, Linux DEB, packaged relaunch and checksum verification. It validates the responsive Photo overlay controls and stacked preview cards, bounded Gemini model selector and adaptive activity log, plus the restored hosted-green Windows shortcut smoke contract. Manual native visual, 1280x800/HiDPI and screen-reader acceptance remains open; no partial GitHub task is closed from automated evidence alone.
+
 **Responsive photo-preview checkpoint (2026-10-18):** Photo original/edited comparison cards now stack below 620px of measured card width and return to a two-up layout above it, preserving readable previews in narrow inspectors without changing source or edit behavior. Foundation coverage verifies both arrangements.
 
 **Responsive Gemini-provider checkpoint (2026-10-18):** The optional Gemini model selector now uses a 150–300px bounded stretch with explicit model-selection guidance, keeping provider setup usable in compact inspectors without changing secure-key or consent behavior. Foundation coverage verifies the geometry and accessible tooltip.
