@@ -1,6 +1,8 @@
 # Implementation Status — Resume Checkpoint
 
-**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 36 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 37 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+
+**Photo affordance checkpoint (2026-10-19):** Photo overlay import/clear, circular masking, clone retouch and exposure-grade actions now expose concise effect guidance in the inspector. The focused production-shell test and format/diff checks pass; the source remains non-destructive and native visual acceptance remains open.
 
 **Full Release gate checkpoint (2026-10-19):** The 35-commit local batch passes 271 unit tests and 2 golden tests, builds with 0 warnings/errors, passes `dotnet format --verify-no-changes`, repository validation and `git diff --check`. The validator correctly retains six tracked partial P0 gates; application, native-media, manual and hosted release acceptance remain distinct.
 
