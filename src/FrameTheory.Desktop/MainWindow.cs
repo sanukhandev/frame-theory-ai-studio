@@ -3106,9 +3106,9 @@ public sealed class MainWindow : Window
         var saveProject = new Button { Content = "Save timeline project" };
         AutomationProperties.SetName(saveProject, "Save timeline project");
         ToolTip.SetTip(saveProject, "Save the timeline, edits and media references to a portable project file.");
-        saveProject.Click += async (_, _) =>
+        async Task SaveTimelineProjectFrom(Control source)
         {
-            var topLevel = TopLevel.GetTopLevel(saveProject);
+            var topLevel = TopLevel.GetTopLevel(source);
             if (topLevel is null)
             {
                 return;
@@ -3124,7 +3124,13 @@ public sealed class MainWindow : Window
             {
                 await viewModel.SaveTimelineProjectAsync(path, CancellationToken.None);
             }
-        };
+        }
+
+        saveProject.Click += async (_, _) => await SaveTimelineProjectFrom(saveProject);
+        var quickSaveProject = new Button { Content = "Save project" };
+        AutomationProperties.SetName(quickSaveProject, "Quick save timeline project");
+        ToolTip.SetTip(quickSaveProject, "Save the current editable timeline project to a portable file.");
+        quickSaveProject.Click += async (_, _) => await SaveTimelineProjectFrom(quickSaveProject);
         var openProject = new Button { Content = "Open timeline project" };
         AutomationProperties.SetName(openProject, "Open timeline project");
         ToolTip.SetTip(openProject, "Open a Frame Theory project and restore its editable timeline.");
@@ -3332,7 +3338,7 @@ public sealed class MainWindow : Window
                         playbackBadge
                     }
                 },
-                CreateFlow(previewCurrentFrame, playTimeline, stopTimeline, quickExport),
+                CreateFlow(previewCurrentFrame, playTimeline, stopTimeline, quickSaveProject, quickExport),
                 quickExportStatus,
                 usePreviewProxy,
                 analyzeMotion,
