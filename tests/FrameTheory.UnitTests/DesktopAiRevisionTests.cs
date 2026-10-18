@@ -80,6 +80,19 @@ public sealed class DesktopAiRevisionTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task DesktopRevisionReportsSecureStoreAccessFailure()
+    {
+        var settings = new GeminiSettingsViewModel(new GeminiConfigurationService(new FailingSecretStore()));
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new TestCapabilityDetector(),
+            geminiSettings: settings);
+
+        Xunit.Assert.False(await viewModel.RequestAiRevisionAsync("revise", string.Empty, CancellationToken.None));
+        Xunit.Assert.Contains("revision failed", viewModel.AiRevisionStatusText, StringComparison.OrdinalIgnoreCase);
+    }
+
     private sealed class InMemorySecretStore : ISecretStore
     {
         private string? _secret;
@@ -97,6 +110,18 @@ public sealed class DesktopAiRevisionTests
             _secret = null;
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class FailingSecretStore : ISecretStore
+    {
+        public Task StoreAsync(string name, string secret, CancellationToken cancellationToken = default) =>
+            throw new UnauthorizedAccessException("credential store unavailable");
+
+        public Task<string?> ReadAsync(string name, CancellationToken cancellationToken = default) =>
+            throw new UnauthorizedAccessException("credential store unavailable");
+
+        public Task DeleteAsync(string name, CancellationToken cancellationToken = default) =>
+            throw new UnauthorizedAccessException("credential store unavailable");
     }
 
     private sealed class StubHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler

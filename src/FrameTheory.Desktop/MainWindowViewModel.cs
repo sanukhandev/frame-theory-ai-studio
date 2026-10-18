@@ -666,7 +666,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             AiRevisionStatusText = "Gemini revision canceled; no mutation occurred.";
             return false;
         }
-        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or HttpRequestException)
+        catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or UnauthorizedAccessException or HttpRequestException)
         {
             _diagnosticsLog.Record("gemini-revision-failed", exception);
             RefreshGeminiActivityLog();
