@@ -77,6 +77,42 @@ public sealed class RecoveryTests
     }
 
     [Xunit.Fact]
+    public async Task CacheIndexStoreRejectsReparsePointFiles()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-cache-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-cache-external-");
+        try
+        {
+            var store = new JsonCacheIndexStore();
+            var index = new CacheIndex();
+            index.Register("entry", "cache/item.bin", 1, DateTimeOffset.UtcNow);
+            var externalPath = Path.Combine(externalDirectory.FullName, "index.json");
+            await store.SaveAtomicAsync(externalPath, index, CancellationToken.None);
+            var linkedPath = Path.Combine(directory.FullName, "index.json");
+            File.CreateSymbolicLink(linkedPath, externalPath);
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                store.LoadAsync(linkedPath, CancellationToken.None));
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                store.SaveAtomicAsync(linkedPath, index, CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public void RecoveryRejectsTraversalAndReparsePointDirectories()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-recovery-boundary-");

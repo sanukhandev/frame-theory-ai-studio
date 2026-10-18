@@ -68,6 +68,7 @@ public sealed class JsonCacheIndexStore
         var fullPath = Path.GetFullPath(path);
         var directory = Path.GetDirectoryName(fullPath) ?? throw new ArgumentException("A cache directory is required.", nameof(path));
         Directory.CreateDirectory(directory);
+        EnsureRegularPath(fullPath, directory);
         var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
         try
         {
@@ -104,6 +105,9 @@ public sealed class JsonCacheIndexStore
             return new CacheIndex();
         }
 
+        EnsureRegularPath(fullPath, Path.GetDirectoryName(fullPath)
+            ?? throw new ArgumentException("A cache directory is required.", nameof(path)));
+
         if (new FileInfo(fullPath).Length > MaximumIndexBytes)
         {
             throw new InvalidDataException("The cache index exceeds the supported size limit.");
@@ -130,6 +134,19 @@ public sealed class JsonCacheIndexStore
         catch (JsonException exception)
         {
             throw new InvalidDataException("The cache index JSON is malformed.", exception);
+        }
+    }
+
+    private static void EnsureRegularPath(string fullPath, string directory)
+    {
+        if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new InvalidDataException("The cache index directory must not be a reparse point.");
+        }
+
+        if (File.Exists(fullPath) && (File.GetAttributes(fullPath) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new InvalidDataException("The cache index file must not be a reparse point.");
         }
     }
 }
