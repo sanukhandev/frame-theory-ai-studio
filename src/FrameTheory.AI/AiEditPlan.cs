@@ -94,7 +94,7 @@ public static class AiOperationCatalog
         ["reel.before_after"] = new("reel.before_after", "project", "Create an editable before/after reveal composition.", ["style"])
     };
 
-    public static IReadOnlyList<AiOperationDescriptor> Supported => Descriptors.Values.OrderBy(descriptor => descriptor.Type).ToArray();
+    public static IReadOnlyList<AiOperationDescriptor> Supported => Array.AsReadOnly(Descriptors.Values.OrderBy(descriptor => descriptor.Type).ToArray());
 
     public static bool TryGet(string type, out AiOperationDescriptor descriptor) => Descriptors.TryGetValue(type, out descriptor!);
 }

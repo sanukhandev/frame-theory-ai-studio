@@ -32,6 +32,8 @@ public sealed class AiEditPlanTests
         Xunit.Assert.True(result.IsValid, string.Join(Environment.NewLine, result.Errors));
         Xunit.Assert.Equal(3, plan.Actions.Count);
         Xunit.Assert.NotEmpty(AiOperationCatalog.Supported);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<AiOperationDescriptor>>(AiOperationCatalog.Supported).IsReadOnly);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<GeminiModelOption>>(GeminiModelCatalog.Supported).IsReadOnly);
     }
 
     [Xunit.Fact]

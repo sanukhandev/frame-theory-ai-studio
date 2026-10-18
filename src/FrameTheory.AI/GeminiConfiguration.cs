@@ -6,11 +6,10 @@ public sealed record GeminiModelOption(string Id, string DisplayName);
 
 public static class GeminiModelCatalog
 {
-    public static IReadOnlyList<GeminiModelOption> Supported { get; } =
-    [
+    public static IReadOnlyList<GeminiModelOption> Supported { get; } = Array.AsReadOnly<GeminiModelOption>([
         new("gemini-2.5-flash", "Gemini 2.5 Flash"),
         new("gemini-2.5-pro", "Gemini 2.5 Pro")
-    ];
+    ]);
 
     public static bool Contains(string modelId) => Supported.Any(model => string.Equals(model.Id, modelId, StringComparison.Ordinal));
 }
