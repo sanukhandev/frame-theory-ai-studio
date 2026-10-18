@@ -624,6 +624,12 @@ public sealed class FoundationTests
                 Xunit.Assert.True(aiProposalStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, aiProposalStatus.FontSize);
                 Xunit.Assert.Equal("Current AI proposal review and validation status.", ToolTip.GetTip(aiProposalStatus));
+                var aiApprovalSummary = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "AI approval summary");
+                Xunit.Assert.True(aiApprovalSummary.IsReadOnly);
+                Xunit.Assert.Equal(11, aiApprovalSummary.FontSize);
+                Xunit.Assert.Equal("Summary of the validated AI actions and their approval state.", ToolTip.GetTip(aiApprovalSummary));
                 var aiRevisionStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "AI revision status");
@@ -658,6 +664,12 @@ public sealed class FoundationTests
                 Xunit.Assert.True(geminiAnalysisStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, geminiAnalysisStatus.FontSize);
                 Xunit.Assert.Equal("Status of the latest bounded Gemini analysis request.", ToolTip.GetTip(geminiAnalysisStatus));
+                var geminiUsageStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Gemini usage status");
+                Xunit.Assert.True(geminiUsageStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, geminiUsageStatus.FontSize);
+                Xunit.Assert.Equal("Usage and response metadata for the latest bounded Gemini request.", ToolTip.GetTip(geminiUsageStatus));
                 var automationNames = new HashSet<string>(StringComparer.Ordinal);
                 for (var workspaceIndex = 0; workspaceIndex < tabs.Items.Count; workspaceIndex++)
                 {

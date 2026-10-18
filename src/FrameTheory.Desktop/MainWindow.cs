@@ -1581,9 +1581,21 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(analysisStatus, "Gemini analysis status");
         ToolTip.SetTip(analysisStatus, "Status of the latest bounded Gemini analysis request.");
         analysisStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.AnalysisStatusText)));
-        var usageStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var usageStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(usageStatus, "Gemini usage status");
-        usageStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.GeminiUsageStatusText)));
+        ToolTip.SetTip(usageStatus, "Usage and response metadata for the latest bounded Gemini request.");
+        usageStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.GeminiUsageStatusText)));
         var activityLog = new TextBox { IsReadOnly = true, Height = 100, TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(activityLog, "Gemini activity log");
         activityLog.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.GeminiActivityLogText)));
@@ -1709,9 +1721,21 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(status, "AI proposal status");
         ToolTip.SetTip(status, "Current AI proposal review and validation status.");
         status.Bind(TextBox.TextProperty, new Binding("AiProposal.StatusText"));
-        var approvalSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var approvalSummary = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(approvalSummary, "AI approval summary");
-        approvalSummary.Bind(TextBlock.TextProperty, new Binding("AiProposal.ApprovalSummary"));
+        ToolTip.SetTip(approvalSummary, "Summary of the validated AI actions and their approval state.");
+        approvalSummary.Bind(TextBox.TextProperty, new Binding("AiProposal.ApprovalSummary"));
         viewModel.AiProposal.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName == nameof(AiProposalViewModel.Actions))
