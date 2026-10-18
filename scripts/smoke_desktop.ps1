@@ -63,6 +63,9 @@ try {
 } finally {
     if (-not $process.HasExited) {
         Stop-Process -Id $process.Id -Force
-        $process.WaitForExit(5000)
+        $process.WaitForExit(5000) | Out-Null
     }
+
+    Start-Sleep -Milliseconds 250
+    $process.Dispose()
 }
