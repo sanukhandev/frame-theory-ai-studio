@@ -1037,6 +1037,16 @@ public sealed class FoundationTests
                 Xunit.Assert.True(geminiUsageStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, geminiUsageStatus.FontSize);
                 Xunit.Assert.Equal("Usage and response metadata for the latest bounded Gemini request.", ToolTip.GetTip(geminiUsageStatus));
+                var geminiActivityLog = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Gemini activity log");
+                Xunit.Assert.True(geminiActivityLog.IsReadOnly);
+                Xunit.Assert.Equal(80, geminiActivityLog.MinHeight);
+                Xunit.Assert.Equal(180, geminiActivityLog.MaxHeight);
+                Xunit.Assert.Equal(HorizontalAlignment.Stretch, geminiActivityLog.HorizontalAlignment);
+                Xunit.Assert.Equal(
+                    "Review the latest optional Gemini request and validation activity.",
+                    ToolTip.GetTip(geminiActivityLog));
                 var automationNames = new HashSet<string>(StringComparer.Ordinal);
                 for (var workspaceIndex = 0; workspaceIndex < tabs.Items.Count; workspaceIndex++)
                 {

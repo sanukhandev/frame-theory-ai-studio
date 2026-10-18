@@ -1829,8 +1829,16 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(usageStatus, "Gemini usage status");
         ToolTip.SetTip(usageStatus, "Usage and response metadata for the latest bounded Gemini request.");
         usageStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.GeminiUsageStatusText)));
-        var activityLog = new TextBox { IsReadOnly = true, Height = 100, TextWrapping = TextWrapping.Wrap };
+        var activityLog = new TextBox
+        {
+            IsReadOnly = true,
+            MinHeight = 80,
+            MaxHeight = 180,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            TextWrapping = TextWrapping.Wrap
+        };
         AutomationProperties.SetName(activityLog, "Gemini activity log");
+        ToolTip.SetTip(activityLog, "Review the latest optional Gemini request and validation activity.");
         activityLog.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.GeminiActivityLogText)));
         _ = settings.LoadAsync(CancellationToken.None);
         var providerSection = CreateInspectorExpander(
