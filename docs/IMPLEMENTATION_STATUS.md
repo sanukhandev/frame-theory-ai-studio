@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive photo-export checkpoint (2026-10-18):** Photo format, JPEG quality and social-dimension controls now use bounded responsive widths instead of fixed children, keeping export actions readable when the inspector wraps. Foundation coverage verifies each control’s compact geometry; native visual and HiDPI acceptance remains open.
+
 **Responsive style-input checkpoint (2026-10-18):** Color style-library naming now uses a bounded 140–220px input that stretches with the inspector flow and explains its local-save purpose through a tooltip. Foundation coverage verifies the compact geometry and accessible name.
 
 **Responsive title-input checkpoint (2026-10-18):** Timeline title entry now stretches within a bounded 160–360px inspector width and exposes a concise editable-title tooltip, preventing the compact captions panel from being dominated by a fixed input. Foundation coverage verifies its bounds and discoverability.

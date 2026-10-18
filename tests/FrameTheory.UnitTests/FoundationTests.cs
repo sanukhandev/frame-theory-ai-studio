@@ -642,6 +642,24 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo export quality value")
                     .Text);
+                var photoFormat = window.GetVisualDescendants()
+                    .OfType<ComboBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Photo export format");
+                Xunit.Assert.True(double.IsNaN(photoFormat.Width));
+                Xunit.Assert.Equal(90, photoFormat.MinWidth);
+                Xunit.Assert.Equal(110, photoFormat.MaxWidth);
+                var photoQuality = window.GetVisualDescendants()
+                    .OfType<Slider>()
+                    .Single(control => AutomationProperties.GetName(control) == "Photo export quality");
+                Xunit.Assert.True(double.IsNaN(photoQuality.Width));
+                Xunit.Assert.Equal(110, photoQuality.MinWidth);
+                Xunit.Assert.Equal(180, photoQuality.MaxWidth);
+                var photoSocialPreset = window.GetVisualDescendants()
+                    .OfType<ComboBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Photo export social dimensions");
+                Xunit.Assert.True(double.IsNaN(photoSocialPreset.Width));
+                Xunit.Assert.Equal(140, photoSocialPreset.MinWidth);
+                Xunit.Assert.Equal(180, photoSocialPreset.MaxWidth);
                 photoSections["Layers and blend section"].IsExpanded = false;
                 Xunit.Assert.True(window.GetVisualDescendants()
                     .OfType<TextBlock>()

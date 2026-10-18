@@ -1386,9 +1386,24 @@ public sealed class MainWindow : Window
         var clearGradeMask = new Button { Content = "Clear grade mask" };
         AutomationProperties.SetName(clearGradeMask, "Clear last photo grade mask");
         clearGradeMask.Click += (_, _) => editor.ClearLastAdjustmentLayerMask();
-        var format = new ComboBox { ItemsSource = new[] { "PNG", "JPEG" }, SelectedIndex = 0, Width = 90 };
+        var format = new ComboBox
+        {
+            ItemsSource = new[] { "PNG", "JPEG" },
+            SelectedIndex = 0,
+            MinWidth = 90,
+            MaxWidth = 110,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
         AutomationProperties.SetName(format, "Photo export format");
-        var quality = new Slider { Minimum = 1, Maximum = 100, Value = 95, Width = 140 };
+        var quality = new Slider
+        {
+            Minimum = 1,
+            Maximum = 100,
+            Value = 95,
+            MinWidth = 110,
+            MaxWidth = 180,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
         AutomationProperties.SetName(quality, "Photo export quality");
         ToolTip.SetTip(quality, "Set JPEG export quality from 1 to 100.");
         var qualityValue = new TextBlock
@@ -1401,7 +1416,14 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(qualityValue, "Photo export quality value");
         quality.ValueChanged += (_, args) => qualityValue.Text = $"{args.NewValue:0}";
-        var socialPreset = new ComboBox { ItemsSource = new[] { "Original", "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
+        var socialPreset = new ComboBox
+        {
+            ItemsSource = new[] { "Original", "16:9 landscape", "1:1 square", "9:16 portrait" },
+            SelectedIndex = 0,
+            MinWidth = 140,
+            MaxWidth = 180,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
         AutomationProperties.SetName(socialPreset, "Photo export social dimensions");
         var export = new Button { Content = "Export image" };
         export.Classes.Add("primary");
