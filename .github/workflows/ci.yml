@@ -319,8 +319,18 @@ jobs:
           choco install innosetup --no-progress -y
           $bundleDirectory = Join-Path $env:RUNNER_TEMP "frame-theory-ffmpeg-bundle"
           New-Item -ItemType Directory -Force -Path $bundleDirectory | Out-Null
-          Copy-Item -LiteralPath (Get-Command ffmpeg -ErrorAction Stop).Source -Destination (Join-Path $bundleDirectory "ffmpeg.exe") -Force
-          Copy-Item -LiteralPath (Get-Command ffprobe -ErrorAction Stop).Source -Destination (Join-Path $bundleDirectory "ffprobe.exe") -Force
+          $ffmpegPair = Get-ChildItem -Path "$env:ChocolateyInstall\lib\ffmpeg" -Filter ffmpeg.exe -File -Recurse -ErrorAction SilentlyContinue |
+            Where-Object { Test-Path -LiteralPath (Join-Path $_.DirectoryName "ffprobe.exe") } |
+            Select-Object -First 1
+          if (-not $ffmpegPair) {
+            $ffmpegPath = (Get-Command ffmpeg -ErrorAction Stop).Source
+            $ffmpegPair = Get-Item -LiteralPath $ffmpegPath
+          }
+          $bundleSource = $ffmpegPair.DirectoryName
+          if (-not (Test-Path -LiteralPath (Join-Path $bundleSource "ffprobe.exe") -PathType Leaf)) {
+            throw "Could not locate an FFmpeg/ffprobe executable pair for the Windows bundle smoke."
+          }
+          Copy-Item -Path (Join-Path $bundleSource "*") -Destination $bundleDirectory -Force
           ./scripts/package_windows.ps1 -OutputDirectory artifacts/installer -PublishDirectory artifacts/installer-publish -Version 0.1.1 -FfmpegDirectory $bundleDirectory
           $installer = Join-Path (Resolve-Path artifacts/installer).Path "FrameTheoryStudioAI-win-x64.exe"
           $installDirectory = Join-Path $env:RUNNER_TEMP "frame-theory-installed"

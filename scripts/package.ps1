@@ -21,11 +21,13 @@ if (-not [string]::IsNullOrWhiteSpace($FfmpegDirectory)) {
         if (-not (Test-Path -LiteralPath $toolPath -PathType Leaf)) {
             throw "FfmpegDirectory must contain $toolName."
         }
-        if ((Get-Item -LiteralPath $toolPath).Attributes -band [IO.FileAttributes]::ReparsePoint) {
-            throw "FfmpegDirectory cannot contain a reparse-point tool: $toolName."
+    }
+    foreach ($bundleFile in Get-ChildItem -LiteralPath $toolRoot -File) {
+        if ($bundleFile.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+            throw "FfmpegDirectory cannot contain reparse-point files: $($bundleFile.Name)."
         }
 
-        Copy-Item -LiteralPath $toolPath -Destination (Join-Path $OutputDirectory $toolName) -Force
+        Copy-Item -LiteralPath $bundleFile.FullName -Destination (Join-Path $OutputDirectory $bundleFile.Name) -Force
     }
 }
 
