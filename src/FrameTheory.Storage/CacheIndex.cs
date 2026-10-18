@@ -129,7 +129,19 @@ public sealed class JsonCacheIndexStore
             var index = new CacheIndex();
             foreach (var entry in entries)
             {
-                index.Register(entry.Key, entry.RelativePath, entry.SizeBytes, entry.LastAccessUtc);
+                if (entry is null)
+                {
+                    throw new InvalidDataException("The cache index contains a null entry.");
+                }
+
+                try
+                {
+                    index.Register(entry.Key, entry.RelativePath, entry.SizeBytes, entry.LastAccessUtc);
+                }
+                catch (ArgumentException exception)
+                {
+                    throw new InvalidDataException("The cache index contains an invalid entry.", exception);
+                }
             }
 
             return index;

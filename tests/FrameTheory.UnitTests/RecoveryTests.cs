@@ -122,6 +122,23 @@ public sealed class RecoveryTests
     }
 
     [Xunit.Fact]
+    public async Task CacheIndexStoreRejectsCorruptEntriesAsInvalidData()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-cache-corrupt-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "index.json");
+            await File.WriteAllTextAsync(path, "[{\"key\":\"escape\",\"relativePath\":\"../outside.bin\",\"sizeBytes\":1,\"lastAccessUtc\":\"2026-01-01T00:00:00Z\"}]");
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => new JsonCacheIndexStore().LoadAsync(path, CancellationToken.None));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task RelinkRejectsDanglingReplacementBeforeMissingFileFallback()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-recovery-dangling-");
