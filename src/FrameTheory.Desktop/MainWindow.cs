@@ -607,6 +607,16 @@ public sealed class MainWindow : Window
                 await editor.ExportAsync(path, jpeg ? PhotoExportFormat.Jpeg : PhotoExportFormat.Png, (int)Math.Round(quality.Value), CancellationToken.None, selectedPreset);
             }
         };
+        var photoPreviewCard = new Border
+        {
+            Padding = new Thickness(12),
+            HorizontalAlignment = HorizontalAlignment.Left,
+            CornerRadius = new CornerRadius(8),
+            Background = Brushes.Black,
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(1),
+            Child = preview
+        };
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
@@ -620,13 +630,18 @@ public sealed class MainWindow : Window
                 Spacing = 8,
                 Children =
                 {
-                    new TextBlock { Text = "Non-destructive photo editor", FontWeight = FontWeight.SemiBold },
-                    preview,
+                    new TextBlock { Text = "Non-destructive photo editor", FontSize = 14, FontWeight = FontWeight.SemiBold, Foreground = Brushes.White },
+                    photoPreviewCard,
+                    CreateSectionLabel("Project"),
                     CreateFlow(open, openProject, saveProject, rotate, undo),
+                    CreateSectionLabel("Layers and blend"),
                     CreateFlow(importOverlay, clearOverlays, overlayBlend, overlayOpacity),
+                    CreateSectionLabel("Mask and retouch"),
                     CreateFlow(applyMask, maskX, maskY, maskRadius, maskStrength, clearMask),
                     CreateFlow(applyRetouch, retouchX, retouchY, retouchRadius, retouchOffsetX, retouchOffsetY, retouchStrength, clearRetouch),
+                    CreateSectionLabel("Grade"),
                     CreateFlow(gradeExposure, addGrade, maskGrade, clearGradeMask),
+                    CreateSectionLabel("Export"),
                     CreateFlow(format, quality, socialPreset, export),
                     status
                 }
