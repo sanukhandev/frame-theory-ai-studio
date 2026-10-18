@@ -435,6 +435,12 @@ public sealed class FoundationTests
                         window.GetVisualDescendants().OfType<Button>(),
                         button => AutomationProperties.GetName(button) == primaryActionName && button.Classes.Contains("primary"));
                 }
+                Xunit.Assert.Equal(
+                    "Apply the selected reusable style to the local color preview.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Apply loaded color style")));
+                Xunit.Assert.Equal(
+                    "Apply the reviewed reference grade to the local preview without uploading it again.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Apply reviewed reference grade")));
 
                 var shortcuts = new[]
                 {

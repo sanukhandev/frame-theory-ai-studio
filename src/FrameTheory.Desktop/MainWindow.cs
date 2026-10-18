@@ -1548,6 +1548,7 @@ public sealed class MainWindow : Window
         controls.Children.Add(CreateGradeControl("Tint", -1, 1, inspector.Tint, value => inspector.Tint = value));
         var reset = new Button { Content = "Reset grade" };
         AutomationProperties.SetName(reset, "Reset color grade");
+        ToolTip.SetTip(reset, "Clear the current grade and return the local preview to the shared default pipeline.");
         reset.Click += (_, _) => inspector.ResetGrade();
         controls.Children.Add(reset);
         var presetStore = new JsonColorPresetStore();
@@ -1559,6 +1560,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(presetStatus, "Color style library status");
         var savePreset = new Button { Content = "Save style library" };
         AutomationProperties.SetName(savePreset, "Save color style library");
+        ToolTip.SetTip(savePreset, "Save the current grade as a reusable local style library.");
         savePreset.Click += async (_, _) =>
         {
             if (string.IsNullOrWhiteSpace(presetName.Text))
@@ -1594,6 +1596,7 @@ public sealed class MainWindow : Window
         };
         var loadPreset = new Button { Content = "Load styles" };
         AutomationProperties.SetName(loadPreset, "Load color style library");
+        ToolTip.SetTip(loadPreset, "Load reusable local styles without changing the current grade until applied.");
         loadPreset.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(loadPreset);
@@ -1626,6 +1629,7 @@ public sealed class MainWindow : Window
         var applyPreset = new Button { Content = "Apply loaded style" };
         applyPreset.Classes.Add("primary");
         AutomationProperties.SetName(applyPreset, "Apply loaded color style");
+        ToolTip.SetTip(applyPreset, "Apply the selected reusable style to the local color preview.");
         applyPreset.Click += (_, _) =>
         {
             if (presetSelection.SelectedItem is ColorPreset preset)
@@ -1711,9 +1715,11 @@ public sealed class MainWindow : Window
         var analyzeReference = new Button { Content = "Analyze approved visual reference" };
         analyzeReference.Classes.Add("primary");
         AutomationProperties.SetName(analyzeReference, "Analyze approved visual reference");
+        ToolTip.SetTip(analyzeReference, "Analyze the explicitly approved source and reference previews for a reviewable grade.");
         var applyReference = new Button { Content = "Apply reviewed reference grade" };
         applyReference.Classes.Add("primary");
         AutomationProperties.SetName(applyReference, "Apply reviewed reference grade");
+        ToolTip.SetTip(applyReference, "Apply the reviewed reference grade to the local preview without uploading it again.");
         var referenceStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(referenceStatus, "Reference analysis status");
         referenceStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.ReferenceAnalysisStatusText)));
