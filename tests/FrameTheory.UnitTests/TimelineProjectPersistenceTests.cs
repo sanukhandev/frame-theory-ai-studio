@@ -75,6 +75,8 @@ public sealed class TimelineProjectPersistenceTests
 
         Xunit.Assert.True(restored.KineticCaptions);
         Xunit.Assert.Equal(["one", "two"], restored.Captions.Single().Words.Select(word => word.Text));
+        Xunit.Assert.Equal(CaptionProvenance.VerifiedTranscript, restored.Captions.Single().Provenance);
+        Xunit.Assert.Equal("sha256:spoken", restored.TranscriptSourceFingerprint);
     }
 
     [Xunit.Fact]
