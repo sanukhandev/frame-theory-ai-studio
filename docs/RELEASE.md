@@ -43,6 +43,8 @@ CI also creates `frame-theory-<platform>-portable.zip` from the published deskto
 | macOS Apple Silicon/Intel | Hosted restore/build/test/publish, native media, extracted portable process-liveness and mounted unsigned DMG relaunch plus plist-version validation passed in `39097200292` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; local GUI/manual acceptance not run here | Unsigned validation DMG available; no notarization or native FFmpeg bundle |
 | Linux x64 | Hosted restore/build/test/publish, native media, extracted portable process-liveness, and installed/removed unsigned DEB relaunch passed in `39097200292` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified under Xvfb; local GUI/manual acceptance not run here | Unsigned validation DEB available; no signing or native FFmpeg bundle |
 
+The subsequent native-bundle run `39099250089` reached successful macOS/Linux package validation and proved the Windows bundled importer could read video and audio, but failed on a multiline PowerShell assertion. It is not release evidence; the corrected assertion and support-file package checks are pending the next hosted run.
+
 ## Release blockers
 
 - Approved Frame Theory logo bytes are absent from the repository; no replacement asset is allowed.
