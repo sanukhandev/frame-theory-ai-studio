@@ -2299,7 +2299,27 @@ public sealed class MainWindow : Window
         snap.Bind(ToggleButton.IsCheckedProperty, new Binding("TimelineEditor.SnapEnabled") { Mode = BindingMode.TwoWay });
         var zoom = new Slider { Minimum = 0.05, Maximum = 20, Value = timeline.FramesPerPixel };
         AutomationProperties.SetName(zoom, "Timeline zoom");
-        zoom.ValueChanged += (_, args) => timeline.SetZoom(args.NewValue);
+        var zoomValue = new TextBlock
+        {
+            Text = $"{timeline.FramesPerPixel:0.00} frames/px",
+            Width = 104,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(172, 181, 196)),
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        AutomationProperties.SetName(zoomValue, "Timeline zoom value");
+        zoom.ValueChanged += (_, args) =>
+        {
+            timeline.SetZoom(args.NewValue);
+            zoomValue.Text = $"{timeline.FramesPerPixel:0.00} frames/px";
+        };
+        timeline.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(TimelineEditorViewModel.FramesPerPixel))
+            {
+                zoom.Value = timeline.FramesPerPixel;
+                zoomValue.Text = $"{timeline.FramesPerPixel:0.00} frames/px";
+            }
+        };
         var back = new Button { Content = "◀ Frame" };
         AutomationProperties.SetName(back, "Previous timeline frame");
         back.Click += (_, _) => timeline.Step(-1);
@@ -2854,7 +2874,7 @@ public sealed class MainWindow : Window
             expanded: true);
         var timelineViewSection = CreateInspectorExpander(
             "Timeline view",
-            CreateSectionContent(CreateFlow(snap, new TextBlock { Text = "Zoom" }, zoom)),
+            CreateSectionContent(CreateFlow(snap, new TextBlock { Text = "Zoom" }, zoom, zoomValue)),
             expanded: true);
         var previewActions = new StackPanel
         {

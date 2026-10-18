@@ -504,6 +504,7 @@ public sealed class FoundationTests
                     "Timeline navigation controls",
                     "Timeline frame readout",
                     "Timeline position readout",
+                    "Timeline zoom value",
                     "Timeline motion analysis status",
                     "Rough cut status",
                     "Title animation status",
