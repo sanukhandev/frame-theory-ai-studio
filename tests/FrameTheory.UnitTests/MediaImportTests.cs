@@ -56,6 +56,37 @@ public sealed class MediaImportTests
     }
 
     [Xunit.Fact]
+    public async Task ImportFailureCleansWaveformOutput()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-import-failure-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "clip.wav");
+            await File.WriteAllTextAsync(path, "source");
+            var metadata = new MediaSourceMetadata(
+                MediaId.Parse(new string('a', 64)),
+                new Uri(path),
+                MediaKind.Audio,
+                0,
+                0,
+                null,
+                0,
+                hasAudio: true);
+            var importer = new FfmpegMediaImporter(
+                new StubProbe(metadata),
+                new StubDecoder(),
+                new StubProcessRunner(writeOutput: true, exitCode: 1));
+
+            await Xunit.Assert.ThrowsAsync<MediaImportException>(() => importer.ImportAsync(new Uri(path), CancellationToken.None));
+            Xunit.Assert.Empty(Directory.EnumerateFiles(Path.GetTempPath(), "frame-theory-waveform-*.pcm"));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task ImportRejectsLinkedWaveformSource()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-import-link-");
@@ -107,7 +138,7 @@ public sealed class MediaImportTests
             Task.FromResult("P6\n1 1\n255\n\0\0\0"u8.ToArray());
     }
 
-    private sealed class StubProcessRunner(bool writeOutput = true) : IMediaProcessRunner
+    private sealed class StubProcessRunner(bool writeOutput = true, int exitCode = 0) : IMediaProcessRunner
     {
         public Task<MediaProcessResult> RunAsync(string executable, IReadOnlyList<string> arguments, CancellationToken cancellationToken)
         {
@@ -123,7 +154,7 @@ public sealed class MediaImportTests
                 File.WriteAllBytes(arguments[^1], bytes);
             }
 
-            return Task.FromResult(new MediaProcessResult(0, string.Empty, string.Empty));
+            return Task.FromResult(new MediaProcessResult(exitCode, string.Empty, string.Empty));
         }
     }
 }

@@ -93,10 +93,24 @@ public sealed class FfmpegMediaImporter : IMediaImporter
         }
         finally
         {
-            if (File.Exists(outputPath))
+            TryDelete(outputPath);
+        }
+    }
+
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
             {
-                File.Delete(outputPath);
+                File.Delete(path);
             }
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
         }
     }
 
