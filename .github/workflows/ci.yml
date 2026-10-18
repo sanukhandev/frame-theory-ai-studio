@@ -116,6 +116,12 @@ jobs:
               throw "Installer validation does not emit $manifestName."
             }
           }
+          $manifestVerifier = Get-Content -LiteralPath 'scripts/verify_native_media_manifest.ps1' -Raw
+          foreach ($needle in @('ConvertFrom-Json', 'Get-FileHash', 'ReparsePoint', 'schemaVersion')) {
+            if ($manifestVerifier -notmatch [regex]::Escape($needle)) {
+              throw "Native media manifest verifier is missing required check: $needle"
+            }
+          }
       - name: Validate package manifest guards
         shell: pwsh
         run: |
@@ -348,6 +354,7 @@ jobs:
           Copy-Item -Path (Join-Path $bundleSource "*") -Destination $bundleDirectory -Force
           Set-Content -LiteralPath (Join-Path $bundleDirectory "frame-theory-native-support.test") -Value "support-file"
           ./scripts/generate_native_media_manifest.ps1 -Directory $bundleDirectory -OutputPath artifacts/sbom/native-bundle-windows.json -FfmpegName ffmpeg.exe -FfprobeName ffprobe.exe
+          ./scripts/verify_native_media_manifest.ps1 -Directory $bundleDirectory -ManifestPath artifacts/sbom/native-bundle-windows.json
           ./scripts/package_windows.ps1 -OutputDirectory artifacts/installer -PublishDirectory artifacts/installer-publish -Version 0.1.1 -FfmpegDirectory $bundleDirectory
           $installer = Join-Path (Resolve-Path artifacts/installer).Path "FrameTheoryStudioAI-win-x64.exe"
           $installDirectory = Join-Path $env:RUNNER_TEMP "frame-theory-installed"
@@ -398,6 +405,7 @@ jobs:
           printf 'support-file\n' > "$bundle_directory/frame-theory-native-support.test"
           chmod +x "$bundle_directory/ffmpeg" "$bundle_directory/ffprobe"
           pwsh -NoProfile -File ./scripts/generate_native_media_manifest.ps1 -Directory "$bundle_directory" -OutputPath artifacts/sbom/native-bundle-macos.json
+          pwsh -NoProfile -File ./scripts/verify_native_media_manifest.ps1 -Directory "$bundle_directory" -ManifestPath artifacts/sbom/native-bundle-macos.json
           scripts/package_macos_dmg.sh "" artifacts/installer 0.1.1 "$bundle_directory"
           mkdir -p "$RUNNER_TEMP/frame-theory-dmg"
           dmg_mount="$RUNNER_TEMP/frame-theory-dmg"
@@ -443,6 +451,7 @@ jobs:
           printf 'support-file\n' > "$bundle_directory/frame-theory-native-support.test"
           chmod +x "$bundle_directory/ffmpeg" "$bundle_directory/ffprobe"
           pwsh -NoProfile -File ./scripts/generate_native_media_manifest.ps1 -Directory "$bundle_directory" -OutputPath artifacts/sbom/native-bundle-linux.json
+          pwsh -NoProfile -File ./scripts/verify_native_media_manifest.ps1 -Directory "$bundle_directory" -ManifestPath artifacts/sbom/native-bundle-linux.json
           scripts/package_linux_deb.sh linux-x64 artifacts/installer 0.1.1 "$bundle_directory"
           dpkg-deb --info artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb
           test "$(dpkg-deb --field artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb Version)" = "0.1.1"
