@@ -111,7 +111,7 @@ public sealed class PhotoRecoveryViewModel : INotifyPropertyChanged
         try
         {
             var projectPath = Path.GetFullPath(ProjectPath);
-            var relinked = _recovery.RelinkMedia(projectPath, _snapshot, SelectedMissingMedia.Id, replacementPath);
+            var relinked = await _recovery.RelinkMediaAsync(projectPath, _snapshot, SelectedMissingMedia.Id, replacementPath, cancellationToken);
             await _repository.SaveAtomicAsync(projectPath, relinked, cancellationToken);
             _snapshot = relinked;
             RefreshMissing(projectPath, relinked);

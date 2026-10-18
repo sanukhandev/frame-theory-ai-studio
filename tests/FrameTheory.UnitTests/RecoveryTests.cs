@@ -29,11 +29,14 @@ public sealed class RecoveryTests
             await recovery.SaveAutosaveAsync(projectPath, snapshot, CancellationToken.None);
             var recovered = await recovery.TryLoadAutosaveAsync(projectPath, CancellationToken.None);
             var missing = recovery.FindMissingMedia(projectPath, snapshot);
-            var relinked = recovery.RelinkMedia(projectPath, snapshot, mediaId, replacementPath);
+            var relinked = await recovery.RelinkMediaAsync(projectPath, snapshot, mediaId, replacementPath, CancellationToken.None);
 
             Xunit.Assert.NotNull(recovered);
             Xunit.Assert.Single(missing);
             Xunit.Assert.Equal("media/replacement.mov", relinked.MediaReferences.Single().RelativePath);
+            Xunit.Assert.Equal(
+                $"sha256:{Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(await File.ReadAllBytesAsync(replacementPath))).ToLowerInvariant()}",
+                relinked.MediaReferences.Single().ContentFingerprint);
             Xunit.Assert.False(File.Exists(missingPath));
             Xunit.Assert.Equal("synthetic media", await File.ReadAllTextAsync(replacementPath));
             recovery.ClearAutosave(projectPath);

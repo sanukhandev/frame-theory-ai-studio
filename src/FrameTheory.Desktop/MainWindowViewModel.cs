@@ -1129,11 +1129,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         try
         {
-            var relinked = _timelineProjectRecovery.RelinkMedia(
+            var relinked = await _timelineProjectRecovery.RelinkMediaAsync(
                 _pendingTimelineProjectPath,
                 _pendingTimelineSnapshot,
                 SelectedMissingTimelineMedia.Id,
-                replacementPath);
+                replacementPath,
+                cancellationToken);
             await _timelineProjectRepository.SaveAtomicAsync(_pendingTimelineProjectPath, relinked, cancellationToken);
             _pendingTimelineSnapshot = relinked;
             var missing = _timelineProjectRecovery.FindMissingMedia(_pendingTimelineProjectPath, relinked);

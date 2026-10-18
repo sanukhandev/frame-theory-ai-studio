@@ -1,4 +1,5 @@
 using FrameTheory.Domain;
+using System.Security.Cryptography;
 
 namespace FrameTheory.Storage;
 
@@ -41,7 +42,12 @@ public sealed class ProjectRecoveryService
             .ToArray();
     }
 
-    public ProjectSnapshot RelinkMedia(string projectPath, ProjectSnapshot snapshot, MediaId mediaId, string replacementPath)
+    public async Task<ProjectSnapshot> RelinkMediaAsync(
+        string projectPath,
+        ProjectSnapshot snapshot,
+        MediaId mediaId,
+        string replacementPath,
+        CancellationToken cancellationToken)
     {
         var projectDirectory = GetProjectDirectory(projectPath);
         var replacementFullPath = Path.GetFullPath(replacementPath);
@@ -52,10 +58,11 @@ public sealed class ProjectRecoveryService
 
         var containedReplacementPath = ResolveContainedPath(projectDirectory, Path.GetRelativePath(projectDirectory, replacementFullPath));
         var relativePath = Path.GetRelativePath(projectDirectory, containedReplacementPath);
+        var replacementFingerprint = await ComputeFingerprintAsync(containedReplacementPath, cancellationToken);
         var target = snapshot.MediaReferences.SingleOrDefault(reference => reference.Id == mediaId)
             ?? throw new InvalidOperationException("The media reference was not found.");
         var updated = snapshot.MediaReferences.Select(reference => reference.Id == mediaId
-            ? new MediaReference(reference.Id, relativePath, reference.ContentFingerprint)
+            ? new MediaReference(reference.Id, relativePath, replacementFingerprint)
             : reference);
         return snapshot.WithMediaReferences(updated);
     }
@@ -118,4 +125,17 @@ public sealed class ProjectRecoveryService
 
     private static bool IsReparsePoint(string path) =>
         (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
+
+    private static async Task<string> ComputeFingerprintAsync(string path, CancellationToken cancellationToken)
+    {
+        await using var stream = new FileStream(path, new FileStreamOptions
+        {
+            Access = FileAccess.Read,
+            Mode = FileMode.Open,
+            Share = FileShare.Read,
+            Options = FileOptions.Asynchronous | FileOptions.SequentialScan
+        });
+        var hash = await SHA256.HashDataAsync(stream, cancellationToken);
+        return $"sha256:{Convert.ToHexString(hash).ToLowerInvariant()}";
+    }
 }
