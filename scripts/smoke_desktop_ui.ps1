@@ -164,6 +164,7 @@ try {
             "Quick save timeline project",
             "Quick export timeline MP4",
             "Timeline action status",
+            "Video export aspect ratio",
             "Timeline playhead frame",
             "Select at playhead",
             "Import verified transcript JSON",
