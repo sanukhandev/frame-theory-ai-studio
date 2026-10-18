@@ -29,6 +29,7 @@ public sealed class DesktopAiAnalysisTests
             };
         }));
         var settings = new GeminiSettingsViewModel(new GeminiConfigurationService(new InMemorySecretStore()));
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<string>>(settings.Models).IsReadOnly);
         await settings.SaveAsync("test-secret", CancellationToken.None);
         var viewModel = new MainWindowViewModel(
             new WorkspaceCatalog(),

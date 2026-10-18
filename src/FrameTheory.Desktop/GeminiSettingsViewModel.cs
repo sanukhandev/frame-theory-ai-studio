@@ -14,7 +14,7 @@ public sealed class GeminiSettingsViewModel : INotifyPropertyChanged
     public GeminiSettingsViewModel(GeminiConfigurationService configuration)
     {
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-        Models = GeminiModelCatalog.Supported.Select(model => model.Id).ToArray();
+        Models = Array.AsReadOnly(GeminiModelCatalog.Supported.Select(model => model.Id).ToArray());
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
