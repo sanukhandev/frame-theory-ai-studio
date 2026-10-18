@@ -17,7 +17,7 @@ Audit checkpoint: 2026-10-18, commit `7a2d1df`, Windows 11 x64 plus hosted CI ru
 | Area | Open task(s) | Reason V1 cannot be tagged |
 |---|---|---|
 | Source-grounded transcription | FT-602 | Desktop/provider adapter, safe video-audio extraction, resumable Files API cleanup and fake-HTTP coverage exist; live approved-key/spoken-fixture verification and local ASR fallback remain open |
-| Gemini production loop | FT-706 | Desktop revision validation, retries, usage and redacted history exist; live provider-to-plan execution remains unverified |
+| Gemini production loop | FT-706 live gate | Desktop revision validation, retries, usage and redacted history are implemented; live provider-to-plan execution remains unverified |
 | Creator Reel/export | FT-803 | Multi-clip Reel, social photo dimensions and queue retry are verified; approved Frame Theory watermark asset/branded export remains unavailable |
 | UX/performance/reliability | FT-901..FT-904 | Interactive/manual GUI acceptance remains open; bounded headless proxy evidence now passes but has not replaced the required UI acceptance |
 | QA/release | FT-1002, FT-1003, FT-1005, FT-1006 | Manual journeys, license/CVE clearance, native media redistribution, clean-host relaunch/recovery, signing/notarization and final audit remain open; unsigned installer validation, FT-1001 and FT-1004 are verified |
