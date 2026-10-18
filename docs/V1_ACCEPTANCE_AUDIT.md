@@ -1,6 +1,6 @@
 # V1 Acceptance Audit
 
-Audit checkpoint: 2026-10-18, commit `5d57f8e`, Windows 11 x64 plus hosted CI run `39097200292` and the preceding implementation matrix runs recorded in `docs/IMPLEMENTATION_STATUS.md`.
+Audit checkpoint: 2026-10-18, latest previously verified green packaging run `39097200292` plus the preceding implementation matrix runs recorded in `docs/IMPLEMENTATION_STATUS.md`.
 
 ## Evidence
 
@@ -13,6 +13,7 @@ Audit checkpoint: 2026-10-18, commit `5d57f8e`, Windows 11 x64 plus hosted CI ru
 - Local post-checkpoint evidence: the adaptive-flow and keyboard-smoke increments pass the Windows UI smoke at 1280x800 and 960x640, with all four workspaces, 22 controls and `Ctrl+3` selection verified; the full Release suite remains green at 194 unit and 2 golden tests. Hosted confirmation for this batch is required before treating it as cross-platform evidence.
 - Latest hosted update: run `39094586204` passed documentation and Windows/macOS/Linux build/test jobs after the redacted AI activity-log slice. Its Windows job also passed the native UI and media/package validation steps; telemetry, reference matching and activity logging remain limited by the manual/live acceptance gates listed below.
 - Latest hosted packaging update: run `39097200292` passed all documentation, Windows, macOS and Linux jobs, including macOS DMG version validation, Windows x64 installer checks, Linux DEB metadata, packaged relaunch and manifest security regressions. This closes the implementation evidence gap for the packaging correction but does not clear the external release blockers below.
+- Latest native-bundle follow-up: run `39098739893` passed documentation, macOS and Linux validation but failed the Windows installer media smoke because the harness copied a Chocolatey-resolved executable without its adjacent runtime files. It is not release evidence; the corrective local commits and required rerun are recorded in `docs/IMPLEMENTATION_STATUS.md`.
 
 ## P0 blockers before V1
 
