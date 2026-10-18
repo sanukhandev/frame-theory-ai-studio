@@ -111,6 +111,11 @@ jobs:
               throw "Native media manifest script is missing required guard: $needle"
             }
           }
+          foreach ($manifestName in @('native-bundle-windows.json', 'native-bundle-macos.json', 'native-bundle-linux.json')) {
+            if ($workflow -notmatch [regex]::Escape($manifestName)) {
+              throw "Installer validation does not emit $manifestName."
+            }
+          }
       - name: Validate package manifest guards
         shell: pwsh
         run: |
