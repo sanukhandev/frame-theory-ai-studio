@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Photo redo checkpoint (2026-10-18):** The existing non-destructive photo history now exposes a real `Redo photo edit` action beside undo, preserves the operation stack and reports an explicit empty-redo state. Persistence coverage exercises undo followed by redo before save/reopen, and the adaptive shell exposes the accessible control.
+
 **Responsive inspector-input checkpoint (2026-10-18):** AI revision and recipe inputs now use bounded minimum/maximum widths, and Color reference selectors stretch within a 160–240px bound. The controls retain their existing commands while wrapping cleanly in compact inspector flows; the adaptive-shell contract verifies their geometry and automation names.
 
 **Responsive photo-preview checkpoint (2026-10-18):** Photo original/edited canvases now stretch within their two-up comparison cards while preserving aspect ratio and a 640px bound, avoiding centered oversized children at compact widths. The adaptive-shell contract verifies both images; native visual and HiDPI acceptance remains open.

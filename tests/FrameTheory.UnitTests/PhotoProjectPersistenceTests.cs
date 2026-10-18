@@ -24,6 +24,9 @@ public sealed class PhotoProjectPersistenceTests
 
             await first.OpenAsync(sourcePath, CancellationToken.None);
             first.RotateRight();
+            first.Undo();
+            first.Redo();
+            Xunit.Assert.Single(first.Current!.Operations);
             Xunit.Assert.True(await first.SaveProjectAsync(projectPath, CancellationToken.None));
 
             var second = CreateEditor(repository);

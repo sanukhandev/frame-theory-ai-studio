@@ -1257,6 +1257,10 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(undo, "Undo last photo edit");
         ToolTip.SetTip(undo, "Undo the latest non-destructive photo operation.");
         undo.Click += (_, _) => editor.Undo();
+        var redo = new Button { Content = "Redo photo edit" };
+        AutomationProperties.SetName(redo, "Redo last photo edit");
+        ToolTip.SetTip(redo, "Redo the latest photo operation that was undone.");
+        redo.Click += (_, _) => editor.Redo();
         var overlayOpacity = new Slider { Minimum = 0, Maximum = 1, Value = 1, Width = 120 };
         AutomationProperties.SetName(overlayOpacity, "Photo overlay opacity");
         ToolTip.SetTip(overlayOpacity, "Set the imported overlay opacity from 0% to 100%.");
@@ -1485,7 +1489,7 @@ public sealed class MainWindow : Window
         Grid.SetColumn(((Grid)photoPreviewCard.Child).Children[1], 1);
         var photoProjectSection = CreateInspectorExpander(
             "Project",
-            CreateSectionContent(CreateFlow(open, openProject, saveProject, rotate, undo)),
+            CreateSectionContent(CreateFlow(open, openProject, saveProject, rotate, undo, redo)),
             expanded: true);
         var photoLayersSection = CreateInspectorExpander(
             "Layers and blend",

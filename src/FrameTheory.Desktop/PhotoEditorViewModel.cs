@@ -382,6 +382,18 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         NotifyDocumentChanged();
     }
 
+    public void Redo()
+    {
+        if (_history?.Redo() != true)
+        {
+            StatusText = "No photo edit is available to redo.";
+            return;
+        }
+
+        StatusText = "Redid the last photo edit.";
+        NotifyDocumentChanged();
+    }
+
     public async Task ExportAsync(
         string destinationPath,
         PhotoExportFormat format,

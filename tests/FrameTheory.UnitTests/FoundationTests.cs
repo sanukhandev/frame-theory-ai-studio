@@ -1042,6 +1042,7 @@ public sealed class FoundationTests
                     "Undo last AI apply",
                     "Rotate photo 90 degrees clockwise",
                     "Undo last photo edit",
+                    "Redo last photo edit",
                     "Clear photo overlays",
                     "Clear last photo overlay mask",
                     "Clear photo clone retouch",
