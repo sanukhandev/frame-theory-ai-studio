@@ -358,6 +358,9 @@ jobs:
           $previousPath = $env:PATH
           try {
             $env:PATH = "$env:DOTNET_ROOT;$env:SystemRoot\System32"
+            if (Get-Command ffmpeg -ErrorAction SilentlyContinue) {
+              throw "Windows clean-PATH smoke unexpectedly resolved host ffmpeg."
+            }
             $isolatedMediaSmoke = & $dotnetPath tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4
             if ($LASTEXITCODE -ne 0 -or -not ($isolatedMediaSmoke -match 'kind=Video') -or -not ($isolatedMediaSmoke -match 'has_audio=True')) {
               throw "Windows packaged FFmpeg clean-PATH smoke failed: $isolatedMediaSmoke"
@@ -398,6 +401,10 @@ jobs:
           dotnet_path="$(command -v dotnet)"
           clean_path="$RUNNER_TEMP/frame-theory-empty-path"
           mkdir -p "$clean_path"
+          if PATH="$clean_path" command -v ffmpeg >/dev/null 2>&1; then
+            echo "macOS clean-PATH smoke unexpectedly resolved host ffmpeg." >&2
+            exit 1
+          fi
           FRAME_THEORY_FFMPEG_DIR="$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS" PATH="$clean_path" \
             "$dotnet_path" tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4 | tee "$RUNNER_TEMP/frame-theory-macos-bundled-media-clean-path.txt"
           grep -F 'kind=Video' "$RUNNER_TEMP/frame-theory-macos-bundled-media-clean-path.txt"
@@ -447,6 +454,10 @@ jobs:
           dotnet_path="$(command -v dotnet)"
           clean_path="$RUNNER_TEMP/frame-theory-empty-path"
           mkdir -p "$clean_path"
+          if PATH="$clean_path" command -v ffmpeg >/dev/null 2>&1; then
+            echo "Linux clean-PATH smoke unexpectedly resolved host ffmpeg." >&2
+            exit 1
+          fi
           FRAME_THEORY_FFMPEG_DIR=/opt/frame-theory-studio PATH="$clean_path" \
             "$dotnet_path" tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4 | tee "$RUNNER_TEMP/frame-theory-linux-bundled-media-clean-path.txt"
           grep -F 'kind=Video' "$RUNNER_TEMP/frame-theory-linux-bundled-media-clean-path.txt"
