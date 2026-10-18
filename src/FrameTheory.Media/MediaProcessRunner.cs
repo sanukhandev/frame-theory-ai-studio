@@ -16,6 +16,7 @@ public sealed class FfmpegProcessRunner : IMediaProcessRunner
         IReadOnlyList<string> arguments,
         CancellationToken cancellationToken)
     {
+        executable = FfmpegExecutableLocator.Resolve(executable);
         using var process = new Process
         {
             StartInfo = new ProcessStartInfo
