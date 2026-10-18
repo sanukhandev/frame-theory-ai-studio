@@ -390,7 +390,23 @@ public sealed class FoundationTests
                     "Analyze approved samples with Gemini",
                     "Validate AI proposal",
                     "Apply approved AI actions",
-                    "Undo last AI apply"
+                    "Undo last AI apply",
+                    "Rotate photo 90 degrees clockwise",
+                    "Undo last photo edit",
+                    "Clear photo overlays",
+                    "Clear last photo overlay mask",
+                    "Clear photo clone retouch",
+                    "Mask last photo grade",
+                    "Clear last photo grade mask",
+                    "Clear AI proposal",
+                    "Apply fade-in animation preset",
+                    "Apply push-in animation preset",
+                    "Clear selected clip animation",
+                    "Duck selected audio by 12 dB",
+                    "Clear selected audio ducking",
+                    "Clear selected audio settings",
+                    "Apply fade-in animation to last title",
+                    "Apply push-in animation to last title"
                 })
                 {
                     Xunit.Assert.Contains(requiredName, automationNames);
