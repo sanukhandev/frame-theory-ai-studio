@@ -488,6 +488,17 @@ public sealed class MainWindow : Window
             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145))
         };
         AutomationProperties.SetName(mediaSearchEmptyState, "Media search empty state");
+        var mediaEmptyState = new TextBlock
+        {
+            Text = "No media imported yet. Use Import media or drop files here.",
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            TextWrapping = TextWrapping.Wrap,
+            TextAlignment = TextAlignment.Center,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145))
+        };
+        AutomationProperties.SetName(mediaEmptyState, "Media bin empty state");
         ImportedMediaViewModel? preservedSelection = null;
         void RefreshMediaList()
         {
@@ -503,6 +514,7 @@ public sealed class MainWindow : Window
             }
             clearMediaSearch.IsEnabled = !string.IsNullOrEmpty(query);
             mediaSearchEmptyState.IsVisible = !string.IsNullOrEmpty(query) && filtered.Count == 0;
+            mediaEmptyState.IsVisible = viewModel.ImportedMedia.Count == 0;
         }
 
         mediaSearch.TextChanged += (_, _) => RefreshMediaList();
@@ -619,7 +631,7 @@ public sealed class MainWindow : Window
                     TextWrapping = TextWrapping.Wrap
                 }
             },
-            CreateMediaBin(importZone, importStatus, importedList, mediaSearch, clearMediaSearch, mediaSearchEmptyState)
+            CreateMediaBin(importZone, importStatus, importedList, mediaSearch, clearMediaSearch, mediaSearchEmptyState, mediaEmptyState)
         };
         if (workspace.Name == "Photo")
         {
@@ -750,7 +762,8 @@ public sealed class MainWindow : Window
         ListBox importedList,
         TextBox mediaSearch,
         Button clearMediaSearch,
-        TextBlock mediaSearchEmptyState)
+        TextBlock mediaSearchEmptyState,
+        TextBlock mediaEmptyState)
     {
         importZone.Margin = new Thickness(0);
         var mediaBin = new Border
@@ -801,7 +814,7 @@ public sealed class MainWindow : Window
                 },
                 new Grid
                 {
-                    Children = { importedList, mediaSearchEmptyState }
+                    Children = { importedList, mediaSearchEmptyState, mediaEmptyState }
                 },
                 importStatus
             }

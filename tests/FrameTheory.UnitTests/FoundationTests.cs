@@ -242,6 +242,10 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Media search empty state")
                     .IsVisible);
+                Xunit.Assert.True(window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => AutomationProperties.GetName(control) == "Media bin empty state")
+                    .IsVisible);
                 var timelineTracks = window.GetVisualDescendants()
                     .OfType<ListBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline tracks");
@@ -493,6 +497,7 @@ public sealed class FoundationTests
                     "Search imported media",
                     "Clear media search",
                     "Media search empty state",
+                    "Media bin empty state",
                     "Timeline preview status",
                     "Timeline program monitor",
                     "Timeline monitor controls",
