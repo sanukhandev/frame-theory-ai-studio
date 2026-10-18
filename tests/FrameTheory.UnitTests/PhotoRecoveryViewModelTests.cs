@@ -34,6 +34,14 @@ public sealed class PhotoRecoveryViewModelTests
             Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<MissingMediaViewModel>>(viewModel.MissingMedia).IsReadOnly);
             Xunit.Assert.Contains("1 missing", viewModel.StatusText);
 
+            var corruptProjectPath = Path.Combine(directory.FullName, "corrupt.ftstudio");
+            await File.WriteAllTextAsync(corruptProjectPath, "{not-json");
+            viewModel.ProjectPath = corruptProjectPath;
+            await viewModel.OpenProjectAsync(CancellationToken.None);
+            Xunit.Assert.Contains("could not be opened", viewModel.StatusText);
+            Xunit.Assert.Single(viewModel.MissingMedia);
+            viewModel.ProjectPath = projectPath;
+
             await viewModel.RelinkSelectedAsync(replacementPath, CancellationToken.None);
             var loaded = await repository.LoadAsync(projectPath, CancellationToken.None);
             Xunit.Assert.Empty(viewModel.MissingMedia);

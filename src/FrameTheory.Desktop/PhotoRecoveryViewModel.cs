@@ -92,10 +92,6 @@ public sealed class PhotoRecoveryViewModel : INotifyPropertyChanged
         }
         catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException or UnauthorizedAccessException)
         {
-            _snapshot = null;
-            MissingMedia = Array.AsReadOnly(Array.Empty<MissingMediaViewModel>());
-            SelectedMissingMedia = null;
-            OnPropertyChanged(nameof(MissingMedia));
             StatusText = $"Project could not be opened: {exception.Message}";
         }
     }
