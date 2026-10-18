@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 5 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+
 **FT-901 workspace-render checkpoint (2026-10-19):** The production Skia-backed headless shell now captures all four Video, Photo, Color and AI workspaces at the compact 960×640 surface after real tab selection. Focused render coverage passes 2/2; the full Release suite passes 271 unit tests and 2 golden tests with format verification, repository validation and `git diff --check` green. This strengthens responsive-render evidence but does not replace native visual or screen-reader review.
 
 **FT-901 rendered-frame checkpoint (2026-10-19):** The test-only Avalonia shell harness now uses the production Skia renderer to capture the real `MainWindow` at 1280×800 standard scale, 960×640 compact scale and 1920×1200 at 1.5× HiDPI, proving the rendered surface remains available at the supported responsive bounds and scale. The managed Release desktop launch smoke also detected `Frame Theory Studio AI`. The full Release suite passes 270 unit tests and 2 golden tests with a warning-free build, format verification, repository validation and `git diff --check`; this strengthens evidence but does not replace native visual or screen-reader review.
