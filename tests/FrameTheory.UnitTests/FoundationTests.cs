@@ -280,6 +280,11 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Search imported media");
                 Xunit.Assert.True(double.IsNaN(mediaSearch.Width));
                 Xunit.Assert.Equal(HorizontalAlignment.Stretch, mediaSearch.HorizontalAlignment);
+                var mediaTypeFilter = window.GetVisualDescendants()
+                    .OfType<ComboBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Filter imported media by type");
+                Xunit.Assert.Equal(4, mediaTypeFilter.Items.Count);
+                Xunit.Assert.Equal("Show all imported assets or filter the media bin by type.", ToolTip.GetTip(mediaTypeFilter));
                 Xunit.Assert.Equal("Filter imported media by filename.", ToolTip.GetTip(mediaSearch));
                 Xunit.Assert.False(window.GetVisualDescendants()
                     .OfType<Button>()
