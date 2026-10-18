@@ -7,6 +7,7 @@ using Avalonia.Themes.Fluent;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using System.Reflection;
+using FrameTheory.AI;
 using FrameTheory.Application;
 using FrameTheory.Domain;
 
@@ -624,6 +625,43 @@ public sealed class FoundationTests
                     .OfType<Image>()
                     .Single(control => AutomationProperties.GetName(control) == "Color vectorscope")
                     .Source);
+            }
+            finally
+            {
+                window.Close();
+            }
+        }, CancellationToken.None);
+    }
+
+    [Xunit.Fact]
+    public async Task ValidatedAiActionsRenderAsNamedReviewCards()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
+        await session.Dispatch(() =>
+        {
+            var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
+                new FrameTheory.Desktop.WorkspaceCatalog(),
+                new TestCapabilityDetector());
+            viewModel.AiProposal.Validate(
+                """
+                {"schemaVersion":"1.0","planId":"plan-1","projectId":"active-project","intent":"grade","actions":[{"id":"grade-1","type":"color.adjust","targetId":"clip-1","startFrame":0,"durationFrames":10,"params":{"exposureEV":0.25,"contrast":0,"saturation":0,"temperature":0,"tint":0}}]}
+                """,
+                new AiPlanValidationContext("active-project", new HashSet<string>(["clip-1"]), 20));
+            var window = new FrameTheory.Desktop.MainWindow(viewModel);
+            try
+            {
+                window.Show();
+                var tabs = window.GetVisualDescendants()
+                    .OfType<TabControl>()
+                    .Single(control => AutomationProperties.GetName(control) == "Workspaces");
+                tabs.SelectedIndex = 3;
+                Dispatcher.UIThread.RunJobs();
+                var approval = window.GetVisualDescendants()
+                    .OfType<CheckBox>()
+                    .Single(control => AutomationProperties.GetName(control)?.StartsWith("Approve AI action:", StringComparison.Ordinal) == true);
+
+                Xunit.Assert.IsType<Border>(approval.Parent);
+                Xunit.Assert.Contains("Approve AI action:", AutomationProperties.GetName(approval), StringComparison.Ordinal);
             }
             finally
             {
