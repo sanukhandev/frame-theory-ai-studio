@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Native UI attempt checkpoint (2026-10-18):** The local Windows UI smoke launched the production desktop window but the non-interactive session failed at the first `SendKeys("^1")` call with the host exception `The operation completed successfully.` The script cleaned up the process; native shortcut success is not claimed locally, and hosted Windows UI validation is required for the new all-shortcut smoke.
+
 **Native launch-size checkpoint (2026-10-18):** Windows UI automation now fails closed unless the real desktop window launches at least the documented `1280x800` bounds before exercising the supported `960x640` resize. PowerShell parsing and diff checks pass; hosted native UI confirmation is pending.
 
 **Native shortcut smoke checkpoint (2026-10-18):** `scripts/smoke_desktop_ui.ps1` now drives and verifies real `Ctrl+1..4` workspace selection through Windows UI Automation instead of checking only `Ctrl+3`. PowerShell parsing passes and focused Foundation coverage passes 19/19; hosted confirmation is pending the next exact-ten-commit push.
