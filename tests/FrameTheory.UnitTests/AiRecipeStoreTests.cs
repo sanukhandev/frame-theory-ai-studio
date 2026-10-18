@@ -38,6 +38,12 @@ public sealed class AiRecipeStoreTests
                 "Invalid",
                 "{\"schemaVersion\":\"1.0\"}",
                 CancellationToken.None));
+            await File.WriteAllTextAsync(
+                Path.Combine(directory.FullName, "corrupt.ftrecipe.json"),
+                "{\"schemaVersion\":1,\"name\":null,\"planJson\":\"{}\"}");
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => store.LoadAsync(
+                Path.Combine(directory.FullName, "corrupt.ftrecipe.json"),
+                CancellationToken.None));
         }
         finally
         {

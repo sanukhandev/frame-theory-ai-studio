@@ -99,6 +99,14 @@ public sealed class AiRecipeStore
         {
             throw new InvalidDataException("The AI recipe JSON is malformed.", exception);
         }
+        catch (ArgumentException exception)
+        {
+            throw new InvalidDataException("The AI recipe contains invalid values.", exception);
+        }
+        catch (AiPlanFormatException exception)
+        {
+            throw new InvalidDataException("The AI recipe contains an invalid edit plan.", exception);
+        }
     }
 
     private static void ValidateName(string? name)
