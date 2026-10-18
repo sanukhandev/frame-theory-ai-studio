@@ -41,4 +41,35 @@ public sealed class FfmpegExecutableLocatorTests
             directory.Delete(true);
         }
     }
+
+    [Xunit.Fact]
+    public void ResolveIgnoresSymlinkedBundledMediaTools()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-ffmpeg-linked-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-ffmpeg-linked-target-");
+        try
+        {
+            var executable = OperatingSystem.IsWindows() ? "ffmpeg.exe" : "ffmpeg";
+            var targetPath = Path.Combine(externalDirectory.FullName, executable);
+            var linkedPath = Path.Combine(directory.FullName, executable);
+            File.WriteAllText(targetPath, "external");
+            File.CreateSymbolicLink(linkedPath, targetPath);
+
+            Xunit.Assert.Equal("ffmpeg", FfmpegExecutableLocator.Resolve("ffmpeg", directory.FullName, directory.FullName));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
 }

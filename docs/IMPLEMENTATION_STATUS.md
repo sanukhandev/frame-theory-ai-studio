@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**FFmpeg executable-boundary checkpoint (2026-10-18):** Bundled and environment-selected FFmpeg/ffprobe candidates now ignore reparse-point paths before they can be returned to the process runner. The locator regression covers redirected bundled tools; focused locator coverage and repository policy validation are pending this commit's local gate and hosted revalidation.
+
 **Photo input-boundary checkpoint (2026-10-18):** The Photo workspace now rejects reparse-point image and overlay paths before handing them to the importer, and reports the rejection through the existing status surface instead of escaping the UI. Focused photo persistence coverage passes 8/8, with formatting, repository validation and `git diff --check` green; hosted cross-platform revalidation remains pending at the next exact-ten-commit push.
 
 **Native GUI availability checkpoint (2026-10-18):** The Windows computer-use inventory returned no native applications (`apps=[]`), only browser tabs. Native UI interaction, HiDPI inspection and cross-platform manual journeys therefore remain unverified; no GUI task is closed from headless or CI evidence alone.

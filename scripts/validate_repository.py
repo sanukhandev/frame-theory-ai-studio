@@ -55,6 +55,7 @@ def run() -> int:
         "src/FrameTheory.Media/TimelinePreview.cs",
         "src/FrameTheory.Media/AudioSourcePreparer.cs",
         "src/FrameTheory.Media/PreviewProxy.cs",
+        "src/FrameTheory.Media/FfmpegExecutableLocator.cs",
         "src/FrameTheory.AI/GeminiInteractions.cs",
         "src/FrameTheory.Media/MediaExport.cs",
         "src/FrameTheory.Media/TimelineCompositor.cs",

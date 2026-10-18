@@ -1,3 +1,5 @@
+using FrameTheory.Domain;
+
 namespace FrameTheory.Media;
 
 public static class FfmpegExecutableLocator
@@ -22,7 +24,7 @@ public static class FfmpegExecutableLocator
         foreach (var directory in directories.Where(path => !string.IsNullOrWhiteSpace(path)))
         {
             var candidate = Path.Combine(directory!, fileName);
-            if (File.Exists(candidate))
+            if (!LocalPathSecurity.ContainsReparsePoint(candidate) && File.Exists(candidate))
             {
                 return candidate;
             }
