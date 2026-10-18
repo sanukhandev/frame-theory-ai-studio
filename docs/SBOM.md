@@ -30,6 +30,8 @@ The package scripts now accept an explicit, release-owner-supplied native-tools 
 
 The Windows CI fallback pins the WinGet package `Gyan.FFmpeg` version `9.0.2` from the `winget` source. Its portable installer URL is `https://github.com/GyanD/codexffmpeg/releases/download/9.0.2/ffmpeg-9.0.2-full_build.zip` with installer SHA-256 `759d0a9831c436a0eb331ad36f236c06cb04aaa0005da46571f0e9d3d9206f6b`. This is GPL validation evidence only; it is not an approval to redistribute FFmpeg, codecs or the package in a product installer.
 
+Installer validation also emits `native-bundle-windows.json`, `native-bundle-macos.json` and `native-bundle-linux.json` using `scripts/generate_native_media_manifest.ps1`. Each manifest records the SHA-256 and byte length of every regular bundle file plus bounded `ffmpeg -version` and `ffprobe -version` output, and rejects linked directories/files. These are provenance artifacts for the exact validation payload, not license or codec redistribution approval.
+
 ## Release blockers
 
 - No production installer currently has approved native media binaries or fonts; CI validation installers may carry runner-supplied test bundles solely for runtime smoke evidence.
