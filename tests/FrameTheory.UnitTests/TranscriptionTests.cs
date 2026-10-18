@@ -171,6 +171,42 @@ public sealed class TranscriptionTests
     }
 
     [Xunit.Fact]
+    public void WhisperJsonParserLoadsWordTimingsAndRejectsMissingWords()
+    {
+        var source = new Uri("file:///spoken.wav");
+        var result = WhisperCliJsonParser.Parse(
+            source,
+            "sha256:spoken",
+            """
+            {"segments":[{"words":[{"word":" hello ","start":0,"end":0.4},{"word":"world","start":0.45,"end":0.8}]}]}
+            """);
+
+        Xunit.Assert.Equal(["hello", "world"], result.Words.Select(word => word.Text));
+        Xunit.Assert.Equal(TimeSpan.FromMilliseconds(450), result.Words[1].Start);
+        Xunit.Assert.Throws<InvalidDataException>(() => WhisperCliJsonParser.Parse(source, "sha256:spoken", "{}"));
+    }
+
+    [Xunit.Fact]
+    public void LocalWhisperOptionsRejectMissingOrLinkedFiles()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-local-whisper-");
+        try
+        {
+            var executablePath = Path.Combine(directory.FullName, "whisper.exe");
+            var modelPath = Path.Combine(directory.FullName, "model.bin");
+            Xunit.Assert.Throws<FileNotFoundException>(() => new LocalWhisperOptions(executablePath, modelPath));
+            File.WriteAllBytes(executablePath, [1]);
+            File.WriteAllBytes(modelPath, [2]);
+            var options = new LocalWhisperOptions(executablePath, modelPath);
+            Xunit.Assert.Equal(Path.GetFullPath(executablePath), options.ExecutablePath);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task GeminiProviderUploadsOnlyWithConsentAndPreservesTimedWordProvenance()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-transcript-");
