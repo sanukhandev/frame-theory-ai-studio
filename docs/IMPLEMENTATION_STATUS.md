@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**UIA guard checkpoint (2026-10-18):** Repository validation now requires the native UI smoke to include explicit inspector-section expansion and coverage for Video titles/captions, Color reference matching and AI activity before checking nested controls. Documentation validation, PowerShell parsing and diff checks pass; the next hosted correction run remains pending.
+
 **Explicit label regression checkpoint (2026-10-18):** The adaptive shell contract now asserts stable names for Photo edit/reset/mask/retouch actions, AI proposal clearing, and timeline motion/audio/title actions. Focused shell coverage and the full local Release gate pass: 261 unit tests, 2 golden tests, formatting and `git diff --check`. Hosted UI smoke remains pending on the next exact-ten-commit push.
 
 **Explicit action-label checkpoint (2026-10-18):** Photo rotate/undo/overlay-mask/retouch/grade actions, AI proposal clearing, timeline motion/audio/title actions now carry stable action-specific automation names instead of relying on generic content fallback. Release build is warning-free; 261 unit tests, 2 golden tests, formatting and `git diff --check` pass locally. The next hosted run must include the UI-smoke section-navigation correction.
