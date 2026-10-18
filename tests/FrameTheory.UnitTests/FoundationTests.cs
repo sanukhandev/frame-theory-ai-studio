@@ -371,6 +371,9 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(1, viewModel.SelectedWorkspaceIndex);
                 Xunit.Assert.Contains(
                     window.GetVisualDescendants().OfType<Button>(),
+                    button => AutomationProperties.GetName(button) == "Open image" && button.Classes.Contains("primary"));
+                Xunit.Assert.Contains(
+                    window.GetVisualDescendants().OfType<Button>(),
                     button => AutomationProperties.GetName(button) == "Export photo image" && button.Classes.Contains("primary"));
 
                 viewModel.SelectedWorkspaceIndex = 2;

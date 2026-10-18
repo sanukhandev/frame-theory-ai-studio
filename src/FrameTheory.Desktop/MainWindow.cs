@@ -898,6 +898,7 @@ public sealed class MainWindow : Window
         status.Bind(TextBlock.TextProperty, new Binding(nameof(PhotoEditorViewModel.StatusText)));
         var open = new Button { Content = "Open image" };
         AutomationProperties.SetName(open, "Open image");
+        open.Classes.Add("primary");
         open.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(open);
