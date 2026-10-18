@@ -30,6 +30,8 @@
 
 **Core validation checkpoint (2026-10-19):** Color scopes, motion frames, export presets and timeline render plans now report the specific invalid width, height or duration parameter at their trust boundaries. The UnitTests project passes 281/281 with format and diff checks clean; the local fix remains unpushed until the next exact 50-commit boundary.
 
+**FT-602 caption-validation checkpoint (2026-10-19):** Caption style validation now reports `marginBottom` and `maximumCharactersPerLine` independently from `fontSize`. Focused caption coverage passes 4/4 with format and diff checks clean; the local fix remains unpushed until the next exact 50-commit boundary.
+
 **Post-rough-cut Release gate checkpoint (2026-10-19):** The local changes pass 277 unit tests and 2 golden tests, build with 0 warnings/errors, pass `dotnet format --verify-no-changes`, repository validation through `py scripts/validate_repository.py` and `git diff --check`. The validator correctly remains blocked by six tracked partial P0 tasks; this is not a V1 completion claim. The local commits remain unpushed until the next exact 50-commit boundary.
 
 **Workspace navigation affordance checkpoint (2026-10-19):** The adaptive shell's Ctrl+1 through Ctrl+4 workspace shortcut hint now has an explicit accessible tooltip explaining each destination. Focused production-shell coverage and format/diff checks pass; native keyboard acceptance remains unverified.
