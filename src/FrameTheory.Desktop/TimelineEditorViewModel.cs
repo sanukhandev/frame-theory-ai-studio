@@ -728,7 +728,6 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             throw new ArgumentOutOfRangeException(nameof(startFrame));
         }
 
-        SetCaptionFontPath(fontPath);
         var caption = new TimedCaption(
             _captions.Count + 1,
             _projectFrameRate.TimeAtFrame(startFrame),
@@ -740,6 +739,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             throw new InvalidOperationException("AI caption actions cannot overlap existing captions.");
         }
 
+        SetCaptionFontPath(fontPath);
         _captions = Array.AsReadOnly(_captions.Append(caption).OrderBy(existing => existing.Start).ToArray());
         OnPropertyChanged(nameof(Captions));
     }

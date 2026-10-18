@@ -282,6 +282,22 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void RejectedOverlappingCaptionDoesNotChangeCaptionFont()
+    {
+        var source = new Uri("file:///caption-overlap.mp4");
+        var metadata = Metadata(source, "caption-overlap", 90, hasAudio: false);
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(metadata);
+        editor.AddCaptionAt("Existing", CaptionProvenance.AuthoredCaption, 0, 30, "original.ttf");
+
+        Xunit.Assert.Throws<InvalidOperationException>(() =>
+            editor.AddCaptionAt("Overlap", CaptionProvenance.AuthoredCaption, 15, 30, "replacement.ttf"));
+
+        Xunit.Assert.Equal(Path.GetFullPath("original.ttf"), editor.CaptionFontPath);
+        Xunit.Assert.Single(editor.Captions);
+    }
+
+    [Xunit.Fact]
     public void TimelineEditorCarriesKineticCaptionSettingIntoRenderPlan()
     {
         var source = new Uri("file:///kinetic-caption.mp4");
