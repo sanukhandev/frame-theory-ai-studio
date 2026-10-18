@@ -145,7 +145,7 @@ public sealed class FfmpegPreviewProxyService
         var files = Directory.EnumerateFiles(_cacheDirectory, "*.mp4", SearchOption.TopDirectoryOnly)
             .Where(path => !string.Equals(path, currentPath, StringComparison.OrdinalIgnoreCase))
             .Select(path => new FileInfo(path))
-            .Where(file => !file.Attributes.HasFlag(FileAttributes.ReparsePoint))
+            .Where(file => !LocalPathSecurity.ContainsReparsePoint(file.FullName))
             .OrderBy(file => file.LastAccessTimeUtc)
             .ToArray();
         var totalBytes = files.Sum(file => file.Length) + new FileInfo(currentPath).Length;

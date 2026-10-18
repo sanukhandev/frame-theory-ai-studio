@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using FrameTheory.Domain;
 
 namespace FrameTheory.Desktop;
 
@@ -18,7 +19,7 @@ internal static class BrandAssetCatalog
 
         try
         {
-            if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+            if (LocalPathSecurity.ContainsReparsePoint(path))
             {
                 path = string.Empty;
                 return false;

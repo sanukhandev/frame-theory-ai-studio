@@ -447,7 +447,7 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         CancellationToken cancellationToken)
     {
         var sourcePath = GetSourcePath(document.SourceUri);
-        if ((File.GetAttributes(sourcePath) & FileAttributes.ReparsePoint) != 0)
+        if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new InvalidDataException("Symlinked photo sources are not accepted.");
         }

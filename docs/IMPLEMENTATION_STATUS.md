@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Remaining trust-boundary consolidation checkpoint (2026-10-18):** Photo project source capture, approved-brand loading and preview-cache eviction now use the shared ancestor-aware path guard; static repository validation requires all three entry points to retain it. Focused photo/preview/brand coverage passes 10/10, repository validation, formatting and `git diff --check` pass.
+
 **Dangling-link checkpoint (2026-10-18):** `LocalPathSecurity` now inspects the requested path before walking ancestors and treats missing-entry attribute errors as a normal walk step, so dangling file links cannot bypass the reparse-point guard used by local stores and media boundaries. Focused Foundation coverage passes 19/19, formatting and `git diff --check` pass.
 
 **Shared ancestor regression checkpoint (2026-10-18):** Foundation coverage now verifies that a future file beneath a linked directory is rejected by `LocalPathSecurity`, covering the non-existent destination case used by atomic stores. Focused Foundation coverage passes 18/18; formatting and `git diff --check` pass.
