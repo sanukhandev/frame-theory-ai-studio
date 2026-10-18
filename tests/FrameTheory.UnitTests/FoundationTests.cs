@@ -385,7 +385,7 @@ public sealed class FoundationTests
                 var playTimeline = window.GetVisualDescendants()
                     .OfType<Button>()
                     .Single(control => AutomationProperties.GetName(control) == "Play timeline preview");
-                Xunit.Assert.True(playTimeline.IsEnabled);
+                Xunit.Assert.False(playTimeline.IsEnabled);
                 Xunit.Assert.Equal("Play timeline", playTimeline.Content);
                 Xunit.Assert.False(window.GetVisualDescendants()
                     .OfType<Button>()

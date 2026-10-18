@@ -2167,9 +2167,26 @@ public sealed class MainWindow : Window
             if (args.PropertyName == nameof(MainWindowViewModel.IsTimelinePreviewPlaying))
             {
                 RefreshPlaybackControls();
+                RefreshVideoActionAvailability();
             }
         };
         RefreshPlaybackControls();
+        void RefreshVideoActionAvailability()
+        {
+            var hasVideo = timeline.TrackRows.Any(row => row.Kind == TimelineTrackKind.Video);
+            previewCurrentFrame.IsEnabled = hasVideo;
+            analyzeMotion.IsEnabled = hasVideo;
+            playTimeline.IsEnabled = hasVideo && !viewModel.IsTimelinePreviewPlaying;
+        }
+
+        timeline.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(TimelineEditorViewModel.TrackRows))
+            {
+                RefreshVideoActionAvailability();
+            }
+        };
+        RefreshVideoActionAvailability();
         var usePreviewProxy = new CheckBox { Content = "Use bounded preview proxy" };
         usePreviewProxy.Bind(ToggleButton.IsCheckedProperty, new Binding(nameof(MainWindowViewModel.UseTimelinePreviewProxy))
         {

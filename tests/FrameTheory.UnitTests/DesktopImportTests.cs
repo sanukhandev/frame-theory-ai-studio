@@ -144,6 +144,10 @@ public sealed class DesktopImportTests
                 window.Width = 960;
                 window.Height = 640;
                 window.Show();
+                Xunit.Assert.True(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Play timeline preview")
+                    .IsEnabled);
                 var canvas = window.GetVisualDescendants()
                     .OfType<Canvas>()
                     .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Video timeline clip canvas");
