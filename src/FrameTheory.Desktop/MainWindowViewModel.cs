@@ -106,6 +106,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _aiRevisionStatusText = "No Gemini revision requested.";
     private string _aiRecipeStatusText = "No AI recipe loaded.";
     private readonly Dictionary<MediaId, Uri> _mediaSources = [];
+    private readonly Dictionary<MediaId, MediaSourceStamp> _mediaSourceStamps = [];
     private readonly Dictionary<MediaId, ImportedMedia> _analysisAssets = [];
     private ITimelineVideoExporter? _timelineExporter;
     private readonly ExportQueueService _exportQueue;
@@ -855,6 +856,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                         newlyImported++;
                     }
                     _mediaSources[media.Metadata.Id] = new Uri(fullPath);
+                    if (MediaSourceStamp.TryRead(fullPath) is { } sourceStamp)
+                    {
+                        _mediaSourceStamps[media.Metadata.Id] = sourceStamp;
+                    }
                     _analysisAssets[media.Metadata.Id] = media;
                     if (media.Metadata.Kind == MediaKind.Video && _videoWidth == 0)
                     {
@@ -906,6 +911,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         try
         {
+            EnsureCurrentMediaSource(sample.MediaId);
             var previewSource = source;
             var proxyDescription = string.Empty;
             if (UseTimelinePreviewProxy)
@@ -956,7 +962,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             TimelinePreviewStatusText = "Timeline preview canceled.";
             return false;
         }
-        catch (Exception exception) when (exception is IOException or InvalidOperationException or ArgumentException or MediaDecodeException or MediaExportException or PreviewProxyException)
+        catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidOperationException or ArgumentException or MediaDecodeException or MediaExportException or PreviewProxyException)
         {
             _diagnosticsLog.Record("timeline-preview-failed", exception);
             TimelinePreviewStatusText = $"Timeline preview failed: {exception.Message}";
@@ -1049,6 +1055,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 return false;
             }
 
+            EnsureCurrentMediaSource(initialSample.MediaId);
             var endFrame = Math.Min(TimelineEditor.TotalFrames, checked(originalFrame + 12));
             for (var timelineFrame = originalFrame; timelineFrame < endFrame; timelineFrame++)
             {
@@ -1114,6 +1121,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             var mediaReferences = new List<MediaReference>(_mediaSources.Count);
             foreach (var item in _mediaSources)
             {
+                EnsureCurrentMediaSource(item.Key);
                 if (!_analysisAssets.TryGetValue(item.Key, out var media))
                 {
                     throw new InvalidDataException($"Imported media {item.Key.Value} has no metadata.");
@@ -1211,11 +1219,16 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             TimelineEditor.RestoreProjectState(timelineState, mediaIdMap);
 
             _mediaSources.Clear();
+            _mediaSourceStamps.Clear();
             _analysisAssets.Clear();
             var importedViewModels = new List<ImportedMediaViewModel>();
             foreach (var item in imported)
             {
                 _mediaSources[item.Media.Metadata.Id] = item.Source;
+                if (MediaSourceStamp.TryRead(item.Source.LocalPath) is { } sourceStamp)
+                {
+                    _mediaSourceStamps[item.Media.Metadata.Id] = sourceStamp;
+                }
                 _analysisAssets[item.Media.Metadata.Id] = item.Media;
                 importedViewModels.Add(new ImportedMediaViewModel(
                     Path.GetFileName(item.Source.LocalPath),
@@ -1325,6 +1338,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         try
         {
+            EnsureCurrentMediaSources(_mediaSources.Keys);
             var request = new GeminiAnalysisRequest(_analysisAssets.Values.ToArray(), scopes, uploadConsent);
             LastLocalAnalysisReport = await _analysisSampler.PrepareAsync(
                 request,
@@ -1497,6 +1511,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         try
         {
+            EnsureCurrentMediaSources(_mediaSources.Keys);
             var plan = aspectRatio is null
                 ? TimelineEditor.BuildRenderPlan(_videoWidth, _videoHeight, _mediaSources)
                 : TimelineEditor.BuildRenderPlan(SocialVideoExportPreset.Create(aspectRatio.Value).Width, SocialVideoExportPreset.Create(aspectRatio.Value).Height, _mediaSources);
@@ -1504,7 +1519,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             _lastTimelineExportRequest = new TimelineExportRequest(plan, destinationPath, preset);
             return await RunTimelineExportAsync(_lastTimelineExportRequest, retryOf: null, cancellationToken);
         }
-        catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaExportException or MediaProbeException)
+        catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidOperationException or MediaExportException or MediaProbeException)
         {
             _diagnosticsLog.Record("timeline-export-failed", exception);
             TimelineExportStatusText = $"Timeline export failed: {exception.Message}";
@@ -1522,6 +1537,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         try
         {
+            EnsureCurrentMediaSources(_mediaSources.Keys);
             outputDirectory = Path.GetFullPath(outputDirectory);
             if (!Directory.Exists(outputDirectory))
             {
@@ -1561,7 +1577,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             TimelineExportStatusText = "Batch timeline export canceled.";
             return false;
         }
-        catch (Exception exception) when (exception is ArgumentException or DirectoryNotFoundException or IOException or InvalidOperationException or MediaExportException or MediaProbeException)
+        catch (Exception exception) when (exception is ArgumentException or DirectoryNotFoundException or IOException or InvalidDataException or InvalidOperationException or MediaExportException or MediaProbeException)
         {
             _diagnosticsLog.Record("timeline-batch-export-failed", exception);
             TimelineExportStatusText = $"Batch timeline export failed: {exception.Message}";
@@ -1618,7 +1634,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             TimelineExportStatusText = "Timeline export canceled.";
             return false;
         }
-        catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaExportException or MediaProbeException)
+        catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidOperationException or MediaExportException or MediaProbeException)
         {
             _diagnosticsLog.Record("timeline-export-failed", exception);
             TimelineExportStatusText = $"Timeline export failed: {exception.Message}";
@@ -1906,6 +1922,27 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    private void EnsureCurrentMediaSources(IEnumerable<MediaId> mediaIds)
+    {
+        foreach (var mediaId in mediaIds)
+        {
+            EnsureCurrentMediaSource(mediaId);
+        }
+    }
+
+    private void EnsureCurrentMediaSource(MediaId mediaId)
+    {
+        if (!_mediaSources.TryGetValue(mediaId, out var source) || !_mediaSourceStamps.TryGetValue(mediaId, out var expected))
+        {
+            return;
+        }
+
+        if (MediaSourceStamp.TryRead(source.LocalPath) is not { } actual || actual != expected)
+        {
+            throw new InvalidDataException($"Media source '{Path.GetFileName(source.LocalPath)}' changed since import; reimport it before continuing.");
+        }
+    }
+
     private void SetMissingTimelineMedia(IReadOnlyList<MediaReference> references)
     {
         MissingTimelineMedia = Array.AsReadOnly(references
@@ -1969,6 +2006,20 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         sample = null!;
         return false;
+    }
+
+    private readonly record struct MediaSourceStamp(long Length, DateTime LastWriteTimeUtc)
+    {
+        public static MediaSourceStamp? TryRead(string path)
+        {
+            if (LocalPathSecurity.ContainsReparsePoint(path) || !File.Exists(path))
+            {
+                return null;
+            }
+
+            var info = new FileInfo(path);
+            return new MediaSourceStamp(info.Length, info.LastWriteTimeUtc);
+        }
     }
 }
 

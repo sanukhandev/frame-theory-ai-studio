@@ -508,6 +508,30 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task TimelinePreviewRejectsMediaReplacedAfterImport()
+    {
+        var sourcePath = Path.Combine(Path.GetTempPath(), $"frame-theory-live-replacement-{Guid.NewGuid():N}.mp4");
+        await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+        try
+        {
+            var viewModel = new MainWindowViewModel(
+                new WorkspaceCatalog(),
+                new StubCapabilityDetector(),
+                new VideoImporter(),
+                timelinePreviewDecoder: new StubPreviewDecoder());
+            await viewModel.ImportFilesAsync([sourcePath], CancellationToken.None);
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3, 4]);
+
+            Xunit.Assert.False(await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None));
+            Xunit.Assert.Contains("changed since import", viewModel.TimelinePreviewStatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            File.Delete(sourcePath);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task TimelinePreviewCanUseAndReuseBoundedProxy()
     {
         var sourcePath = Path.Combine(Path.GetTempPath(), $"frame-theory-preview-source-{Guid.NewGuid():N}.mp4");
