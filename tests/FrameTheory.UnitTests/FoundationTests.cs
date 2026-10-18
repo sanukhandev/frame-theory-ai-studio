@@ -7,6 +7,7 @@ using Avalonia.Media;
 using Avalonia.Themes.Fluent;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using Avalonia;
 using System.Reflection;
 using FrameTheory.AI;
 using FrameTheory.Application;
@@ -1317,6 +1318,37 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public async Task MainWindowRendersAtStandardAndHiDpiScales()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
+        await session.Dispatch(() =>
+        {
+            var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
+                new FrameTheory.Desktop.WorkspaceCatalog(),
+                new TestCapabilityDetector());
+            var window = new FrameTheory.Desktop.MainWindow(viewModel);
+            try
+            {
+                window.Show();
+                Dispatcher.UIThread.RunJobs();
+                AvaloniaHeadlessPlatform.ForceRenderTimerTick(3);
+                using var standardFrame = window.CaptureRenderedFrame();
+                Xunit.Assert.NotNull(standardFrame);
+                Xunit.Assert.Equal(new Avalonia.PixelSize(1280, 800), standardFrame.PixelSize);
+
+                window.SetRenderScaling(1.5);
+                using var hiDpiFrame = window.CaptureRenderedFrame();
+                Xunit.Assert.NotNull(hiDpiFrame);
+                Xunit.Assert.Equal(new Avalonia.PixelSize(1920, 1200), hiDpiFrame.PixelSize);
+            }
+            finally
+            {
+                window.Close();
+            }
+        }, CancellationToken.None);
+    }
+
+    [Xunit.Fact]
     public async Task ColorScopesRenderFromTheRealInspectorSource()
     {
         using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
@@ -1664,6 +1696,10 @@ public sealed class FoundationTests
         {
             Styles.Add(new FluentTheme());
         }
+
+        public static Avalonia.AppBuilder BuildAvaloniaApp() => Avalonia.AppBuilder.Configure<HeadlessTestApplication>()
+            .UseSkia()
+            .UseHeadless(new AvaloniaHeadlessPlatformOptions { UseHeadlessDrawing = false });
     }
 
     private sealed class TestWorkspaceStateStore(int selectedWorkspaceIndex) : FrameTheory.Desktop.IWorkspaceStateStore

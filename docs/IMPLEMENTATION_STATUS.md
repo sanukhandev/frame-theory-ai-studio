@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**FT-901 rendered-frame checkpoint (2026-10-19):** The test-only Avalonia shell harness now uses the production Skia renderer to capture the real `MainWindow` at 1280×800 standard scale and 1920×1200 at 1.5× HiDPI, proving the rendered surface remains available at both scales. The full Release suite passes 270 unit tests and 2 golden tests with a warning-free build, format verification, repository validation and `git diff --check`; this strengthens evidence but does not replace native visual or screen-reader review.
+
 **Hosted AI-undo validation checkpoint (2026-10-18):** Quality Gates run `39160407760` for pushed commit `f08c80c` passed documentation/schema validation, Windows/macOS/Linux restore/build/test, native media smoke, formatting, headless shell, Windows UI automation, packaging, relaunch and checksum verification. The AI undo-affordance implementation is hosted-green; manual AI workspace acceptance remains open.
 
 **FT-902 AI-undo-affordance checkpoint (2026-10-18):** The production AI review panel now disables `Undo last AI apply` until a successful transactional AI edit group exists, exposes timeline AI-history availability through `CanUndoAiEdit`, and clears the affordance after undo. Executor/model and headless shell coverage pass; the full Release suite passes 269 unit tests and 2 golden tests with a warning-free build, format verification, repository validation and `git diff --check`. Manual AI workspace acceptance remains open.
