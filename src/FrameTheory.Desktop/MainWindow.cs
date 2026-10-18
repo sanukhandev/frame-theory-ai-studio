@@ -1223,9 +1223,25 @@ public sealed class MainWindow : Window
                 presetStatus.Text = "Load and select a style first.";
             }
         };
-        var referenceSource = new ComboBox { Width = 240 };
+        var referenceSource = new ComboBox
+        {
+            Width = 240,
+            ItemTemplate = new FuncDataTemplate<ImportedMediaViewModel>((item, _) => new TextBlock
+            {
+                Text = item?.Name ?? "Unavailable media",
+                TextTrimming = TextTrimming.CharacterEllipsis
+            }, supportsRecycling: false)
+        };
         AutomationProperties.SetName(referenceSource, "Reference source preview");
-        var referenceTarget = new ComboBox { Width = 240 };
+        var referenceTarget = new ComboBox
+        {
+            Width = 240,
+            ItemTemplate = new FuncDataTemplate<ImportedMediaViewModel>((item, _) => new TextBlock
+            {
+                Text = item?.Name ?? "Unavailable media",
+                TextTrimming = TextTrimming.CharacterEllipsis
+            }, supportsRecycling: false)
+        };
         AutomationProperties.SetName(referenceTarget, "Reference target preview");
         var referenceConsent = new CheckBox { Content = "I approve uploading these exact previews to Gemini" };
         var analyzeReference = new Button { Content = "Analyze approved visual reference" };
