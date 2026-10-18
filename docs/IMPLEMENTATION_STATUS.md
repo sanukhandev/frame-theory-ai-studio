@@ -295,6 +295,8 @@
 7. Continue FT-1105 only when the approved official asset source is available; do not invent branding assets.
 8. Keep FT-1106 deferred until an approved segmentation/enhancement model, license terms and target hardware baseline are supplied; do not add a fake or unlicensed model.
 
+**FT-602 local engine execution record (2026-10-18):** Commits `6e9be76`, `24e929b`, `bbc4c22`, `b05ccd5`, `785af80`, `f1cd3a2` and `0ad1132` add the solution smoke tool, ADR, dependency/development/release documentation, repository guard and malformed-timing coverage. `dotnet build FrameTheory.sln --configuration Release --no-restore` passed with 0 warnings/errors; the full Release suite passed 222 unit tests and 2 golden tests; the focused transcription suite passed 25 tests; `dotnet format --verify-no-changes`, repository validation and `git diff --check` passed. The real Windows smoke used a separately installed `openai-whisper` 20250625 CLI, official `tiny.en` model and synthesized speech, returning seven timed words with source fingerprint preservation. No engine, model, fixture or user key entered Git. Next: push this ten-commit batch, verify hosted build, then close FT-602 if the remote evidence remains green; live Gemini transcription remains optional.
+
 ## Latest execution record
 ```text
 Date/time: 2026-10-18
