@@ -99,12 +99,11 @@ public sealed class PhotoExporter
         ArgumentNullException.ThrowIfNull(state);
         ArgumentNullException.ThrowIfNull(options);
         var sourcePath = GetLocalPath(state.Source.SourceUri, "Photo source");
+        EnsureNotReparsePoint(sourcePath, "Photo source");
         if (!File.Exists(sourcePath))
         {
             throw new FileNotFoundException("The source photo was not found.", sourcePath);
         }
-
-        EnsureNotReparsePoint(sourcePath, "Photo source");
         var outputPath = Path.GetFullPath(destinationPath);
         var outputDirectory = Path.GetDirectoryName(outputPath)
             ?? throw new ArgumentException("An output directory is required.", nameof(destinationPath));
@@ -120,10 +119,7 @@ public sealed class PhotoExporter
             throw new PhotoExportException("The export destination cannot replace the source photo.");
         }
 
-        if (File.Exists(outputPath))
-        {
-            EnsureNotReparsePoint(outputPath, "Photo export destination");
-        }
+        EnsureNotReparsePoint(outputPath, "Photo export destination");
 
         cancellationToken.ThrowIfCancellationRequested();
         var jobId = Guid.NewGuid();

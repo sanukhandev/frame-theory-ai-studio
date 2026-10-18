@@ -85,14 +85,14 @@ public sealed class FfmpegFrameDecoder : IPreviewFrameDecoder, IRgbaPreviewFrame
         }
 
         var path = Path.GetFullPath(file.LocalPath);
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException("The media file was not found.", path);
-        }
-
         if (LocalPathSecurity.ContainsReparsePoint(path))
         {
             throw new MediaDecodeException("Symlinked media paths are not accepted by the decoder.");
+        }
+
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("The media file was not found.", path);
         }
 
         var cacheKey = $"{file.AbsoluteUri}|{frameRate}|{frameIndex}|rgba={rgba}";

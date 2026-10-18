@@ -632,14 +632,14 @@ public sealed class TimelineFilterGraphBuilder
         }
 
         var path = Path.GetFullPath(source.LocalPath);
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException("A timeline source file was not found.", path);
-        }
-
         if (LocalPathSecurity.ContainsReparsePoint(path))
         {
             throw new MediaExportException("Symlinked timeline sources are not accepted.");
+        }
+
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("A timeline source file was not found.", path);
         }
 
         return new Uri(path);
@@ -653,14 +653,14 @@ public sealed class TimelineFilterGraphBuilder
             throw new MediaExportException("Watermarks must be PNG, JPEG or WebP images.");
         }
 
-        if (!File.Exists(watermark.SourcePath))
-        {
-            throw new FileNotFoundException("The selected watermark file was not found.", watermark.SourcePath);
-        }
-
         if (LocalPathSecurity.ContainsReparsePoint(watermark.SourcePath))
         {
             throw new MediaExportException("Symlinked watermark files are not accepted.");
+        }
+
+        if (!File.Exists(watermark.SourcePath))
+        {
+            throw new FileNotFoundException("The selected watermark file was not found.", watermark.SourcePath);
         }
 
         return new Uri(watermark.SourcePath);
@@ -671,14 +671,14 @@ public sealed class TimelineFilterGraphBuilder
     private static string GetFontPath(string fontPath)
     {
         var path = Path.GetFullPath(fontPath);
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException("The selected title font was not found.", path);
-        }
-
         if (LocalPathSecurity.ContainsReparsePoint(path))
         {
             throw new MediaExportException("Symlinked title fonts are not accepted.");
+        }
+
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("The selected title font was not found.", path);
         }
 
         return path;

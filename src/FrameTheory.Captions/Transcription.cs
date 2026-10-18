@@ -164,14 +164,14 @@ public sealed class GeminiTranscriptionProvider : IProgressiveTranscriptionProvi
         }
 
         var sourcePath = source.LocalPath;
-        if (!File.Exists(sourcePath))
-        {
-            throw new FileNotFoundException("The transcription source was not found.", sourcePath);
-        }
-
         if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new InvalidDataException("Symlinked transcription sources are not accepted.");
+        }
+
+        if (!File.Exists(sourcePath))
+        {
+            throw new FileNotFoundException("The transcription source was not found.", sourcePath);
         }
 
         var contentType = GetAudioContentType(sourcePath);
@@ -581,24 +581,24 @@ public sealed class JsonTranscriptProvider : IProgressiveTranscriptionProvider
         }
 
         var sourcePath = source.LocalPath;
-        if (!File.Exists(sourcePath))
-        {
-            throw new FileNotFoundException("The transcript source was not found.", sourcePath);
-        }
-
         if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new InvalidDataException("Symlinked transcript sources are not accepted.");
         }
 
-        if (!File.Exists(_transcriptPath))
+        if (!File.Exists(sourcePath))
         {
-            throw new FileNotFoundException("The transcript JSON file was not found.", _transcriptPath);
+            throw new FileNotFoundException("The transcript source was not found.", sourcePath);
         }
 
         if (LocalPathSecurity.ContainsReparsePoint(_transcriptPath))
         {
             throw new InvalidDataException("Symlinked transcript files are not accepted.");
+        }
+
+        if (!File.Exists(_transcriptPath))
+        {
+            throw new FileNotFoundException("The transcript JSON file was not found.", _transcriptPath);
         }
 
         if (new FileInfo(_transcriptPath).Length > MaximumBytes)
@@ -691,14 +691,14 @@ public static class TranscriptSourceFingerprint
         }
 
         var sourcePath = source.LocalPath;
-        if (!File.Exists(sourcePath))
-        {
-            throw new FileNotFoundException("The transcript source was not found.", sourcePath);
-        }
-
         if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new InvalidDataException("Symlinked transcript sources are not accepted.");
+        }
+
+        if (!File.Exists(sourcePath))
+        {
+            throw new FileNotFoundException("The transcript source was not found.", sourcePath);
         }
 
         await using var stream = new FileStream(

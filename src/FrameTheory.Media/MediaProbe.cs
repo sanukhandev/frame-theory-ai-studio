@@ -40,14 +40,14 @@ public sealed class FfprobeMediaProbe : IMediaProbe
         }
 
         var path = Path.GetFullPath(file.LocalPath);
-        if (!File.Exists(path))
-        {
-            throw new FileNotFoundException("The media file was not found.", path);
-        }
-
         if (LocalPathSecurity.ContainsReparsePoint(path))
         {
             throw new MediaProbeException("Symlinked media paths are not accepted by the probe.");
+        }
+
+        if (!File.Exists(path))
+        {
+            throw new FileNotFoundException("The media file was not found.", path);
         }
 
         var result = await _processRunner.RunAsync(_executable,

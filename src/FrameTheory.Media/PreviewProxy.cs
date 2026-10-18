@@ -58,14 +58,14 @@ public sealed class FfmpegPreviewProxyService
         }
 
         var sourcePath = Path.GetFullPath(source.LocalPath);
-        if (!File.Exists(sourcePath))
-        {
-            throw new FileNotFoundException("The preview source was not found.", sourcePath);
-        }
-
         if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new PreviewProxyException("Symlinked preview sources are not accepted.");
+        }
+
+        if (!File.Exists(sourcePath))
+        {
+            throw new FileNotFoundException("The preview source was not found.", sourcePath);
         }
 
         Directory.CreateDirectory(_cacheDirectory);
@@ -81,13 +81,13 @@ public sealed class FfmpegPreviewProxyService
         await _gate.WaitAsync(cancellationToken);
         try
         {
+            if (LocalPathSecurity.ContainsReparsePoint(outputPath))
+            {
+                throw new PreviewProxyException("Symlinked preview cache entries are not accepted.");
+            }
+
             if (File.Exists(outputPath))
             {
-                if (LocalPathSecurity.ContainsReparsePoint(outputPath))
-                {
-                    throw new PreviewProxyException("Symlinked preview cache entries are not accepted.");
-                }
-
                 var existingBytes = new FileInfo(outputPath).Length;
                 if (existingBytes > 0 && existingBytes <= _maximumCacheBytes)
                 {

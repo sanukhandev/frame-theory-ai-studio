@@ -27,14 +27,14 @@ public sealed record LocalWhisperOptions
         }
 
         var fullPath = Path.GetFullPath(path);
-        if (!File.Exists(fullPath))
-        {
-            throw new FileNotFoundException(missingMessage, fullPath);
-        }
-
         if (LocalPathSecurity.ContainsReparsePoint(fullPath))
         {
             throw new InvalidDataException("Local Whisper executable and model files must not be reparse points.");
+        }
+
+        if (!File.Exists(fullPath))
+        {
+            throw new FileNotFoundException(missingMessage, fullPath);
         }
 
         return fullPath;
@@ -68,14 +68,14 @@ public sealed class WhisperCliTranscriptionProvider : IProgressiveTranscriptionP
         }
 
         var sourcePath = Path.GetFullPath(source.LocalPath);
-        if (!File.Exists(sourcePath))
-        {
-            throw new FileNotFoundException("The local Whisper source was not found.", sourcePath);
-        }
-
         if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new InvalidDataException("Local Whisper sources must not be reparse points.");
+        }
+
+        if (!File.Exists(sourcePath))
+        {
+            throw new FileNotFoundException("The local Whisper source was not found.", sourcePath);
         }
 
         var sourceFingerprint = await TranscriptSourceFingerprint.ComputeAsync(source, cancellationToken);

@@ -96,6 +96,34 @@ public sealed class MediaProbeTests
     }
 
     [Xunit.Fact]
+    public async Task FfprobeAdapterRejectsDanglingMediaSymlinkBeforeMissingFileFallback()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-probe-dangling-");
+        try
+        {
+            var linkedPath = Path.Combine(directory.FullName, "linked.mp4");
+            File.CreateSymbolicLink(linkedPath, Path.Combine(directory.FullName, "missing.mp4"));
+
+            await Xunit.Assert.ThrowsAsync<MediaProbeException>(() =>
+                new FfprobeMediaProbe(new StubProcessRunner("{}"))
+                    .ProbeAsync(new Uri(linkedPath), CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task FfprobeAdapterClassifiesStillImageExtensionAsImage()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-probe-");

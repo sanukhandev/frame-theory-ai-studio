@@ -77,12 +77,11 @@ public sealed class FfmpegMediaExporter : IMediaExporter
         }
 
         var sourcePath = Path.GetFullPath(source.LocalPath);
+        EnsureNotReparsePoint(sourcePath, "Source media");
         if (!File.Exists(sourcePath))
         {
             throw new FileNotFoundException("The source media file was not found.", sourcePath);
         }
-
-        EnsureNotReparsePoint(sourcePath, "Source media");
         var outputPath = Path.GetFullPath(destinationPath);
         var outputDirectory = Path.GetDirectoryName(outputPath)
             ?? throw new ArgumentException("An output directory is required.", nameof(destinationPath));
@@ -98,10 +97,7 @@ public sealed class FfmpegMediaExporter : IMediaExporter
             throw new MediaExportException("The export destination cannot replace the source media.");
         }
 
-        if (File.Exists(outputPath))
-        {
-            EnsureNotReparsePoint(outputPath, "Export destination");
-        }
+        EnsureNotReparsePoint(outputPath, "Export destination");
 
         cancellationToken.ThrowIfCancellationRequested();
         var jobId = Guid.NewGuid();
