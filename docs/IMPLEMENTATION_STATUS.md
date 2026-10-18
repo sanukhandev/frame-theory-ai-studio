@@ -10,6 +10,8 @@
 
 **FT-902 preview error checkpoint (2026-10-18):** Compositor preview now reports missing FFmpeg diagnostics explicitly, handles invalid renderer arguments through the desktop failure status path, and keeps temporary output cleanup covered. Focused desktop preview coverage passes 10/10; the corrected native smoke remains pending hosted revalidation.
 
+**FT-902 preview UX checkpoint (2026-10-18):** The Video workspace now distinguishes `Rendering timeline frame ... with compositor` from raw/proxy decoding in its accessible status text. The nullable production renderer path is warning-free and the focused desktop preview suite remains 10/10.
+
 **FT-602 source-integrity checkpoint (2026-10-18):** `JsonTranscriptProvider` now requires the selected local source to exist as a regular file and verifies the transcript's declared `sha256:` fingerprint against the source bytes before exposing any word timings. Focused transcription coverage passes 14/14; the full Release gate passes 209 unit tests and 2 golden tests, the build has 0 warnings/errors, formatting and `git diff --check` pass. Live Gemini/key/spoken-fixture verification and a bundled local ASR engine remain open.
 
 **AI and transcription trust-boundary checkpoint (2026-10-18):** Remote transcription fingerprints the original selected media before and after derived-audio processing and rejects returned words if the source changes. Gemini plan requests reject malformed or oversized inline images and oversized text inputs before network use; plan and transcription responses are capped at 4 MiB before deserialization. Focused Gemini interaction coverage passes 7/7 and focused transcription coverage passes 19/19; no user media or key was used.
