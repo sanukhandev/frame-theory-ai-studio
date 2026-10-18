@@ -16,7 +16,9 @@ public sealed class CacheIndex
 
     public void Register(string key, string relativePath, long sizeBytes, DateTimeOffset lastAccessUtc)
     {
-        if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(relativePath) || Path.IsPathRooted(relativePath))
+        var normalizedPath = relativePath?.Trim().Replace('\\', '/') ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(relativePath) || Path.IsPathRooted(relativePath) ||
+            normalizedPath == ".." || normalizedPath.StartsWith("../", StringComparison.Ordinal) || normalizedPath.Contains("/../", StringComparison.Ordinal))
         {
             throw new ArgumentException("Cache keys and paths must be non-empty and relative.");
         }
@@ -26,7 +28,7 @@ public sealed class CacheIndex
             throw new ArgumentOutOfRangeException(nameof(sizeBytes));
         }
 
-        _entries[key] = new CacheIndexEntry(key, relativePath.Replace('\\', '/'), sizeBytes, lastAccessUtc);
+        _entries[key] = new CacheIndexEntry(key, normalizedPath, sizeBytes, lastAccessUtc);
     }
 
     public bool TryGet(string key, out CacheIndexEntry? entry) => _entries.TryGetValue(key, out entry);
