@@ -4,8 +4,14 @@ set -eu
 machine="$(uname -m)"
 rid="${1:-}"
 if [ -z "$rid" ]; then
-  rid="osx-arm64"
-  [ "$machine" = "x86_64" ] && rid="osx-x64"
+  case "$machine" in
+    arm64|aarch64) rid="osx-arm64" ;;
+    x86_64) rid="osx-x64" ;;
+    *)
+      printf 'Unsupported macOS host architecture: %s\n' "$machine" >&2
+      exit 1
+      ;;
+  esac
 fi
 case "$rid" in
   osx-x64|osx-arm64) ;;
