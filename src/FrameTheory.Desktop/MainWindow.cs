@@ -3630,21 +3630,27 @@ public sealed class MainWindow : Window
         clearStabilization.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedStabilization);
         var muteAudio = new Button { Content = "Mute audio" };
         AutomationProperties.SetName(muteAudio, "Mute selected audio");
+        ToolTip.SetTip(muteAudio, "Mute the selected audio clip without changing its other settings.");
         muteAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioSettingsToSelected(0, muted: true));
         var gainAudio = new Button { Content = "Audio +3 dB" };
         AutomationProperties.SetName(gainAudio, "Increase selected audio by 3 dB");
+        ToolTip.SetTip(gainAudio, "Increase the selected audio clip gain by 3 dB.");
         gainAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioSettingsToSelected(3, muted: false));
         var fadeAudio = new Button { Content = "Audio fades" };
         AutomationProperties.SetName(fadeAudio, "Apply selected audio fades");
+        ToolTip.SetTip(fadeAudio, "Apply short editable fade-in and fade-out ramps to the selected audio clip.");
         fadeAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioSettingsToSelected(0, muted: false, fadeInFrames: 2, fadeOutFrames: 2));
         var duckAudio = new Button { Content = "Duck audio -12 dB" };
         AutomationProperties.SetName(duckAudio, "Duck selected audio by 12 dB");
+        ToolTip.SetTip(duckAudio, "Lower the selected audio by 12 dB using an editable ducking setting.");
         duckAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioDuckingToSelected());
         var clearDucking = new Button { Content = "Clear ducking" };
         AutomationProperties.SetName(clearDucking, "Clear selected audio ducking");
+        ToolTip.SetTip(clearDucking, "Remove ducking from the selected audio clip.");
         clearDucking.Click += (_, _) => RunTimelineAction(timeline.ClearAudioDuckingFromSelected);
         var clearAudio = new Button { Content = "Clear audio" };
         AutomationProperties.SetName(clearAudio, "Clear selected audio settings");
+        ToolTip.SetTip(clearAudio, "Remove mute, gain, fades and ducking from the selected audio clip.");
         clearAudio.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedAudioSettings);
         var titleText = new TextBox
         {
@@ -3657,6 +3663,7 @@ public sealed class MainWindow : Window
         ToolTip.SetTip(titleText, "Enter editable title text for the selected timeline position.");
         var addTitle = new Button { Content = "Add title" };
         AutomationProperties.SetName(addTitle, "Add timeline title");
+        ToolTip.SetTip(addTitle, "Add editable title text after choosing a licensed local font.");
         addTitle.Click += async (_, _) =>
         {
             if (string.IsNullOrWhiteSpace(titleText.Text))
@@ -3687,9 +3694,11 @@ public sealed class MainWindow : Window
         };
         var fadeTitle = new Button { Content = "Fade title in" };
         AutomationProperties.SetName(fadeTitle, "Apply fade-in animation to last title");
+        ToolTip.SetTip(fadeTitle, "Apply an editable fade-in animation to the latest title.");
         fadeTitle.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToLastTitle(TimelineAnimationPreset.FadeIn));
         var pushTitle = new Button { Content = "Push title in" };
         AutomationProperties.SetName(pushTitle, "Apply push-in animation to last title");
+        ToolTip.SetTip(pushTitle, "Apply an editable push-in animation to the latest title.");
         pushTitle.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToLastTitle(TimelineAnimationPreset.PushIn));
         var titleAnimationStatus = new TextBox
         {
@@ -3708,6 +3717,7 @@ public sealed class MainWindow : Window
         titleAnimationStatus.Bind(TextBox.TextProperty, new Binding(nameof(TimelineEditorViewModel.TitleAnimationStatus)));
         var importCaptions = new Button { Content = "Import SRT" };
         AutomationProperties.SetName(importCaptions, "Import SRT captions");
+        ToolTip.SetTip(importCaptions, "Import editable caption timings from a local SubRip SRT file.");
         importCaptions.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(importCaptions);
@@ -3729,6 +3739,7 @@ public sealed class MainWindow : Window
         };
         var importTranscript = new Button { Content = "Import verified transcript" };
         AutomationProperties.SetName(importTranscript, "Import verified transcript JSON");
+        ToolTip.SetTip(importTranscript, "Import source-verified word timings from a local transcript JSON file.");
         importTranscript.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(importTranscript);
@@ -3761,6 +3772,7 @@ public sealed class MainWindow : Window
         };
         var exportCaptions = new Button { Content = "Export SRT" };
         AutomationProperties.SetName(exportCaptions, "Export SRT captions");
+        ToolTip.SetTip(exportCaptions, "Export the current editable captions to a local SubRip SRT file.");
         exportCaptions.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(exportCaptions);
@@ -3807,6 +3819,7 @@ public sealed class MainWindow : Window
         ToolTip.SetTip(transcriptionConsent, "Required before the optional Gemini transcription path can upload local audio.");
         var transcribeAudio = new Button { Content = "Transcribe approved audio" };
         AutomationProperties.SetName(transcribeAudio, "Transcribe approved audio");
+        ToolTip.SetTip(transcribeAudio, "Upload only the selected audio after the exact Gemini consent checkbox is approved.");
         transcribeAudio.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(transcribeAudio);
@@ -3828,6 +3841,7 @@ public sealed class MainWindow : Window
         };
         var transcribeLocalWhisper = new Button { Content = "Transcribe with local Whisper" };
         AutomationProperties.SetName(transcribeLocalWhisper, "Transcribe with local Whisper");
+        ToolTip.SetTip(transcribeLocalWhisper, "Transcribe locally with a user-selected Whisper executable and model; no upload is required.");
         transcribeLocalWhisper.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(transcribeLocalWhisper);
@@ -3898,6 +3912,7 @@ public sealed class MainWindow : Window
         var batchExport = new Button { Content = "Export all social targets" };
         batchExport.Classes.Add("primary");
         AutomationProperties.SetName(batchExport, "Export all social video targets");
+        ToolTip.SetTip(batchExport, "Render the timeline to every supported social aspect ratio in a local folder.");
         batchExport.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(batchExport);
@@ -3918,6 +3933,7 @@ public sealed class MainWindow : Window
         };
         var cancelExport = new Button { Content = "Cancel export" };
         AutomationProperties.SetName(cancelExport, "Cancel timeline export");
+        ToolTip.SetTip(cancelExport, "Cancel the active local timeline export and clean up its temporary output.");
         cancelExport.Click += (_, _) => viewModel.CancelTimelineExport();
         var saveProject = new Button { Content = "Save timeline project" };
         AutomationProperties.SetName(saveProject, "Save timeline project");

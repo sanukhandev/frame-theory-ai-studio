@@ -515,6 +515,7 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(HorizontalAlignment.Left, aspectRatio.HorizontalContentAlignment);
                 timelineSections["Project and export section"].IsExpanded = true;
                 timelineSections["Timeline view section"].IsExpanded = true;
+                timelineSections["Audio section"].IsExpanded = true;
                 timelineSections["Titles and captions section"].IsExpanded = true;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(
@@ -755,6 +756,15 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Render source-timed words with editable kinetic caption animation.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<CheckBox>().Single(control => AutomationProperties.GetName(control) == "Kinetic word captions")));
+                Xunit.Assert.Equal(
+                    "Mute the selected audio clip without changing its other settings.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Mute selected audio")));
+                Xunit.Assert.Equal(
+                    "Import editable caption timings from a local SubRip SRT file.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Import SRT captions")));
+                Xunit.Assert.Equal(
+                    "Transcribe locally with a user-selected Whisper executable and model; no upload is required.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Transcribe with local Whisper")));
                 Xunit.Assert.Equal(
                     "Required before the optional Gemini transcription path can upload local audio.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<CheckBox>().Single(control => AutomationProperties.GetName(control) == "Gemini transcription upload consent")));
