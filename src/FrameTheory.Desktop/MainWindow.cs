@@ -29,19 +29,23 @@ public sealed class MainWindow : Window
         KeyDown += OnKeyDown;
         Focusable = true;
         Title = "Frame Theory Studio AI";
+        AutomationProperties.SetName(this, Title);
         Width = 1280;
         Height = 800;
         MinWidth = 960;
         MinHeight = 640;
 
         var tabs = new TabControl();
+        AutomationProperties.SetName(tabs, "Workspaces");
         foreach (var workspace in viewModel.Workspaces)
         {
-            tabs.Items.Add(new TabItem
+            var tab = new TabItem
             {
                 Header = workspace.Name,
                 Content = CreateWorkspaceContent(workspace, viewModel)
-            });
+            };
+            AutomationProperties.SetName(tab, $"{workspace.Name} workspace");
+            tabs.Items.Add(tab);
         }
         tabs.Bind(SelectingItemsControl.SelectedIndexProperty, new Binding(nameof(MainWindowViewModel.SelectedWorkspaceIndex))
         {
