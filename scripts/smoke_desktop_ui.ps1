@@ -56,6 +56,30 @@ try {
         return $null
     }
 
+    function Expand-NamedSection([string]$name) {
+        $section = Find-NamedControl $name
+        if ($null -eq $section) {
+            throw "Required inspector section was not found: $name."
+        }
+
+        $expandCollapse = $null
+        if ($section.TryGetCurrentPattern([System.Windows.Automation.ExpandCollapsePattern]::Pattern, [ref]$expandCollapse)) {
+            if ($expandCollapse.Current.ExpandCollapseState -eq [System.Windows.Automation.ExpandCollapseState]::Collapsed) {
+                $expandCollapse.Expand()
+            }
+
+            return
+        }
+
+        $invoke = $null
+        if ($section.TryGetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern, [ref]$invoke)) {
+            $invoke.Invoke()
+            return
+        }
+
+        throw "Inspector section did not expose an expand/collapse or invoke pattern: $name."
+    }
+
     while ([DateTime]::UtcNow -lt $deadline -and $null -eq $window) {
         if ($process.HasExited) {
             throw "Desktop UI process exited before exposing its window (exit code $($process.ExitCode))."
@@ -153,6 +177,11 @@ try {
         "Before" = @("Color grade before preview", "Before")
         "After" = @("Color grade after preview", "After")
     }
+    $sectionsByTab = @{
+        "Video workspace" = @("Titles and captions section")
+        "Color workspace" = @("Reference match section")
+        "AI workspace" = @("Activity section")
+    }
     $observedControls = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     foreach ($tab in $tabs) {
         $selection = $tab.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern)
@@ -161,6 +190,11 @@ try {
         $selected = $tab.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern)
         if (-not $selected.Current.IsSelected) {
             throw "Workspace tab selection did not stick: $($tab.Current.Name)."
+        }
+
+        foreach ($sectionName in $sectionsByTab[$tab.Current.Name]) {
+            Expand-NamedSection $sectionName
+            Start-Sleep -Milliseconds 150
         }
 
         foreach ($name in $controlsByTab[$tab.Current.Name]) {
