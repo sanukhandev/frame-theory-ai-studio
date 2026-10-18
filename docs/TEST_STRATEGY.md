@@ -28,7 +28,7 @@ Use FFmpeg lavfi generators where useful; keep recorded scripts and expected che
 - No secrets in git, project JSON, reports or logs.
 
 ## Security abuse tests
-Prompt injection embedded in subtitles, unexpected JSON keys, path traversal in media references, huge frames/LUTs, negative/overflow durations, symlink redirects, hostile file names, model retry storms, cache eviction and OS secret-store failure.
+Prompt injection embedded in subtitles, unexpected JSON keys, path traversal in media references, package checksum sibling escapes and unlisted nested files, huge frames/LUTs, negative/overflow durations, symlink redirects, hostile file names, model retry storms, cache eviction and OS secret-store failure.
 
 ## Platform matrix
 Windows 11 x64, macOS Apple Silicon + Intel if available, Linux Ubuntu x64 baseline; track exact OS versions / hardware / driver / native binaries. CI native-media smoke is evidence for host codec/process behavior, not a substitute for GUI smoke. Mark untested environments unverified.
