@@ -1,6 +1,8 @@
 # Implementation Status — Resume Checkpoint
 
-**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 49 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 50 commits ahead of `origin/main`; this exact batch is ready for the single hosted validation push.
+
+**50-commit push boundary checkpoint (2026-10-19):** The requested local batch is complete at exactly 50 commits ahead of `origin/main`. The final local Release gate passes 271 unit tests and 2 golden tests, a warning-free Release build, format verification, repository validation and `git diff --check`; hosted revalidation is the next required evidence.
 
 **GitHub issue inventory checkpoint (2026-10-19):** A live `gh issue list` audit reports 55 closed issues and 27 open issues. The six partial P0 gates remain `FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005` and `FT-1006`; no issue is closed from local headless evidence alone.
 
