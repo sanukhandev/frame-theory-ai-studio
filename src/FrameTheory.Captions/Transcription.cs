@@ -131,6 +131,7 @@ public sealed class GeminiTranscriptionException : InvalidOperationException
 public sealed class GeminiTranscriptionProvider : IProgressiveTranscriptionProvider
 {
     private const int MaximumInlineBytes = 20 * 1024 * 1024;
+    private const int MaximumResponseBytes = 4 * 1024 * 1024;
     private const long MaximumFilesApiBytes = 2L * 1024 * 1024 * 1024;
     private static readonly Uri InteractionsEndpoint = new("https://generativelanguage.googleapis.com/v1beta/interactions");
     private static readonly Uri FilesUploadEndpoint = new("https://generativelanguage.googleapis.com/upload/v1beta/files");
@@ -238,7 +239,8 @@ public sealed class GeminiTranscriptionProvider : IProgressiveTranscriptionProvi
 
             progress?.Report(new TranscriptionProgress("Parsing word timings", 0.9));
             await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
-            var interaction = await JsonSerializer.DeserializeAsync<GeminiInteractionResponse>(responseStream, cancellationToken: cancellationToken)
+            var responseBytes = await ReadBoundedAsync(responseStream, cancellationToken);
+            var interaction = JsonSerializer.Deserialize<GeminiInteractionResponse>(responseBytes)
                 ?? throw new GeminiTranscriptionException("Gemini returned an empty transcription response.");
             if (!string.Equals(interaction.Status, "completed", StringComparison.OrdinalIgnoreCase))
             {
@@ -424,6 +426,24 @@ public sealed class GeminiTranscriptionProvider : IProgressiveTranscriptionProvi
         ".webm" => "audio/webm",
         _ => throw new InvalidDataException("Gemini transcription requires a supported audio file (WAV, MP3, M4A, FLAC, OGG, OPUS, AAC, AIFF or WebM).")
     };
+
+    private static async Task<byte[]> ReadBoundedAsync(Stream stream, CancellationToken cancellationToken)
+    {
+        using var payload = new MemoryStream();
+        var buffer = new byte[64 * 1024];
+        int bytesRead;
+        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(), cancellationToken)) > 0)
+        {
+            if (payload.Length > MaximumResponseBytes - bytesRead)
+            {
+                throw new GeminiTranscriptionException("Gemini returned a transcription response larger than the supported limit.");
+            }
+
+            payload.Write(buffer, 0, bytesRead);
+        }
+
+        return payload.ToArray();
+    }
 
     private sealed record GeminiInteractionRequest(
         [property: JsonPropertyName("model")] string Model,

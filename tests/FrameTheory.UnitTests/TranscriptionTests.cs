@@ -250,6 +250,30 @@ public sealed class TranscriptionTests
     }
 
     [Xunit.Fact]
+    public async Task GeminiProviderRejectsAnOversizedResponseBeforeDeserialization()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-transcript-response-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "spoken.wav");
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+            using var client = new HttpClient(new StubHandler(_ => new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(new string('x', 4 * 1024 * 1024 + 1), Encoding.UTF8, "application/json")
+            }));
+
+            await Xunit.Assert.ThrowsAsync<GeminiTranscriptionException>(() => new GeminiTranscriptionProvider(
+                client,
+                new GeminiTranscriptionOptions("test-secret", uploadConsent: true))
+                .TranscribeAsync(new Uri(sourcePath), CancellationToken.None));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task GeminiProviderUsesFilesApiForLongAudioAndDeletesRemoteFile()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-transcript-files-");
