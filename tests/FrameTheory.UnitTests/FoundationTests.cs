@@ -405,17 +405,30 @@ public sealed class FoundationTests
                 Xunit.Assert.True(performanceStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, performanceStatus.FontSize);
                 Xunit.Assert.Equal(
+                    "Performance details for the last local timeline preview.",
+                    ToolTip.GetTip(performanceStatus));
+                Xunit.Assert.Equal(
                     viewModel.TimelinePreviewStatusText,
                     window.GetVisualDescendants()
                         .OfType<TextBox>()
                         .Single(control => AutomationProperties.GetName(control) == "Timeline preview status")
                         .Text);
                 Xunit.Assert.Equal(
+                    "Current local timeline frame preview status.",
+                    ToolTip.GetTip(window.GetVisualDescendants()
+                        .OfType<TextBox>()
+                        .Single(control => AutomationProperties.GetName(control) == "Timeline preview status")));
+                Xunit.Assert.Equal(
                     viewModel.MotionAnalysisStatusText,
                     window.GetVisualDescendants()
                         .OfType<TextBox>()
                         .Single(control => AutomationProperties.GetName(control) == "Timeline motion analysis status")
                         .Text);
+                Xunit.Assert.Equal(
+                    "Local motion analysis result for the active timeline.",
+                    ToolTip.GetTip(window.GetVisualDescendants()
+                        .OfType<TextBox>()
+                        .Single(control => AutomationProperties.GetName(control) == "Timeline motion analysis status")));
                 Xunit.Assert.True(window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline preview empty state")

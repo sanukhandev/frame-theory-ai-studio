@@ -2219,6 +2219,7 @@ public sealed class MainWindow : Window
             MinHeight = 0
         };
         AutomationProperties.SetName(timelinePreviewStatus, "Timeline preview status");
+        ToolTip.SetTip(timelinePreviewStatus, "Current local timeline frame preview status.");
         timelinePreviewStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePreviewStatusText)));
         var timelinePerformanceStatus = new TextBox
         {
@@ -2233,6 +2234,7 @@ public sealed class MainWindow : Window
             MinHeight = 0
         };
         AutomationProperties.SetName(timelinePerformanceStatus, "Timeline preview performance status");
+        ToolTip.SetTip(timelinePerformanceStatus, "Performance details for the last local timeline preview.");
         timelinePerformanceStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePerformanceStatusText)));
         var analyzeMotion = new Button { Content = "Analyze motion" };
         AutomationProperties.SetName(analyzeMotion, "Analyze timeline motion");
@@ -2250,6 +2252,7 @@ public sealed class MainWindow : Window
             MinHeight = 0
         };
         AutomationProperties.SetName(motionAnalysisStatus, "Timeline motion analysis status");
+        ToolTip.SetTip(motionAnalysisStatus, "Local motion analysis result for the active timeline.");
         motionAnalysisStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.MotionAnalysisStatusText)));
         void RefreshTimelinePreview()
         {
