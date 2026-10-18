@@ -1078,6 +1078,7 @@ public sealed class MainWindow : Window
             ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"),
             Children = { mediaSearch, mediaTypeFilter, clearMediaSearch }
         };
+        AutomationProperties.SetName(mediaSearchRow, "Media search controls");
         Grid.SetColumn(mediaTypeFilter, 1);
         Grid.SetColumn(clearMediaSearch, 2);
         grid.Children.Add(mediaSearchRow);
@@ -1091,6 +1092,31 @@ public sealed class MainWindow : Window
         Grid.SetRow(grid.Children[2], 2);
         Grid.SetRow(importStatus, 3);
         Grid.SetRow(importZone, 4);
+        void RefreshMediaSearchLayout(double width)
+        {
+            var topLevel = TopLevel.GetTopLevel(mediaSearchRow);
+            var windowWidth = topLevel is Window window && !double.IsNaN(window.Width)
+                ? window.Width
+                : topLevel?.Bounds.Width ?? width;
+            var compact = windowWidth < 1120;
+            mediaSearchRow.ColumnDefinitions = compact
+                ? new ColumnDefinitions("*,Auto")
+                : new ColumnDefinitions("*,Auto,Auto");
+            mediaSearchRow.RowDefinitions = compact
+                ? new RowDefinitions("Auto,Auto")
+                : new RowDefinitions("Auto");
+            Grid.SetRow(mediaSearch, 0);
+            Grid.SetColumn(mediaSearch, 0);
+            Grid.SetColumnSpan(mediaSearch, compact ? 2 : 1);
+            Grid.SetRow(mediaTypeFilter, compact ? 1 : 0);
+            Grid.SetColumn(mediaTypeFilter, compact ? 0 : 1);
+            Grid.SetRow(clearMediaSearch, compact ? 1 : 0);
+            Grid.SetColumn(clearMediaSearch, compact ? 1 : 2);
+        }
+
+        mediaSearchRow.SizeChanged += (_, args) => RefreshMediaSearchLayout(args.NewSize.Width);
+        mediaSearchRow.AttachedToVisualTree += (_, _) => Dispatcher.UIThread.Post(() => RefreshMediaSearchLayout(mediaSearchRow.Bounds.Width));
+        RefreshMediaSearchLayout(mediaSearchRow.Width);
         return mediaBin;
     }
 

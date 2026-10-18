@@ -385,13 +385,30 @@ public sealed class FoundationTests
                 var mediaTypeFilter = window.GetVisualDescendants()
                     .OfType<ComboBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Filter imported media by type");
+                var clearMediaSearch = window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Clear media search");
+                var mediaSearchControls = window.GetVisualDescendants()
+                    .OfType<Grid>()
+                    .Single(control => AutomationProperties.GetName(control) == "Media search controls");
+                Xunit.Assert.Single(mediaSearchControls.RowDefinitions);
+                Xunit.Assert.Equal(3, mediaSearchControls.ColumnDefinitions.Count);
+                window.Width = 960;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(2, mediaSearchControls.RowDefinitions.Count);
+                Xunit.Assert.Equal(2, mediaSearchControls.ColumnDefinitions.Count);
+                Xunit.Assert.Equal(2, Grid.GetColumnSpan(mediaSearch));
+                Xunit.Assert.Equal(1, Grid.GetRow(mediaTypeFilter));
+                Xunit.Assert.Equal(1, Grid.GetRow(clearMediaSearch));
+                window.Width = 1280;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Single(mediaSearchControls.RowDefinitions);
+                Xunit.Assert.Equal(3, mediaSearchControls.ColumnDefinitions.Count);
+                Xunit.Assert.Equal(1, Grid.GetColumnSpan(mediaSearch));
                 Xunit.Assert.Equal(4, mediaTypeFilter.Items.Count);
                 Xunit.Assert.Equal("Show all imported assets or filter the media bin by type.", ToolTip.GetTip(mediaTypeFilter));
                 Xunit.Assert.Equal("Filter imported media by filename.", ToolTip.GetTip(mediaSearch));
-                Xunit.Assert.False(window.GetVisualDescendants()
-                    .OfType<Button>()
-                    .Single(control => AutomationProperties.GetName(control) == "Clear media search")
-                    .IsEnabled);
+                Xunit.Assert.False(clearMediaSearch.IsEnabled);
                 Xunit.Assert.False(window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Media search empty state")
