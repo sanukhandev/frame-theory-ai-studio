@@ -118,7 +118,7 @@ public static class AiEditPlanExecutor
                     },
                     action.StartFrame,
                     action.DurationFrames,
-                    approvedFontPaths.Values.FirstOrDefault() ?? throw new InvalidOperationException("An approved caption font is required."));
+                    ApprovedFont(approvedFontPaths, approvedFontPaths.Keys.FirstOrDefault()));
                 break;
             case "animation.keyframes":
                 SelectClip(timeline, action.TargetId, TimelineTrackKind.Video);
@@ -170,7 +170,8 @@ public static class AiEditPlanExecutor
 
     private static string ApprovedFont(IReadOnlyDictionary<string, string> approvedFontPaths, string? fontId)
     {
-        if (fontId is null || !approvedFontPaths.TryGetValue(fontId, out var path) || !File.Exists(path))
+        if (fontId is null || !approvedFontPaths.TryGetValue(fontId, out var path) ||
+            LocalPathSecurity.ContainsReparsePoint(path) || !File.Exists(path))
         {
             throw new InvalidOperationException($"The font ID '{fontId ?? ""}' is not mapped to an existing approved local font.");
         }

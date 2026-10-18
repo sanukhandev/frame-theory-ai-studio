@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**AI font trust-boundary checkpoint (2026-10-18):** AI title and caption actions now validate approved font paths through the shared reparse-point guard before applying an edit; a dangling approved font rolls back the transactional action group. Focused executor coverage passes 5/5; formatting, repository validation and `git diff --check` pass. This is local evidence pending the next exact-ten-commit hosted revalidation.
+
 **Audio/brand dangling-path checkpoint (2026-10-18):** Audio preparation and approved-logo verification now inspect the shared reparse-point guard before existence or hashing fallbacks. A dangling audio-link regression and brand/audio focused coverage pass 8/8; formatting, repository validation and `git diff --check` pass. This is local evidence pending the next exact-ten-commit hosted revalidation.
 
 **Media/caption dangling-path checkpoint (2026-10-18):** Probe, decode, preview, export, timeline, photo and transcription consumers now run the shared reparse-point guard before missing-file fallbacks; export destinations are guarded even when the final entry does not exist. A dangling media-link regression passes, and the focused media/caption/export suite passes 61/61; formatting, repository validation and `git diff --check` pass. This is local evidence pending the next exact-ten-commit hosted revalidation.

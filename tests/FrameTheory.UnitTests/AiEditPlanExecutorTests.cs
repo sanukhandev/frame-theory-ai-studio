@@ -54,6 +54,45 @@ public sealed class AiEditPlanExecutorTests
     }
 
     [Xunit.Fact]
+    public void DanglingApprovedFontRollsBackTitleAction()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-ai-font-link-");
+        try
+        {
+            var linkedFont = Path.Combine(directory.FullName, "linked.ttf");
+            File.CreateSymbolicLink(linkedFont, Path.Combine(directory.FullName, "missing.ttf"));
+            var action = new AiEditAction("title", "title.add", "title-track", 0, 10, new Dictionary<string, JsonElement>
+            {
+                ["text"] = JsonDocument.Parse("\"Title\"").RootElement.Clone(),
+                ["fontId"] = JsonDocument.Parse("\"brand-sans\"").RootElement.Clone(),
+                ["preset"] = JsonDocument.Parse("\"fade-in\"").RootElement.Clone()
+            });
+
+            var result = AiEditPlanExecutor.Execute(
+                [action],
+                new TimelineEditorViewModel(),
+                new Dictionary<string, string> { ["brand-sans"] = linkedFont },
+                new Dictionary<string, FrameTheory.Color.ColorGrade>());
+
+            Xunit.Assert.False(result.IsApplied);
+            Xunit.Assert.Contains("approved local font", result.Message, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public void ApprovedReelActionProducesEditableRevealPlan()
     {
         var editor = CreateEditor(out var mediaId);
