@@ -230,6 +230,12 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Color after preview empty state")
                     .IsVisible);
+                tabs.SelectedIndex = 3;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.True(window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => AutomationProperties.GetName(control) == "AI proposal empty state")
+                    .IsVisible);
                 tabs.SelectedIndex = 0;
                 Dispatcher.UIThread.RunJobs();
                 var automationNames = new HashSet<string>(StringComparer.Ordinal);
