@@ -254,10 +254,11 @@ public sealed class FoundationTests
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline selection context")
                     .IsReadOnly);
-                Xunit.Assert.True(window.GetVisualDescendants()
+                var timelineOperationStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
-                    .Single(control => AutomationProperties.GetName(control) == "Timeline operation status")
-                    .IsReadOnly);
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline operation status");
+                Xunit.Assert.True(timelineOperationStatus.IsReadOnly);
+                Xunit.Assert.Equal("Validation or edit result for the last timeline action.", ToolTip.GetTip(timelineOperationStatus));
                 var timelineSectionNames = new HashSet<string>(StringComparer.Ordinal)
                 {
                     "Analysis and rough cut section",

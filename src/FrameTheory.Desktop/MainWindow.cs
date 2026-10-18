@@ -2019,6 +2019,7 @@ public sealed class MainWindow : Window
             MinHeight = 0
         };
         AutomationProperties.SetName(operationStatus, "Timeline operation status");
+        ToolTip.SetTip(operationStatus, "Validation or edit result for the last timeline action.");
         void RunTimelineAction(Action action)
         {
             try
