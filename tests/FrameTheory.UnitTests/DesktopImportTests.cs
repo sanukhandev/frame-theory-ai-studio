@@ -1,3 +1,8 @@
+using Avalonia.Controls;
+using Avalonia.Headless;
+using Avalonia.Themes.Fluent;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 using FrameTheory.Application;
 using FrameTheory.Desktop;
 using FrameTheory.Domain;
@@ -38,6 +43,37 @@ public sealed class DesktopImportTests
         Xunit.Assert.All(viewModel.ImportedMedia, media => Xunit.Assert.Equal(MediaKind.Video, media.Kind));
         Xunit.Assert.Equal(2, viewModel.TimelineEditor.TrackRows.Single(track => track.Kind == TimelineTrackKind.Video).Clips.Count);
         Xunit.Assert.Contains("2 file(s) available", viewModel.MediaImportStatusText, StringComparison.Ordinal);
+    }
+
+    [Xunit.Fact]
+    public async Task SelectingImportedMediaSelectsItsTimelineClip()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new BatchImporter());
+        await viewModel.ImportFilesAsync(["clip.mp4"], CancellationToken.None);
+
+        await session.Dispatch(() =>
+        {
+            var window = new MainWindow(viewModel);
+            try
+            {
+                window.Show();
+                var mediaList = window.GetVisualDescendants()
+                    .OfType<ListBox>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Imported media");
+                mediaList.SelectedIndex = 0;
+                Dispatcher.UIThread.RunJobs();
+
+                Xunit.Assert.Contains("Selected Video clip", viewModel.TimelineEditor.SelectionContextText, StringComparison.Ordinal);
+            }
+            finally
+            {
+                window.Close();
+            }
+        }, CancellationToken.None);
     }
 
     [Xunit.Fact]
@@ -246,6 +282,14 @@ public sealed class DesktopImportTests
     {
         public Task<CapabilityReport> DetectAsync(CancellationToken cancellationToken) => Task.FromResult(
             new CapabilityReport("Test", "x64", [new("Storage", CapabilityState.Available, "ready")]));
+    }
+
+    private sealed class HeadlessTestApplication : Avalonia.Application
+    {
+        public HeadlessTestApplication()
+        {
+            Styles.Add(new FluentTheme());
+        }
     }
 
     private sealed class ThrowingImporter : IMediaImporter
