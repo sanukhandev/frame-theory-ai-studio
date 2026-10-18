@@ -100,19 +100,25 @@ public sealed class MainWindow : Window
 
     private void OnKeyDown(object? sender, KeyEventArgs args)
     {
-        if (args.Source is TextBox || DataContext is not MainWindowViewModel viewModel)
+        if (DataContext is not MainWindowViewModel viewModel)
         {
             return;
         }
 
         var commandModifier = (args.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Meta)) != 0;
+        var isWorkspaceShortcut = commandModifier && args.Key is Key.D1 or Key.NumPad1 or Key.D2 or Key.NumPad2 or Key.D3 or Key.NumPad3 or Key.D4 or Key.NumPad4;
+        if (args.Source is TextBox && !isWorkspaceShortcut)
+        {
+            return;
+        }
+
         var shortcut = commandModifier
             ? args.Key switch
             {
-                Key.D1 => EditorShortcut.VideoWorkspace,
-                Key.D2 => EditorShortcut.PhotoWorkspace,
-                Key.D3 => EditorShortcut.ColorWorkspace,
-                Key.D4 => EditorShortcut.AiWorkspace,
+                Key.D1 or Key.NumPad1 => EditorShortcut.VideoWorkspace,
+                Key.D2 or Key.NumPad2 => EditorShortcut.PhotoWorkspace,
+                Key.D3 or Key.NumPad3 => EditorShortcut.ColorWorkspace,
+                Key.D4 or Key.NumPad4 => EditorShortcut.AiWorkspace,
                 Key.Z => EditorShortcut.UndoAiEdit,
                 _ => (EditorShortcut?)null
             }
