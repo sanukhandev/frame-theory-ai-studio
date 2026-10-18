@@ -97,6 +97,11 @@ public static class PhotoProjectStateJson
                 throw new InvalidDataException("The photo edit state schema or bounds are invalid.");
             }
 
+            if (!string.Equals(state.SourceMediaId, source.Metadata.Id.Value, StringComparison.Ordinal))
+            {
+                throw new InvalidDataException("The photo edit state source does not match the imported photo.");
+            }
+
             var operations = state.Operations.Select(operation => operation is null
                 ? throw new InvalidDataException("The photo edit state contains a null operation.")
                 : new PhotoEditOperation(operation.Kind, operation.First, operation.Second, operation.Third, operation.Fourth));

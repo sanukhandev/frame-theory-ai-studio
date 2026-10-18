@@ -95,6 +95,20 @@ public sealed class PhotoProjectPersistenceTests
     }
 
     [Xunit.Fact]
+    public void PhotoProjectStateRejectsDifferentSource()
+    {
+        var source = Document(new Uri("file:///photo.png"));
+        var json = PhotoProjectStateJson.Serialize(new PhotoEditState(source));
+        var differentSourceId = new string('b', 64);
+
+        var exception = Xunit.Assert.Throws<InvalidDataException>(() => PhotoProjectStateJson.Deserialize(
+            json.Replace(source.Metadata.Id.Value, differentSourceId, StringComparison.Ordinal),
+            source));
+
+        Xunit.Assert.Contains("source", exception.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Xunit.Fact]
     public async Task PhotoProjectOpenFailureLeavesCurrentPhotoLoaded()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-photo-project-");
