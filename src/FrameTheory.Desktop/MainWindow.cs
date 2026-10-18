@@ -2488,7 +2488,10 @@ public sealed class MainWindow : Window
             Content = content,
             IsExpanded = expanded,
             Margin = new Thickness(0, 8, 0, 0),
-            Padding = new Thickness(0, 0, 0, 4)
+            Padding = new Thickness(0, 0, 0, 4),
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            HorizontalContentAlignment = HorizontalAlignment.Stretch,
+            VerticalContentAlignment = VerticalAlignment.Top
         };
         AutomationProperties.SetName(expander, $"{title} section");
         ToolTip.SetTip(expander, $"Show or hide {title.ToLowerInvariant()} controls.");

@@ -227,6 +227,9 @@ public sealed class FoundationTests
                     Xunit.Assert.NotNull(ToolTip.GetTip(section));
                     Xunit.Assert.NotNull(section.Background);
                     Xunit.Assert.NotNull(section.BorderBrush);
+                    Xunit.Assert.Equal(HorizontalAlignment.Stretch, section.HorizontalAlignment);
+                    Xunit.Assert.Equal(HorizontalAlignment.Stretch, section.HorizontalContentAlignment);
+                    Xunit.Assert.Equal(VerticalAlignment.Top, section.VerticalContentAlignment);
                 });
                 Xunit.Assert.All(
                     window.GetVisualDescendants()
