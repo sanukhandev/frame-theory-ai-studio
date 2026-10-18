@@ -137,6 +137,27 @@ jobs:
           & pwsh -NoProfile -File ./scripts/verify_package.ps1 -PackageDirectory $package -ManifestPath (Join-Path $package "SHA256SUMS.txt")
           if ($LASTEXITCODE -ne 0) { throw "A valid package manifest was rejected." }
 
+          $linkedDirectory = Join-Path $package "linked-directory"
+          try {
+            New-Item -ItemType SymbolicLink -Path $linkedDirectory -Target $sibling -ErrorAction Stop | Out-Null
+            $output = & pwsh -NoProfile -File ./scripts/verify_package.ps1 -PackageDirectory $package -ManifestPath (Join-Path $package "SHA256SUMS.txt") 2>&1
+            if ($LASTEXITCODE -eq 0 -or (($output -join "`n") -notmatch 'reparse-point entry')) {
+              throw "A linked package directory was not rejected."
+            }
+            $global:LASTEXITCODE = 0
+          } catch {
+            if ($_.Exception -isnot [UnauthorizedAccessException] -and
+                $_.Exception -isnot [PlatformNotSupportedException] -and
+                $_.Exception -isnot [IO.IOException]) {
+              throw
+            }
+            Write-Host "Directory symlink regression skipped: $($_.Exception.Message)"
+          } finally {
+            if (Test-Path -LiteralPath $linkedDirectory) {
+              Remove-Item -LiteralPath $linkedDirectory -Force
+            }
+          }
+
           New-Item -ItemType Directory -Force -Path (Join-Path $package "nested") | Out-Null
           Set-Content -LiteralPath (Join-Path $package "nested/SHA256SUMS.txt") -Value "unlisted"
           $output = & pwsh -NoProfile -File ./scripts/verify_package.ps1 -PackageDirectory $package -ManifestPath (Join-Path $package "SHA256SUMS.txt") 2>&1
