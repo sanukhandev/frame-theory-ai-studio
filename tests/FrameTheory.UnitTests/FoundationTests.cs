@@ -488,6 +488,14 @@ public sealed class FoundationTests
                 Xunit.Assert.True(timelineSections["Clip editing section"].IsExpanded);
                 Xunit.Assert.False(timelineSections["Project and export section"].IsExpanded);
                 Xunit.Assert.False(timelineSections["Timeline view section"].IsExpanded);
+                timelineSections["Motion and speed section"].IsExpanded = true;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Start speed");
+                Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "End speed");
+                Xunit.Assert.Equal(
+                    "Playback speed at the start of the selected clip, from 0.25× to 4×.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBox>().Single(control => AutomationProperties.GetName(control) == "Speed ramp start multiplier")));
+                timelineSections["Motion and speed section"].IsExpanded = false;
                 var aspectRatio = window.GetVisualDescendants()
                     .OfType<ComboBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Video export aspect ratio");

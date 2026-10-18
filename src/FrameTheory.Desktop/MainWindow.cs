@@ -3522,8 +3522,10 @@ public sealed class MainWindow : Window
         clearAnimation.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedAnimation);
         var speedRampStart = new TextBox { Text = "1", Width = 55 };
         AutomationProperties.SetName(speedRampStart, "Speed ramp start multiplier");
+        ToolTip.SetTip(speedRampStart, "Playback speed at the start of the selected clip, from 0.25× to 4×.");
         var speedRampEnd = new TextBox { Text = "2", Width = 55 };
         AutomationProperties.SetName(speedRampEnd, "Speed ramp end multiplier");
+        ToolTip.SetTip(speedRampEnd, "Playback speed at the end of the selected clip, from 0.25× to 4×.");
         var applySpeedRamp = new Button { Content = "Apply speed ramp" };
         AutomationProperties.SetName(applySpeedRamp, "Apply speed ramp");
         applySpeedRamp.Click += (_, _) =>
@@ -3542,6 +3544,7 @@ public sealed class MainWindow : Window
         clearSpeedRamp.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedSpeedRamp);
         var stabilizationRadius = new TextBox { Text = "8", Width = 55 };
         AutomationProperties.SetName(stabilizationRadius, "Stabilization search radius");
+        ToolTip.SetTip(stabilizationRadius, "Motion search radius for local stabilization, from 1 to 64.");
         var applyStabilization = new Button { Content = "Apply stabilization" };
         AutomationProperties.SetName(applyStabilization, "Apply stabilization");
         applyStabilization.Click += (_, _) =>
@@ -4145,8 +4148,12 @@ public sealed class MainWindow : Window
             "Motion and speed",
             CreateSectionContent(
                 CreateFlow(fadeIn, pushIn, clearAnimation),
-                CreateFlow(new TextBlock { Text = "Speed" }, speedRampStart, new TextBlock { Text = "to" }, speedRampEnd, applySpeedRamp, clearSpeedRamp),
-                CreateFlow(new TextBlock { Text = "Stabilization radius" }, stabilizationRadius, applyStabilization, clearStabilization)),
+                CreateFlow(
+                    CreateLabeledField("Start speed", speedRampStart),
+                    CreateLabeledField("End speed", speedRampEnd),
+                    applySpeedRamp,
+                    clearSpeedRamp),
+                CreateFlow(CreateLabeledField("Stabilization radius", stabilizationRadius), applyStabilization, clearStabilization)),
             expanded: false);
         var audioSection = CreateInspectorExpander(
             "Audio",
