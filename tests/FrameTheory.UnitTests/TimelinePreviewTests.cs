@@ -20,7 +20,8 @@ public sealed class TimelinePreviewTests
             var result = await renderer.RenderFrameAsync(plan, 15, CancellationToken.None);
 
             Xunit.Assert.Equal("P6\n1 1\n255\n\0\0\0"u8.ToArray(), result);
-            Xunit.Assert.Contains("-filter_complex", runner.ArgumentsSeen);
+        Xunit.Assert.Contains("-filter_complex", runner.ArgumentsSeen);
+            Xunit.Assert.Contains("anullsink", runner.ArgumentsSeen);
             Xunit.Assert.Contains("-map [outv]", runner.ArgumentsSeen);
             Xunit.Assert.Contains("-ss 0.5", runner.ArgumentsSeen);
             Xunit.Assert.Contains("-frames:v 1", runner.ArgumentsSeen);
@@ -87,7 +88,9 @@ public sealed class TimelinePreviewTests
             30,
             new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
             [new TimelineVideoLayer("video-1", 0, [new TimelineVideoSegment(
-                TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1)))])]);
+                TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1)))])],
+            [new TimelineAudioLayer("audio-1", 0, [new TimelineAudioSegment(
+                TimelineClip.Audio(mediaId, 0, 48000, 0, 30, 48000))])]);
     }
 
     private sealed class StubProcessRunner : IMediaProcessRunner

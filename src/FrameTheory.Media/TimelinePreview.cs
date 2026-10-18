@@ -36,6 +36,9 @@ public sealed class FfmpegTimelinePreviewRenderer : ITimelinePreviewRenderer
         }
 
         var graph = _graphBuilder.Build(plan);
+        var filterComplex = graph.AudioOutputLabel is null
+            ? graph.FilterComplex
+            : $"{graph.FilterComplex};[{graph.AudioOutputLabel}]anullsink";
         var outputDirectory = Path.GetTempPath();
         var outputPath = Path.Combine(outputDirectory, $"frame-theory-timeline-preview-{Guid.NewGuid():N}.ppm");
         try
@@ -47,7 +50,7 @@ public sealed class FfmpegTimelinePreviewRenderer : ITimelinePreviewRenderer
             }
 
             arguments.AddRange([
-                "-filter_complex", graph.FilterComplex,
+                "-filter_complex", filterComplex,
                 "-map", $"[{graph.OutputLabel}]",
                 "-ss", FormatSeconds(frameIndex, plan.FrameRate),
                 "-frames:v", "1",
