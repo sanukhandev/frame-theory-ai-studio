@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Frame-decoder cleanup checkpoint (2026-10-19):** Single-frame preview cleanup is now best effort, preserving the decoder or cancellation error when the temporary output cannot be removed. Existing decoder failure and cancellation coverage remains green.
+
 **Photo-export cleanup checkpoint (2026-10-19):** Photo export temporary-file cleanup is now best effort, so an encoder, verification or cancellation error remains the user-visible failure even when the operating system denies cleanup. Existing photo export failure coverage remains green.
 
 **Cache-index cancellation checkpoint (2026-10-19):** Cache-index temporary-file cleanup no longer masks the original save or cancellation failure, and a canceled replacement save preserves the existing index. Focused recovery coverage passes; the next full release gate remains required before the 50-commit push.
