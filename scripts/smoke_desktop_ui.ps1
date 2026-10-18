@@ -38,13 +38,16 @@ $window = $null
 
 try {
     function Find-NamedControl([string]$name) {
-        $condition = New-Object System.Windows.Automation.PropertyCondition(
-            [System.Windows.Automation.AutomationElement]::NameProperty,
-            $name)
+        $candidates = if ($controlAliases.ContainsKey($name)) { $controlAliases[$name] } else { @($name) }
         while ([DateTime]::UtcNow -lt $deadline) {
-            $control = $window.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condition)
-            if ($null -ne $control) {
-                return $control
+            foreach ($candidate in $candidates) {
+                $condition = New-Object System.Windows.Automation.PropertyCondition(
+                    [System.Windows.Automation.AutomationElement]::NameProperty,
+                    $candidate)
+                $control = $window.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $condition)
+                if ($null -ne $control) {
+                    return $control
+                }
             }
 
             Start-Sleep -Milliseconds 100
@@ -107,6 +110,15 @@ try {
         "Photo workspace" = @("Open image", "Open photo project")
         "Color workspace" = @("Before", "After")
         "AI workspace" = @("Analyze approved samples with Gemini")
+    }
+    $controlAliases = @{
+        "Preview current frame" = @("Preview current timeline frame", "Preview current frame")
+        "Play timeline" = @("Play timeline preview", "Play timeline")
+        "Stop playback" = @("Stop timeline preview", "Stop playback")
+        "Select at playhead" = @("Select video clip at playhead", "Select at playhead")
+        "Export composite MP4" = @("Export timeline MP4", "Export composite MP4")
+        "Before" = @("Color grade before preview", "Before")
+        "After" = @("Color grade after preview", "After")
     }
     $observedControls = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
     foreach ($tab in $tabs) {
