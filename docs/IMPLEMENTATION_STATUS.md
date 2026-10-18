@@ -26,6 +26,8 @@
 
 **FT-1104 rough-cut-snapshot checkpoint (2026-10-19):** Rough-cut waveform samples and planned segments now expose actual read-only snapshots, preventing caller mutation from changing a reviewed AI rough-cut. Focused rough-cut coverage passes 3/3 with format and diff checks clean; the local change remains unpushed until the next exact 50-commit boundary.
 
+**Post-rough-cut Release gate checkpoint (2026-10-19):** The local changes pass 277 unit tests and 2 golden tests, build with 0 warnings/errors, pass `dotnet format --verify-no-changes`, repository validation through `py scripts/validate_repository.py` and `git diff --check`. The validator correctly remains blocked by six tracked partial P0 tasks; this is not a V1 completion claim. The local commits remain unpushed until the next exact 50-commit boundary.
+
 **Workspace navigation affordance checkpoint (2026-10-19):** The adaptive shell's Ctrl+1 through Ctrl+4 workspace shortcut hint now has an explicit accessible tooltip explaining each destination. Focused production-shell coverage and format/diff checks pass; native keyboard acceptance remains unverified.
 
 **Media import affordance checkpoint (2026-10-19):** The shared media-bin drop surface now explains supported local media, the explicit Import action and the local-only default. Focused production-shell coverage and format/diff checks pass; actual native drag/drop acceptance remains unverified.
