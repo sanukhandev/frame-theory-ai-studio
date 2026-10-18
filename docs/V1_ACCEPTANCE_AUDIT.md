@@ -18,6 +18,7 @@ Audit checkpoint: 2026-10-18, latest previously verified green packaging run `39
 - Latest clean-`PATH` evidence: run `39100413937` passed bundled media import/audio probing with host FFmpeg removed from `PATH` on Windows, macOS and Linux, alongside support-file packaging, relaunch, uninstall and checksum jobs. This strengthens runtime independence evidence but does not clear legal, clean-host production, signing or V1 gates.
 - Latest provenance evidence: run `39101406586` passed per-OS native-bundle manifest generation and pre-package verification with bounded tool versions, byte lengths and SHA-256 for every staged file, supporting FT-1003 review without closing its legal/redistribution gate.
 - Latest branding evidence: the policy-named source attachment is imported at `assets/brand/frame-theory-original.png`, byte-verified in the unit suite and guarded in CI; hosted branded-output and release-owner rights/visual review remain open.
+- Local branded-output evidence: the 2026-10-18 FFmpeg 9.0.2 synthetic timeline smoke reported `watermark=approved` and ffprobe verified video/audio streams in the exported MP4; this does not replace hosted three-OS or release-owner review.
 
 ## P0 blockers before V1
 
