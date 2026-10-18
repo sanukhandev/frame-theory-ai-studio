@@ -13,15 +13,7 @@ public sealed class TimelinePreviewTests
         {
             var sourcePath = Path.Combine(directory.FullName, "source.mp4");
             await File.WriteAllTextAsync(sourcePath, "source");
-            var mediaId = MediaId.Create(new Uri(sourcePath), "preview-test");
-            var plan = new TimelineVideoRenderPlan(
-                new RationalFrameRate(30, 1),
-                16,
-                8,
-                30,
-                new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
-                [new TimelineVideoLayer("video-1", 0, [new TimelineVideoSegment(
-                    TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1)))])]);
+            var plan = CreatePlan(sourcePath);
             var runner = new StubProcessRunner();
             var renderer = new FfmpegTimelinePreviewRenderer(runner);
 
@@ -37,6 +29,43 @@ public sealed class TimelinePreviewTests
         {
             directory.Delete(true);
         }
+    }
+
+    [Xunit.Fact]
+    public async Task RendererRejectsOutOfRangeAndCanceledFrames()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-timeline-preview-invalid-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            await File.WriteAllTextAsync(sourcePath, "source");
+            var plan = CreatePlan(sourcePath);
+            var runner = new StubProcessRunner();
+            var renderer = new FfmpegTimelinePreviewRenderer(runner);
+
+            await Xunit.Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => renderer.RenderFrameAsync(plan, plan.DurationFrames, CancellationToken.None));
+            using var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+            await Xunit.Assert.ThrowsAnyAsync<OperationCanceledException>(() => renderer.RenderFrameAsync(plan, 0, cancellation.Token));
+            Xunit.Assert.Empty(runner.ArgumentsSeen);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    private static TimelineVideoRenderPlan CreatePlan(string sourcePath)
+    {
+        var mediaId = MediaId.Create(new Uri(sourcePath), "preview-test");
+        return new TimelineVideoRenderPlan(
+            new RationalFrameRate(30, 1),
+            16,
+            8,
+            30,
+            new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
+            [new TimelineVideoLayer("video-1", 0, [new TimelineVideoSegment(
+                TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1)))])]);
     }
 
     private sealed class StubProcessRunner : IMediaProcessRunner
