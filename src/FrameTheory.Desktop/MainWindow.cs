@@ -648,6 +648,7 @@ public sealed class MainWindow : Window
             }
         };
         var validate = new Button { Content = "Validate proposal" };
+        AutomationProperties.SetName(validate, "Validate AI proposal");
         validate.Click += (_, _) => viewModel.ValidateAiPlan(planJson.Text ?? string.Empty);
         var revisionInstruction = new TextBox { PlaceholderText = "Natural-language revision request", Width = 420 };
         var requestRevision = new Button { Content = "Ask Gemini to revise" };
@@ -659,8 +660,10 @@ public sealed class MainWindow : Window
         var revisionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         revisionStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AiRevisionStatusText)));
         var approve = new Button { Content = "Apply approved actions" };
+        AutomationProperties.SetName(approve, "Apply approved AI actions");
         approve.Click += (_, _) => viewModel.ApplyApprovedAiPlan();
         var undo = new Button { Content = "Undo last AI apply" };
+        AutomationProperties.SetName(undo, "Undo last AI apply");
         undo.Click += (_, _) => viewModel.UndoLastAiEdit();
         var clear = new Button { Content = "Clear proposal" };
         clear.Click += (_, _) => viewModel.AiProposal.Clear();
