@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Current exact-ten-commit batch checkpoint (2026-10-18):** The native shortcut smoke contract and linked-path regressions pass the full Release gate at 247 unit tests and 2 golden tests with 0 failures; repository validation, PowerShell parsing, formatting and `git diff --check` also pass. This batch is ready to push now; hosted native UI/media/packaging revalidation remains required.
+**Current batch correction checkpoint (2026-10-18):** Hosted run `39119313079` correctly exposed that a physical `1280x800` UI Automation rectangle is invalid under runner DPI scaling (`1028x749`). The native smoke now retains its scaled-safe `960x640` minimum; exact `1280x800` and `960x640` logical bounds remain covered by the production headless tests. The failed hosted run is not release evidence and a new exact-ten-commit revalidation batch is required.
 
 **Gemini parent-link regression checkpoint (2026-10-18):** Interaction-history coverage now proves record/read refuses a log beneath a linked parent directory and never creates the external target. Focused Gemini interaction coverage passes 11/11; formatting and `git diff --check` pass.
 
@@ -10,7 +10,7 @@
 
 **Native UI attempt checkpoint (2026-10-18):** The local Windows UI smoke launched the production desktop window but the non-interactive session failed at the first `SendKeys("^1")` call with the host exception `The operation completed successfully.` The script cleaned up the process; native shortcut success is not claimed locally, and hosted Windows UI validation is required for the new all-shortcut smoke.
 
-**Native launch-size checkpoint (2026-10-18):** Windows UI automation now fails closed unless the real desktop window launches at least the documented `1280x800` bounds before exercising the supported `960x640` resize. PowerShell parsing and diff checks pass; hosted native UI confirmation is pending.
+**Native launch-size checkpoint (2026-10-18):** Windows UI automation fails closed below a scaled-safe `960x640` minimum and exercises the supported resize path; exact logical `1280x800` and `960x640` bounds are validated by the production headless test. PowerShell parsing and diff checks pass.
 
 **Native shortcut smoke checkpoint (2026-10-18):** `scripts/smoke_desktop_ui.ps1` now drives and verifies real `Ctrl+1..4` workspace selection through Windows UI Automation instead of checking only `Ctrl+3`. PowerShell parsing passes and focused Foundation coverage passes 19/19; hosted confirmation is pending the next exact-ten-commit push.
 
