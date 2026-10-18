@@ -23,11 +23,11 @@ public sealed class ColorScopeData
         ValidateBins(vectorscope, 64 * 64, nameof(vectorscope));
         Width = width;
         Height = height;
-        RedHistogram = redHistogram;
-        GreenHistogram = greenHistogram;
-        BlueHistogram = blueHistogram;
-        Waveform = waveform;
-        Vectorscope = vectorscope;
+        RedHistogram = redHistogram.ToArray();
+        GreenHistogram = greenHistogram.ToArray();
+        BlueHistogram = blueHistogram.ToArray();
+        Waveform = waveform.ToArray();
+        Vectorscope = vectorscope.ToArray();
     }
 
     public int Width { get; }

@@ -26,4 +26,21 @@ public sealed class ColorScopeTests
         Xunit.Assert.Throws<ArgumentException>(() => ColorScopeAnalyzer.Analyze(2, 2, [0, 0, 0]));
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => ColorScopeAnalyzer.Analyze(0, 2, []));
     }
+
+    [Xunit.Fact]
+    public void ScopeDataSnapshotsValidatedBins()
+    {
+        var red = new int[256];
+        var green = new int[256];
+        var blue = new int[256];
+        var waveform = new int[64 * 64];
+        var vectorscope = new int[64 * 64];
+        var scopes = new ColorScopeData(1, 1, red, green, blue, waveform, vectorscope);
+
+        red[0] = 1;
+        waveform[0] = 1;
+
+        Xunit.Assert.Equal(0, scopes.RedHistogram[0]);
+        Xunit.Assert.Equal(0, scopes.Waveform[0]);
+    }
 }
