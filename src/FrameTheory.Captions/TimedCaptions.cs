@@ -135,7 +135,7 @@ public static partial class SrtCaptionFile
             captions.Add(caption);
         }
 
-        return captions;
+        return Array.AsReadOnly(captions.ToArray());
     }
 
     public static string Export(IEnumerable<TimedCaption> captions)

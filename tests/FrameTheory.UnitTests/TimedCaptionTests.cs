@@ -16,6 +16,7 @@ public sealed class TimedCaptionTests
         Xunit.Assert.Equal(TimeSpan.FromMilliseconds(2500), captions[0].End);
         Xunit.Assert.Equal("Hello\nworld", captions[0].Text);
         Xunit.Assert.Equal(CaptionProvenance.ImportedSubtitle, captions[0].Provenance);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimedCaption>>(captions).IsReadOnly);
         Xunit.Assert.Contains("00:00:01,250 --> 00:00:02,500", exported);
         Xunit.Assert.Contains("00:01:00,000 --> 00:01:01,001", exported);
     }
