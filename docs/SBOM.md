@@ -26,6 +26,8 @@ The current restore resolves Avalonia native/UI dependencies including SkiaSharp
 
 FFmpeg/ffprobe are discovered from the host and are not committed or bundled by this repository. The Windows evidence host used FFmpeg 9.0.2 full build. A release must pin the exact binary build, configure flags, source offer/notice path, LGPL/GPL choice, codec patent review and per-OS redistribution method before packaging.
 
+The Windows CI fallback pins the WinGet package `Gyan.FFmpeg` version `9.0.2` from the `winget` source. Its portable installer URL is `https://github.com/GyanD/codexffmpeg/releases/download/9.0.2/ffmpeg-9.0.2-full_build.zip` with installer SHA-256 `759d0a9831c436a0eb331ad36f236c06cb04aaa0005da46571f0e9d3d9206f6b`. This is GPL validation evidence only; it is not an approval to redistribute FFmpeg, codecs or the package in a product installer.
+
 ## Release blockers
 
 - No installer currently bundles native media binaries or fonts.
