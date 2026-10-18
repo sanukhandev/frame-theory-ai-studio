@@ -113,6 +113,21 @@ public sealed class ExportQueueTests
         Xunit.Assert.Throws<InvalidOperationException>(() => queue.Enqueue(_ => Task.FromResult(Receipt("closed"))));
     }
 
+    [Xunit.Fact]
+    public async Task QueueHistoryRetainsOnlyTheNewestJobs()
+    {
+        await using var queue = new ExportQueueService();
+        var jobs = Enumerable.Range(0, 105)
+            .Select(index => queue.Enqueue(_ => Task.FromResult(Receipt($"history-{index}"))))
+            .ToArray();
+
+        await Task.WhenAll(jobs.Select(job => job.Completion));
+
+        Xunit.Assert.Equal(100, queue.History.Count);
+        Xunit.Assert.DoesNotContain(queue.History, item => item.Id == jobs[0].Id);
+        Xunit.Assert.Contains(queue.History, item => item.Id == jobs[^1].Id);
+    }
+
     private static ExportReceipt Receipt(string name) => new(
         Guid.NewGuid(),
         Path.Combine(Path.GetTempPath(), name + ".mp4"),

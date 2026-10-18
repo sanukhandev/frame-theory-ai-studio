@@ -153,6 +153,7 @@ public sealed class ExportQueueJob
 
 public sealed class ExportQueueService : IAsyncDisposable
 {
+    private const int MaximumHistoryEntries = 100;
     private readonly Channel<WorkItem> _queue = Channel.CreateUnbounded<WorkItem>();
     private readonly CancellationTokenSource _shutdown = new();
     private readonly Task _worker;
@@ -189,6 +190,10 @@ public sealed class ExportQueueService : IAsyncDisposable
         lock (_history)
         {
             _history.Add(job);
+            if (_history.Count > MaximumHistoryEntries)
+            {
+                _history.RemoveRange(0, _history.Count - MaximumHistoryEntries);
+            }
         }
 
         return job;
