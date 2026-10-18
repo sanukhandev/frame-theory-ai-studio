@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive width-lifecycle checkpoint (2026-10-18):** The media rail now uses the attached top-level window width when available, with a measured-layout fallback, preventing an early startup pass from applying the compact width to the standard shell. Foundation coverage remains green at 960px and 1280px.
+
 **Responsive workspace-frame checkpoint (2026-10-18):** Each editor workspace now reduces outer margin and padding below the 1120px window breakpoint, preserving the dense media/inspector composition at the 960px minimum while retaining the spacious standard shell. Foundation coverage verifies standard and compact frame geometry across the production workspaces; native visual and HiDPI acceptance remains open.
 
 **Responsive footer checkpoint (2026-10-18):** The bottom capability bar now hides the secondary diagnostics readout below the 1120px window breakpoint while retaining its tooltip/log path, keeping the primary capability status and refresh action readable at the 960px minimum. Attached-window initialization is covered by Foundation geometry tests; native visual and HiDPI acceptance remains open.

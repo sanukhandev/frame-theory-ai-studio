@@ -1123,7 +1123,10 @@ public sealed class MainWindow : Window
                 return;
             }
 
-            var windowWidth = TopLevel.GetTopLevel(layout)?.Bounds.Width ?? width;
+            var topLevel = TopLevel.GetTopLevel(layout);
+            var windowWidth = topLevel is Window window && !double.IsNaN(window.Width)
+                ? window.Width
+                : topLevel?.Bounds.Width ?? width;
             var mediaRailWidth = windowWidth < 1120 ? 240 : 300;
             if (layout.ColumnDefinitions[0].Width.Value != mediaRailWidth)
             {
