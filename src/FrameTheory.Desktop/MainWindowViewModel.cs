@@ -1512,7 +1512,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         try
         {
-            var content = await File.ReadAllTextAsync(sourcePath, cancellationToken);
+            var fullPath = Path.GetFullPath(sourcePath);
+            if (LocalPathSecurity.ContainsReparsePoint(fullPath))
+            {
+                throw new InvalidDataException("Symlinked caption files are not accepted.");
+            }
+
+            var content = await File.ReadAllTextAsync(fullPath, cancellationToken);
             TimelineEditor.ImportCaptions(content);
             CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} caption cue(s).";
             return true;
@@ -1536,6 +1542,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         {
             var fullSourcePath = Path.GetFullPath(sourcePath);
             var fullTranscriptPath = Path.GetFullPath(transcriptPath);
+            if (LocalPathSecurity.ContainsReparsePoint(fullSourcePath) || LocalPathSecurity.ContainsReparsePoint(fullTranscriptPath))
+            {
+                throw new InvalidDataException("Symlinked transcript sources are not accepted.");
+            }
+
             CaptionStatusText = $"Verifying transcript source: {Path.GetFileName(fullSourcePath)}.";
             var provider = new JsonTranscriptProvider(fullTranscriptPath);
             var progressActive = true;
@@ -1583,6 +1594,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         try
         {
             var fullSourcePath = Path.GetFullPath(sourcePath);
+            if (LocalPathSecurity.ContainsReparsePoint(fullSourcePath))
+            {
+                throw new InvalidDataException("Symlinked local Whisper sources are not accepted.");
+            }
+
             CaptionStatusText = $"Preparing local Whisper: {Path.GetFileName(fullSourcePath)}.";
             var provider = new WhisperCliTranscriptionProvider(new LocalWhisperOptions(executablePath, modelPath));
             var progressActive = true;
@@ -1625,8 +1641,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     {
         try
         {
+            var fullPath = Path.GetFullPath(destinationPath);
+            if (LocalPathSecurity.ContainsReparsePoint(fullPath))
+            {
+                throw new InvalidDataException("Symlinked caption export destinations are not accepted.");
+            }
+
             var content = TimelineEditor.ExportCaptions();
-            await File.WriteAllTextAsync(destinationPath, content, cancellationToken);
+            await File.WriteAllTextAsync(fullPath, content, cancellationToken);
             CaptionStatusText = $"Exported {TimelineEditor.Captions.Count} caption cue(s).";
             return true;
         }

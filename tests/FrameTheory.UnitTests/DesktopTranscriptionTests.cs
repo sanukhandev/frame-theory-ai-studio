@@ -106,6 +106,37 @@ public sealed class DesktopTranscriptionTests
     }
 
     [Xunit.Fact]
+    public async Task DesktopCaptionImportRejectsDanglingFileBeforeRead()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-caption-link-");
+        try
+        {
+            var linkedPath = Path.Combine(directory.FullName, "linked.srt");
+            File.CreateSymbolicLink(linkedPath, Path.Combine(directory.FullName, "missing.srt"));
+            var viewModel = new MainWindowViewModel(new WorkspaceCatalog(), new TestCapabilityDetector());
+
+            var succeeded = await viewModel.ImportCaptionsAsync(linkedPath, CancellationToken.None);
+
+            Xunit.Assert.False(succeeded);
+            Xunit.Assert.Contains("symlinked", viewModel.CaptionStatusText, StringComparison.OrdinalIgnoreCase);
+            Xunit.Assert.Empty(viewModel.TimelineEditor.Captions);
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task DesktopTranscriptionExtractsVideoAudioBeforeUpload()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-transcription-video-");
