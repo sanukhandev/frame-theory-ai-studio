@@ -228,6 +228,7 @@ public sealed class TimelineWatermarkProjectState
 public static class TimelineProjectStateJson
 {
     private const int MaximumBytes = 8 * 1024 * 1024;
+    private const int MaximumEntries = 10_000;
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -264,9 +265,14 @@ public static class TimelineProjectStateJson
 
     private static void Validate(TimelineProjectState state)
     {
-        if (state.VideoClips is null || state.AudioClips is null || state.VideoSettings is null ||
+        if (state.SchemaVersion != 1 || state.VideoClips is null || state.AudioClips is null || state.VideoSettings is null ||
             state.AudioSettings is null || state.ColorGrades is null || state.Titles is null ||
             state.Captions is null || state.BeatMarkers is null || state.BeatMarkerWaveform is null ||
+            state.VideoClips.Count > MaximumEntries || state.AudioClips.Count > MaximumEntries ||
+            state.VideoSettings.Count > MaximumEntries || state.AudioSettings.Count > MaximumEntries ||
+            state.ColorGrades.Count > MaximumEntries || state.Titles.Count > MaximumEntries ||
+            state.Captions.Count > MaximumEntries || state.BeatMarkers.Count > MaximumEntries ||
+            state.BeatMarkerWaveform.Count > MaximumEntries ||
             state.VideoClips.Any(clip => clip is null) || state.AudioClips.Any(clip => clip is null) ||
             state.VideoSettings.Any(settings => settings is null || settings.Clip is null) ||
             state.AudioSettings.Any(settings => settings is null || settings.Clip is null) ||
@@ -286,6 +292,12 @@ public static class TimelineProjectStateJson
             (settings.Animation.Keyframes is null || settings.Animation.Keyframes.Any(keyframe => keyframe is null || keyframe.Value is null))))
         {
             throw new InvalidDataException("The timeline animation state is incomplete.");
+        }
+
+        if (state.Titles.Any(title => title.Animation is not null &&
+            (title.Animation.Keyframes is null || title.Animation.Keyframes.Any(keyframe => keyframe is null || keyframe.Value is null))))
+        {
+            throw new InvalidDataException("The title animation state is incomplete.");
         }
 
         if (state.VideoSettings.Any(settings => settings.Stabilization is not null &&

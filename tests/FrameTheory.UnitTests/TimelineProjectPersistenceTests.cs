@@ -305,6 +305,11 @@ public sealed class TimelineProjectPersistenceTests
     {
         Xunit.Assert.Throws<InvalidDataException>(() => TimelineProjectStateJson.Deserialize("{not-json"));
         Xunit.Assert.Throws<InvalidDataException>(() => TimelineProjectStateJson.Deserialize("{\"videoClips\":null}"));
+        Xunit.Assert.Throws<InvalidDataException>(() => TimelineProjectStateJson.Deserialize(
+            TimelineProjectStateJson.Serialize(new TimelineProjectState
+            {
+                VideoClips = Enumerable.Range(0, 10_001).Select(_ => new TimelineClipProjectState()).ToList()
+            })));
     }
 
     [Xunit.Fact]
