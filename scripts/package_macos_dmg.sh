@@ -51,6 +51,10 @@ if [ -n "$ffmpeg_directory" ]; then
       printf 'FFmpeg directory must contain %s\n' "$tool" >&2
       exit 1
     fi
+    if [ -L "$ffmpeg_directory/$tool" ]; then
+      printf 'FFmpeg directory cannot contain a symlink: %s\n' "$tool" >&2
+      exit 1
+    fi
     cp "$ffmpeg_directory/$tool" "$app/Contents/MacOS/$tool"
     chmod +x "$app/Contents/MacOS/$tool"
   done
