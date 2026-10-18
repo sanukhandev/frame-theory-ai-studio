@@ -181,6 +181,11 @@ public sealed class FoundationTests
                     .OfType<ListBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline tracks");
                 Xunit.Assert.NotNull(timelineTracks.ItemTemplate);
+                Xunit.Assert.All(
+                    window.GetVisualDescendants()
+                        .OfType<ComboBox>()
+                        .Where(control => AutomationProperties.GetName(control) is "Reference source preview" or "Reference target preview"),
+                    selector => Xunit.Assert.NotNull(selector.ItemTemplate));
 
                 var performanceStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
