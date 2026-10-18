@@ -102,6 +102,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             _framesPerPixel = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(RulerText));
+            OnPropertyChanged(nameof(TrackRows));
         }
     }
 
@@ -118,6 +119,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             _scrollFrame = value;
             OnPropertyChanged();
             OnPropertyChanged(nameof(RulerText));
+            OnPropertyChanged(nameof(TrackRows));
         }
     }
 

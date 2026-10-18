@@ -2145,6 +2145,16 @@ public sealed class MainWindow : Window
                     Canvas.SetTop(clipButton, 4);
                     clipCanvas.Children.Add(clipButton);
                 }
+                var playheadIndicator = new Border
+                {
+                    Width = 2,
+                    Height = 40,
+                    Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(255, 92, 112)),
+                    IsHitTestVisible = false
+                };
+                Canvas.SetLeft(playheadIndicator, Math.Max(0, (timeline.CurrentFrame - timeline.ScrollFrame) / timeline.FramesPerPixel));
+                Canvas.SetTop(playheadIndicator, 0);
+                clipCanvas.Children.Add(playheadIndicator);
                 var clipViewport = new ScrollViewer
                 {
                     HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,

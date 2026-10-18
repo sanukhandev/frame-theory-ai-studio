@@ -33,6 +33,14 @@ public sealed class TimelineEditorTests
         var editor = new TimelineEditorViewModel();
         editor.AddMedia(Metadata(new Uri("file:///clip.mp4"), "c", 90));
         Xunit.Assert.NotEmpty(editor.TrackRows);
+        var trackRowsRefreshes = 0;
+        editor.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(TimelineEditorViewModel.TrackRows))
+            {
+                trackRowsRefreshes++;
+            }
+        };
 
         var snapped = editor.SeekFrame(1);
         editor.SetZoom(2);
@@ -42,6 +50,7 @@ public sealed class TimelineEditorTests
 
         Xunit.Assert.Equal(0, snapped.TimelineFrame);
         Xunit.Assert.Equal(2, editor.FramesPerPixel);
+        Xunit.Assert.InRange(trackRowsRefreshes, 4, int.MaxValue);
         Xunit.Assert.NotEmpty(ticks);
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => editor.BuildRulerTicks(0));
     }
