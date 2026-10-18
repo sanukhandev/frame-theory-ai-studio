@@ -1866,9 +1866,21 @@ public sealed class MainWindow : Window
         var scopeSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(scopeSummary, "Color scope summary");
         scopeSummary.Bind(TextBlock.TextProperty, new Binding("ColorInspector.ScopeSummary"));
-        var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var status = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(status, "Color inspector status");
-        status.Bind(TextBlock.TextProperty, new Binding("ColorInspector.StatusText"));
+        ToolTip.SetTip(status, "Current local color grade and preview status.");
+        status.Bind(TextBox.TextProperty, new Binding("ColorInspector.StatusText"));
         var controls = new StackPanel { Spacing = 4 };
         controls.Children.Add(CreateGradeControl("Exposure EV", -8, 8, inspector.ExposureEV, value => inspector.ExposureEV = value, inspector, nameof(ColorGradeInspectorViewModel.ExposureEV), () => inspector.ExposureEV));
         controls.Children.Add(CreateGradeControl("Contrast", -1, 1, inspector.Contrast, value => inspector.Contrast = value, inspector, nameof(ColorGradeInspectorViewModel.Contrast), () => inspector.Contrast));

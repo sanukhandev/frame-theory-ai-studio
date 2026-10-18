@@ -565,6 +565,12 @@ public sealed class FoundationTests
                 var colorComparison = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Color before and after preview");
+                var colorInspectorStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color inspector status");
+                Xunit.Assert.True(colorInspectorStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, colorInspectorStatus.FontSize);
+                Xunit.Assert.Equal("Current local color grade and preview status.", ToolTip.GetTip(colorInspectorStatus));
                 Xunit.Assert.Equal(
                     "Compare the ungraded source with the current shared color grade.",
                     ToolTip.GetTip(colorComparison));
