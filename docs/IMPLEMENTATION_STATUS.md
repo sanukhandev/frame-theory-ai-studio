@@ -24,6 +24,8 @@
 
 **FT-1102 immutable-view checkpoint (2026-10-19):** Scope bins and stabilization transforms now expose actual read-only collection views, not mutable arrays behind `IReadOnlyList` interfaces. Focused motion/scope coverage passes 9/9 with format and diff checks clean; the local change remains unpushed until the next exact 50-commit boundary.
 
+**FT-1104 rough-cut-snapshot checkpoint (2026-10-19):** Rough-cut waveform samples and planned segments now expose actual read-only snapshots, preventing caller mutation from changing a reviewed AI rough-cut. Focused rough-cut coverage passes 3/3 with format and diff checks clean; the local change remains unpushed until the next exact 50-commit boundary.
+
 **Workspace navigation affordance checkpoint (2026-10-19):** The adaptive shell's Ctrl+1 through Ctrl+4 workspace shortcut hint now has an explicit accessible tooltip explaining each destination. Focused production-shell coverage and format/diff checks pass; native keyboard acceptance remains unverified.
 
 **Media import affordance checkpoint (2026-10-19):** The shared media-bin drop surface now explains supported local media, the explicit Import action and the local-only default. Focused production-shell coverage and format/diff checks pass; actual native drag/drop acceptance remains unverified.
