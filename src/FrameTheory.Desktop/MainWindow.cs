@@ -1394,7 +1394,13 @@ public sealed class MainWindow : Window
 
             foreach (var action in viewModel.AiProposal.Actions)
             {
-                var approval = new CheckBox { Content = action.Summary, IsChecked = action.IsApproved };
+                var approval = new CheckBox
+                {
+                    Content = new TextBlock { Text = action.Summary, TextWrapping = TextWrapping.Wrap },
+                    IsChecked = action.IsApproved,
+                    HorizontalAlignment = HorizontalAlignment.Stretch
+                };
+                AutomationProperties.SetName(approval, $"Approve AI action: {action.Summary}");
                 approval.PropertyChanged += (_, args) =>
                 {
                     if (args.Property == ToggleButton.IsCheckedProperty)
@@ -1402,7 +1408,16 @@ public sealed class MainWindow : Window
                         action.IsApproved = approval.IsChecked == true;
                     }
                 };
-                actions.Children.Add(approval);
+                actions.Children.Add(new Border
+                {
+                    Margin = new Thickness(0, 0, 0, 4),
+                    Padding = new Thickness(8, 6),
+                    Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
+                    BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(5),
+                    Child = approval
+                });
             }
         }
         RefreshActions();
