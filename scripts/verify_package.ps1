@@ -51,7 +51,11 @@ foreach ($entry in $entries.GetEnumerator()) {
     }
 
     $resolvedCandidate = (Resolve-Path -LiteralPath $candidate).Path
-    if (-not $resolvedCandidate.StartsWith($packageRoot, [StringComparison]::OrdinalIgnoreCase)) {
+    $relativeCandidate = [IO.Path]::GetRelativePath($packageRoot, $resolvedCandidate)
+    if ([IO.Path]::IsPathRooted($relativeCandidate) -or
+        $relativeCandidate -eq '..' -or
+        $relativeCandidate.StartsWith("..$([IO.Path]::DirectorySeparatorChar)", [StringComparison]::Ordinal) -or
+        $relativeCandidate.StartsWith("..$([IO.Path]::AltDirectorySeparatorChar)", [StringComparison]::Ordinal)) {
         throw "Manifest file is outside the package: $($entry.Key)"
     }
 
