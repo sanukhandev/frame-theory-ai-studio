@@ -185,7 +185,7 @@ try {
     }
     $sectionsByTab = @{
         "Video workspace" = @("Titles and captions section")
-        "Color workspace" = @("Reference match section")
+        "Color workspace" = @("Reference match section", "Scopes section")
         "AI workspace" = @("Activity section")
     }
     $observedControls = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
