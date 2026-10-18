@@ -32,7 +32,7 @@ Threats: prompt injection -> blocked by command allowlist; command injection -> 
 
 ## Supply chain
 - Track SBOM, package vulnerability checks, binaries, native licenses, signing/notarization requirements.
-- Package checksum verification resolves manifest entries with path-relative containment; sibling-prefix paths and traversal attempts are rejected before hashing.
+- Package checksum verification resolves manifest entries with path-relative containment; sibling-prefix paths and traversal attempts are rejected before hashing, with a hosted regression covering both valid and escaping manifests.
 - No executable plugins from Gemini; no arbitrary plugin execution from external downloaded packages.
 - Harden GitHub workflows with least privilege; do not run untrusted release secrets on PRs.
 
