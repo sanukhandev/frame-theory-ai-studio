@@ -78,6 +78,32 @@ public sealed class PhotoEditorExportTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task PhotoExportRejectsSourceReplacedAfterOpen()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-photo-export-source-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.png");
+            var outputPath = Path.Combine(directory.FullName, "output.png");
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+            var editor = new PhotoEditorViewModel(
+                new PhotoImporter(new StubProbe(), new StubDecoder()),
+                new PhotoExporter(new RecordingProcessRunner(), new StubProbe()),
+                projectRepository: new JsonProjectRepository());
+            await editor.OpenAsync(sourcePath, CancellationToken.None);
+            await File.WriteAllBytesAsync(sourcePath, [4, 5, 6, 7]);
+
+            await editor.ExportAsync(outputPath, PhotoExportFormat.Png, 95, CancellationToken.None);
+
+            Xunit.Assert.Contains("changed since import", editor.StatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private static ExportReceipt Receipt(string name) => new(
         Guid.NewGuid(),
         Path.Combine(Path.GetTempPath(), name + ".mp4"),

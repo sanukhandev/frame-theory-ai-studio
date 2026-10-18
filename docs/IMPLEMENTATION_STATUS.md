@@ -58,6 +58,8 @@
 
 **Caption export error checkpoint (2026-10-19):** Invalid or inaccessible caption destinations now become visible Caption workspace status failures instead of escaping local SRT export. Focused transcription coverage includes the invalid-destination contract; full release validation remains required before the next 50-commit push.
 
+**Photo source integrity checkpoint (2026-10-19):** Photo base and overlay sources now capture local size/write stamps at import and reject preview export, queued export or project save after replacement, preventing non-destructive edit state from being rendered against changed path bytes. Focused photo export coverage includes replacement detection; full release validation remains required before the next 50-commit push.
+
 **Gemini upload cleanup checkpoint (2026-10-19):** Temporary Files API cleanup after an invalid provider URI now uses an independent bounded timeout instead of the caller's potentially canceled token, so cancellation cannot skip deletion of an already-uploaded sample. Existing provider cleanup coverage remains green; full release validation is required before the next 50-commit push.
 
 **AI caption execution checkpoint (2026-10-19):** Approved `caption.add` actions now use the caption font explicitly selected in the Video workspace instead of incorrectly requiring the optional title-brand font map. Plans fail clearly without a selected caption font, and success remains one undoable transaction; focused executor coverage includes both paths.

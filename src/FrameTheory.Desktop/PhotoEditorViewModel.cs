@@ -16,6 +16,7 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
     private readonly PhotoExporter _exporter;
     private readonly ExportQueueService? _exportQueue;
     private readonly IProjectRepository? _projectRepository;
+    private readonly Dictionary<MediaId, PhotoSourceStamp> _sourceStamps = [];
     private PhotoEditHistory? _history;
     private string _statusText = "Open a local image to begin a non-destructive edit.";
 
@@ -72,8 +73,10 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
             return false;
         }
 
+        var state = Current;
         try
         {
+            EnsureCurrentSources(state);
             var fullPath = Path.GetFullPath(projectPath);
             var directory = Path.GetDirectoryName(fullPath) ?? throw new ArgumentException("A project directory is required.", nameof(projectPath));
             if (!Directory.Exists(directory))
@@ -83,9 +86,9 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
 
             var mediaReferences = new List<MediaReference>
             {
-                await CreateMediaReferenceAsync(Current.Source, directory, cancellationToken)
+                await CreateMediaReferenceAsync(state.Source, directory, cancellationToken)
             };
-            foreach (var layer in Current.CompositeLayers)
+            foreach (var layer in state.CompositeLayers)
             {
                 mediaReferences.Add(await CreateMediaReferenceAsync(layer.Source, directory, cancellationToken));
             }
@@ -93,11 +96,11 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
             var snapshot = new ProjectSnapshot(
                 "photo-project",
                 new RationalFrameRate(1, 1),
-                Math.Max(1, Current.Source.Metadata.Width),
-                Math.Max(1, Current.Source.Metadata.Height),
+                Math.Max(1, state.Source.Metadata.Width),
+                Math.Max(1, state.Source.Metadata.Height),
                 "sRGB",
                 mediaReferences,
-                photoStateJson: PhotoProjectStateJson.Serialize(Current));
+                photoStateJson: PhotoProjectStateJson.Serialize(state));
             await _projectRepository.SaveAtomicAsync(fullPath, snapshot, cancellationToken);
             StatusText = $"Saved photo project {Path.GetFileName(fullPath)}.";
             return true;
@@ -148,6 +151,12 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
                 ? new PhotoEditState(document)
                 : PhotoProjectStateJson.Deserialize(snapshot.PhotoStateJson, document, compositeSources);
             _history = new PhotoEditHistory(state);
+            _sourceStamps.Clear();
+            CaptureSourceStamp(document);
+            foreach (var compositeSource in compositeSources.Values)
+            {
+                CaptureSourceStamp(compositeSource);
+            }
             StatusText = $"Opened photo project {Path.GetFileName(fullPath)}.";
             NotifyDocumentChanged();
             return true;
@@ -176,6 +185,8 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
 
             var document = await _importer.ImportAsync(new Uri(fullPath), cancellationToken);
             _history = new PhotoEditHistory(new PhotoEditState(document));
+            _sourceStamps.Clear();
+            CaptureSourceStamp(document);
             StatusText = $"Opened {Path.GetFileName(fullPath)}; non-destructive history is active.";
             NotifyDocumentChanged();
         }
@@ -225,7 +236,12 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
             }
 
             var document = await _importer.ImportAsync(new Uri(fullPath), cancellationToken);
+            var sourceStamp = PhotoSourceStamp.TryRead(document.SourceUri);
             _history!.Execute(Current.AddCompositeLayer(new PhotoCompositeLayer(document, offsetX, offsetY, opacity, blendMode)));
+            if (sourceStamp is { } value)
+            {
+                _sourceStamps[document.Metadata.Id] = value;
+            }
             StatusText = $"Added {Path.GetFileName(path)} as a non-destructive {blendMode.ToString().ToLowerInvariant()} overlay.";
             NotifyDocumentChanged();
         }
@@ -416,6 +432,7 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         var state = Current;
         try
         {
+            EnsureCurrentSources(state);
             PhotoExportReceipt? receipt;
             if (_exportQueue is null)
             {
@@ -426,6 +443,7 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
                 receipt = null;
                 var job = _exportQueue.Enqueue(async queueCancellation =>
                 {
+                    EnsureCurrentSources(state);
                     var result = await _exporter.ExportAsync(state, destinationPath, new PhotoExportOptions(format, quality, preset), null, queueCancellation);
                     receipt = result;
                     return new ExportReceipt(result.JobId, result.OutputPath, result.OutputBytes, result.VerifiedMetadata);
@@ -458,6 +476,36 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(PreviewPpm));
         OnPropertyChanged(nameof(CanUndo));
         OnPropertyChanged(nameof(CanRedo));
+    }
+
+    private void CaptureSourceStamp(PhotoDocument document)
+    {
+        if (PhotoSourceStamp.TryRead(document.SourceUri) is { } sourceStamp)
+        {
+            _sourceStamps[document.Metadata.Id] = sourceStamp;
+        }
+    }
+
+    private void EnsureCurrentSources(PhotoEditState state)
+    {
+        EnsureCurrentSource(state.Source);
+        foreach (var layer in state.CompositeLayers)
+        {
+            EnsureCurrentSource(layer.Source);
+        }
+    }
+
+    private void EnsureCurrentSource(PhotoDocument document)
+    {
+        if (!_sourceStamps.TryGetValue(document.Metadata.Id, out var expected))
+        {
+            return;
+        }
+
+        if (PhotoSourceStamp.TryRead(document.SourceUri) is not { } actual || actual != expected)
+        {
+            throw new InvalidDataException($"Photo source '{Path.GetFileName(document.SourceUri.LocalPath)}' changed since import; reopen it before continuing.");
+        }
     }
 
     private static string GetSourcePath(Uri source)
@@ -527,6 +575,26 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         if (!string.Equals(actualFingerprint, expectedFingerprint, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidDataException("The saved photo source fingerprint does not match the project.");
+        }
+    }
+
+    private readonly record struct PhotoSourceStamp(long Length, DateTime LastWriteTimeUtc)
+    {
+        public static PhotoSourceStamp? TryRead(Uri source)
+        {
+            if (!source.IsFile)
+            {
+                return null;
+            }
+
+            var path = source.LocalPath;
+            if (LocalPathSecurity.ContainsReparsePoint(path) || !File.Exists(path))
+            {
+                return null;
+            }
+
+            var info = new FileInfo(path);
+            return new PhotoSourceStamp(info.Length, info.LastWriteTimeUtc);
         }
     }
 
