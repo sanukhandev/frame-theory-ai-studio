@@ -323,6 +323,8 @@ jobs:
           bundle_version="$(plutil -extract CFBundleShortVersionString raw -o - "$dmg_mount/Frame Theory Studio AI.app/Contents/Info.plist")"
           echo "Mounted DMG bundle version: $bundle_version"
           test "$bundle_version" = "0.1.1"
+          test "$(plutil -extract CFBundleIdentifier raw -o - "$dmg_mount/Frame Theory Studio AI.app/Contents/Info.plist")" = "ai.frametheory.studio"
+          test "$(plutil -extract CFBundleExecutable raw -o - "$dmg_mount/Frame Theory Studio AI.app/Contents/Info.plist")" = "FrameTheoryStudio"
           pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath "$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
           hdiutil detach "$dmg_mount"
           trap - EXIT
