@@ -259,6 +259,9 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Current frame and timeline position.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBlock>().Single(control => AutomationProperties.GetName(control) == "Timeline ruler")));
+                Xunit.Assert.Equal(
+                    "Click the ruler to seek to an exact timeline frame.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Border>().Single(control => AutomationProperties.GetName(control) == "Timeline visual ruler")));
                 Xunit.Assert.True(window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline selection context")

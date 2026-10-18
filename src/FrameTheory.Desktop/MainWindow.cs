@@ -2123,6 +2123,12 @@ public sealed class MainWindow : Window
             }
         };
         AutomationProperties.SetName(rulerVisual, "Timeline visual ruler");
+        ToolTip.SetTip(rulerVisual, "Click the ruler to seek to an exact timeline frame.");
+        rulerCanvas.PointerPressed += (_, args) =>
+        {
+            timeline.ScrubPixels(Math.Max(0, args.GetPosition(rulerCanvas).X));
+            args.Handled = true;
+        };
         void RefreshRulerVisual()
         {
             rulerCanvas.Children.Clear();
