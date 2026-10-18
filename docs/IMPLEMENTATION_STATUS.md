@@ -66,6 +66,8 @@
 
 **Export history retention checkpoint (2026-10-19):** The shared export queue now retains only the newest 100 terminal/history entries, preventing long-running editor sessions from accumulating an unbounded in-memory job list while preserving recent status and retry records. Focused queue coverage verifies eviction; full release validation remains required before the next 50-commit push.
 
+**Preview permission checkpoint (2026-10-19):** Preview-proxy permission failures now use the same visible Video workspace error status as decode and FFmpeg failures. Focused desktop coverage exercises a permission-denied proxy runner; full release validation remains required before the next 50-commit push.
+
 **Gemini upload cleanup checkpoint (2026-10-19):** Temporary Files API cleanup after an invalid provider URI now uses an independent bounded timeout instead of the caller's potentially canceled token, so cancellation cannot skip deletion of an already-uploaded sample. Existing provider cleanup coverage remains green; full release validation is required before the next 50-commit push.
 
 **AI caption execution checkpoint (2026-10-19):** Approved `caption.add` actions now use the caption font explicitly selected in the Video workspace instead of incorrectly requiring the optional title-brand font map. Plans fail clearly without a selected caption font, and success remains one undoable transaction; focused executor coverage includes both paths.

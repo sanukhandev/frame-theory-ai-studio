@@ -644,6 +644,36 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task PreviewProxyPermissionFailureIsReportedWithoutEscapingTheUi()
+    {
+        var sourcePath = Path.Combine(Path.GetTempPath(), $"frame-theory-preview-permission-{Guid.NewGuid():N}.mp4");
+        var cachePath = Path.Combine(Path.GetTempPath(), $"frame-theory-preview-permission-cache-{Guid.NewGuid():N}");
+        await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+        try
+        {
+            var viewModel = new MainWindowViewModel(
+                new WorkspaceCatalog(),
+                new StubCapabilityDetector(),
+                new VideoImporter(),
+                timelinePreviewDecoder: new StubPreviewDecoder(),
+                timelinePreviewProxy: new FfmpegPreviewProxyService(new PermissionDeniedProxyProcessRunner(), cachePath));
+            await viewModel.ImportFilesAsync([sourcePath], CancellationToken.None);
+            viewModel.UseTimelinePreviewProxy = true;
+
+            Xunit.Assert.False(await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None));
+            Xunit.Assert.Contains("Timeline preview failed", viewModel.TimelinePreviewStatusText, StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(sourcePath);
+            if (Directory.Exists(cachePath))
+            {
+                Directory.Delete(cachePath, recursive: true);
+            }
+        }
+    }
+
+    [Xunit.Fact]
     public async Task TimelineCompositorPreviewFailureIsReportedWithoutEscapingTheUi()
     {
         var viewModel = new MainWindowViewModel(
@@ -961,6 +991,12 @@ public sealed class DesktopImportTests
     {
         public Task<MediaProcessResult> RunAsync(string executable, IReadOnlyList<string> arguments, CancellationToken cancellationToken) =>
             Task.FromResult(new MediaProcessResult(1, string.Empty, "proxy failed"));
+    }
+
+    private sealed class PermissionDeniedProxyProcessRunner : IMediaProcessRunner
+    {
+        public Task<MediaProcessResult> RunAsync(string executable, IReadOnlyList<string> arguments, CancellationToken cancellationToken) =>
+            throw new UnauthorizedAccessException("proxy cache access denied");
     }
 
     private sealed class BlockingPreviewDecoder : IPreviewFrameDecoder

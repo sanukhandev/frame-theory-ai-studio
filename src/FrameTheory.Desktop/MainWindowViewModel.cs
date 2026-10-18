@@ -962,7 +962,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             TimelinePreviewStatusText = "Timeline preview canceled.";
             return false;
         }
-        catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidOperationException or ArgumentException or MediaDecodeException or MediaExportException or PreviewProxyException)
+        catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException or InvalidDataException or InvalidOperationException or MediaDecodeException or MediaExportException or PreviewProxyException)
         {
             _diagnosticsLog.Record("timeline-preview-failed", exception);
             TimelinePreviewStatusText = $"Timeline preview failed: {exception.Message}";
