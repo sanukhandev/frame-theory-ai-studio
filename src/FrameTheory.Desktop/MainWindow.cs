@@ -48,9 +48,10 @@ public sealed class MainWindow : Window
         {
             var tab = new TabItem
             {
-                Header = workspace.Name,
+                Header = CreateWorkspaceNavHeader(workspace, tabs.Items.Count),
                 Content = CreateWorkspaceContent(workspace, viewModel),
                 MinWidth = 152,
+                MinHeight = 62,
                 HorizontalContentAlignment = HorizontalAlignment.Stretch
             };
             AutomationProperties.SetName(tab, $"{workspace.Name} workspace");
@@ -219,6 +220,75 @@ public sealed class MainWindow : Window
                 AutomationProperties.SetName(textBox, textBox.PlaceholderText);
             }
         }
+    }
+
+    private static Control CreateWorkspaceNavHeader(WorkspaceViewModel workspace, int index)
+    {
+        var shortName = workspace.Name switch
+        {
+            "Video" => "V",
+            "Photo" => "P",
+            "Color" => "C",
+            "AI" => "AI",
+            _ => "•"
+        };
+        var badge = new Border
+        {
+            Width = 30,
+            Height = 30,
+            CornerRadius = new CornerRadius(7),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 33, 40)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(59, 68, 83)),
+            BorderThickness = new Thickness(1),
+            Child = new TextBlock
+            {
+                Text = shortName,
+                FontSize = shortName.Length == 1 ? 15 : 11,
+                FontWeight = FontWeight.Bold,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                TextAlignment = TextAlignment.Center,
+                Foreground = Brushes.White
+            }
+        };
+        var title = new TextBlock
+        {
+            Text = workspace.Name,
+            FontSize = 12,
+            FontWeight = FontWeight.SemiBold,
+            Foreground = Brushes.White,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        var descriptor = new TextBlock
+        {
+            Text = workspace.Name == "AI" ? "Creative direction" : "Local editor",
+            FontSize = 10,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
+            TextTrimming = TextTrimming.CharacterEllipsis
+        };
+        var keyHint = new TextBlock
+        {
+            Text = $"{index + 1}",
+            FontSize = 10,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        var titleStack = new StackPanel
+        {
+            Margin = new Thickness(10, 0, 6, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+            Spacing = 1,
+            Children = { title, descriptor }
+        };
+        var header = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto"),
+            Children = { badge, titleStack, keyHint }
+        };
+        Grid.SetColumn(titleStack, 1);
+        Grid.SetColumn(keyHint, 2);
+        return header;
     }
 
     private async void OnDrop(object? sender, DragEventArgs args)
@@ -405,23 +475,10 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(importZone, "Local media import drop zone");
         var children = new List<Control>
         {
-            new TextBlock
-            {
-                Text = workspace.Name,
-                FontSize = 25,
-                FontWeight = FontWeight.SemiBold,
-                Foreground = Brushes.White
-            },
-            new TextBlock
-            {
-                Text = workspace.Description,
-                FontSize = 13,
-                Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
-                TextWrapping = TextWrapping.Wrap
-            },
+            CreateWorkspaceHeader(workspace),
             new Border
             {
-                Margin = new Thickness(0, 16, 0, 0),
+                Margin = new Thickness(0, 14, 0, 0),
                 Padding = new Thickness(12, 10),
                 CornerRadius = new CornerRadius(6),
                 Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(28, 46, 45)),
@@ -478,6 +535,62 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(workspaceScrollViewer, $"{workspace.Name} workspace content");
         return workspaceScrollViewer;
+    }
+
+    private static Control CreateWorkspaceHeader(WorkspaceViewModel workspace)
+    {
+        var modeLabel = workspace.Name == "AI" ? "OPTIONAL AI" : "LOCAL WORKSPACE";
+        var modeForeground = workspace.Name == "AI"
+            ? new SolidColorBrush(Avalonia.Media.Color.FromRgb(205, 184, 255))
+            : new SolidColorBrush(Avalonia.Media.Color.FromRgb(148, 218, 188));
+        var modeBackground = workspace.Name == "AI"
+            ? new SolidColorBrush(Avalonia.Media.Color.FromRgb(43, 34, 61))
+            : new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 44, 42));
+        var header = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+            Children =
+            {
+                new StackPanel
+                {
+                    Spacing = 3,
+                    Children =
+                    {
+                        new TextBlock
+                        {
+                            Text = workspace.Name,
+                            FontSize = 24,
+                            FontWeight = FontWeight.SemiBold,
+                            Foreground = Brushes.White
+                        },
+                        new TextBlock
+                        {
+                            Text = workspace.Description,
+                            FontSize = 13,
+                            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+                            TextWrapping = TextWrapping.Wrap
+                        }
+                    }
+                },
+                new Border
+                {
+                    Margin = new Thickness(12, 2, 0, 0),
+                    Padding = new Thickness(10, 6),
+                    CornerRadius = new CornerRadius(5),
+                    Background = modeBackground,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Child = new TextBlock
+                    {
+                        Text = modeLabel,
+                        FontSize = 10,
+                        FontWeight = FontWeight.SemiBold,
+                        Foreground = modeForeground
+                    }
+                }
+            }
+        };
+        Grid.SetColumn(header.Children[1], 1);
+        return header;
     }
 
     private static Control CreateMediaBin(Border importZone, TextBlock importStatus, ListBox importedList)

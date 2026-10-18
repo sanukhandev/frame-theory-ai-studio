@@ -153,7 +153,16 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal("Frame Theory Studio AI", AutomationProperties.GetName(window));
                 Xunit.Assert.Equal("Workspaces", AutomationProperties.GetName(tabs));
                 Xunit.Assert.Equal(Dock.Left, tabs.TabStripPlacement);
-                Xunit.Assert.Equal(new[] { "Video", "Photo", "Color", "AI" }, tabItems.Select(tab => tab.Header));
+                var navigationLabels = tabItems
+                    .Select(tab => Xunit.Assert.IsType<Grid>(tab.Header).Children
+                        .OfType<StackPanel>()
+                        .Single()
+                        .Children
+                        .OfType<TextBlock>()
+                        .First()
+                        .Text)
+                    .ToArray();
+                Xunit.Assert.Equal(new[] { "Video", "Photo", "Color", "AI" }, navigationLabels);
                 Xunit.Assert.Equal(
                     new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
                     tabItems.Select(AutomationProperties.GetName));
