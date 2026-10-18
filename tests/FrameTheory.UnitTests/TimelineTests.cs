@@ -48,4 +48,15 @@ public sealed class TimelineTests
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => TimelineClip.Video(
             mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1)).SourceFrameAt(30, new RationalFrameRate(30, 1)));
     }
+
+    [Xunit.Fact]
+    public void TimelineClipReportsTheInvalidRangeParameter()
+    {
+        var mediaId = MediaId.Parse(new string('d', 64));
+
+        Xunit.Assert.Equal("sourceUnitCount", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => TimelineClip.Video(
+            mediaId, 0, 0, 0, 30, new RationalFrameRate(30, 1))).ParamName);
+        Xunit.Assert.Equal("timelineDurationFrames", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => TimelineClip.Video(
+            mediaId, 0, 30, 0, 0, new RationalFrameRate(30, 1))).ParamName);
+    }
 }

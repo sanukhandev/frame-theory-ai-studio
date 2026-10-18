@@ -31,9 +31,14 @@ public sealed record TimelineTitle
             throw new ArgumentException("A licensed local font path is required.", nameof(fontPath));
         }
 
-        if (startFrame < 0 || durationFrames <= 0)
+        if (startFrame < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(startFrame));
+        }
+
+        if (durationFrames <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(durationFrames));
         }
 
         if (fontSize <= 0 || fontSize > 4096)

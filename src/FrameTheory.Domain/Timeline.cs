@@ -23,9 +23,24 @@ public sealed record TimelineClip
             throw new ArgumentException("A media ID is required.", nameof(mediaId));
         }
 
-        if (sourceStartUnit < 0 || sourceUnitCount <= 0 || timelineStartFrame < 0 || timelineDurationFrames <= 0)
+        if (sourceStartUnit < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(sourceStartUnit), "Clip positions and lengths must be positive or zero as appropriate.");
+        }
+
+        if (sourceUnitCount <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(sourceUnitCount), "Clip positions and lengths must be positive or zero as appropriate.");
+        }
+
+        if (timelineStartFrame < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(timelineStartFrame), "Clip positions and lengths must be positive or zero as appropriate.");
+        }
+
+        if (timelineDurationFrames <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(timelineDurationFrames), "Clip positions and lengths must be positive or zero as appropriate.");
         }
 
         if (sourceStartUnit > long.MaxValue - sourceUnitCount)

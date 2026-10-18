@@ -17,6 +17,7 @@ public sealed class TimelineAudioTests
         Xunit.Assert.Equal(0, segment.DuckingDb);
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineAudioSegment(clip, gainDb: 20));
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineAudioSegment(clip, fadeInFrames: 30));
+        Xunit.Assert.Equal("fadeOutFrames", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineAudioSegment(clip, fadeOutFrames: 30)).ParamName);
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineAudioSegment(clip, duckingDb: 61));
     }
 

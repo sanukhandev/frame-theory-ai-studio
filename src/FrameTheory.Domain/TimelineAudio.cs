@@ -21,9 +21,14 @@ public sealed record TimelineAudioSegment
             throw new ArgumentOutOfRangeException(nameof(gainDb));
         }
 
-        if (fadeInFrames < 0 || fadeOutFrames < 0 || fadeInFrames >= clip.TimelineRange.Length || fadeOutFrames >= clip.TimelineRange.Length)
+        if (fadeInFrames < 0 || fadeInFrames >= clip.TimelineRange.Length)
         {
             throw new ArgumentOutOfRangeException(nameof(fadeInFrames));
+        }
+
+        if (fadeOutFrames < 0 || fadeOutFrames >= clip.TimelineRange.Length)
+        {
+            throw new ArgumentOutOfRangeException(nameof(fadeOutFrames));
         }
 
         if (double.IsNaN(duckingDb) || double.IsInfinity(duckingDb) || duckingDb is < 0 or > 60)
