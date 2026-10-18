@@ -25,9 +25,9 @@ CI writes `SHA256SUMS.txt` for the complete validation artifact set and verifies
 
 | Platform | Build/CI compile | Local GUI/media evidence | Installer/signing |
 |---|---|---|---|
-| Windows 11 x64 | Local and hosted CI publish verified in runs `39050810748`, `39051936860`, `39054338193` and `39054513784` | Local FFmpeg import/export/smoke plus hosted native media smoke verified; interactive shell and package relaunch remain open | Portable validation package available; no installer, signing or notarization |
-| macOS Apple Silicon/Intel | Hosted restore/build/test/publish and native media smoke verified in runs `39051936860`, `39054338193` and `39054513784` | Hosted FFmpeg import/extraction/seek smoke verified; local GUI and package relaunch not run here | Portable validation package path available; no installer or notarization |
-| Linux x64 | Hosted restore/build/test/publish and native media smoke verified in runs `39051936860`, `39054338193` and `39054513784` | Hosted FFmpeg import/extraction/seek smoke verified; local GUI and package relaunch not run here | Portable validation package path available; no installer or signing |
+| Windows 11 x64 | Local and hosted CI publish verified; latest matrix run `39080954139` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; interactive shell/package relaunch remains open | Portable validation package available; no installer, signing or notarization |
+| macOS Apple Silicon/Intel | Hosted restore/build/test/publish and native media smoke verified in `39080954139` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; local GUI/package relaunch not run here | Portable validation package path available; no installer or notarization |
+| Linux x64 | Hosted restore/build/test/publish and native media smoke verified in `39080954139` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; local GUI/package relaunch not run here | Portable validation package path available; no installer or signing |
 
 ## Release blockers
 
