@@ -161,6 +161,7 @@ try {
             "Timeline preview performance status",
             "Play timeline",
             "Stop playback",
+            "Quick export timeline MP4",
             "Timeline playhead frame",
             "Select at playhead",
             "Import verified transcript JSON",
