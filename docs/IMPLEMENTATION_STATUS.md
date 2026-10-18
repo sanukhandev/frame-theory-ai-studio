@@ -52,6 +52,8 @@
 
 **CI FFmpeg install checkpoint (2026-10-18):** Windows run `39082333029` correctly exposed a Chocolatey feed `404` while installing FFmpeg, so the workflow now falls back to the pinned WinGet `Gyan.FFmpeg` 9.0.2 package, locates its static executable, and preserves the existing FFmpeg/ffprobe evidence capture. Hosted run `39082588976` passed the repaired Windows path plus the full macOS/Linux matrix; no application behavior changed.
 
+**FT-1003 runtime provenance checkpoint (2026-10-18):** `docs/SBOM.md` now records the pinned Windows validation package source, GPL status and installer SHA-256 without treating it as redistribution approval. Hosted run `39082884398` passed the documentation, restore/build, advisory, native-media, format, test, publish, portable-archive and checksum matrix on Windows, macOS and Linux.
+
 **Manual UI gate checkpoint (2026-10-18):** The Release desktop process launches from the managed `FrameTheory.Desktop.dll` with the expected `Frame Theory Studio AI` window title on this Windows host, but the available CUA inventory still returns zero native Windows applications and only browser tabs. FT-901..FT-904 and FT-1002 remain unverified; no interactive acceptance claim is made.
 
 **FT-204 batch-import checkpoint (2026-10-18):** The desktop media browser now retains previously imported media when files arrive in later drag/drop or picker batches, preserves stable media IDs for the visible entries and avoids duplicate browser rows when the same source is imported again. The timeline and analysis dictionaries retain their existing idempotent behavior. Focused desktop import coverage passes 6/6; full local Release tests pass 163/2, build has 0 warnings/errors and formatting verification passes.
