@@ -292,12 +292,12 @@ public sealed class FoundationTests
                     .OfType<Grid>()
                     .Single(control => AutomationProperties.GetName(control) == "Video workspace header");
                 Xunit.Assert.Equal(2, videoWorkspaceHeader.ColumnDefinitions.Count);
-                Xunit.Assert.Equal(1, videoWorkspaceHeader.RowDefinitions.Count);
+                Xunit.Assert.Single(videoWorkspaceHeader.RowDefinitions);
                 window.Width = 960;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(new Avalonia.Thickness(12), videoWorkspaceFrame.Margin);
                 Xunit.Assert.Equal(new Avalonia.Thickness(16, 14), videoWorkspaceFrame.Padding);
-                Xunit.Assert.Equal(1, videoWorkspaceHeader.ColumnDefinitions.Count);
+                Xunit.Assert.Single(videoWorkspaceHeader.ColumnDefinitions);
                 Xunit.Assert.Equal(2, videoWorkspaceHeader.RowDefinitions.Count);
                 var compactHeaderMeta = videoWorkspaceHeader.Children[1];
                 Xunit.Assert.Equal(Orientation.Horizontal, Xunit.Assert.IsType<StackPanel>(compactHeaderMeta).Orientation);
@@ -306,7 +306,7 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(new Avalonia.Thickness(20), videoWorkspaceFrame.Margin);
                 Xunit.Assert.Equal(new Avalonia.Thickness(24, 22), videoWorkspaceFrame.Padding);
                 Xunit.Assert.Equal(2, videoWorkspaceHeader.ColumnDefinitions.Count);
-                Xunit.Assert.Equal(1, videoWorkspaceHeader.RowDefinitions.Count);
+                Xunit.Assert.Single(videoWorkspaceHeader.RowDefinitions);
                 Xunit.Assert.Equal(Orientation.Vertical, Xunit.Assert.IsType<StackPanel>(compactHeaderMeta).Orientation);
                 Xunit.Assert.Equal(
                     new[] { "Video workspace content", "Photo workspace content", "Color workspace content", "AI workspace content" },
