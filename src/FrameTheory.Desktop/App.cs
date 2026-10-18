@@ -117,6 +117,29 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.BorderBrushProperty, accent)
             }
         });
+        Styles.Add(new Style(selector => selector.OfType<ComboBoxItem>())
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.PaddingProperty, new Thickness(10, 7)),
+                new Setter(TemplatedControl.ForegroundProperty, foreground)
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<ComboBoxItem>().Class(":pointerover"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 48, 59)))
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<ComboBoxItem>().Class(":selected"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(35, 43, 66))),
+                new Setter(TemplatedControl.ForegroundProperty, foreground)
+            }
+        });
         Styles.Add(new Style(selector => selector.OfType<TabItem>())
         {
             Setters =
