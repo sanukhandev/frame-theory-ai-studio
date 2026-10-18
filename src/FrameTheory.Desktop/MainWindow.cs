@@ -898,6 +898,7 @@ public sealed class MainWindow : Window
         status.Bind(TextBlock.TextProperty, new Binding(nameof(PhotoEditorViewModel.StatusText)));
         var open = new Button { Content = "Open image" };
         AutomationProperties.SetName(open, "Open image");
+        ToolTip.SetTip(open, "Open a local image for non-destructive editing.");
         open.Classes.Add("primary");
         open.Click += async (_, _) =>
         {

@@ -372,6 +372,9 @@ public sealed class FoundationTests
                 Xunit.Assert.Contains(
                     window.GetVisualDescendants().OfType<Button>(),
                     button => AutomationProperties.GetName(button) == "Open image" && button.Classes.Contains("primary"));
+                Xunit.Assert.Equal(
+                    "Open a local image for non-destructive editing.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(button => AutomationProperties.GetName(button) == "Open image")));
                 Xunit.Assert.Contains(
                     window.GetVisualDescendants().OfType<Button>(),
                     button => AutomationProperties.GetName(button) == "Export photo image" && button.Classes.Contains("primary"));
