@@ -207,14 +207,19 @@ public sealed class FileGeminiInteractionHistory : IGeminiInteractionHistory, IG
                     return [];
                 }
 
-                var records = new List<GeminiInteractionRecord>();
+                var records = new Queue<GeminiInteractionRecord>(maximumEntries);
                 foreach (var line in File.ReadLines(LogPath))
                 {
                     try
                     {
                         if (JsonSerializer.Deserialize<GeminiInteractionRecord>(line) is { } record)
                         {
-                            records.Add(record);
+                            if (records.Count == maximumEntries)
+                            {
+                                records.Dequeue();
+                            }
+
+                            records.Enqueue(record);
                         }
                     }
                     catch (JsonException)
@@ -222,7 +227,7 @@ public sealed class FileGeminiInteractionHistory : IGeminiInteractionHistory, IG
                     }
                 }
 
-                return records.TakeLast(maximumEntries).ToArray();
+                return records.ToArray();
             }
         }
         catch

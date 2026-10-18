@@ -36,6 +36,38 @@ public sealed class GeminiInteractionsTests
     }
 
     [Xunit.Fact]
+    public void FileHistoryReadKeepsOnlyRequestedTail()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-history-tail-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "usage.jsonl");
+            var history = new FileGeminiInteractionHistory(path);
+            for (var index = 0; index < 4; index++)
+            {
+                history.Record(new GeminiInteractionRecord(
+                    DateTimeOffset.UtcNow.AddSeconds(index),
+                    $"model-{index}",
+                    null,
+                    true,
+                    null,
+                    null,
+                    1,
+                    index,
+                    null));
+            }
+
+            var recent = history.ReadRecent(2);
+
+            Xunit.Assert.Equal(["model-2", "model-3"], recent.Select(record => record.ModelId));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public void FileHistoryDoesNotFollowReparsePointLogPath()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-history-boundary-");
