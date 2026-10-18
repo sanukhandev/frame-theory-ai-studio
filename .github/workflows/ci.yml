@@ -41,6 +41,9 @@ jobs:
             throw "Windows package version validation did not reject an invalid version."
           }
           $global:LASTEXITCODE = 0
+          if (-not (Select-String -Path packaging/windows/FrameTheoryStudio.iss -Pattern 'OutputBaseFilename=\{#OutputBaseFilename\}')) {
+            throw "Windows installer does not use the runtime-specific output filename macro."
+          }
       - name: Validate Linux package guards
         shell: bash
         run: |
