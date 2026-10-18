@@ -532,6 +532,7 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Enter editable title text for the selected timeline position.",
                     ToolTip.GetTip(titleText));
+                Xunit.Assert.Contains(timelineSections["Titles and captions section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Title");
                 var timelineReplacementPath = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline replacement media path");
@@ -729,6 +730,12 @@ public sealed class FoundationTests
                 Xunit.Assert.True(titleAnimationStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, titleAnimationStatus.FontSize);
                 Xunit.Assert.Equal("Status of the latest title animation edit.", ToolTip.GetTip(titleAnimationStatus));
+                Xunit.Assert.Equal(
+                    "Render source-timed words with editable kinetic caption animation.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<CheckBox>().Single(control => AutomationProperties.GetName(control) == "Kinetic word captions")));
+                Xunit.Assert.Equal(
+                    "Required before the optional Gemini transcription path can upload local audio.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<CheckBox>().Single(control => AutomationProperties.GetName(control) == "Gemini transcription upload consent")));
                 var captionStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Caption status");

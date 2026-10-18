@@ -3740,6 +3740,7 @@ public sealed class MainWindow : Window
         };
         var kineticCaptions = new CheckBox { Content = "Kinetic word captions" };
         AutomationProperties.SetName(kineticCaptions, "Kinetic word captions");
+        ToolTip.SetTip(kineticCaptions, "Render source-timed words with editable kinetic caption animation.");
         kineticCaptions.Bind(ToggleButton.IsCheckedProperty, new Binding(nameof(TimelineEditorViewModel.KineticCaptions))
         {
             Mode = BindingMode.TwoWay
@@ -3761,6 +3762,7 @@ public sealed class MainWindow : Window
         captionStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.CaptionStatusText)));
         var transcriptionConsent = new CheckBox { Content = "I approve uploading this exact local audio file or extracted video audio track to Gemini" };
         AutomationProperties.SetName(transcriptionConsent, "Gemini transcription upload consent");
+        ToolTip.SetTip(transcriptionConsent, "Required before the optional Gemini transcription path can upload local audio.");
         var transcribeAudio = new Button { Content = "Transcribe approved audio" };
         AutomationProperties.SetName(transcribeAudio, "Transcribe approved audio");
         transcribeAudio.Click += async (_, _) =>
@@ -3827,6 +3829,7 @@ public sealed class MainWindow : Window
         };
         var captionFont = new Button { Content = "Choose caption font" };
         AutomationProperties.SetName(captionFont, "Choose caption font");
+        ToolTip.SetTip(captionFont, "Choose a licensed local TrueType or OpenType font for captions.");
         captionFont.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(captionFont);
@@ -4190,11 +4193,12 @@ public sealed class MainWindow : Window
         var titleCaptionSection = CreateInspectorExpander(
             "Titles and captions",
             CreateSectionContent(
-                CreateFlow(titleText, addTitle, fadeTitle, pushTitle),
+                CreateFlow(CreateLabeledField("Title", titleText), addTitle, fadeTitle, pushTitle),
                 titleAnimationStatus,
                 CreateFlow(importCaptions, importTranscript, exportCaptions),
                 kineticCaptions,
-                CreateFlow(transcribeAudio, transcribeLocalWhisper, transcriptionConsent),
+                CreateFlow(transcribeAudio, transcribeLocalWhisper),
+                transcriptionConsent,
                 CreateFlow(captionFont),
                 captionStatus),
             expanded: false);
