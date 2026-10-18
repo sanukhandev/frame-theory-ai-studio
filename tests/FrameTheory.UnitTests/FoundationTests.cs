@@ -230,6 +230,8 @@ public sealed class FoundationTests
                     Xunit.Assert.Equal(HorizontalAlignment.Stretch, section.HorizontalAlignment);
                     Xunit.Assert.Equal(HorizontalAlignment.Stretch, section.HorizontalContentAlignment);
                     Xunit.Assert.Equal(VerticalAlignment.Top, section.VerticalContentAlignment);
+                    Xunit.Assert.True(section.Focusable);
+                    Xunit.Assert.True(section.IsTabStop);
                 });
                 timelineSections["Analysis and rough cut section"].IsExpanded = true;
                 Dispatcher.UIThread.RunJobs();

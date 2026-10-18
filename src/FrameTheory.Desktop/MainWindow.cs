@@ -2507,7 +2507,9 @@ public sealed class MainWindow : Window
             Padding = new Thickness(0, 0, 0, 4),
             HorizontalAlignment = HorizontalAlignment.Stretch,
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
-            VerticalContentAlignment = VerticalAlignment.Top
+            VerticalContentAlignment = VerticalAlignment.Top,
+            Focusable = true,
+            IsTabStop = true
         };
         AutomationProperties.SetName(expander, $"{title} section");
         ToolTip.SetTip(expander, $"Show or hide {title.ToLowerInvariant()} controls.");
