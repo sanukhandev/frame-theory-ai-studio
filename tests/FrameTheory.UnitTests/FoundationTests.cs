@@ -1,3 +1,8 @@
+using Avalonia.Automation;
+using Avalonia.Controls;
+using Avalonia.Headless;
+using Avalonia.Input;
+using Avalonia.Themes.Fluent;
 using System.Reflection;
 using FrameTheory.Application;
 
@@ -49,6 +54,46 @@ public sealed class FoundationTests
         viewModel.SelectedWorkspaceIndex = viewModel.Workspaces.Count;
 
         Xunit.Assert.Equal("AI", viewModel.SelectedWorkspace.Name);
+    }
+
+    [Xunit.Fact]
+    public async Task MainWindowBuildsAccessibleAdaptiveWorkspaceShell()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
+        await session.Dispatch(() =>
+        {
+            var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
+                new FrameTheory.Desktop.WorkspaceCatalog(),
+                new TestCapabilityDetector());
+
+            var window = new FrameTheory.Desktop.MainWindow(viewModel);
+            try
+            {
+                window.Show();
+                var layout = Xunit.Assert.IsType<Grid>(window.Content);
+                var tabs = Xunit.Assert.IsType<TabControl>(layout.Children[1]);
+                var tabItems = tabs.Items.Cast<TabItem>().ToArray();
+
+                Xunit.Assert.Equal(1280, window.Width);
+                Xunit.Assert.Equal(800, window.Height);
+                Xunit.Assert.Equal(960, window.MinWidth);
+                Xunit.Assert.Equal(640, window.MinHeight);
+                Xunit.Assert.Equal("Frame Theory Studio AI", AutomationProperties.GetName(window));
+                Xunit.Assert.Equal("Workspaces", AutomationProperties.GetName(tabs));
+                Xunit.Assert.Equal(new[] { "Video", "Photo", "Color", "AI" }, tabItems.Select(tab => tab.Header));
+                Xunit.Assert.Equal(
+                    new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
+                    tabItems.Select(AutomationProperties.GetName));
+
+                window.KeyPress(Key.D3, RawInputModifiers.Control, PhysicalKey.Digit3, "3");
+                window.KeyRelease(Key.D3, RawInputModifiers.Control, PhysicalKey.Digit3, "3");
+                Xunit.Assert.Equal("Color", viewModel.SelectedWorkspace.Name);
+            }
+            finally
+            {
+                window.Close();
+            }
+        }, CancellationToken.None);
     }
 
     [Xunit.Fact]
@@ -269,6 +314,14 @@ public sealed class FoundationTests
     {
         public Task<CapabilityReport> DetectAsync(CancellationToken cancellationToken) => Task.FromResult(
             new CapabilityReport("Test OS", "x64", [new("Storage", CapabilityState.Available, "ready")]));
+    }
+
+    private sealed class HeadlessTestApplication : Avalonia.Application
+    {
+        public HeadlessTestApplication()
+        {
+            Styles.Add(new FluentTheme());
+        }
     }
 
     private sealed class TestWorkspaceStateStore(int selectedWorkspaceIndex) : FrameTheory.Desktop.IWorkspaceStateStore
