@@ -240,8 +240,16 @@ public sealed class GeminiTranscriptionProvider : IProgressiveTranscriptionProvi
             progress?.Report(new TranscriptionProgress("Parsing word timings", 0.9));
             await using var responseStream = await response.Content.ReadAsStreamAsync(cancellationToken);
             var responseBytes = await ReadBoundedAsync(responseStream, cancellationToken);
-            var interaction = JsonSerializer.Deserialize<GeminiInteractionResponse>(responseBytes)
-                ?? throw new GeminiTranscriptionException("Gemini returned an empty transcription response.");
+            GeminiInteractionResponse interaction;
+            try
+            {
+                interaction = JsonSerializer.Deserialize<GeminiInteractionResponse>(responseBytes)
+                    ?? throw new GeminiTranscriptionException("Gemini returned an empty transcription response.");
+            }
+            catch (JsonException exception)
+            {
+                throw new GeminiTranscriptionException("Gemini returned malformed transcription JSON.", innerException: exception);
+            }
             if (!string.Equals(interaction.Status, "completed", StringComparison.OrdinalIgnoreCase))
             {
                 throw new GeminiTranscriptionException($"Gemini transcription did not complete (status: {interaction.Status ?? "unknown"}).");

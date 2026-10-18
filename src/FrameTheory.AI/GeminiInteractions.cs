@@ -470,8 +470,16 @@ public sealed class GeminiInteractionsClient : IGeminiClient
 
                     await using var responseStream = await response.Content.ReadAsStreamAsync(timeout.Token);
                     var responseBytes = await ReadBoundedAsync(responseStream, timeout.Token);
-                    var interaction = JsonSerializer.Deserialize<GeminiInteractionResponse>(responseBytes)
-                        ?? throw new GeminiProviderException("Gemini returned an empty response.", GeminiProviderFailureKind.MalformedResponse);
+                    GeminiInteractionResponse interaction;
+                    try
+                    {
+                        interaction = JsonSerializer.Deserialize<GeminiInteractionResponse>(responseBytes)
+                            ?? throw new GeminiProviderException("Gemini returned an empty response.", GeminiProviderFailureKind.MalformedResponse);
+                    }
+                    catch (JsonException exception)
+                    {
+                        throw new GeminiProviderException("Gemini returned malformed JSON.", GeminiProviderFailureKind.MalformedResponse, innerException: exception);
+                    }
                     if (!string.Equals(interaction.Status, "completed", StringComparison.OrdinalIgnoreCase) ||
                         string.IsNullOrWhiteSpace(interaction.Id))
                     {

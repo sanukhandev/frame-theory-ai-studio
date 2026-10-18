@@ -198,6 +198,18 @@ public sealed class GeminiInteractionsTests
         Xunit.Assert.Equal(GeminiProviderFailureKind.MalformedResponse, exception.FailureKind);
     }
 
+    [Xunit.Fact]
+    public async Task ProviderWrapsMalformedJsonAsTypedFailure()
+    {
+        using var client = new HttpClient(new StubHandler(_ => Response("{")));
+        var exception = await Xunit.Assert.ThrowsAsync<GeminiProviderException>(() => new GeminiInteractionsClient(
+            client,
+            new GeminiClientOptions("test-secret", "gemini-2.5-flash", TimeSpan.FromSeconds(5), 1, TimeSpan.Zero))
+            .CreateFollowUpAsync("malformed response", null, CancellationToken.None));
+
+        Xunit.Assert.Equal(GeminiProviderFailureKind.MalformedResponse, exception.FailureKind);
+    }
+
     private static HttpResponseMessage Response(string json) => new(HttpStatusCode.OK)
     {
         Content = new StringContent(json, Encoding.UTF8, "application/json")
