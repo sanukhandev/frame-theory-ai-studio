@@ -22,6 +22,20 @@ public sealed class AvaloniaHeadlessCollectionDefinition
 public sealed class DesktopImportTests
 {
     [Xunit.Fact]
+    public void ImportedMediaViewModelSnapshotsPreviewPayloads()
+    {
+        var thumbnail = new byte[] { 1, 2, 3 };
+        var waveform = new List<float> { 0.25f };
+        var viewModel = new ImportedMediaViewModel("clip.mp4", "summary", thumbnail, MediaKind.Video, waveform);
+
+        thumbnail[0] = 9;
+        waveform[0] = 0.9f;
+
+        Xunit.Assert.Equal(new byte[] { 1, 2, 3 }, viewModel.ThumbnailPpm);
+        Xunit.Assert.Equal([0.25f], viewModel.WaveformPeaks);
+    }
+
+    [Xunit.Fact]
     public async Task CorruptMediaIsReportedInTheImportStatusInsteadOfEscapingTheUi()
     {
         var viewModel = new MainWindowViewModel(
