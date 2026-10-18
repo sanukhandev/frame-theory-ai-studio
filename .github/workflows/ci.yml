@@ -427,7 +427,16 @@ jobs:
           scripts/package_macos_dmg.sh "" artifacts/installer 0.1.1 "$bundle_directory"
           mkdir -p "$RUNNER_TEMP/frame-theory-dmg"
           dmg_mount="$RUNNER_TEMP/frame-theory-dmg"
-          cleanup_dmg() { hdiutil detach "$dmg_mount" >/dev/null 2>&1 || true; }
+          detach_dmg() {
+            for attempt in 1 2 3 4 5; do
+              if hdiutil detach "$dmg_mount" >/dev/null 2>&1; then
+                return 0
+              fi
+              sleep 1
+            done
+            return 1
+          }
+          cleanup_dmg() { detach_dmg || true; }
           trap cleanup_dmg EXIT
           hdiutil attach -nobrowse -readonly artifacts/installer/FrameTheoryStudioAI-*.dmg -mountpoint "$dmg_mount"
           test -x "$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
@@ -454,7 +463,7 @@ jobs:
           test "$(plutil -extract CFBundleIdentifier raw -o - "$dmg_mount/Frame Theory Studio AI.app/Contents/Info.plist")" = "ai.frametheory.studio"
           test "$(plutil -extract CFBundleExecutable raw -o - "$dmg_mount/Frame Theory Studio AI.app/Contents/Info.plist")" = "FrameTheoryStudio"
           pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath "$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
-          hdiutil detach "$dmg_mount"
+          detach_dmg
           trap - EXIT
       - name: Build Linux DEB validation
         if: steps.detect.outputs.has_solution == 'true' && runner.os == 'Linux'
