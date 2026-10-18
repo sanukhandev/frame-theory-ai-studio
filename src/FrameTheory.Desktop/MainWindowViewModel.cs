@@ -1523,16 +1523,25 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             var fullTranscriptPath = Path.GetFullPath(transcriptPath);
             CaptionStatusText = $"Verifying transcript source: {Path.GetFileName(fullSourcePath)}.";
             var provider = new JsonTranscriptProvider(fullTranscriptPath);
-            var result = await provider.TranscribeAsync(
-                new Uri(fullSourcePath),
-                new Progress<TranscriptionProgress>(update =>
-                {
-                    if (update.Fraction < 1)
+            var progressActive = true;
+            TranscriptResult result;
+            try
+            {
+                result = await provider.TranscribeAsync(
+                    new Uri(fullSourcePath),
+                    new Progress<TranscriptionProgress>(update =>
                     {
-                        CaptionStatusText = $"{update.Stage} ({update.Fraction:P0})";
-                    }
-                }),
-                cancellationToken);
+                        if (progressActive && update.Fraction < 1)
+                        {
+                            CaptionStatusText = $"{update.Stage} ({update.Fraction:P0})";
+                        }
+                    }),
+                    cancellationToken);
+            }
+            finally
+            {
+                progressActive = false;
+            }
             TimelineEditor.ImportTranscript(result);
             CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} verified transcript caption cue(s) from {Path.GetFileName(fullTranscriptPath)}.";
             return true;
@@ -1561,16 +1570,25 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             var fullSourcePath = Path.GetFullPath(sourcePath);
             CaptionStatusText = $"Preparing local Whisper: {Path.GetFileName(fullSourcePath)}.";
             var provider = new WhisperCliTranscriptionProvider(new LocalWhisperOptions(executablePath, modelPath));
-            var result = await provider.TranscribeAsync(
-                new Uri(fullSourcePath),
-                new Progress<TranscriptionProgress>(update =>
-                {
-                    if (update.Fraction < 1)
+            var progressActive = true;
+            TranscriptResult result;
+            try
+            {
+                result = await provider.TranscribeAsync(
+                    new Uri(fullSourcePath),
+                    new Progress<TranscriptionProgress>(update =>
                     {
-                        CaptionStatusText = $"{update.Stage} ({update.Fraction:P0})";
-                    }
-                }),
-                cancellationToken);
+                        if (progressActive && update.Fraction < 1)
+                        {
+                            CaptionStatusText = $"{update.Stage} ({update.Fraction:P0})";
+                        }
+                    }),
+                    cancellationToken);
+            }
+            finally
+            {
+                progressActive = false;
+            }
             TimelineEditor.ImportTranscript(result);
             CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} verified local Whisper caption cue(s).";
             return true;
@@ -1641,10 +1659,25 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             var provider = new GeminiTranscriptionProvider(
                 _transcriptionHttpClient,
                 new GeminiTranscriptionOptions(apiKey, uploadConsent: true));
-            var result = await provider.TranscribeAsync(
-                preparedSource.Source,
-                new Progress<TranscriptionProgress>(update => CaptionStatusText = $"{update.Stage} ({update.Fraction:P0})"),
-                cancellationToken);
+            var progressActive = true;
+            TranscriptResult result;
+            try
+            {
+                result = await provider.TranscribeAsync(
+                    preparedSource.Source,
+                    new Progress<TranscriptionProgress>(update =>
+                    {
+                        if (progressActive)
+                        {
+                            CaptionStatusText = $"{update.Stage} ({update.Fraction:P0})";
+                        }
+                    }),
+                    cancellationToken);
+            }
+            finally
+            {
+                progressActive = false;
+            }
             var currentFingerprint = await TranscriptSourceFingerprint.ComputeAsync(originalSource, cancellationToken);
             if (!string.Equals(originalFingerprint, currentFingerprint, StringComparison.OrdinalIgnoreCase))
             {
