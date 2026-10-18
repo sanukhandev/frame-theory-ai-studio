@@ -207,6 +207,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/frame-theory-dmg"
           hdiutil attach -nobrowse -readonly artifacts/installer/FrameTheoryStudioAI-*.dmg -mountpoint "$RUNNER_TEMP/frame-theory-dmg"
           test -x "$RUNNER_TEMP/frame-theory-dmg/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
+          pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath "$RUNNER_TEMP/frame-theory-dmg/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
           hdiutil detach "$RUNNER_TEMP/frame-theory-dmg"
       - name: Build Linux DEB validation
         if: steps.detect.outputs.has_solution == 'true' && runner.os == 'Linux'
@@ -216,6 +217,11 @@ jobs:
           scripts/package_linux_deb.sh linux-x64 artifacts/installer
           dpkg-deb --info artifacts/installer/frame-theory-studio-ai_0.1.0_amd64.deb
           dpkg-deb --contents artifacts/installer/frame-theory-studio-ai_0.1.0_amd64.deb | grep -F '/usr/bin/frame-theory-studio-ai'
+          deb_directory="$RUNNER_TEMP/frame-theory-deb"
+          rm -rf "$deb_directory"
+          mkdir -p "$deb_directory"
+          dpkg-deb --extract artifacts/installer/frame-theory-studio-ai_0.1.0_amd64.deb "$deb_directory"
+          xvfb-run -a pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath "$deb_directory/opt/frame-theory-studio/FrameTheory.Desktop"
       - name: Launch extracted portable archive smoke
         if: steps.detect.outputs.has_solution == 'true' && runner.os == 'Windows'
         shell: pwsh
