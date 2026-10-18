@@ -43,6 +43,14 @@ The source URI must match the selected file and the provider recomputes the sour
 
 The Video workspace also exposes **Transcribe with local Whisper**. It requires the user to select a local Whisper CLI executable, a local model file and the source media. The adapter invokes only that selected executable through fixed argument-list parameters (`--model`, `--output_format json`, `--word_timestamps True`, `--output_dir`, `--task transcribe` and the selected source), parses segment word timings, verifies the original source SHA-256 before and after processing, deletes temporary JSON output and never downloads or bundles a model.
 
+The real local-engine acceptance smoke is reproducible with a separately installed Whisper-compatible CLI and model:
+
+```powershell
+dotnet run --project tools/FrameTheory.LocalWhisperSmoke/FrameTheory.LocalWhisperSmoke.csproj --configuration Release -- <whisper-executable> <model-path> <spoken-audio-path>
+```
+
+On 2026-10-18 Windows x64, this command ran `openai-whisper` 20250625 with the `tiny.en` model against a locally synthesized spoken fixture and produced seven source-timed words with a preserved `sha256:` fingerprint. The executable, model, FFmpeg helper and audio fixture remained outside the repository; this is validation evidence, not a bundled runtime or redistribution approval.
+
 ## Repository target layout
 ```text
 src/

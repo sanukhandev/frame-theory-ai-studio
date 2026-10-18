@@ -25,6 +25,8 @@ The current restore inventory is recorded in [SBOM.md](SBOM.md). It must be rege
 ## Implemented dependency baseline
 FT-002 uses `Avalonia`, `Avalonia.Desktop` and `Avalonia.Themes.Fluent` version `12.1.2` from NuGet. The package metadata identifies Avalonia as MIT-licensed; transitive packages and native assets remain part of the release SBOM and must be rechecked before packaging. FT-004 uses `Microsoft.CodeAnalysis.NetAnalyzers` version `10.0.402`, also identified as MIT-licensed.
 
+The optional local-caption path was exercised without repository redistribution using `openai-whisper` 20250625 (MIT package metadata), the official `tiny.en` model URL and a separately installed FFmpeg helper. The model and native tools remain user-supplied validation inputs; their individual model, codec and redistribution terms must be reviewed before any product bundle is produced.
+
 ## Packaging choices
 Separate per-OS native dependencies, with architecture-specific smoke checks. Some codec usage may carry patent/licensing obligations even if FFmpeg itself is open source. Signing/notarization/Apple accounts can cost money, although development stack itself may be free.
 

@@ -11,7 +11,7 @@ Decisions must be revisited only with evidence. Create `docs/adr/NNNN-*.md` for 
 | ADR-0005 | Unified color graph with explicit profiles | Accepted direction | Prevent differing photo vs video results |
 | ADR-0006 | Versioned project JSON, optional SQLite indexes | Accepted direction | Portable edit history and cheap cache invalidation |
 | ADR-0007 | Image renderer library selection | **Open** | SkiaSharp vs ImageSharp: cost/licensing, GPU, ICC, fidelity, cross-platform |
-| ADR-0008 | Caption transcription engine | **Open** | Local Whisper-compatible vs Gemini timed transcription; language/time precision |
+| ADR-0008 | Caption transcription engine | Accepted optional local path; Gemini remains optional provider | User-supplied Whisper-compatible CLI/model provides an offline path; live Gemini remains an explicit consented alternative |
 | ADR-0009 | Native packaging / license policy | **Open** | FFmpeg build flags, MLT LGPL, codecs, model weights, signing |
 | ADR-0010 | Real-time GPU preview backends | **Open** | Provide consistent CPU fallback; no fictional universal acceleration |
 
