@@ -858,8 +858,10 @@ public sealed class MainWindow : Window
             }
         };
         var rotate = new Button { Content = "Rotate 90°" };
+        AutomationProperties.SetName(rotate, "Rotate photo 90 degrees clockwise");
         rotate.Click += (_, _) => editor.RotateRight();
         var undo = new Button { Content = "Undo photo edit" };
+        AutomationProperties.SetName(undo, "Undo last photo edit");
         undo.Click += (_, _) => editor.Undo();
         var overlayOpacity = new Slider { Minimum = 0, Maximum = 1, Value = 1, Width = 120 };
         AutomationProperties.SetName(overlayOpacity, "Photo overlay opacity");
@@ -893,6 +895,7 @@ public sealed class MainWindow : Window
             }
         };
         var clearOverlays = new Button { Content = "Clear overlays" };
+        AutomationProperties.SetName(clearOverlays, "Clear photo overlays");
         clearOverlays.Click += (_, _) => editor.ClearOverlays();
         var maskX = new TextBox { Text = "0", PlaceholderText = "Mask X", Width = 55 };
         var maskY = new TextBox { Text = "0", PlaceholderText = "Mask Y", Width = 55 };
@@ -915,6 +918,7 @@ public sealed class MainWindow : Window
             }
         };
         var clearMask = new Button { Content = "Clear last mask" };
+        AutomationProperties.SetName(clearMask, "Clear last photo overlay mask");
         clearMask.Click += (_, _) => editor.ClearLastOverlayMask();
         var retouchX = new TextBox { Text = "0", PlaceholderText = "Retouch X", Width = 65 };
         var retouchY = new TextBox { Text = "0", PlaceholderText = "Retouch Y", Width = 65 };
@@ -943,6 +947,7 @@ public sealed class MainWindow : Window
             }
         };
         var clearRetouch = new Button { Content = "Clear retouch" };
+        AutomationProperties.SetName(clearRetouch, "Clear photo clone retouch");
         clearRetouch.Click += (_, _) => editor.ClearRetouch();
         var gradeExposure = new TextBox { Text = "1", PlaceholderText = "Exposure EV", Width = 90 };
         AutomationProperties.SetName(gradeExposure, "Photo grade exposure");
@@ -956,6 +961,7 @@ public sealed class MainWindow : Window
             }
         };
         var maskGrade = new Button { Content = "Mask last grade" };
+        AutomationProperties.SetName(maskGrade, "Mask last photo grade");
         maskGrade.Click += (_, _) =>
         {
             if (int.TryParse(maskX.Text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var centerX) &&
@@ -967,6 +973,7 @@ public sealed class MainWindow : Window
             }
         };
         var clearGradeMask = new Button { Content = "Clear grade mask" };
+        AutomationProperties.SetName(clearGradeMask, "Clear last photo grade mask");
         clearGradeMask.Click += (_, _) => editor.ClearLastAdjustmentLayerMask();
         var format = new ComboBox { ItemsSource = new[] { "PNG", "JPEG" }, SelectedIndex = 0, Width = 90 };
         AutomationProperties.SetName(format, "Photo export format");
@@ -1247,6 +1254,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(undo, "Undo last AI apply");
         undo.Click += (_, _) => viewModel.UndoLastAiEdit();
         var clear = new Button { Content = "Clear proposal" };
+        AutomationProperties.SetName(clear, "Clear AI proposal");
         clear.Click += (_, _) => viewModel.AiProposal.Clear();
         var recipeName = new TextBox { PlaceholderText = "Recipe name", Width = 180 };
         AutomationProperties.SetName(recipeName, "AI recipe name");
@@ -1902,10 +1910,13 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(rippleDelete, "Ripple delete selected clip");
         rippleDelete.Click += (_, _) => RunTimelineAction(timeline.RippleDeleteSelected);
         var fadeIn = new Button { Content = "Fade in preset" };
+        AutomationProperties.SetName(fadeIn, "Apply fade-in animation preset");
         fadeIn.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToSelected(TimelineAnimationPreset.FadeIn));
         var pushIn = new Button { Content = "Push in preset" };
+        AutomationProperties.SetName(pushIn, "Apply push-in animation preset");
         pushIn.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToSelected(TimelineAnimationPreset.PushIn));
         var clearAnimation = new Button { Content = "Clear animation" };
+        AutomationProperties.SetName(clearAnimation, "Clear selected clip animation");
         clearAnimation.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedAnimation);
         var speedRampStart = new TextBox { Text = "1", Width = 55 };
         AutomationProperties.SetName(speedRampStart, "Speed ramp start multiplier");
@@ -1954,10 +1965,13 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(fadeAudio, "Apply selected audio fades");
         fadeAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioSettingsToSelected(0, muted: false, fadeInFrames: 2, fadeOutFrames: 2));
         var duckAudio = new Button { Content = "Duck audio -12 dB" };
+        AutomationProperties.SetName(duckAudio, "Duck selected audio by 12 dB");
         duckAudio.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAudioDuckingToSelected());
         var clearDucking = new Button { Content = "Clear ducking" };
+        AutomationProperties.SetName(clearDucking, "Clear selected audio ducking");
         clearDucking.Click += (_, _) => RunTimelineAction(timeline.ClearAudioDuckingFromSelected);
         var clearAudio = new Button { Content = "Clear audio" };
+        AutomationProperties.SetName(clearAudio, "Clear selected audio settings");
         clearAudio.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedAudioSettings);
         var titleText = new TextBox { PlaceholderText = "Title text", Width = 220 };
         AutomationProperties.SetName(titleText, "Timeline title text");
@@ -1992,8 +2006,10 @@ public sealed class MainWindow : Window
             RunTimelineAction(() => timeline.AddTitle(titleText.Text!, fontPath));
         };
         var fadeTitle = new Button { Content = "Fade title in" };
+        AutomationProperties.SetName(fadeTitle, "Apply fade-in animation to last title");
         fadeTitle.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToLastTitle(TimelineAnimationPreset.FadeIn));
         var pushTitle = new Button { Content = "Push title in" };
+        AutomationProperties.SetName(pushTitle, "Apply push-in animation to last title");
         pushTitle.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToLastTitle(TimelineAnimationPreset.PushIn));
         var titleAnimationStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(titleAnimationStatus, "Title animation status");
