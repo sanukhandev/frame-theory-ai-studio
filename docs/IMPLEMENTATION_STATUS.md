@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Native UI smoke contract checkpoint (2026-10-18):** Repository validation now fails if the Windows UI smoke loses its `1280x800` launch assertion or its loop over all four workspace shortcuts. Documentation validation and PowerShell parsing pass; the actual local SendKeys limitation remains recorded separately.
+
 **Native UI attempt checkpoint (2026-10-18):** The local Windows UI smoke launched the production desktop window but the non-interactive session failed at the first `SendKeys("^1")` call with the host exception `The operation completed successfully.` The script cleaned up the process; native shortcut success is not claimed locally, and hosted Windows UI validation is required for the new all-shortcut smoke.
 
 **Native launch-size checkpoint (2026-10-18):** Windows UI automation now fails closed unless the real desktop window launches at least the documented `1280x800` bounds before exercising the supported `960x640` resize. PowerShell parsing and diff checks pass; hosted native UI confirmation is pending.
