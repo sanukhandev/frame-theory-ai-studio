@@ -752,6 +752,7 @@ public sealed class MainWindow : Window
         });
         var apiKey = new TextBox { PlaceholderText = "Gemini API key (stored securely)", PasswordChar = '•' };
         var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(status, "Gemini provider status");
         status.Bind(TextBlock.TextProperty, new Binding(nameof(GeminiSettingsViewModel.StatusText)));
         var save = new Button { Content = "Store Gemini key" };
         AutomationProperties.SetName(save, "Store Gemini key securely");
@@ -764,9 +765,13 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(clear, "Remove Gemini key");
         clear.Click += async (_, _) => await settings.ClearAsync(CancellationToken.None);
         var videoFrames = new CheckBox { Content = "Video frames", IsChecked = true };
+        AutomationProperties.SetName(videoFrames, "Gemini video frame scope");
         var audioWaveform = new CheckBox { Content = "Audio waveform" };
+        AutomationProperties.SetName(audioWaveform, "Gemini audio waveform scope");
         var photoPreview = new CheckBox { Content = "Photo preview" };
+        AutomationProperties.SetName(photoPreview, "Gemini photo preview scope");
         var uploadConsent = new CheckBox { Content = "I approve uploading this exact sample scope to Gemini" };
+        AutomationProperties.SetName(uploadConsent, "Gemini upload consent");
         var prepareAnalysis = new Button { Content = "Prepare local analysis samples" };
         AutomationProperties.SetName(prepareAnalysis, "Prepare local Gemini analysis samples");
         prepareAnalysis.Click += async (_, _) =>
@@ -793,6 +798,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(analyzeApprovedSamples, "Analyze approved samples with Gemini");
         analyzeApprovedSamples.Click += async (_, _) => await viewModel.RequestAiAnalysisAsync(CancellationToken.None);
         var analysisStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(analysisStatus, "Gemini analysis status");
         analysisStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AnalysisStatusText)));
         var usageStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(usageStatus, "Gemini usage status");
@@ -863,8 +869,10 @@ public sealed class MainWindow : Window
         }
 
         var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(status, "AI proposal status");
         status.Bind(TextBlock.TextProperty, new Binding("AiProposal.StatusText"));
         var approvalSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(approvalSummary, "AI approval summary");
         approvalSummary.Bind(TextBlock.TextProperty, new Binding("AiProposal.ApprovalSummary"));
         viewModel.AiProposal.PropertyChanged += (_, args) =>
         {
@@ -889,6 +897,7 @@ public sealed class MainWindow : Window
             planJson.Text ?? string.Empty,
             CancellationToken.None);
         var revisionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(revisionStatus, "AI revision status");
         revisionStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AiRevisionStatusText)));
         var approve = new Button { Content = "Apply approved actions" };
         AutomationProperties.SetName(approve, "Apply approved AI actions");
@@ -943,6 +952,7 @@ public sealed class MainWindow : Window
             }
         };
         var recipeStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(recipeStatus, "AI recipe status");
         recipeStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AiRecipeStatusText)));
         return new Border
         {

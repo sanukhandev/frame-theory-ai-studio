@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**AI-status accessibility checkpoint (2026-10-18):** Gemini provider/consent scope, analysis, proposal, approval, revision and recipe feedback regions now have stable automation names, preserving the optional-provider boundary while making review states discoverable. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native assistive-technology review remains unverified.
+
 **Color-status accessibility checkpoint (2026-10-18):** Color before/after summaries, deterministic scope output, inspector state, style-library state and reference-analysis feedback now expose stable automation names; the adaptive-shell contract asserts them. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native assistive-technology review remains unverified.
 
 **Photo-status accessibility checkpoint (2026-10-18):** Photo recovery now names its missing-media list and recovery status, while the editor exposes a distinct live edit status alongside its real preview. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native assistive-technology review remains unverified.
