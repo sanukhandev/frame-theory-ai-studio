@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Gemini parent-link regression checkpoint (2026-10-18):** Interaction-history coverage now proves record/read refuses a log beneath a linked parent directory and never creates the external target. Focused Gemini interaction coverage passes 11/11; formatting and `git diff --check` pass.
+
 **Regular-destination regression checkpoint (2026-10-18):** Foundation coverage verifies that a missing file beneath a normal directory remains accepted for atomic first-time saves while linked and dangling paths are rejected. Focused Foundation coverage passes 20/20; formatting and `git diff --check` pass.
 
 **Native UI smoke contract checkpoint (2026-10-18):** Repository validation now fails if the Windows UI smoke loses its `1280x800` launch assertion or its loop over all four workspace shortcuts. Documentation validation and PowerShell parsing pass; the actual local SendKeys limitation remains recorded separately.
