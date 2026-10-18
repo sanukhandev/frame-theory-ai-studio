@@ -54,6 +54,23 @@ public sealed class DesktopAiAnalysisTests
         Xunit.Assert.Contains("inline_images=1", viewModel.GeminiActivityLogText, StringComparison.Ordinal);
     }
 
+    [Xunit.Fact]
+    public async Task DesktopPlanRejectsPhotoMediaTargetForTimelineOnlyActions()
+    {
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new TestCapabilityDetector(),
+            new ImageImporter());
+        await viewModel.ImportFilesAsync(["photo.png"], CancellationToken.None);
+        var photoId = viewModel.ImportedMedia.Single().Id!.Value;
+        var plan = $"{{\"schemaVersion\":\"1.0\",\"planId\":\"photo-target\",\"projectId\":\"active-project\",\"intent\":\"grade\",\"actions\":[{{\"id\":\"grade-1\",\"type\":\"color.adjust\",\"targetId\":\"{photoId}\",\"startFrame\":0,\"durationFrames\":1,\"params\":{{\"exposureEV\":0,\"contrast\":0,\"saturation\":0,\"temperature\":0,\"tint\":0}}}}]}}";
+
+        viewModel.ValidateAiPlan(plan);
+
+        Xunit.Assert.Empty(viewModel.AiProposal.Actions);
+        Xunit.Assert.Contains("target", viewModel.AiProposal.StatusText, StringComparison.OrdinalIgnoreCase);
+    }
+
     private sealed class ImageImporter : IMediaImporter
     {
         public Task<ImportedMedia> ImportAsync(Uri file, CancellationToken cancellationToken)

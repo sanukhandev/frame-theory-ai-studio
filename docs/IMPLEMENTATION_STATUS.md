@@ -36,6 +36,8 @@
 
 **Export queue lifecycle checkpoint (2026-10-19):** Export queue disposal is now idempotent, so repeated application teardown paths await the completed worker without touching disposed cancellation state. Focused queue coverage includes double-dispose behavior; full release validation remains required before the next 50-commit push.
 
+**AI target-boundary checkpoint (2026-10-19):** Desktop AI validation now allowlists only media IDs represented by timeline clips for timeline edit operations; imported photo-only assets can still be analyzed locally but cannot be proposed as unsupported timeline targets. Focused desktop AI coverage includes the rejection path; full release validation remains required before the next 50-commit push.
+
 **Gemini upload cleanup checkpoint (2026-10-19):** Temporary Files API cleanup after an invalid provider URI now uses an independent bounded timeout instead of the caller's potentially canceled token, so cancellation cannot skip deletion of an already-uploaded sample. Existing provider cleanup coverage remains green; full release validation is required before the next 50-commit push.
 
 **AI caption execution checkpoint (2026-10-19):** Approved `caption.add` actions now use the caption font explicitly selected in the Video workspace instead of incorrectly requiring the optional title-brand font map. Plans fail clearly without a selected caption font, and success remains one undoable transaction; focused executor coverage includes both paths.

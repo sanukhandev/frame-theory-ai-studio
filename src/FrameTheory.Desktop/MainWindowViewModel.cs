@@ -724,7 +724,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     private HashSet<string> BuildAiTargetIds()
     {
-        var targetIds = _analysisAssets.Keys.Select(mediaId => mediaId.Value).ToHashSet(StringComparer.Ordinal);
+        var targetIds = TimelineEditor.TrackRows
+            .SelectMany(track => track.Clips)
+            .Select(clip => clip.MediaId)
+            .ToHashSet(StringComparer.Ordinal);
         targetIds.UnionWith(["Video 1", "Audio 1", "title-track", "caption-track", "active-project"]);
         return targetIds;
     }
