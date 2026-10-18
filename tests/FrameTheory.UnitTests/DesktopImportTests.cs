@@ -148,6 +148,10 @@ public sealed class DesktopImportTests
                     .OfType<Button>()
                     .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Play timeline preview")
                     .IsEnabled);
+                Xunit.Assert.True(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Quick export timeline MP4")
+                    .IsEnabled);
                 var canvas = window.GetVisualDescendants()
                     .OfType<Canvas>()
                     .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Video timeline clip canvas");
