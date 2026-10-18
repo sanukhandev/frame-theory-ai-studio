@@ -8,6 +8,8 @@
 
 **Core boundary hardening checkpoint (2026-10-19):** `GeminiClientOptions` now honors its optional timeout/retry-delay parameters with bounded two-minute/one-second defaults, and `MediaSourceMetadata` rejects negative durations. Focused Gemini coverage passes 12/12 and focused Foundation coverage passes 25/25; the next full Release gate remains required before the next 50-commit push.
 
+**Export queue integrity checkpoint (2026-10-19):** Export job cancellation now preserves terminal success/failure state under repeated or late cancellation, with synchronized state and completion transitions. The full local Release gate passes 310 unit tests and 2 golden tests, a warning-free build, format verification, repository validation and `git diff --check`; this evidence remains local until the exact 50-commit push boundary.
+
 **Latest hosted 50-commit gate (2026-10-19):** Quality Gates run `39168203239` passed for `742cd38` across documentation/schema validation, Ubuntu, Windows and macOS restore/build/test, native media, headless shell/UI automation, formatting, portable archives, installer/DMG/DEB validation, packaged relaunch and checksums. This confirms the pushed batch; the six tracked partial P0 gates remain open because manual visual/HiDPI/screen-reader, legal redistribution, signing/clean-host and final-audit evidence are still required.
 
 **Post-push integrity Release gate (2026-10-19):** The 16 verified local hardening commits after `742cd38` pass 305 unit tests and 2 golden tests, a warning-free Release build, format verification, repository validation and `git diff --check`. These commits remain local until the next exact 50-commit push boundary; the six tracked partial P0 gates remain open.
