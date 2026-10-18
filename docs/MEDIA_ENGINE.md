@@ -22,6 +22,8 @@ The FT-006 spike selected the existing interface-backed FFmpeg decoder, transpor
 
 The hosted smoke proves real decode, seek, multitrack composition, audio mixing and export on three OS runners. It does not replace the separate interactive desktop playback acceptance. Never confuse a rendered bitmap slideshow or pre-rendered MP4 with interactive multitrack playback.
 
+The desktop current-frame preview now uses the same `TimelineFilterGraphBuilder` as export through a bounded FFmpeg single-frame renderer. Raw-source decoding remains the explicit fallback when a host does not provide the compositor renderer or when the preview-proxy toggle is enabled; the production desktop service provides the compositor renderer.
+
 ## Color and effects
 Both preview and export must consume a canonical effect graph and color pipeline. When CPU preview differs from export, golden tests enforce tolerances and UI discloses hardware-quality tradeoffs.
 
