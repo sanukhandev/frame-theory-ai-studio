@@ -111,6 +111,17 @@ try {
         throw "Workspace tabs did not match the expected set: $($actualTabs -join ', ')."
     }
 
+    Add-Type -AssemblyName System.Windows.Forms
+    $window.SetFocus()
+    [System.Windows.Forms.SendKeys]::SendWait("^3")
+    Start-Sleep -Milliseconds 250
+    $selectedAfterShortcut = @($tabs | Where-Object {
+        $_.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Current.IsSelected
+    }) | Select-Object -First 1
+    if ($null -eq $selectedAfterShortcut -or $selectedAfterShortcut.Current.Name -ne "Color workspace") {
+        throw "Ctrl+3 did not select the Color workspace."
+    }
+
     $controlsByTab = @{
         "Video workspace" = @(
             "Imported media",
