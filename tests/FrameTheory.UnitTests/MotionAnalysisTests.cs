@@ -68,6 +68,7 @@ public sealed class MotionAnalysisTests
 
         Xunit.Assert.Single(plan.Transforms);
         Xunit.Assert.Equal(2, plan.Transforms[0].OffsetX);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<StabilizationTransform>>(plan.Transforms).IsReadOnly);
     }
 
     private static MotionFrame Frame(int index, int width, int height, int shiftX)

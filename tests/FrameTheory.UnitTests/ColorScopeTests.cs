@@ -42,5 +42,6 @@ public sealed class ColorScopeTests
 
         Xunit.Assert.Equal(0, scopes.RedHistogram[0]);
         Xunit.Assert.Equal(0, scopes.Waveform[0]);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<int>>(scopes.RedHistogram).IsReadOnly);
     }
 }

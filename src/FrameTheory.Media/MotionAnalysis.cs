@@ -65,7 +65,7 @@ public sealed class StabilizationPlan
     public StabilizationPlan(IReadOnlyList<StabilizationTransform> transforms)
     {
         ArgumentNullException.ThrowIfNull(transforms);
-        Transforms = transforms.ToArray();
+        Transforms = Array.AsReadOnly(transforms.ToArray());
     }
 
     public IReadOnlyList<StabilizationTransform> Transforms { get; }
