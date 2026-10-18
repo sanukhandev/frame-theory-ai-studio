@@ -415,6 +415,12 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo original preview empty state")
                     .IsVisible);
+                var photoComparison = window.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => AutomationProperties.GetName(control) == "Photo before and after preview");
+                Xunit.Assert.Equal(
+                    "Compare the original source pixels with the current non-destructive edit.",
+                    ToolTip.GetTip(photoComparison));
                 tabs.SelectedIndex = 2;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.True(window.GetVisualDescendants()
@@ -431,6 +437,12 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Color after preview empty state")
                     .IsVisible);
+                var colorComparison = window.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color before and after preview");
+                Xunit.Assert.Equal(
+                    "Compare the ungraded source with the current shared color grade.",
+                    ToolTip.GetTip(colorComparison));
                 viewModel.ColorInspector.ExposureEV = 1.25f;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(1.25, window.GetVisualDescendants()

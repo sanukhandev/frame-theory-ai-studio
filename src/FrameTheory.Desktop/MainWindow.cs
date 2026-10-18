@@ -1307,6 +1307,8 @@ public sealed class MainWindow : Window
                 }
             }
         };
+        AutomationProperties.SetName(photoPreviewCard, "Photo before and after preview");
+        ToolTip.SetTip(photoPreviewCard, "Compare the original source pixels with the current non-destructive edit.");
         Grid.SetColumn(((Grid)photoPreviewCard.Child).Children[1], 1);
         var photoProjectSection = CreateInspectorExpander(
             "Project",
@@ -2001,6 +2003,8 @@ public sealed class MainWindow : Window
             BorderThickness = new Thickness(1),
             Child = CreateFlow(beforePane, afterPane)
         };
+        AutomationProperties.SetName(colorPreviewCard, "Color before and after preview");
+        ToolTip.SetTip(colorPreviewCard, "Compare the ungraded source with the current shared color grade.");
         var referenceSection = CreateInspectorExpander(
             "Reference match",
             CreateSectionContent(
