@@ -260,6 +260,9 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
                     tabItems.Select(AutomationProperties.GetName));
+                Xunit.Assert.Equal(
+                    "Use Ctrl+1 through Ctrl+4 to switch between Video, Photo, Color and AI workspaces.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBlock>().Single(control => AutomationProperties.GetName(control) == "Workspace keyboard shortcuts")));
                 var activeIndicators = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Where(control => AutomationProperties.GetName(control)?.EndsWith("workspace active indicator", StringComparison.Ordinal) == true)

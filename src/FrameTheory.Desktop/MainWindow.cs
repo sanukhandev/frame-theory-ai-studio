@@ -156,6 +156,7 @@ public sealed class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(shortcutHint, "Workspace keyboard shortcuts");
+        ToolTip.SetTip(shortcutHint, "Use Ctrl+1 through Ctrl+4 to switch between Video, Photo, Color and AI workspaces.");
         var projectTitle = new TextBlock
         {
             FontSize = 12,
