@@ -10,7 +10,7 @@ public sealed record MediaReference
         }
 
         var normalizedPath = relativePath.Trim().Replace('\\', '/');
-        if (Path.IsPathRooted(relativePath) || normalizedPath.StartsWith('/') ||
+        if (Path.IsPathRooted(normalizedPath) || normalizedPath.StartsWith('/') ||
             normalizedPath == ".." || normalizedPath.StartsWith("../", StringComparison.Ordinal) ||
             normalizedPath.Contains("/../", StringComparison.Ordinal))
         {
