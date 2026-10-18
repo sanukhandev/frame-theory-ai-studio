@@ -50,7 +50,7 @@ These are design choices to validate in working spikes, not promises about compl
 
 For an offline package that carries a separately reviewed native media build, pass its directory to the package script; it must contain both `ffmpeg` and `ffprobe` (or the Windows `.exe` pair) plus any adjacent runtime support files required by that build. The packager rejects symlink/reparse-point inputs, and native license/codec review is still required before redistribution.
 
-For review evidence, `scripts/generate_native_media_manifest.ps1` records the staged bundle’s file hashes and bounded tool-version output without granting redistribution rights.
+For review evidence, `scripts/generate_native_media_manifest.ps1` records the staged bundle’s file hashes and bounded tool-version output; `scripts/verify_native_media_manifest.ps1` rechecks those hashes before packaging without granting redistribution rights.
 
 ## Documentation
 
