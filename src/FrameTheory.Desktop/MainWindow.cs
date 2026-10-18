@@ -48,11 +48,13 @@ public sealed class MainWindow : Window
         tabs.BorderThickness = new Thickness(0, 0, 1, 0);
         tabs.HorizontalContentAlignment = HorizontalAlignment.Stretch;
         tabs.VerticalContentAlignment = VerticalAlignment.Stretch;
+        var navigationIndicators = new List<Border>();
         foreach (var workspace in viewModel.Workspaces)
         {
+            var navigationHeader = CreateWorkspaceNavHeader(workspace, tabs.Items.Count, out var navigationIndicator);
             var tab = new TabItem
             {
-                Header = CreateWorkspaceNavHeader(workspace, tabs.Items.Count),
+                Header = navigationHeader,
                 Content = CreateWorkspaceContent(workspace, viewModel),
                 MinWidth = 152,
                 MinHeight = 62,
@@ -61,11 +63,24 @@ public sealed class MainWindow : Window
             AutomationProperties.SetName(tab, $"{workspace.Name} workspace");
             ToolTip.SetTip(tab, $"{workspace.Name}: {workspace.Description}");
             tabs.Items.Add(tab);
+            navigationIndicators.Add(navigationIndicator);
         }
         tabs.Bind(SelectingItemsControl.SelectedIndexProperty, new Binding(nameof(MainWindowViewModel.SelectedWorkspaceIndex))
         {
             Mode = BindingMode.TwoWay
         });
+        void RefreshWorkspaceNavigation()
+        {
+            for (var index = 0; index < navigationIndicators.Count; index++)
+            {
+                navigationIndicators[index].Background = new SolidColorBrush(index == tabs.SelectedIndex
+                    ? Avalonia.Media.Color.FromRgb(95, 125, 255)
+                    : Avalonia.Media.Color.FromRgb(42, 46, 55));
+            }
+        }
+
+        tabs.SelectionChanged += (_, _) => RefreshWorkspaceNavigation();
+        RefreshWorkspaceNavigation();
 
         var brand = new StackPanel
         {
@@ -237,7 +252,7 @@ public sealed class MainWindow : Window
         }
     }
 
-    private static Control CreateWorkspaceNavHeader(WorkspaceViewModel workspace, int index)
+    private static Control CreateWorkspaceNavHeader(WorkspaceViewModel workspace, int index, out Border activeIndicator)
     {
         var shortName = workspace.Name switch
         {
@@ -296,13 +311,22 @@ public sealed class MainWindow : Window
             Spacing = 1,
             Children = { title, descriptor }
         };
+        activeIndicator = new Border
+        {
+            Width = 3,
+            Margin = new Thickness(0, 6, 10, 6),
+            CornerRadius = new CornerRadius(2),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55))
+        };
+        AutomationProperties.SetName(activeIndicator, $"{workspace.Name} workspace active indicator");
         var header = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("Auto,*,Auto"),
-            Children = { badge, titleStack, keyHint }
+            ColumnDefinitions = new ColumnDefinitions("Auto,Auto,*,Auto"),
+            Children = { activeIndicator, badge, titleStack, keyHint }
         };
-        Grid.SetColumn(titleStack, 1);
-        Grid.SetColumn(keyHint, 2);
+        Grid.SetColumn(badge, 1);
+        Grid.SetColumn(titleStack, 2);
+        Grid.SetColumn(keyHint, 3);
         return header;
     }
 

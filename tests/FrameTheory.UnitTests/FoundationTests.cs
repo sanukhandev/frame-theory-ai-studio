@@ -182,6 +182,17 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
                     tabItems.Select(AutomationProperties.GetName));
+                var activeIndicators = window.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Where(control => AutomationProperties.GetName(control)?.EndsWith("workspace active indicator", StringComparison.Ordinal) == true)
+                    .ToArray();
+                Xunit.Assert.Equal(4, activeIndicators.Length);
+                Xunit.Assert.Equal(
+                    Avalonia.Media.Color.FromRgb(95, 125, 255),
+                    Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(activeIndicators[0].Background).Color);
+                Xunit.Assert.Equal(
+                    Avalonia.Media.Color.FromRgb(42, 46, 55),
+                    Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(activeIndicators[1].Background).Color);
                 var workspaceScrollers = tabItems
                     .Select(tab => Xunit.Assert.IsType<ScrollViewer>(tab.Content))
                     .ToArray();
@@ -202,6 +213,12 @@ public sealed class FoundationTests
                     ToolTip.GetTip(activeWorkspaceStatus));
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(
+                    Avalonia.Media.Color.FromRgb(95, 125, 255),
+                    Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(activeIndicators[1].Background).Color);
+                Xunit.Assert.Equal(
+                    Avalonia.Media.Color.FromRgb(42, 46, 55),
+                    Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(activeIndicators[0].Background).Color);
                 Xunit.Assert.Equal(viewModel.ActiveWorkspaceStatusText, activeWorkspaceStatus.Text);
                 tabs.SelectedIndex = 2;
                 Dispatcher.UIThread.RunJobs();
