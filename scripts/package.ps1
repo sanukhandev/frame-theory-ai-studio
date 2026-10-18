@@ -1,7 +1,8 @@
 param(
     [string]$RuntimeIdentifier = "win-x64",
     [string]$OutputDirectory = "artifacts/package",
-    [switch]$SelfContained
+    [switch]$SelfContained,
+    [string]$FfmpegDirectory = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -12,6 +13,18 @@ dotnet publish src/FrameTheory.Desktop/FrameTheory.Desktop.csproj `
     --runtime $RuntimeIdentifier `
     --self-contained $selfContainedValue `
     --output $OutputDirectory
+
+if (-not [string]::IsNullOrWhiteSpace($FfmpegDirectory)) {
+    $toolRoot = (Resolve-Path -LiteralPath $FfmpegDirectory -ErrorAction Stop).Path
+    foreach ($toolName in @("ffmpeg.exe", "ffprobe.exe")) {
+        $toolPath = Join-Path $toolRoot $toolName
+        if (-not (Test-Path -LiteralPath $toolPath -PathType Leaf)) {
+            throw "FfmpegDirectory must contain $toolName."
+        }
+
+        Copy-Item -LiteralPath $toolPath -Destination (Join-Path $OutputDirectory $toolName) -Force
+    }
+}
 
 $manifestPath = Join-Path $OutputDirectory "SHA256SUMS.txt"
 $packageRoot = (Resolve-Path $OutputDirectory).Path
