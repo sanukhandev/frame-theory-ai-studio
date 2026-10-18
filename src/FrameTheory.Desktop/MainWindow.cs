@@ -455,6 +455,7 @@ public sealed class MainWindow : Window
                     }
                 };
                 AutomationProperties.SetName(card, $"Imported media card: {item.Name}");
+                ToolTip.SetTip(card, $"{item.Kind?.ToString() ?? "Media"} · {item.Name} · {item.Summary}");
                 return card;
             }, supportsRecycling: false)
         };
