@@ -946,7 +946,7 @@ public sealed class MainWindow : Window
         timelinePreviewStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePreviewStatusText)));
         var timelinePerformanceStatus = new TextBox { IsReadOnly = true, TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(timelinePerformanceStatus, "Timeline preview performance status");
-        timelinePerformanceStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePerformanceStatusText)));
+        timelinePerformanceStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePerformanceStatusText)));
         var analyzeMotion = new Button { Content = "Analyze motion" };
         AutomationProperties.SetName(analyzeMotion, "Analyze timeline motion");
         analyzeMotion.Click += async (_, _) => await viewModel.AnalyzeTimelineMotionAsync(CancellationToken.None);
