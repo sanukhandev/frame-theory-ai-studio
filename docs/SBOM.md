@@ -32,7 +32,7 @@ The Windows CI fallback pins the WinGet package `Gyan.FFmpeg` version `9.0.2` fr
 
 ## Release blockers
 
-- No installer currently bundles native media binaries or fonts.
+- No production installer currently has approved native media binaries or fonts; CI validation installers may carry runner-supplied test bundles solely for runtime smoke evidence.
 - The repository license is undecided; do not label binaries as open source.
 - Transitive package notices, CVE scan, FFmpeg configure/license evidence and platform-native checksums remain required for FT-1003/FT-1005.
 - Gemini API use remains an optional external service with provider terms and user-account charges.
