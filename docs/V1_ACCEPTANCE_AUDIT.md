@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Current timeline-compositor increment: intermediate cleanup cannot mask a composition failure; existing automated compositor coverage remains green. Native timeline export acceptance remains open.
+
 - Current media-export cleanup increment: temporary output cleanup cannot mask the original direct video export failure; automated media-export coverage remains green. Native export and clean-host acceptance remain open.
 
 - Current proxy-cache increment: optional cache maintenance cannot mask a valid preview result; existing automated proxy coverage remains green. Native preview and cache-budget acceptance remain open.

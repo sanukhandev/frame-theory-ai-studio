@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline-compositor cleanup checkpoint (2026-10-19):** Timeline compositor temporary output cleanup is now best effort, preserving composition, verification and cancellation failures when an intermediate file cannot be deleted. Existing compositor coverage remains green.
+
 **Media-export cleanup checkpoint (2026-10-19):** Direct video export temporary-file cleanup is now best effort, preserving encoder, verification and cancellation failures instead of replacing them with cleanup exceptions. Existing media-export coverage remains green.
 
 **Preview-cache maintenance checkpoint (2026-10-19):** Proxy temp cleanup and optional cache eviction no longer mask a successfully generated preview when the operating system refuses a maintenance delete. Existing proxy reuse, failure and budget coverage remains green.
