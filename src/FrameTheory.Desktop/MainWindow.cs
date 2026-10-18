@@ -415,6 +415,27 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(importedList, "Imported media");
         importedList.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(MainWindowViewModel.ImportedMedia)));
+        importedList.SelectionChanged += (_, _) =>
+        {
+            if (importedList.SelectedItem is not ImportedMediaViewModel item || item.Id is not MediaId mediaId)
+            {
+                return;
+            }
+
+            if (item.ThumbnailPpm is not null)
+            {
+                viewModel.ColorInspector.SetSource(item.ThumbnailPpm);
+            }
+
+            if (item.Kind is MediaKind.Video)
+            {
+                viewModel.TimelineEditor.SelectMedia(mediaId.Value, TimelineTrackKind.Video);
+            }
+            else if (item.Kind is MediaKind.Audio)
+            {
+                viewModel.TimelineEditor.SelectMedia(mediaId.Value, TimelineTrackKind.Audio);
+            }
+        };
         var importMedia = new Button { Content = "Import media", HorizontalAlignment = HorizontalAlignment.Left };
         AutomationProperties.SetName(importMedia, "Import local media");
         importMedia.Click += async (_, _) =>
