@@ -127,6 +127,17 @@ public sealed class PhotoLayerTests
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<PhotoMaskStroke>>(state.Layers.Layers[0].MaskStrokes).IsReadOnly);
     }
 
+    [Xunit.Fact]
+    public void PpmRasterExposesDefensivePixelSnapshots()
+    {
+        var raster = PpmRaster.Parse([.. "P6\n1 1\n255\n"u8, 10, 20, 30]);
+
+        var pixels = raster.RgbBytes;
+        pixels[0] = 99;
+
+        Xunit.Assert.Equal([10, 20, 30], raster.RgbBytes);
+    }
+
     private static PhotoDocument Document(Uri source, byte[] pixels) => new(
         source,
         new MediaSourceMetadata(MediaId.Create(source, "photo-layer-test"), source, MediaKind.Image, 2, 1, null, 0),

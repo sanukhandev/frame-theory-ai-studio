@@ -645,24 +645,26 @@ public sealed class PhotoEditHistory
 public sealed class PpmRaster
 {
     private const int MaximumPixels = 64 * 1024 * 1024;
+    private readonly byte[] _rgbBytes;
+    private readonly byte[]? _alphaBytes;
 
     private PpmRaster(int width, int height, byte[] rgbBytes, byte[]? alphaBytes = null)
     {
         Width = width;
         Height = height;
-        RgbBytes = rgbBytes;
-        AlphaBytes = alphaBytes;
+        _rgbBytes = rgbBytes;
+        _alphaBytes = alphaBytes;
     }
 
     public int Width { get; }
 
     public int Height { get; }
 
-    public byte[] RgbBytes { get; }
+    public byte[] RgbBytes => _rgbBytes.ToArray();
 
-    public byte[]? AlphaBytes { get; }
+    public byte[]? AlphaBytes => _alphaBytes?.ToArray();
 
-    public bool HasAlpha => AlphaBytes is not null;
+    public bool HasAlpha => _alphaBytes is not null;
 
     public static PpmRaster Parse(byte[] bytes)
     {
@@ -707,13 +709,13 @@ public sealed class PpmRaster
         }
 
         var output = new byte[checked(width * height * 3)];
-        var alpha = AlphaBytes is null ? null : new byte[checked(width * height)];
+        var alpha = _alphaBytes is null ? null : new byte[checked(width * height)];
         for (var row = 0; row < height; row++)
         {
             var sourceOffset = ((y + row) * Width + x) * 3;
             var targetOffset = row * width * 3;
-            RgbBytes.AsSpan(sourceOffset, width * 3).CopyTo(output.AsSpan(targetOffset, width * 3));
-            AlphaBytes?.AsSpan((y + row) * Width + x, width).CopyTo(alpha!.AsSpan(row * width, width));
+            _rgbBytes.AsSpan(sourceOffset, width * 3).CopyTo(output.AsSpan(targetOffset, width * 3));
+            _alphaBytes?.AsSpan((y + row) * Width + x, width).CopyTo(alpha!.AsSpan(row * width, width));
         }
 
         return new PpmRaster(width, height, output, alpha);
@@ -740,7 +742,7 @@ public sealed class PpmRaster
         }
 
         var output = new byte[checked(width * height * 3)];
-        var alpha = AlphaBytes is null ? null : new byte[checked(width * height)];
+        var alpha = _alphaBytes is null ? null : new byte[checked(width * height)];
         for (var targetY = 0; targetY < height; targetY++)
         {
             var sourceY = targetY * Height / height;
@@ -749,10 +751,10 @@ public sealed class PpmRaster
                 var sourceX = targetX * Width / width;
                 var sourceOffset = (sourceY * Width + sourceX) * 3;
                 var targetOffset = (targetY * width + targetX) * 3;
-                RgbBytes.AsSpan(sourceOffset, 3).CopyTo(output.AsSpan(targetOffset, 3));
+                _rgbBytes.AsSpan(sourceOffset, 3).CopyTo(output.AsSpan(targetOffset, 3));
                 if (alpha is not null)
                 {
-                    alpha[targetY * width + targetX] = AlphaBytes![sourceY * Width + sourceX];
+                    alpha[targetY * width + targetX] = _alphaBytes![sourceY * Width + sourceX];
                 }
             }
         }
@@ -774,8 +776,8 @@ public sealed class PpmRaster
             throw new ArgumentOutOfRangeException(nameof(opacity));
         }
 
-        var output = RgbBytes.ToArray();
-        var alpha = AlphaBytes?.ToArray();
+        var output = _rgbBytes.ToArray();
+        var alpha = _alphaBytes?.ToArray();
         for (var overlayY = 0; overlayY < overlay.Height; overlayY++)
         {
             var targetY = overlayY + offsetY;
@@ -794,7 +796,7 @@ public sealed class PpmRaster
 
                 var sourceOffset = (overlayY * overlay.Width + overlayX) * 3;
                 var targetOffset = (targetY * Width + targetX) * 3;
-                var sourceAlpha = opacity * (overlay.AlphaBytes?[overlayY * overlay.Width + overlayX] ?? (byte)255) / 255f;
+                var sourceAlpha = opacity * (overlay._alphaBytes?[overlayY * overlay.Width + overlayX] ?? (byte)255) / 255f;
                 sourceAlpha *= GetMaskFactor(maskStrokes, overlayX, overlayY);
                 if (sourceAlpha <= 0)
                 {
@@ -804,7 +806,7 @@ public sealed class PpmRaster
                 for (var channel = 0; channel < 3; channel++)
                 {
                     var destination = output[targetOffset + channel];
-                    var source = overlay.RgbBytes[sourceOffset + channel];
+                    var source = overlay._rgbBytes[sourceOffset + channel];
                     var blended = blendMode switch
                     {
                         PhotoBlendMode.Normal => source,
@@ -844,8 +846,8 @@ public sealed class PpmRaster
             throw new ArgumentOutOfRangeException(nameof(strength));
         }
 
-        var output = RgbBytes.ToArray();
-        var alpha = AlphaBytes?.ToArray();
+        var output = _rgbBytes.ToArray();
+        var alpha = _alphaBytes?.ToArray();
         var radiusSquared = (long)radius * radius;
         var minimumX = Math.Max(0, centerX - radius);
         var maximumX = Math.Min(Width - 1, centerX + radius);
@@ -877,7 +879,7 @@ public sealed class PpmRaster
                 for (var channel = 0; channel < 3; channel++)
                 {
                     output[targetOffset + channel] = (byte)Math.Clamp(
-                        (int)MathF.Round(RgbBytes[targetOffset + channel] * (1 - brushStrength) + RgbBytes[sourceOffset + channel] * brushStrength),
+                        (int)MathF.Round(_rgbBytes[targetOffset + channel] * (1 - brushStrength) + _rgbBytes[sourceOffset + channel] * brushStrength),
                         0,
                         255);
                 }
@@ -885,7 +887,7 @@ public sealed class PpmRaster
                 if (alpha is not null)
                 {
                     alpha[targetY * Width + targetX] = (byte)Math.Clamp(
-                        (int)MathF.Round(AlphaBytes![targetY * Width + targetX] * (1 - brushStrength) + AlphaBytes[sourceY * Width + sourceX] * brushStrength),
+                        (int)MathF.Round(_alphaBytes![targetY * Width + targetX] * (1 - brushStrength) + _alphaBytes[sourceY * Width + sourceX] * brushStrength),
                         0,
                         255);
                 }
@@ -900,7 +902,7 @@ public sealed class PpmRaster
     public PpmRaster Apply(ColorGraph graph, ColorGrade grade, CubeLut? lut)
     {
         var pipeline = new ColorPipeline(graph);
-        var output = RgbBytes.ToArray();
+        var output = _rgbBytes.ToArray();
         for (var index = 0; index < output.Length; index += 3)
         {
             var color = pipeline.Transform(
@@ -912,7 +914,7 @@ public sealed class PpmRaster
             output[index + 2] = ToByte(color.Blue);
         }
 
-        return new PpmRaster(Width, Height, output, AlphaBytes?.ToArray());
+        return new PpmRaster(Width, Height, output, _alphaBytes?.ToArray());
     }
 
     public PpmRaster ApplyMasked(PpmRaster graded, IReadOnlyList<PhotoMaskStroke> maskStrokes)
@@ -924,7 +926,7 @@ public sealed class PpmRaster
             throw new ArgumentException("Masked grade dimensions must match the source raster.", nameof(graded));
         }
 
-        var output = RgbBytes.ToArray();
+        var output = _rgbBytes.ToArray();
         for (var y = 0; y < Height; y++)
         {
             for (var x = 0; x < Width; x++)
@@ -939,43 +941,43 @@ public sealed class PpmRaster
                 for (var channel = 0; channel < 3; channel++)
                 {
                     output[offset + channel] = (byte)Math.Clamp(
-                        (int)MathF.Round(RgbBytes[offset + channel] * (1 - coverage) + graded.RgbBytes[offset + channel] * coverage),
+                        (int)MathF.Round(_rgbBytes[offset + channel] * (1 - coverage) + graded._rgbBytes[offset + channel] * coverage),
                         0,
                         255);
                 }
             }
         }
 
-        return new PpmRaster(Width, Height, output, AlphaBytes?.ToArray());
+        return new PpmRaster(Width, Height, output, _alphaBytes?.ToArray());
     }
 
     public byte[] ToPpm()
     {
         var header = System.Text.Encoding.ASCII.GetBytes($"P6\n{Width} {Height}\n255\n");
-        var output = new byte[header.Length + RgbBytes.Length];
+        var output = new byte[header.Length + _rgbBytes.Length];
         header.CopyTo(output, 0);
-        RgbBytes.CopyTo(output, header.Length);
+        _rgbBytes.CopyTo(output, header.Length);
         return output;
     }
 
     public byte[] ToPam()
     {
-        if (AlphaBytes is null)
+        if (_alphaBytes is null)
         {
             throw new InvalidOperationException("The raster has no alpha channel.");
         }
 
         var header = System.Text.Encoding.ASCII.GetBytes($"P7\nWIDTH {Width}\nHEIGHT {Height}\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n");
-        var output = new byte[checked(header.Length + RgbBytes.Length + AlphaBytes.Length)];
+        var output = new byte[checked(header.Length + _rgbBytes.Length + _alphaBytes.Length)];
         header.CopyTo(output, 0);
         var offset = header.Length;
-        for (var index = 0; index < AlphaBytes.Length; index++)
+        for (var index = 0; index < _alphaBytes.Length; index++)
         {
             var rgbOffset = index * 3;
-            output[offset++] = RgbBytes[rgbOffset];
-            output[offset++] = RgbBytes[rgbOffset + 1];
-            output[offset++] = RgbBytes[rgbOffset + 2];
-            output[offset++] = AlphaBytes[index];
+            output[offset++] = _rgbBytes[rgbOffset];
+            output[offset++] = _rgbBytes[rgbOffset + 1];
+            output[offset++] = _rgbBytes[rgbOffset + 2];
+            output[offset++] = _alphaBytes[index];
         }
 
         return output;
@@ -983,8 +985,8 @@ public sealed class PpmRaster
 
     private PpmRaster RotateClockwise()
     {
-        var output = new byte[checked(RgbBytes.Length)];
-        var alpha = AlphaBytes is null ? null : new byte[checked(Width * Height)];
+        var output = new byte[checked(_rgbBytes.Length)];
+        var alpha = _alphaBytes is null ? null : new byte[checked(Width * Height)];
         var outputWidth = Height;
         for (var sourceY = 0; sourceY < Height; sourceY++)
         {
@@ -994,10 +996,10 @@ public sealed class PpmRaster
                 var targetY = sourceX;
                 var sourceOffset = (sourceY * Width + sourceX) * 3;
                 var targetOffset = (targetY * outputWidth + targetX) * 3;
-                RgbBytes.AsSpan(sourceOffset, 3).CopyTo(output.AsSpan(targetOffset, 3));
+                _rgbBytes.AsSpan(sourceOffset, 3).CopyTo(output.AsSpan(targetOffset, 3));
                 if (alpha is not null)
                 {
-                    alpha[targetY * outputWidth + targetX] = AlphaBytes![sourceY * Width + sourceX];
+                    alpha[targetY * outputWidth + targetX] = _alphaBytes![sourceY * Width + sourceX];
                 }
             }
         }
