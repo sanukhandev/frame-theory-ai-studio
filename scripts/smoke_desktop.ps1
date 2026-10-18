@@ -1,5 +1,6 @@
 param(
-    [int]$TimeoutSeconds = 20
+    [int]$TimeoutSeconds = 20,
+    [string]$AssemblyPath = "src/FrameTheory.Desktop/bin/Release/net10.0/FrameTheory.Desktop.dll"
 )
 
 $ErrorActionPreference = "Stop"
@@ -15,7 +16,7 @@ $dotnet = if ($dotnetCommand) {
 
     $userDotnet
 }
-$dll = (Resolve-Path "src/FrameTheory.Desktop/bin/Release/net10.0/FrameTheory.Desktop.dll").Path
+$dll = (Resolve-Path -LiteralPath $AssemblyPath).Path
 $process = Start-Process -FilePath $dotnet -ArgumentList @($dll) -WorkingDirectory (Split-Path $dll) -PassThru
 $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
 $title = $null
