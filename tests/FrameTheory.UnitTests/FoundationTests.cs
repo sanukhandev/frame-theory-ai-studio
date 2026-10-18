@@ -204,6 +204,12 @@ public sealed class FoundationTests
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline preview performance status");
                 Xunit.Assert.Equal(viewModel.TimelinePerformanceStatusText, performanceStatus.Text);
+                var selectionInspector = window.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline selection inspector");
+                Xunit.Assert.Contains(
+                    selectionInspector.GetVisualDescendants().OfType<TextBlock>(),
+                    control => AutomationProperties.GetName(control) == "Timeline selection context");
                 var automationNames = new HashSet<string>(StringComparer.Ordinal);
                 automationNames.UnionWith(window.GetVisualDescendants()
                     .OfType<Control>()
