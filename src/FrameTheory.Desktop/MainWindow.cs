@@ -1972,6 +1972,7 @@ public sealed class MainWindow : Window
             }, supportsRecycling: false)
         };
         AutomationProperties.SetName(tracks, "Timeline tracks");
+        ToolTip.SetTip(tracks, "Select clips in the video and audio edit lanes.");
         tracks.Bind(ItemsControl.ItemsSourceProperty, new Binding("TimelineEditor.TrackRows"));
         var beatMarkers = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(beatMarkers, "Timeline beat markers");

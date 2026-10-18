@@ -244,6 +244,7 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Timeline tracks");
                 Xunit.Assert.NotNull(timelineTracks.ItemTemplate);
                 Xunit.Assert.Equal(124, timelineTracks.Height);
+                Xunit.Assert.Equal("Select clips in the video and audio edit lanes.", ToolTip.GetTip(timelineTracks));
                 Xunit.Assert.Equal(
                     "Scrub to an exact timeline frame.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<Slider>().Single(control => AutomationProperties.GetName(control) == "Timeline playhead frame")));
