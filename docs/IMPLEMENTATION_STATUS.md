@@ -58,7 +58,7 @@
 
 **FT-1003 SBOM portability fix (2026-10-18):** The first hosted attempt `39087079726` correctly failed on Unix because `USERPROFILE` is absent. The follow-up now selects `NUGET_PACKAGES`, `USERPROFILE` or `HOME` in that order and validates the cache directory before parsing metadata; a simulated Windows run with `USERPROFILE` unset and `HOME` set produced 39 records. The failed run is not release evidence.
 
-**FT-1003 SBOM assertion checkpoint (2026-10-18):** CI now rejects an empty `nuget-licenses.json` and requires the restored Avalonia package to retain its `MIT` metadata record. The local generated report passes the same assertions; hosted verification is pending for this workflow-only gate.
+**FT-1003 SBOM assertion checkpoint (2026-10-18):** CI now rejects an empty `nuget-licenses.json` and requires the restored Avalonia package to retain its `MIT` metadata record. The local generated report passes the same assertions, and hosted run `39087705477` passed the new gate on Windows, macOS and Linux. This remains metadata evidence rather than legal clearance.
 
 **FT-901 accessibility checkpoint (2026-10-18):** The desktop window, workspace tab strip and individual Video/Photo/Color/AI tabs now expose stable Avalonia automation names while preserving the existing keyboard shortcuts and 1280x800 defaults. Local Foundation tests passed 13/13, the desktop Release build passed with 0 warnings/errors, formatting and diff checks passed, and hosted run `39085046211` passed the full Windows/macOS/Linux matrix. Interactive 1280x800/HiDPI layout and keyboard acceptance remain manual gates.
 
