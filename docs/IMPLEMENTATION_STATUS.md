@@ -38,6 +38,8 @@
 
 **Shared path guard validation checkpoint (2026-10-18):** Repository validation now fails if the shared `LocalPathSecurity.ContainsReparsePoint` guard or any protected media/photo/transcription entry point is removed. The validator, formatting and diff checks pass; the full local Release gate is 241 unit tests and 2 golden tests.
 
+**Recovery guard consolidation checkpoint (2026-10-18):** `ProjectRecoveryService` now delegates project/media reparse validation to the shared Domain path guard instead of maintaining a second directory walk. Focused recovery coverage passes 5/5 and formatting/diff checks pass; hosted confirmation remains pending.
+
 **Media import boundary checkpoint (2026-10-18):** Waveform extraction now independently rejects reparse-point media paths before invoking FFmpeg, even when a composed or test probe adapter does not enforce the same rule, and best-effort cleanup cannot mask the original import failure. Focused media-import coverage passes 4/4, the Release build is warning-free through the focused compile, formatting and diff checks pass, and original source bytes remain untouched.
 
 **Package traversal checkpoint (2026-10-18):** `scripts/verify_package.ps1` now rejects a reparse-point package root or directory entry before recursive discovery, then hashes only entries from the fail-closed walk. Native bundle generation and verification also reject linked manifests, linked entries and unexpected subdirectories. PowerShell parsing, a real one-file package checksum smoke, repository validation and `git diff --check` pass; the hosted package-manifest gate now includes a real directory-symlink rejection regression, pending the next hosted run.

@@ -89,42 +89,16 @@ public sealed class ProjectRecoveryService
 
     private static void EnsureNoReparsePoint(string projectDirectory, string candidate)
     {
-        if (Directory.Exists(projectDirectory) && IsReparsePoint(projectDirectory))
+        if (LocalPathSecurity.ContainsReparsePoint(projectDirectory))
         {
             throw new InvalidDataException("The project directory must not be a reparse point.");
         }
 
-        var candidateDirectory = Path.GetDirectoryName(candidate)
-            ?? throw new InvalidDataException("A media path must include a containing directory.");
-        var relativeDirectory = Path.GetRelativePath(projectDirectory, candidateDirectory);
-        if (relativeDirectory != ".")
+        if (LocalPathSecurity.ContainsReparsePoint(candidate))
         {
-            var currentDirectory = projectDirectory;
-            foreach (var segment in relativeDirectory.Split(
-                         [Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar],
-                         StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-            {
-                currentDirectory = Path.Combine(currentDirectory, segment);
-                if (!Directory.Exists(currentDirectory))
-                {
-                    break;
-                }
-
-                if (IsReparsePoint(currentDirectory))
-                {
-                    throw new InvalidDataException("A media path uses a reparse-point directory.");
-                }
-            }
-        }
-
-        if ((File.Exists(candidate) || Directory.Exists(candidate)) && IsReparsePoint(candidate))
-        {
-            throw new InvalidDataException("A media path must not be a reparse point.");
+            throw new InvalidDataException("A media path uses a reparse-point directory or file.");
         }
     }
-
-    private static bool IsReparsePoint(string path) =>
-        (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
 
     private static async Task<string> ComputeFingerprintAsync(string path, CancellationToken cancellationToken)
     {
