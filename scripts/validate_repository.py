@@ -35,6 +35,7 @@ def run() -> int:
     ci = (ROOT/".github/workflows/ci.yml").read_text(encoding="utf-8")
     assert "detach_dmg()" in ci and "for attempt in 1 2 3 4 5" in ci, "macOS DMG smoke must retry detach cleanup"
     assert "Avalonia.Headless" in ci and "Avalonia.Headless' -and $_.licenseExpression -eq 'MIT'" in ci, "CI must verify headless test-package license metadata"
+    assert "Test headless desktop shell" in ci and "FullyQualifiedName~FoundationTests" in ci, "CI must expose the headless desktop shell test"
     solution = (ROOT/"FrameTheory.sln").read_text(encoding="utf-8")
     assert "FrameTheory.LocalWhisperSmoke" in solution, "Local Whisper acceptance smoke must remain in the solution"
     development = (ROOT/"docs/DEVELOPMENT.md").read_text(encoding="utf-8")

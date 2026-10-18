@@ -356,6 +356,9 @@ jobs:
       - name: Test
         if: steps.detect.outputs.has_solution == 'true'
         run: dotnet test --no-build -c Release --logger "trx;LogFileName=test-results.trx" --results-directory artifacts/test-results
+      - name: Test headless desktop shell
+        if: steps.detect.outputs.has_solution == 'true'
+        run: dotnet test tests/FrameTheory.UnitTests/FrameTheory.UnitTests.csproj --no-build -c Release --filter FullyQualifiedName~FoundationTests --logger "console;verbosity=minimal"
       - name: Publish desktop validation artifact
         if: steps.detect.outputs.has_solution == 'true'
         run: dotnet publish src/FrameTheory.Desktop/FrameTheory.Desktop.csproj --no-restore -c Release --no-self-contained -o artifacts/publish
