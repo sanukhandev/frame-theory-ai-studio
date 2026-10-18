@@ -42,7 +42,8 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.ForegroundProperty, foreground),
                 new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70))),
                 new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(1)),
-                new Setter(TemplatedControl.PaddingProperty, new Thickness(12, 7))
+                new Setter(TemplatedControl.PaddingProperty, new Thickness(12, 7)),
+                new Setter(Layoutable.MinHeightProperty, 32d)
             }
         });
         Styles.Add(new Style(selector => selector.OfType<Button>().Class(":pointerover"))
@@ -75,7 +76,8 @@ public sealed class App : Avalonia.Application
             {
                 new Setter(TemplatedControl.BackgroundProperty, input),
                 new Setter(TemplatedControl.ForegroundProperty, foreground),
-                new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70)))
+                new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70))),
+                new Setter(Layoutable.MinHeightProperty, 32d)
             }
         });
         Styles.Add(new Style(selector => selector.OfType<TextBox>().Class(":focus"))
@@ -99,7 +101,8 @@ public sealed class App : Avalonia.Application
             {
                 new Setter(TemplatedControl.BackgroundProperty, input),
                 new Setter(TemplatedControl.ForegroundProperty, foreground),
-                new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70)))
+                new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70))),
+                new Setter(Layoutable.MinHeightProperty, 32d)
             }
         });
         Styles.Add(new Style(selector => selector.OfType<ComboBox>().Class(":pointerover"))
@@ -228,7 +231,8 @@ public sealed class App : Avalonia.Application
             Setters =
             {
                 new Setter(TemplatedControl.ForegroundProperty, foreground),
-                new Setter(TemplatedControl.PaddingProperty, new Thickness(4, 3))
+                new Setter(TemplatedControl.PaddingProperty, new Thickness(4, 3)),
+                new Setter(Layoutable.MinHeightProperty, 28d)
             }
         });
         Styles.Add(new Style(selector => selector.OfType<CheckBox>().Class(":pointerover"))
