@@ -19,7 +19,7 @@ Audit checkpoint: 2026-10-18, commit `7a2d1df`, Windows 11 x64 plus hosted CI ru
 | Source-grounded transcription | FT-602 | Desktop/provider adapter, safe video-audio extraction, resumable Files API cleanup and fake-HTTP coverage exist; live approved-key/spoken-fixture verification and local ASR fallback remain open |
 | Gemini production loop | FT-706 live gate | Desktop revision validation, retries, usage and redacted history are implemented; live provider-to-plan execution remains unverified |
 | Creator Reel/export | FT-803 | Multi-clip Reel, social photo dimensions and queue retry are verified; approved Frame Theory watermark asset/branded export remains unavailable |
-| UX/performance/reliability | FT-901..FT-904 | Interactive/manual GUI acceptance remains open; bounded headless proxy evidence now passes but has not replaced the required UI acceptance |
+| UX/performance/reliability | FT-901..FT-902 manual gate | FT-903 telemetry/proxy and FT-904 diagnostics implementation acceptance passes; interactive/manual GUI and long-session sign-off remain open |
 | QA/release | FT-1002, FT-1003, FT-1005, FT-1006 | Manual journeys, license/CVE clearance, native media redistribution, clean-host relaunch/recovery, signing/notarization and final audit remain open; unsigned installer validation, FT-1001 and FT-1004 are verified |
 
 P1/P2 issues are intentionally not part of a V1 completion claim. V1 remains **not complete** until the P0 blockers above have executable evidence.
