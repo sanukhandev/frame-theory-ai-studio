@@ -13,6 +13,7 @@ Audit checkpoint: 2026-10-18, latest verified green complete matrix run `3911831
 - Current AI validation integrity hardening: `AiPlanValidationResult` snapshots rejected-action errors, preserving review explanations after caller-owned collection mutation. Focused AI-plan coverage includes the regression; live-provider acceptance remains open.
 - Current AI context integrity hardening: `AiPlanValidationContext` freezes its target allowlist, preventing post-validation target changes. Focused AI-plan coverage includes the regression; live-provider acceptance remains open.
 - Current AI execution integrity hardening: `AiPlanExecutionResult` snapshots action outcomes, preserving the apply/rollback audit after caller-owned collection mutation. Focused executor coverage includes the regression; live-provider acceptance remains open.
+- Current timeline UI integrity hardening: timeline rows and beat markers now expose read-only view-model snapshots, preventing binding mutation outside editor commands. Focused timeline-editor coverage includes the regression; native UI acceptance remains open.
 
 ## Evidence
 

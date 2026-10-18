@@ -183,6 +183,18 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void TimelineEditorExposesReadOnlyUiSnapshots()
+    {
+        var editor = new TimelineEditorViewModel();
+        var metadata = Metadata(new Uri("file:///snapshots.mp4"), "snapshots", 90);
+        editor.AddMedia(metadata);
+        editor.AddBeatMarkers(metadata.Id, [0.8f]);
+
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineTrackRowViewModel>>(editor.TrackRows).IsReadOnly);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<long>>(editor.BeatMarkers).IsReadOnly);
+    }
+
+    [Xunit.Fact]
     public void TimelineEditorCanRebuildMarkersUsingEnergyOnsets()
     {
         var source = new Uri("file:///energy-beats.mp4");

@@ -66,6 +66,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private bool _snapEnabled = true;
     private TimelineRevealStyle? _beforeAfterStyle;
     private readonly List<long> _beatMarkers = [];
+    private readonly IReadOnlyList<long> _beatMarkerView;
     private MediaId? _beatMarkerMediaId;
     private IReadOnlyList<float> _beatMarkerWaveform = [];
     private BeatDetectionMode _beatDetectionMode;
@@ -75,6 +76,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public TimelineEditorViewModel(RationalFrameRate? projectFrameRate = null)
     {
+        _beatMarkerView = _beatMarkers.AsReadOnly();
         _projectFrameRate = projectFrameRate ?? new RationalFrameRate(30, 1);
         _graph = new TimelineGraph(_projectFrameRate, []);
         _transport = new TimelineTransport(_graph);
@@ -142,7 +144,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public IReadOnlyList<TimelineTrackRowViewModel> TrackRows { get; private set; } = [];
 
-    public IReadOnlyList<long> BeatMarkers => _beatMarkers;
+    public IReadOnlyList<long> BeatMarkers => _beatMarkerView;
 
     public BeatDetectionMode BeatDetectionMode
     {
@@ -593,7 +595,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
         _titles.Clear();
         _titles.AddRange(titles);
-        _captions = captions;
+        _captions = Array.AsReadOnly(captions.ToArray());
         _kineticCaptions = state.KineticCaptions;
         _beforeAfterStyle = state.BeforeAfterStyle;
         _watermark = watermark;
@@ -716,7 +718,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
             throw new InvalidOperationException("AI caption actions cannot overlap existing captions.");
         }
 
-        _captions = _captions.Append(caption).OrderBy(existing => existing.Start).ToArray();
+        _captions = Array.AsReadOnly(_captions.Append(caption).OrderBy(existing => existing.Start).ToArray());
         OnPropertyChanged(nameof(Captions));
     }
 
@@ -1011,7 +1013,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
         _titles.Clear();
         _titles.AddRange(state.Titles);
-        _captions = state.Captions;
+        _captions = Array.AsReadOnly(state.Captions.ToArray());
         _transcriptSourceFingerprint = state.TranscriptSourceFingerprint;
         _captionFontPath = state.CaptionFontPath;
         _mediaIds.Clear();
@@ -1117,7 +1119,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     public void ImportTranscript(TranscriptResult transcript)
     {
         ArgumentNullException.ThrowIfNull(transcript);
-        _captions = transcript.Words
+        _captions = Array.AsReadOnly(transcript.Words
             .Chunk(7)
             .Select((words, index) => new TimedCaption(
                 index + 1,
@@ -1126,7 +1128,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
                 string.Join(' ', words.Select(word => word.Text)),
                 CaptionProvenance.VerifiedTranscript,
                 words.Select(word => new TimedCaptionWord(word.Text, word.Start, word.End))))
-            .ToArray();
+            .ToArray());
         _transcriptSourceFingerprint = transcript.SourceFingerprint;
         OnPropertyChanged(nameof(Captions));
         OnPropertyChanged(nameof(TranscriptSourceFingerprint));
@@ -1455,7 +1457,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     private void RefreshRows()
     {
-        TrackRows = _graph.Tracks.Select(track => new TimelineTrackRowViewModel(
+        TrackRows = Array.AsReadOnly(_graph.Tracks.Select(track => new TimelineTrackRowViewModel(
             track.Id,
             track.Kind,
             track.Clips.Select(clip => new TimelineClipRowViewModel(
@@ -1463,7 +1465,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
                 clip.TimelineRange.StartFrame,
                 clip.TimelineRange.Length,
                 string.Equals(_selectedTrackId, track.Id, StringComparison.OrdinalIgnoreCase) &&
-                _selectedClipStart == clip.TimelineRange.StartFrame)).ToArray())).ToArray();
+                _selectedClipStart == clip.TimelineRange.StartFrame)).ToArray())).ToArray());
         OnPropertyChanged(nameof(TrackRows));
         OnPropertyChanged(nameof(SelectionContextText));
         OnPropertyChanged(nameof(SelectedMediaId));
