@@ -1557,6 +1557,7 @@ public sealed class MainWindow : Window
         clearRetouch.Click += (_, _) => editor.ClearRetouch();
         var gradeExposure = new TextBox { Text = "1", PlaceholderText = "Exposure EV", Width = 90 };
         AutomationProperties.SetName(gradeExposure, "Photo grade exposure");
+        ToolTip.SetTip(gradeExposure, "Exposure adjustment in EV applied as a non-destructive photo layer.");
         var addGrade = new Button { Content = "Add exposure grade" };
         AutomationProperties.SetName(addGrade, "Add photo exposure grade");
         addGrade.Click += (_, _) =>
@@ -1756,7 +1757,7 @@ public sealed class MainWindow : Window
             expanded: false);
         var photoGradeSection = CreateInspectorExpander(
             "Grade",
-            CreateSectionContent(CreateFlow(gradeExposure, addGrade, maskGrade, clearGradeMask)),
+            CreateSectionContent(CreateFlow(CreateLabeledField("Exposure EV", gradeExposure), addGrade, maskGrade, clearGradeMask)),
             expanded: true);
         var photoExportSection = CreateInspectorExpander(
             "Export",

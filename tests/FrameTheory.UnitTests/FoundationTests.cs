@@ -802,6 +802,10 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo export quality value")
                     .Text);
+                Xunit.Assert.Contains(photoSections["Grade section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Exposure EV");
+                Xunit.Assert.Equal(
+                    "Exposure adjustment in EV applied as a non-destructive photo layer.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBox>().Single(control => AutomationProperties.GetName(control) == "Photo grade exposure")));
                 photoSections["Layers and blend section"].IsExpanded = false;
                 photoSections["Mask and retouch section"].IsExpanded = true;
                 Dispatcher.UIThread.RunJobs();
