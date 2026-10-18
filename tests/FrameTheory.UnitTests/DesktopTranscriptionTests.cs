@@ -118,6 +118,49 @@ public sealed class DesktopTranscriptionTests
     }
 
     [Xunit.Fact]
+    public async Task DesktopTranscriptionRejectsSourceMutationDuringUpload()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-transcription-mutation-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "spoken.wav");
+            var preparedPath = Path.Combine(directory.FullName, "prepared.wav");
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+            await File.WriteAllBytesAsync(preparedPath, [7, 8, 9]);
+            var secretStore = new InMemorySecretStore();
+            var settings = new GeminiSettingsViewModel(new GeminiConfigurationService(secretStore));
+            await settings.SaveAsync("mutation-secret", CancellationToken.None);
+            using var client = new HttpClient(new StubHandler(_ =>
+            {
+                File.WriteAllBytes(sourcePath, [4, 5, 6]);
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(
+                        "{\"status\":\"completed\",\"steps\":[{\"content\":[{\"annotations\":[{\"type\":\"word_info\",\"text\":\"changed\",\"start_offset\":\"0.100s\",\"end_offset\":\"0.400s\"}]}]}]}",
+                        Encoding.UTF8,
+                        "application/json")
+                };
+            }));
+            var viewModel = new MainWindowViewModel(
+                new WorkspaceCatalog(),
+                new TestCapabilityDetector(),
+                geminiSettings: settings,
+                transcriptionHttpClient: client,
+                audioSourcePreparer: new StubAudioSourcePreparer(new Uri(preparedPath)));
+
+            var succeeded = await viewModel.TranscribeAudioAsync(sourcePath, uploadConsent: true, CancellationToken.None);
+
+            Xunit.Assert.False(succeeded);
+            Xunit.Assert.Empty(viewModel.TimelineEditor.Captions);
+            Xunit.Assert.Contains("changed", viewModel.CaptionStatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task DesktopVerifiedTranscriptImportIsOfflineAndSourceBound()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-transcript-import-");
