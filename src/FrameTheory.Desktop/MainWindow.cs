@@ -566,6 +566,16 @@ public sealed class MainWindow : Window
             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145))
         };
         AutomationProperties.SetName(mediaEmptyState, "Media bin empty state");
+        var selectedMediaSummary = new TextBlock
+        {
+            Text = "No media selected",
+            FontSize = 10,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        AutomationProperties.SetName(selectedMediaSummary, "Selected media summary");
         ImportedMediaViewModel? preservedSelection = null;
         void RefreshMediaList()
         {
@@ -597,6 +607,9 @@ public sealed class MainWindow : Window
 
         void RefreshSelectedMediaCard()
         {
+            selectedMediaSummary.Text = importedList.SelectedItem is ImportedMediaViewModel selectedMedia
+                ? $"{selectedMedia.Kind switch { MediaKind.Video => "VIDEO", MediaKind.Image => "PHOTO", MediaKind.Audio => "AUDIO", _ => "MEDIA" }}  ·  {selectedMedia.Name}"
+                : "No media selected";
             foreach (var card in mediaCards.Values)
             {
                 card.Background = unselectedMediaBackground;
@@ -731,7 +744,7 @@ public sealed class MainWindow : Window
             }
         };
         AutomationProperties.SetName(importZone, "Local media import drop zone");
-        var mediaBinPanel = CreateMediaBin(importZone, importStatus, importedList, mediaSearch, mediaTypeFilter, clearMediaSearch, mediaSearchEmptyState, mediaEmptyState);
+        var mediaBinPanel = CreateMediaBin(importZone, importStatus, importedList, mediaSearch, mediaTypeFilter, clearMediaSearch, mediaSearchEmptyState, mediaEmptyState, selectedMediaSummary);
         var children = new List<Control>
         {
             CreateWorkspaceHeader(workspace, viewModel),
@@ -886,7 +899,8 @@ public sealed class MainWindow : Window
         ComboBox mediaTypeFilter,
         Button clearMediaSearch,
         TextBlock mediaSearchEmptyState,
-        TextBlock mediaEmptyState)
+        TextBlock mediaEmptyState,
+        TextBlock selectedMediaSummary)
     {
         importZone.Margin = new Thickness(0);
         var mediaBin = new Border
@@ -922,10 +936,11 @@ public sealed class MainWindow : Window
         };
         var mediaHeader = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
-            Children = { mediaTitle, assetSummary }
+            ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"),
+            Children = { mediaTitle, selectedMediaSummary, assetSummary }
         };
-        Grid.SetColumn(assetSummary, 1);
+        Grid.SetColumn(selectedMediaSummary, 1);
+        Grid.SetColumn(assetSummary, 2);
         grid.Children.Add(mediaHeader);
         var mediaSearchRow = new Grid
         {
