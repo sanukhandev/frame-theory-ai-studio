@@ -732,6 +732,15 @@ public sealed class FoundationTests
 
                 Xunit.Assert.IsType<Border>(approval.Parent);
                 Xunit.Assert.Contains("Approve AI action:", AutomationProperties.GetName(approval), StringComparison.Ordinal);
+                var approvalCard = Xunit.Assert.IsType<Border>(approval.Parent);
+                Xunit.Assert.Equal(
+                    Avalonia.Media.Color.FromRgb(24, 27, 33),
+                    Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(approvalCard.Background).Color);
+                approval.IsChecked = true;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(
+                    Avalonia.Media.Color.FromRgb(95, 125, 255),
+                    Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(approvalCard.BorderBrush).Color);
             }
             finally
             {

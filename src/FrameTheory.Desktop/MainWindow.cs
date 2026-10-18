@@ -1480,23 +1480,33 @@ public sealed class MainWindow : Window
                     HorizontalAlignment = HorizontalAlignment.Stretch
                 };
                 AutomationProperties.SetName(approval, $"Approve AI action: {action.Summary}");
+                var approvalCard = new Border
+                {
+                    Margin = new Thickness(0, 0, 0, 4),
+                    Padding = new Thickness(8, 6),
+                    CornerRadius = new CornerRadius(5),
+                    Child = approval
+                };
+                void RefreshApprovalCard()
+                {
+                    approvalCard.Background = new SolidColorBrush(action.IsApproved
+                        ? Avalonia.Media.Color.FromRgb(35, 53, 84)
+                        : Avalonia.Media.Color.FromRgb(24, 27, 33));
+                    approvalCard.BorderBrush = new SolidColorBrush(action.IsApproved
+                        ? Avalonia.Media.Color.FromRgb(95, 125, 255)
+                        : Avalonia.Media.Color.FromRgb(42, 46, 55));
+                    approvalCard.BorderThickness = new Thickness(1);
+                }
                 approval.PropertyChanged += (_, args) =>
                 {
                     if (args.Property == ToggleButton.IsCheckedProperty)
                     {
                         action.IsApproved = approval.IsChecked == true;
+                        RefreshApprovalCard();
                     }
                 };
-                actions.Children.Add(new Border
-                {
-                    Margin = new Thickness(0, 0, 0, 4),
-                    Padding = new Thickness(8, 6),
-                    Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
-                    BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
-                    BorderThickness = new Thickness(1),
-                    CornerRadius = new CornerRadius(5),
-                    Child = approval
-                });
+                RefreshApprovalCard();
+                actions.Children.Add(approvalCard);
             }
         }
         RefreshActions();
