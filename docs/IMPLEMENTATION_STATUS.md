@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive recovery-path checkpoint (2026-10-18):** Timeline missing-media recovery now bounds the replacement-path input to 220–360px and lets it stretch within the project inspector, preventing long path placeholders from forcing compact layouts wider. Foundation coverage verifies the geometry and editable recovery control.
+
 **Responsive export-framing selector checkpoint (2026-10-18):** Video export aspect-ratio selection now uses a readable 150–220px bounded stretch, preserving label clarity without imposing a fixed-width inspector control. Foundation coverage verifies the geometry and existing left-aligned content contract.
 
 **Responsive beat-analysis selector checkpoint (2026-10-18):** The timeline’s waveform beat-detection selector now uses a 120–180px bounded stretch instead of a fixed width, keeping audio-analysis controls usable in compact inspector flows. Foundation coverage verifies its geometry and accessible name.

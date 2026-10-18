@@ -3760,7 +3760,13 @@ public sealed class MainWindow : Window
                 await viewModel.OpenTimelineProjectAsync(path, CancellationToken.None);
             }
         };
-        var timelineReplacementPath = new TextBox { PlaceholderText = "Replacement media path within project folder" };
+        var timelineReplacementPath = new TextBox
+        {
+            PlaceholderText = "Replacement media path within project folder",
+            MinWidth = 220,
+            MaxWidth = 360,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
         AutomationProperties.SetName(timelineReplacementPath, "Timeline replacement media path");
         var missingTimelineMedia = new ListBox { Height = 80 };
         AutomationProperties.SetName(missingTimelineMedia, "Missing timeline media");

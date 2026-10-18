@@ -494,6 +494,13 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Enter editable title text for the selected timeline position.",
                     ToolTip.GetTip(titleText));
+                var timelineReplacementPath = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline replacement media path");
+                Xunit.Assert.True(double.IsNaN(timelineReplacementPath.Width));
+                Xunit.Assert.Equal(220, timelineReplacementPath.MinWidth);
+                Xunit.Assert.Equal(360, timelineReplacementPath.MaxWidth);
+                Xunit.Assert.Equal(HorizontalAlignment.Stretch, timelineReplacementPath.HorizontalAlignment);
                 var rulerPlayhead = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline ruler playhead");
