@@ -15,6 +15,7 @@ Audit checkpoint: 2026-10-18, latest previously verified green packaging run `39
 - Latest hosted packaging update: run `39097200292` passed all documentation, Windows, macOS and Linux jobs, including macOS DMG version validation, Windows x64 installer checks, Linux DEB metadata, packaged relaunch and manifest security regressions. This closes the implementation evidence gap for the packaging correction but does not clear the external release blockers below.
 - Latest native-bundle follow-up: run `39099250089` passed documentation, macOS and Linux validation and proved the Windows installer could import video/audio through the bundled runtime, but failed a multiline PowerShell assertion. It is not release evidence; the corrected assertion, directory trust checks and support-file package assertions are recorded in `docs/IMPLEMENTATION_STATUS.md` and require a new hosted run.
 - Latest hosted bundle evidence: run `39099847174` passed documentation/schema validation plus Windows, macOS and Linux restore, advisory, build, native-media, formatting, tests, publish, portable archive, installer, support-file, relaunch and checksum jobs. This verifies the optional reviewed-bundle mechanism, not legal redistribution, clean-host production recovery, signing/notarization or V1 completion.
+- Next packaging evidence target: the clean-`PATH` installer media smoke is implemented locally and awaits a hosted run; it will strengthen runtime independence evidence but cannot clear legal, clean-host production, signing or V1 gates by itself.
 
 ## P0 blockers before V1
 
