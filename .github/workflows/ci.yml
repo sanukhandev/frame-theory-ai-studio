@@ -101,6 +101,10 @@ jobs:
           if ($locator -notmatch 'FRAME_THEORY_FFMPEG_DIR' -or $locator -notmatch 'AppContext\.BaseDirectory') {
             throw 'Runtime media-tool locator does not cover the reviewed bundle directory and install directory.'
           }
+          $workflow = Get-Content -LiteralPath '.github/workflows/ci.yml' -Raw
+          if ($workflow -notmatch 'frame-theory-empty-path' -or $workflow -notmatch 'clean-path') {
+            throw 'Installer validation does not include a clean-PATH bundled media smoke.'
+          }
       - name: Validate package manifest guards
         shell: pwsh
         run: |
