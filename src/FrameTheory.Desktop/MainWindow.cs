@@ -2241,7 +2241,12 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(presetName, "Color style name");
         ToolTip.SetTip(presetName, "Name the local reusable color style before saving it.");
-        var presetSelection = new ComboBox { Width = 220 };
+        var presetSelection = new ComboBox
+        {
+            MinWidth = 140,
+            MaxWidth = 220,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
         AutomationProperties.SetName(presetSelection, "Loaded color styles");
         var presetStatus = new TextBox
         {

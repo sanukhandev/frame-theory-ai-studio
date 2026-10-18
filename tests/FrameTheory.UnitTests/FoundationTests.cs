@@ -850,6 +850,13 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(140, colorStyleName.MinWidth);
                 Xunit.Assert.Equal(220, colorStyleName.MaxWidth);
                 Xunit.Assert.Equal(HorizontalAlignment.Stretch, colorStyleName.HorizontalAlignment);
+                var loadedColorStyles = window.GetVisualDescendants()
+                    .OfType<ComboBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Loaded color styles");
+                Xunit.Assert.True(double.IsNaN(loadedColorStyles.Width));
+                Xunit.Assert.Equal(140, loadedColorStyles.MinWidth);
+                Xunit.Assert.Equal(220, loadedColorStyles.MaxWidth);
+                Xunit.Assert.Equal(HorizontalAlignment.Stretch, loadedColorStyles.HorizontalAlignment);
                 Xunit.Assert.Equal(
                     "Name the local reusable color style before saving it.",
                     ToolTip.GetTip(colorStyleName));
