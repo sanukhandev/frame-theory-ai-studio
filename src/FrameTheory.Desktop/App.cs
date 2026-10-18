@@ -12,6 +12,7 @@ public sealed class App : Avalonia.Application
 {
     public App()
     {
+        RequestedThemeVariant = ThemeVariant.Dark;
         Styles.Add(new Avalonia.Themes.Fluent.FluentTheme());
         AddStudioStyles();
     }

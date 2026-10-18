@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Deterministic dark-theme checkpoint (2026-10-18):** The Avalonia Fluent theme is now explicitly requested as dark before the shared editor styles are installed, preventing host OS theme defaults from producing inconsistent light controls. The rebuilt Foundation shell test passes, the Release test-project build is warning-free, and formatting/diff checks are green. Native visual inspection remains unverified.
+
 **Hosted UI correction checkpoint (2026-10-18):** Hosted run `39123624550` correctly failed the new adaptive-shell test on macOS/Linux because `FoundationTests.cs` lacked its `Avalonia.Layout` import; the local `--no-build` smoke had not compiled that changed test source. The test now rebuilds from source and passes, unnamed string-content buttons receive content-derived automation names after window open, and formatting/diff checks are green. The corrective commit is local and awaits the next exact-ten-commit push.
 
 **Responsive workspace checkpoint (2026-10-18):** Each workspace content surface now explicitly stretches to the available editor width and anchors at the top of its scroll viewport, with automation coverage for all four workspace containers. The Foundation adaptive-shell test, Desktop Release build, formatting and `git diff --check` pass; native resize/HiDPI review remains unverified.
