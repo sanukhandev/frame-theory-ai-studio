@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Full local correction-batch gate (2026-10-18):** Media/timeline list focus now retains a blue keyboard edge. After the hosted regression fixes, the local Release solution build passes with 0 warnings/errors, unit tests pass 260/260, golden tests pass 2/2, repository validation and formatting pass, and `git diff --check` is clean. The next hosted run must revalidate the failed macOS/Linux symlink tests and Windows UI smoke before any task closure.
+
 **Workspace-focus checkpoint (2026-10-18):** Keyboard focus on the workspace rail now retains a visible blue edge even before selection changes, completing the selected/hover/focus interaction states. Desktop Release build, focused shell test, formatting and `git diff --check` pass; native keyboard and HiDPI visual review remains unverified.
 
 **AI-status accessibility checkpoint (2026-10-18):** Gemini provider/consent scope, analysis, proposal, approval, revision and recipe feedback regions now have stable automation names, preserving the optional-provider boundary while making review states discoverable. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native assistive-technology review remains unverified.
