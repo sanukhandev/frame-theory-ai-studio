@@ -1528,6 +1528,31 @@ public sealed class MainWindow : Window
         var selectionContext = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(selectionContext, "Timeline selection context");
         selectionContext.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.SelectionContextText"));
+        var selectionInspector = new Border
+        {
+            MinHeight = 52,
+            Padding = new Thickness(10, 8),
+            CornerRadius = new CornerRadius(6),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(20, 23, 29)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 54, 65)),
+            BorderThickness = new Thickness(1),
+            Child = new StackPanel
+            {
+                Spacing = 3,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = "SELECTION INSPECTOR",
+                        FontSize = 10,
+                        FontWeight = FontWeight.SemiBold,
+                        Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+                    },
+                    selectionContext
+                }
+            }
+        };
+        AutomationProperties.SetName(selectionInspector, "Timeline selection inspector");
         var tracks = new ListBox
         {
             Height = 100,
@@ -2148,7 +2173,7 @@ public sealed class MainWindow : Window
                     CreateFlow(new TextBlock { Text = "Frame" }, frameStatus, new TextBlock { Text = "Position" }, positionStatus),
                     playhead,
                     ruler,
-                    selectionContext,
+                    selectionInspector,
                     tracks,
                     CreateSectionLabel("Analysis and rough cut"),
                     CreateFlow(beatDetection, beatMarkers),
