@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive photo-preview checkpoint (2026-10-18):** Photo original/edited comparison cards now stack below 620px of measured card width and return to a two-up layout above it, preserving readable previews in narrow inspectors without changing source or edit behavior. Foundation coverage verifies both arrangements.
+
 **Responsive Gemini-provider checkpoint (2026-10-18):** The optional Gemini model selector now uses a 150–300px bounded stretch with explicit model-selection guidance, keeping provider setup usable in compact inspectors without changing secure-key or consent behavior. Foundation coverage verifies the geometry and accessible tooltip.
 
 **Responsive photo-overlay checkpoint (2026-10-18):** Photo Layers and blend controls now give overlay opacity and blend-mode inputs bounded responsive widths, preventing fixed controls from crowding the compact inspector. Foundation coverage verifies stretch alignment, bounds and blend-mode guidance; the change is local and non-destructive.
