@@ -11,7 +11,7 @@
 - Windows: portable `.zip` plus `.exe` installer or MSI when build tooling and signing policy confirmed.
 - macOS: architecture-specific `.app` bundle and `.dmg`; assess Apple signing/notarization.
 - Linux: AppImage and/or distro packages with portable native dependency policies; CI installs and removes the validation DEB and launches both its installed binary and launcher under Xvfb.
-- Never assume a single .NET binary contains FFmpeg, MLT or runtime native plugins.
+- Never assume a single .NET binary contains FFmpeg, MLT or runtime native plugins. The packagers accept an explicitly reviewed native-tools directory; when supplied, both `ffmpeg` and `ffprobe` are copied beside the application and the runtime prefers those adjacent binaries before `PATH`.
 
 ## Version policy
 `0.1.x` technical previews, `0.5.x` feature-complete betas, `1.0.0` only after V1 gate. Use release notes with tested OS/architecture, codecs, known limitations, SBOM, checksums and regressions.
