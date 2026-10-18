@@ -666,6 +666,13 @@ public sealed class FoundationTests
                 Xunit.Assert.True(beatMarkers.IsReadOnly);
                 Xunit.Assert.Equal(11, beatMarkers.FontSize);
                 Xunit.Assert.Equal("Local waveform beat markers detected for the active timeline.", ToolTip.GetTip(beatMarkers));
+                var beatDetection = window.GetVisualDescendants()
+                    .OfType<ComboBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Beat detection mode");
+                Xunit.Assert.True(double.IsNaN(beatDetection.Width));
+                Xunit.Assert.Equal(120, beatDetection.MinWidth);
+                Xunit.Assert.Equal(180, beatDetection.MaxWidth);
+                Xunit.Assert.Equal(HorizontalAlignment.Stretch, beatDetection.HorizontalAlignment);
                 var titleAnimationStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Title animation status");

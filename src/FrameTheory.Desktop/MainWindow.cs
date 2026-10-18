@@ -3219,7 +3219,14 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(beatMarkers, "Timeline beat markers");
         ToolTip.SetTip(beatMarkers, "Local waveform beat markers detected for the active timeline.");
         beatMarkers.Bind(TextBox.TextProperty, new Binding("TimelineEditor.BeatMarkersText"));
-        var beatDetection = new ComboBox { ItemsSource = new[] { "Amplitude peaks", "Energy onsets" }, SelectedIndex = 0, Width = 150 };
+        var beatDetection = new ComboBox
+        {
+            ItemsSource = new[] { "Amplitude peaks", "Energy onsets" },
+            SelectedIndex = 0,
+            MinWidth = 120,
+            MaxWidth = 180,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
         AutomationProperties.SetName(beatDetection, "Beat detection mode");
         ToolTip.SetTip(beatDetection, "Choose the local waveform analysis used for beat markers.");
         beatDetection.SelectionChanged += (_, _) => timeline.BeatDetectionMode = beatDetection.SelectedIndex == 1
