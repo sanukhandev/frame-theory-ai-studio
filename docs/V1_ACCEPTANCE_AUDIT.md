@@ -11,6 +11,7 @@ Audit checkpoint: 2026-10-18, latest verified green complete matrix run `3911831
 - Current timeline integrity hardening: `TimelineSeekResult` snapshots synchronized samples, preserving seek results after caller-owned collections are changed. Focused timeline coverage includes the regression; manual view synchronization remains open.
 - Current compositor integrity hardening: `TimelineFilterGraph` snapshots its input URIs, preserving the generated FFmpeg input set after caller-owned collection mutation. Focused compositor coverage includes the regression; native export acceptance remains separate.
 - Current AI validation integrity hardening: `AiPlanValidationResult` snapshots rejected-action errors, preserving review explanations after caller-owned collection mutation. Focused AI-plan coverage includes the regression; live-provider acceptance remains open.
+- Current AI context integrity hardening: `AiPlanValidationContext` freezes its target allowlist, preventing post-validation target changes. Focused AI-plan coverage includes the regression; live-provider acceptance remains open.
 
 ## Evidence
 

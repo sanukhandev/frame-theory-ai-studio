@@ -113,4 +113,15 @@ public sealed class AiEditPlanTests
         Xunit.Assert.Single(result.Errors);
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<string>>(result.Errors).IsReadOnly);
     }
+
+    [Xunit.Fact]
+    public void ValidationContextSnapshotsTargetIds()
+    {
+        var targetIds = new HashSet<string>(["clip-1"], StringComparer.Ordinal);
+        var context = new AiPlanValidationContext("project-1", targetIds, 30);
+
+        targetIds.Clear();
+
+        Xunit.Assert.Contains("clip-1", context.TargetIds);
+    }
 }

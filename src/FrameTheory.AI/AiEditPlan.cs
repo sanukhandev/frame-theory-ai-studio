@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -282,7 +283,7 @@ public sealed record AiPlanValidationContext
         }
 
         ProjectId = projectId;
-        TargetIds = targetIds;
+        TargetIds = targetIds.ToFrozenSet(StringComparer.Ordinal);
         ProjectDurationFrames = projectDurationFrames;
     }
 
