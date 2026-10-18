@@ -1736,9 +1736,23 @@ public sealed class MainWindow : Window
             "Mask and retouch",
             CreateSectionContent(
                 CreateSectionLabel("Overlay mask"),
-                CreateFlow(applyMask, maskX, maskY, maskRadius, maskStrength, clearMask),
+                CreateFlow(
+                    CreateLabeledField("Center X", maskX),
+                    CreateLabeledField("Center Y", maskY),
+                    CreateLabeledField("Radius", maskRadius),
+                    CreateLabeledField("Strength", maskStrength),
+                    applyMask,
+                    clearMask),
                 CreateSectionLabel("Clone retouch"),
-                CreateFlow(applyRetouch, retouchX, retouchY, retouchRadius, retouchOffsetX, retouchOffsetY, retouchStrength, clearRetouch)),
+                CreateFlow(
+                    CreateLabeledField("Center X", retouchX),
+                    CreateLabeledField("Center Y", retouchY),
+                    CreateLabeledField("Radius", retouchRadius),
+                    CreateLabeledField("Source ΔX", retouchOffsetX),
+                    CreateLabeledField("Source ΔY", retouchOffsetY),
+                    CreateLabeledField("Strength", retouchStrength),
+                    applyRetouch,
+                    clearRetouch)),
             expanded: false);
         var photoGradeSection = CreateInspectorExpander(
             "Grade",
@@ -4351,6 +4365,21 @@ public sealed class MainWindow : Window
 
         return panel;
     }
+
+    private static Control CreateLabeledField(string label, Control input) => new StackPanel
+    {
+        Spacing = 2,
+        Children =
+        {
+            new TextBlock
+            {
+                Text = label,
+                FontSize = 9,
+                Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181))
+            },
+            input
+        }
+    };
 
     private static Control CreateSectionLabel(string text) => new Border
     {

@@ -799,6 +799,8 @@ public sealed class FoundationTests
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "OVERLAY MASK");
                 Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "CLONE RETOUCH");
+                Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Center X");
+                Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Source ΔX");
                 photoSections["Mask and retouch section"].IsExpanded = false;
                 var photoFormat = window.GetVisualDescendants()
                     .OfType<ComboBox>()
