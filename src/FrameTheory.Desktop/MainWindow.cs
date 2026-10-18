@@ -266,9 +266,16 @@ public sealed class MainWindow : Window
         NameUnnamedButtons(this);
         foreach (var textBox in this.GetVisualDescendants().OfType<TextBox>())
         {
-            if (!string.IsNullOrWhiteSpace(textBox.PlaceholderText) && string.IsNullOrWhiteSpace(AutomationProperties.GetName(textBox)))
+            var name = AutomationProperties.GetName(textBox);
+            if (!string.IsNullOrWhiteSpace(textBox.PlaceholderText) && string.IsNullOrWhiteSpace(name))
             {
-                AutomationProperties.SetName(textBox, textBox.PlaceholderText);
+                name = textBox.PlaceholderText;
+                AutomationProperties.SetName(textBox, name);
+            }
+
+            if (ToolTip.GetTip(textBox) is null && !string.IsNullOrWhiteSpace(name))
+            {
+                ToolTip.SetTip(textBox, name);
             }
         }
     }

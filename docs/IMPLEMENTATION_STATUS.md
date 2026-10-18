@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Accessible input-discovery checkpoint (2026-10-18):** Editable fields that receive an accessible name now also receive a fallback tooltip when no control-specific guidance is configured. Existing secure-key, consent and workflow tooltips remain authoritative; the focused Foundation shell suite remains green.
+
 **Export action hierarchy checkpoint (2026-10-18):** The multi-target social export action now uses the same production primary-action treatment as single-target timeline export, photo export and approved-edit actions. Foundation coverage verifies the reachable action class; export behavior and cancellation remain unchanged.
 
 **Accessible action-discovery checkpoint (2026-10-18):** The production shell now gives every named button a fallback tooltip when no feature-specific guidance exists, while preserving explicit tooltips for media, export, AI and editing actions. Foundation coverage verifies the fallback on timeline editing controls; native screen-reader acceptance remains open.
