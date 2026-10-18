@@ -278,7 +278,8 @@ public sealed class FoundationTests
                 var mediaSearch = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Search imported media");
-                Xunit.Assert.Equal(190, mediaSearch.Width);
+                Xunit.Assert.True(double.IsNaN(mediaSearch.Width));
+                Xunit.Assert.Equal(HorizontalAlignment.Stretch, mediaSearch.HorizontalAlignment);
                 Xunit.Assert.Equal("Filter imported media by filename.", ToolTip.GetTip(mediaSearch));
                 Xunit.Assert.False(window.GetVisualDescendants()
                     .OfType<Button>()

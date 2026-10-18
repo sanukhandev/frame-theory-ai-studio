@@ -516,7 +516,8 @@ public sealed class MainWindow : Window
         ToolTip.SetTip(importedList, "Imported local media available to the active workspace.");
         var mediaSearch = new TextBox
         {
-            Width = 190,
+            MinWidth = 0,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             PlaceholderText = "Search media"
         };
         AutomationProperties.SetName(mediaSearch, "Search imported media");
