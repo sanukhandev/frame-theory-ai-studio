@@ -116,9 +116,12 @@ public sealed class DesktopImportTests
                     .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Media search empty state");
 
                 Xunit.Assert.Equal(2, mediaList.Items.Count);
-                search.Text = "first";
+                mediaList.SelectedIndex = 1;
+                Dispatcher.UIThread.RunJobs();
+                search.Text = "second";
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Single(mediaList.Items);
+                Xunit.Assert.Equal("second.mp4", Xunit.Assert.IsType<ImportedMediaViewModel>(mediaList.SelectedItem).Name);
                 Xunit.Assert.True(clear.IsEnabled);
                 Xunit.Assert.False(emptyState.IsVisible);
 
@@ -131,6 +134,7 @@ public sealed class DesktopImportTests
                 clear.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(2, mediaList.Items.Count);
+                Xunit.Assert.Equal("second.mp4", Xunit.Assert.IsType<ImportedMediaViewModel>(mediaList.SelectedItem).Name);
                 Xunit.Assert.False(clear.IsEnabled);
                 Xunit.Assert.False(emptyState.IsVisible);
             }

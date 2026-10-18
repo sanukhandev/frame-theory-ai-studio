@@ -484,13 +484,19 @@ public sealed class MainWindow : Window
             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145))
         };
         AutomationProperties.SetName(mediaSearchEmptyState, "Media search empty state");
+        ImportedMediaViewModel? preservedSelection = null;
         void RefreshMediaList()
         {
             var query = mediaSearch.Text?.Trim();
+            var selectedId = preservedSelection?.Id;
             var filtered = string.IsNullOrEmpty(query)
                 ? viewModel.ImportedMedia
                 : viewModel.ImportedMedia.Where(item => item.Name.Contains(query, StringComparison.OrdinalIgnoreCase)).ToArray();
             importedList.ItemsSource = filtered;
+            if (selectedId is { } id)
+            {
+                importedList.SelectedItem = filtered.FirstOrDefault(item => item.Id == id);
+            }
             clearMediaSearch.IsEnabled = !string.IsNullOrEmpty(query);
             mediaSearchEmptyState.IsVisible = !string.IsNullOrEmpty(query) && filtered.Count == 0;
         }
@@ -512,6 +518,7 @@ public sealed class MainWindow : Window
                 return;
             }
 
+            preservedSelection = item;
             if (item.ThumbnailPpm is not null)
             {
                 viewModel.ColorInspector.SetSource(item.ThumbnailPpm);
