@@ -209,6 +209,8 @@ public sealed class FoundationTests
                 {
                     "Imported media",
                     "Import local media",
+                    "Capability status",
+                    "Diagnostics status",
                     "Preview current timeline frame",
                     "Save timeline project",
                     "Open timeline project",

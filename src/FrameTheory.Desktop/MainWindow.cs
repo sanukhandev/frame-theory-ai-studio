@@ -216,6 +216,7 @@ public sealed class MainWindow : Window
             TextTrimming = TextTrimming.CharacterEllipsis
         };
         status.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CapabilityStatusText)));
+        AutomationProperties.SetName(status, "Capability status");
         var refresh = new Button { Content = "Refresh capabilities", Margin = new Thickness(12, 8, 16, 8) };
         AutomationProperties.SetName(refresh, "Refresh capability check");
         refresh.Click += async (_, _) => await viewModel.RefreshCapabilitiesAsync(CancellationToken.None);
@@ -228,6 +229,7 @@ public sealed class MainWindow : Window
             MaxWidth = 320
         };
         diagnostics.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.DiagnosticsStatusText)));
+        AutomationProperties.SetName(diagnostics, "Diagnostics status");
         return new Border
         {
             Height = 48,
