@@ -188,18 +188,43 @@ public sealed class OperatingSystemSecretStore : ISecretStore
             throw new PlatformNotSupportedException($"The operating-system credential store '{executable}' is unavailable.", exception);
         }
 
-        if (standardInput is not null)
+        try
         {
-            await process.StandardInput.WriteAsync(standardInput.AsMemory(), cancellationToken);
-            await process.StandardInput.FlushAsync(cancellationToken);
-            process.StandardInput.Close();
-        }
+            if (standardInput is not null)
+            {
+                await process.StandardInput.WriteAsync(standardInput.AsMemory(), cancellationToken);
+                await process.StandardInput.FlushAsync(cancellationToken);
+                process.StandardInput.Close();
+            }
 
-        var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-        var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
-        await process.WaitForExitAsync(cancellationToken);
-        await Task.WhenAll(outputTask, errorTask);
-        return new UnixResult(process.ExitCode, outputTask.Result);
+            var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+            var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+            await process.WaitForExitAsync(cancellationToken);
+            await Task.WhenAll(outputTask, errorTask);
+            return new UnixResult(process.ExitCode, outputTask.Result);
+        }
+        catch (OperationCanceledException)
+        {
+            TryKill(process);
+            throw;
+        }
+    }
+
+    private static void TryKill(Process process)
+    {
+        try
+        {
+            if (!process.HasExited)
+            {
+                process.Kill(entireProcessTree: true);
+            }
+        }
+        catch (InvalidOperationException)
+        {
+        }
+        catch (Win32Exception)
+        {
+        }
     }
 
     private sealed record UnixResult(int ExitCode, string Output);
