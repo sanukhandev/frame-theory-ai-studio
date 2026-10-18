@@ -425,6 +425,13 @@ public sealed class MainWindow : Window
                     Source = CreateBitmap(item.ThumbnailPpm)
                 };
                 AutomationProperties.SetName(thumbnail, $"Thumbnail for {item.Name}");
+                var kindLabel = item.Kind switch
+                {
+                    MediaKind.Image => "Photo",
+                    MediaKind.Video => "Video",
+                    MediaKind.Audio => "Audio",
+                    _ => "Media"
+                };
                 var selectedBadge = new Border
                 {
                     IsVisible = false,
@@ -478,7 +485,7 @@ public sealed class MainWindow : Window
                                             VerticalAlignment = VerticalAlignment.Bottom,
                                             Child = new TextBlock
                                             {
-                                                Text = item.Kind?.ToString().ToUpperInvariant() ?? "MEDIA",
+                                                Text = kindLabel.ToUpperInvariant(),
                                                 FontSize = 8,
                                                 FontWeight = FontWeight.SemiBold,
                                                 Foreground = Brushes.White
@@ -506,7 +513,7 @@ public sealed class MainWindow : Window
                     }
                 };
                 AutomationProperties.SetName(card, $"Imported media card: {item.Name}");
-                ToolTip.SetTip(card, $"{item.Kind?.ToString() ?? "Media"} · {item.Name} · {item.Summary}");
+                ToolTip.SetTip(card, $"{kindLabel} · {item.Name} · {item.Summary}");
                 mediaCards[item] = card;
                 mediaSelectionBadges[item] = selectedBadge;
                 return card;
