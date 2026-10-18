@@ -60,6 +60,8 @@ public sealed class JsonColorPresetStore
             throw new DirectoryNotFoundException(directory);
         }
 
+        EnsureRegularPath(fullPath, directory);
+
         var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
         try
         {
@@ -97,6 +99,9 @@ public sealed class JsonColorPresetStore
             throw new FileNotFoundException("The preset file was not found.", fullPath);
         }
 
+        EnsureRegularPath(fullPath, fileInfo.DirectoryName
+            ?? throw new ArgumentException("A preset directory is required.", nameof(path)));
+
         if (fileInfo.Length > MaximumPresetBytes)
         {
             throw new InvalidDataException("The preset file exceeds the supported size limit.");
@@ -132,6 +137,19 @@ public sealed class JsonColorPresetStore
     }
 
     private sealed record PresetFile(PresetDto[] Presets);
+
+    private static void EnsureRegularPath(string fullPath, string directory)
+    {
+        if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new InvalidDataException("The preset directory must not be a reparse point.");
+        }
+
+        if (File.Exists(fullPath) && (File.GetAttributes(fullPath) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new InvalidDataException("The preset file must not be a reparse point.");
+        }
+    }
 
     private sealed class PresetDto
     {

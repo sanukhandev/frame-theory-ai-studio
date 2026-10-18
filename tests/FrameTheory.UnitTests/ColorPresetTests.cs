@@ -51,4 +51,39 @@ public sealed class ColorPresetTests
             directory.Delete(true);
         }
     }
+
+    [Xunit.Fact]
+    public async Task PresetStoreRejectsReparsePointFiles()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-presets-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-presets-external-");
+        try
+        {
+            var store = new JsonColorPresetStore();
+            var preset = new ColorPreset("External", new ColorGrade());
+            var externalPath = Path.Combine(externalDirectory.FullName, "presets.json");
+            await store.SaveAtomicAsync(externalPath, [preset], CancellationToken.None);
+            var linkedPath = Path.Combine(directory.FullName, "presets.json");
+            File.CreateSymbolicLink(linkedPath, externalPath);
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                store.LoadAsync(linkedPath, CancellationToken.None));
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                store.SaveAtomicAsync(linkedPath, [preset], CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
 }
