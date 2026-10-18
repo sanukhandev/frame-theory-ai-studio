@@ -28,6 +28,8 @@
 
 **Export destination boundary checkpoint (2026-10-18):** Video and photo exporters now reject reparse-point destination directories before creating temporary FFmpeg outputs, preserving the atomic destination contract and preventing redirected writes. Focused media/photo export coverage passes 7/7; hosted confirmation remains pending.
 
+**Timeline export destination checkpoint (2026-10-18):** The shared timeline compositor now rejects reparse-point destination directories before building or running the FFmpeg graph. Focused timeline compositor coverage passes 8/8; hosted confirmation remains pending.
+
 **Media import boundary checkpoint (2026-10-18):** Waveform extraction now independently rejects reparse-point media paths before invoking FFmpeg, even when a composed or test probe adapter does not enforce the same rule, and best-effort cleanup cannot mask the original import failure. Focused media-import coverage passes 4/4, the Release build is warning-free through the focused compile, formatting and diff checks pass, and original source bytes remain untouched.
 
 **Package traversal checkpoint (2026-10-18):** `scripts/verify_package.ps1` now rejects a reparse-point package root or directory entry before recursive discovery, then hashes only entries from the fail-closed walk. Native bundle generation and verification also reject linked manifests, linked entries and unexpected subdirectories. PowerShell parsing, a real one-file package checksum smoke, repository validation and `git diff --check` pass; the hosted package-manifest gate now includes a real directory-symlink rejection regression, pending the next hosted run.

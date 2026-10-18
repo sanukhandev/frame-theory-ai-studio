@@ -789,6 +789,11 @@ public sealed class FfmpegTimelineVideoExporter : ITimelineVideoExporter
             throw new DirectoryNotFoundException(outputDirectory);
         }
 
+        if ((File.GetAttributes(outputDirectory) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new MediaExportException("Export directories that are symlinks are not accepted.");
+        }
+
         if (File.Exists(outputPath) && (File.GetAttributes(outputPath) & FileAttributes.ReparsePoint) != 0)
         {
             throw new MediaExportException("Export destinations that are symlinks are not accepted.");

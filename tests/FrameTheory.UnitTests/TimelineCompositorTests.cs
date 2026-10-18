@@ -278,6 +278,63 @@ public sealed class TimelineCompositorTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task TimelineExportRejectsSymlinkedDestinationDirectory()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-compositor-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-compositor-external-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            await File.WriteAllTextAsync(sourcePath, "source");
+            var destinationDirectory = Path.Combine(directory.FullName, "exports");
+            Directory.CreateSymbolicLink(destinationDirectory, externalDirectory.FullName);
+            var destinationPath = Path.Combine(destinationDirectory, "output.mp4");
+            var mediaId = MediaId.Create(new Uri(sourcePath), "compositor-boundary-test");
+            var clip = TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1));
+            var plan = new TimelineVideoRenderPlan(
+                new RationalFrameRate(30, 1),
+                16,
+                8,
+                30,
+                new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
+                [new TimelineVideoLayer("video-1", 0, [new TimelineVideoSegment(clip)])]);
+            var exporter = new FfmpegTimelineVideoExporter(
+                new StubProcessRunner(),
+                new StubProbe(new MediaSourceMetadata(
+                    MediaId.Create(new Uri(destinationPath), "verified"),
+                    new Uri(destinationPath),
+                    MediaKind.Video,
+                    16,
+                    8,
+                    new RationalFrameRate(30, 1),
+                    30,
+                    TimeSpan.FromSeconds(1),
+                    colorProfile: "bt709/bt709/bt709/tv")));
+
+            await Xunit.Assert.ThrowsAsync<MediaExportException>(() => exporter.ExportAsync(
+                plan,
+                destinationPath,
+                new ExportPreset(16, 8, new RationalFrameRate(30, 1), includeAudio: false),
+                null,
+                CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
+
     private sealed class StubProbe(MediaSourceMetadata metadata) : IMediaProbe
     {
         public Task<MediaSourceMetadata> ProbeAsync(Uri file, CancellationToken cancellationToken) => Task.FromResult(metadata);
