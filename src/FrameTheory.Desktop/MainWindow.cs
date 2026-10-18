@@ -3119,11 +3119,11 @@ public sealed class MainWindow : Window
                 exportStatus,
                 CreateFlow(useApprovedWatermark, selectWatermark, clearWatermark),
                 watermarkStatus),
-            expanded: true);
+            expanded: false);
         var timelineViewSection = CreateInspectorExpander(
             "Timeline view",
             CreateSectionContent(CreateFlow(snap, new TextBlock { Text = "Zoom" }, zoom, zoomValue)),
-            expanded: true);
+            expanded: false);
         var previewActions = new StackPanel
         {
             Spacing = 8,

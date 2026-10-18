@@ -298,6 +298,28 @@ public sealed class FoundationTests
                 Xunit.Assert.NotNull(timelineTracks.ItemTemplate);
                 Xunit.Assert.Equal(124, timelineTracks.Height);
                 Xunit.Assert.Equal("Select clips in the video and audio edit lanes.", ToolTip.GetTip(timelineTracks));
+                var timelineSectionNames = new HashSet<string>(StringComparer.Ordinal)
+                {
+                    "Analysis and rough cut section",
+                    "Clip editing section",
+                    "Motion and speed section",
+                    "Audio section",
+                    "Titles and captions section",
+                    "Project and export section",
+                    "Timeline view section"
+                };
+                var timelineSections = window.GetVisualDescendants()
+                    .OfType<Expander>()
+                    .Where(control => timelineSectionNames.Contains(AutomationProperties.GetName(control)!))
+                    .ToDictionary(control => AutomationProperties.GetName(control)!);
+                Xunit.Assert.Equal(7, timelineSections.Count);
+                Xunit.Assert.False(timelineSections["Analysis and rough cut section"].IsExpanded);
+                Xunit.Assert.True(timelineSections["Clip editing section"].IsExpanded);
+                Xunit.Assert.False(timelineSections["Project and export section"].IsExpanded);
+                Xunit.Assert.False(timelineSections["Timeline view section"].IsExpanded);
+                timelineSections["Project and export section"].IsExpanded = true;
+                timelineSections["Timeline view section"].IsExpanded = true;
+                Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(
                     "Scrub to an exact timeline frame.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<Slider>().Single(control => AutomationProperties.GetName(control) == "Timeline playhead frame")));
@@ -327,24 +349,6 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Timeline operation status");
                 Xunit.Assert.True(timelineOperationStatus.IsReadOnly);
                 Xunit.Assert.Equal("Validation or edit result for the last timeline action.", ToolTip.GetTip(timelineOperationStatus));
-                var timelineSectionNames = new HashSet<string>(StringComparer.Ordinal)
-                {
-                    "Analysis and rough cut section",
-                    "Clip editing section",
-                    "Motion and speed section",
-                    "Audio section",
-                    "Titles and captions section",
-                    "Project and export section",
-                    "Timeline view section"
-                };
-                var timelineSections = window.GetVisualDescendants()
-                    .OfType<Expander>()
-                    .Where(control => timelineSectionNames.Contains(AutomationProperties.GetName(control)!))
-                    .ToDictionary(control => AutomationProperties.GetName(control)!);
-                Xunit.Assert.Equal(7, timelineSections.Count);
-                Xunit.Assert.False(timelineSections["Analysis and rough cut section"].IsExpanded);
-                Xunit.Assert.True(timelineSections["Clip editing section"].IsExpanded);
-                Xunit.Assert.True(timelineSections["Project and export section"].IsExpanded);
                 Xunit.Assert.All(timelineSections.Values, section =>
                 {
                     Xunit.Assert.NotNull(ToolTip.GetTip(section));
