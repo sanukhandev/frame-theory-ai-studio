@@ -336,6 +336,14 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Color after preview empty state")
                     .IsVisible);
+                Xunit.Assert.Null(window.GetVisualDescendants()
+                    .OfType<Image>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color waveform scope")
+                    .Source);
+                Xunit.Assert.Null(window.GetVisualDescendants()
+                    .OfType<Image>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color vectorscope")
+                    .Source);
                 tabs.SelectedIndex = 3;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.True(window.GetVisualDescendants()
@@ -472,6 +480,8 @@ public sealed class FoundationTests
                     "Color grade after summary",
                     "Color scope summary",
                     "Color inspector status",
+                    "Color waveform scope",
+                    "Color vectorscope",
                     "Color style library status",
                     "Reference analysis status",
                     "Gemini provider status",
@@ -525,6 +535,39 @@ public sealed class FoundationTests
                 {
                     Xunit.Assert.Contains(requiredName, automationNames);
                 }
+            }
+            finally
+            {
+                window.Close();
+            }
+        }, CancellationToken.None);
+    }
+
+    [Xunit.Fact]
+    public async Task ColorScopesRenderFromTheRealInspectorSource()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
+        await session.Dispatch(() =>
+        {
+            var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
+                new FrameTheory.Desktop.WorkspaceCatalog(),
+                new TestCapabilityDetector());
+            viewModel.ColorInspector.SetSource([.. "P6\n2 1\n255\n"u8, 255, 0, 0, 0, 0, 255]);
+            var window = new FrameTheory.Desktop.MainWindow(viewModel);
+            try
+            {
+                window.Show();
+                var tabs = Xunit.Assert.IsType<TabControl>(Xunit.Assert.IsType<Grid>(window.Content).Children[1]);
+                tabs.SelectedIndex = 2;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.NotNull(window.GetVisualDescendants()
+                    .OfType<Image>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color waveform scope")
+                    .Source);
+                Xunit.Assert.NotNull(window.GetVisualDescendants()
+                    .OfType<Image>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color vectorscope")
+                    .Source);
             }
             finally
             {

@@ -1485,12 +1485,32 @@ public sealed class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(afterEmptyState, "Color after preview empty state");
+        var waveformScope = new Image
+        {
+            Width = 240,
+            Height = 128,
+            Stretch = Stretch.Fill,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
+        AutomationProperties.SetName(waveformScope, "Color waveform scope");
+        ToolTip.SetTip(waveformScope, "Luminance distribution calculated from the selected local preview.");
+        var vectorscope = new Image
+        {
+            Width = 240,
+            Height = 128,
+            Stretch = Stretch.Fill,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
+        AutomationProperties.SetName(vectorscope, "Color vectorscope");
+        ToolTip.SetTip(vectorscope, "Chrominance distribution calculated from the selected local preview.");
         void RefreshPreviews()
         {
             beforeImage.Source = CreateBitmap(inspector.BeforePreviewPpm);
             afterImage.Source = CreateBitmap(inspector.AfterPreviewPpm);
             beforeEmptyState.IsVisible = inspector.BeforePreviewPpm is null;
             afterEmptyState.IsVisible = inspector.AfterPreviewPpm is null;
+            waveformScope.Source = CreateScopeBitmap(inspector.Scopes, vectorscope: false);
+            vectorscope.Source = CreateScopeBitmap(inspector.Scopes, vectorscope: true);
         }
 
         inspector.PropertyChanged += (_, _) => RefreshPreviews();
@@ -1735,7 +1755,38 @@ public sealed class MainWindow : Window
             expanded: false);
         var beforeAfterSection = CreateInspectorExpander(
             "Before and after",
-            CreateSectionContent(colorPreviewCard, scopeSummary),
+            CreateSectionContent(colorPreviewCard),
+            expanded: true);
+        var scopeCard = new Border
+        {
+            Padding = new Thickness(12),
+            CornerRadius = new CornerRadius(8),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(16, 18, 22)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(1),
+            Child = CreateFlow(
+                new StackPanel
+                {
+                    Spacing = 4,
+                    Children =
+                    {
+                        new TextBlock { Text = "WAVEFORM", FontSize = 10, FontWeight = FontWeight.SemiBold },
+                        waveformScope
+                    }
+                },
+                new StackPanel
+                {
+                    Spacing = 4,
+                    Children =
+                    {
+                        new TextBlock { Text = "VECTORSCOPE", FontSize = 10, FontWeight = FontWeight.SemiBold },
+                        vectorscope
+                    }
+                })
+        };
+        var scopeSection = CreateInspectorExpander(
+            "Scopes",
+            CreateSectionContent(scopeCard, scopeSummary),
             expanded: true);
         var gradeSection = CreateInspectorExpander(
             "Grade controls",
@@ -1762,6 +1813,7 @@ public sealed class MainWindow : Window
                     status,
                     referenceSection,
                     beforeAfterSection,
+                    scopeSection,
                     gradeSection,
                     styleSection
                 }
@@ -2775,5 +2827,93 @@ public sealed class MainWindow : Window
         }
 
         return bitmap;
+    }
+
+    private static Bitmap? CreateScopeBitmap(ColorScopeData? scopes, bool vectorscope)
+    {
+        if (scopes is null)
+        {
+            return null;
+        }
+
+        const int width = 256;
+        const int height = 128;
+        var bitmap = new WriteableBitmap(
+            new PixelSize(width, height),
+            new Vector(96, 96),
+            PixelFormat.Rgba8888,
+            AlphaFormat.Opaque);
+        var rgba = new byte[width * height * 4];
+        for (var pixel = 0; pixel < width * height; pixel++)
+        {
+            var offset = pixel * 4;
+            rgba[offset] = 16;
+            rgba[offset + 1] = 18;
+            rgba[offset + 2] = 22;
+            rgba[offset + 3] = 255;
+        }
+
+        for (var grid = 1; grid < 4; grid++)
+        {
+            var y = grid * height / 4;
+            for (var x = 0; x < width; x++)
+            {
+                SetScopePixel(rgba, width, x, y, 42, 46, 55);
+            }
+        }
+
+        var bins = vectorscope ? scopes.Vectorscope : scopes.Waveform;
+        var maximum = bins.Count == 0 ? 0 : bins.Max();
+        if (maximum == 0)
+        {
+            using var emptyFramebuffer = bitmap.Lock();
+            for (var row = 0; row < height; row++)
+            {
+                Marshal.Copy(rgba, row * width * 4, emptyFramebuffer.Address + row * emptyFramebuffer.RowBytes, width * 4);
+            }
+
+            return bitmap;
+        }
+
+        for (var y = 0; y < height; y++)
+        {
+            var sourceY = (height - 1 - y) * 64 / height;
+            for (var x = 0; x < width; x++)
+            {
+                var sourceX = x * 64 / width;
+                var value = bins[sourceY * 64 + sourceX];
+                if (value == 0)
+                {
+                    continue;
+                }
+
+                var intensity = (byte)(48 + 207 * value / maximum);
+                SetScopePixel(
+                    rgba,
+                    width,
+                    x,
+                    y,
+                    vectorscope ? (byte)205 : intensity,
+                    vectorscope ? (byte)184 : intensity,
+                    vectorscope ? (byte)255 : intensity);
+            }
+        }
+
+        using var framebuffer = bitmap.Lock();
+        for (var row = 0; row < height; row++)
+        {
+            Marshal.Copy(rgba, row * width * 4, framebuffer.Address + row * framebuffer.RowBytes, width * 4);
+        }
+
+        return bitmap;
+    }
+
+    private static void SetScopePixel(byte[] rgba, int width, int x, int y, byte red, byte green, byte blue)
+    {
+        var offset = (y * width + x) * 4;
+        rgba[offset] = red;
+        rgba[offset + 1] = green;
+        rgba[offset + 2] = blue;
+        rgba[offset + 3] = 255;
     }
 }
