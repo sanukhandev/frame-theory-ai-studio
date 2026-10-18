@@ -58,6 +58,7 @@ public sealed class MainWindow : Window
                 HorizontalContentAlignment = HorizontalAlignment.Stretch
             };
             AutomationProperties.SetName(tab, $"{workspace.Name} workspace");
+            ToolTip.SetTip(tab, $"{workspace.Name}: {workspace.Description}");
             tabs.Items.Add(tab);
         }
         tabs.Bind(SelectingItemsControl.SelectedIndexProperty, new Binding(nameof(MainWindowViewModel.SelectedWorkspaceIndex))
