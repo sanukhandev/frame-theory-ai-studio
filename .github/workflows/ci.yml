@@ -252,6 +252,9 @@ jobs:
           if (-not ($licenses | Where-Object { $_.id -eq 'Avalonia' -and $_.licenseExpression -eq 'MIT' -and $_.metadataFound })) {
             throw "NuGet license metadata report did not include Avalonia MIT metadata."
           }
+          if (-not ($licenses | Where-Object { $_.id -eq 'Avalonia.Headless' -and $_.licenseExpression -eq 'MIT' -and $_.metadataFound })) {
+            throw "NuGet license metadata report did not include Avalonia.Headless MIT metadata."
+          }
       - name: Build
         if: steps.detect.outputs.has_solution == 'true'
         run: dotnet build --no-restore -c Release
