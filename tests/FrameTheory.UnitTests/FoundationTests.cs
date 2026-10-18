@@ -999,6 +999,16 @@ public sealed class FoundationTests
                 Xunit.Assert.True(geminiProviderStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, geminiProviderStatus.FontSize);
                 Xunit.Assert.Equal("Current optional Gemini provider configuration status.", ToolTip.GetTip(geminiProviderStatus));
+                var geminiModel = window.GetVisualDescendants()
+                    .OfType<ComboBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Gemini model");
+                Xunit.Assert.True(double.IsNaN(geminiModel.Width));
+                Xunit.Assert.Equal(150, geminiModel.MinWidth);
+                Xunit.Assert.Equal(300, geminiModel.MaxWidth);
+                Xunit.Assert.Equal(HorizontalAlignment.Stretch, geminiModel.HorizontalAlignment);
+                Xunit.Assert.Equal(
+                    "Choose the optional Gemini model used for approved analysis requests.",
+                    ToolTip.GetTip(geminiModel));
                 var activitySection = window.GetVisualDescendants()
                     .OfType<Expander>()
                     .Single(control => AutomationProperties.GetName(control) == "Activity section");

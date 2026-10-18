@@ -1703,8 +1703,16 @@ public sealed class MainWindow : Window
     private static Control CreateGeminiSettingsPanel(MainWindowViewModel viewModel)
     {
         var settings = viewModel.GeminiSettings;
-        var model = new ComboBox { ItemsSource = settings.Models, SelectedIndex = 0 };
+        var model = new ComboBox
+        {
+            ItemsSource = settings.Models,
+            SelectedIndex = 0,
+            MinWidth = 150,
+            MaxWidth = 300,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
         AutomationProperties.SetName(model, "Gemini model");
+        ToolTip.SetTip(model, "Choose the optional Gemini model used for approved analysis requests.");
         model.Bind(SelectingItemsControl.SelectedItemProperty, new Binding(nameof(GeminiSettingsViewModel.SelectedModelId))
         {
             Mode = BindingMode.TwoWay
