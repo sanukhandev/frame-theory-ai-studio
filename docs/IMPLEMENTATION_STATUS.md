@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Autosave cleanup checkpoint (2026-10-19):** Autosave removal is now best effort, so recovery and project lifecycle callers are not interrupted by a secondary filesystem cleanup failure. Existing autosave recovery and relink coverage remains green.
+
 **Timeline-compositor cleanup checkpoint (2026-10-19):** Timeline compositor temporary output cleanup is now best effort, preserving composition, verification and cancellation failures when an intermediate file cannot be deleted. Existing compositor coverage remains green.
 
 **Media-export cleanup checkpoint (2026-10-19):** Direct video export temporary-file cleanup is now best effort, preserving encoder, verification and cancellation failures instead of replacing them with cleanup exceptions. Existing media-export coverage remains green.

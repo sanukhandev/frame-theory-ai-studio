@@ -40,7 +40,16 @@ public sealed class ProjectRecoveryService
 
         if (File.Exists(autosavePath))
         {
-            File.Delete(autosavePath);
+            try
+            {
+                File.Delete(autosavePath);
+            }
+            catch (IOException)
+            {
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
         }
     }
 
