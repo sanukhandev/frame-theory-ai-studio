@@ -8,6 +8,23 @@ namespace FrameTheory.UnitTests;
 public sealed class GeminiInteractionsTests
 {
     [Xunit.Fact]
+    public void RetryDelayUsesBoundedExponentialBackoffAndServerHint()
+    {
+        Xunit.Assert.Equal(
+            TimeSpan.FromMilliseconds(25),
+            GeminiInteractionsClient.CalculateRetryDelay(TimeSpan.FromMilliseconds(25), 1, null));
+        Xunit.Assert.Equal(
+            TimeSpan.FromMilliseconds(50),
+            GeminiInteractionsClient.CalculateRetryDelay(TimeSpan.FromMilliseconds(25), 2, null));
+        Xunit.Assert.Equal(
+            TimeSpan.FromSeconds(30),
+            GeminiInteractionsClient.CalculateRetryDelay(TimeSpan.FromSeconds(30), 3, null));
+        Xunit.Assert.Equal(
+            TimeSpan.FromSeconds(30),
+            GeminiInteractionsClient.CalculateRetryDelay(TimeSpan.FromMilliseconds(25), 1, TimeSpan.FromMinutes(1)));
+    }
+
+    [Xunit.Fact]
     public async Task FollowUpParsesUsageAndKeepsPromptAndSecretOutOfLocalHistory()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-history-");

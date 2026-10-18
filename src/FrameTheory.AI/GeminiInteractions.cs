@@ -187,6 +187,7 @@ public interface IGeminiClient
 
 public sealed class GeminiInteractionsClient : IGeminiClient
 {
+    private static readonly TimeSpan MaximumRetryWait = TimeSpan.FromSeconds(30);
     private static readonly Uri InteractionsEndpoint = new("https://generativelanguage.googleapis.com/v1beta/interactions");
     private readonly HttpClient _httpClient;
     private readonly GeminiClientOptions _options;
@@ -396,7 +397,7 @@ public sealed class GeminiInteractionsClient : IGeminiClient
                     if (IsRetryable(response.StatusCode) && attempts < _options.MaximumAttempts)
                     {
                         _diagnostics?.Record($"gemini.{operationName}.retry");
-                        await Task.Delay(TimeSpan.FromTicks(_options.RetryDelay.Ticks * attempts), cancellationToken);
+                        await Task.Delay(CalculateRetryDelay(_options.RetryDelay, attempts, GetRetryAfter(response)), cancellationToken);
                         continue;
                     }
 
@@ -440,12 +441,12 @@ public sealed class GeminiInteractionsClient : IGeminiClient
                 catch (HttpRequestException exception) when (attempts < _options.MaximumAttempts)
                 {
                     _diagnostics?.Record($"gemini.{operationName}.retry", exception);
-                    await Task.Delay(TimeSpan.FromTicks(_options.RetryDelay.Ticks * attempts), cancellationToken);
+                    await Task.Delay(CalculateRetryDelay(_options.RetryDelay, attempts, null), cancellationToken);
                 }
                 catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && attempts < _options.MaximumAttempts)
                 {
                     _diagnostics?.Record($"gemini.{operationName}.retry");
-                    await Task.Delay(TimeSpan.FromTicks(_options.RetryDelay.Ticks * attempts), cancellationToken);
+                    await Task.Delay(CalculateRetryDelay(_options.RetryDelay, attempts, null), cancellationToken);
                 }
                 catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
                 {
@@ -495,6 +496,38 @@ public sealed class GeminiInteractionsClient : IGeminiClient
         statusCode == HttpStatusCode.RequestTimeout ||
         statusCode == (HttpStatusCode)429 ||
         (int)statusCode >= 500;
+
+    internal static TimeSpan CalculateRetryDelay(TimeSpan baseDelay, int attempt, TimeSpan? serverDelay)
+    {
+        if (attempt < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(attempt));
+        }
+
+        var multiplier = 1L << Math.Min(attempt - 1, 5);
+        var maximumTicks = MaximumRetryWait.Ticks;
+        var exponentialTicks = baseDelay.Ticks > maximumTicks / multiplier
+            ? maximumTicks
+            : baseDelay.Ticks * multiplier;
+        var exponentialDelay = TimeSpan.FromTicks(exponentialTicks);
+        if (serverDelay is not { } requestedDelay || requestedDelay <= TimeSpan.Zero)
+        {
+            return exponentialDelay;
+        }
+
+        return requestedDelay > MaximumRetryWait ? MaximumRetryWait : requestedDelay;
+    }
+
+    private static TimeSpan? GetRetryAfter(HttpResponseMessage response)
+    {
+        var retryAfter = response.Headers.RetryAfter;
+        if (retryAfter?.Delta is { } delta)
+        {
+            return delta;
+        }
+
+        return retryAfter?.Date is { } date ? date - DateTimeOffset.UtcNow : null;
+    }
 
     private static string? GetHeader(HttpResponseMessage response, string name) =>
         response.Headers.TryGetValues(name, out var values)
