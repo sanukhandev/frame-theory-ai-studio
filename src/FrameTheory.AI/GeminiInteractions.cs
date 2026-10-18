@@ -371,7 +371,7 @@ public sealed class GeminiInteractionsClient : IGeminiClient
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(inputs);
-        if (inputs.Count is < 2 or > 64 || inputs[0].Type != "text" || string.IsNullOrWhiteSpace(inputs[0].Text) || inputs[0].Text.Length > 32_000)
+        if (inputs.Count is < 2 or > 64 || inputs[0].Type != "text" || string.IsNullOrWhiteSpace(inputs[0].Text) || inputs[0].Text is null || inputs[0].Text.Length > 32_000)
         {
             throw new ArgumentException("A Gemini plan requires one prompt of at most 32,000 characters and one to sixty-three bounded media inputs.", nameof(inputs));
         }
