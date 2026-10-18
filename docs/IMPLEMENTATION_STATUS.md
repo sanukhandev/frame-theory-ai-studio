@@ -50,6 +50,8 @@
 
 **FT-1005 portable archive checkpoint (2026-10-18):** CI now packages each per-OS desktop publish tree as `frame-theory-<platform>-portable.zip` through `scripts/archive_package.ps1` before generating and verifying the SHA-256 manifest. The helper rejects directory output paths and archives placed inside the source tree, while CI opens each archive and asserts that `FrameTheory.Desktop.dll` is present. A local archive smoke verified the generated zip contents; hosted runs `39081424352` and `39082055065` passed archive creation, payload assertion, native media, tests, publish, manifest verification and artifact upload on Windows, macOS and Linux. These are portable validation archives, not installers; native FFmpeg bundling, signing/notarization and clean-host relaunch remain open.
 
+**CI FFmpeg install checkpoint (2026-10-18):** Windows run `39082333029` correctly exposed a Chocolatey feed `404` while installing FFmpeg, so the workflow now falls back to the pinned WinGet `Gyan.FFmpeg` 9.0.2 package, locates its static executable, and preserves the existing FFmpeg/ffprobe evidence capture. Hosted run `39082588976` passed the repaired Windows path plus the full macOS/Linux matrix; no application behavior changed.
+
 **Manual UI gate checkpoint (2026-10-18):** The Release desktop process launches from the managed `FrameTheory.Desktop.dll` with the expected `Frame Theory Studio AI` window title on this Windows host, but the available CUA inventory still returns zero native Windows applications and only browser tabs. FT-901..FT-904 and FT-1002 remain unverified; no interactive acceptance claim is made.
 
 **FT-204 batch-import checkpoint (2026-10-18):** The desktop media browser now retains previously imported media when files arrive in later drag/drop or picker batches, preserves stable media IDs for the visible entries and avoids duplicate browser rows when the same source is imported again. The timeline and analysis dictionaries retain their existing idempotent behavior. Focused desktop import coverage passes 6/6; full local Release tests pass 163/2, build has 0 warnings/errors and formatting verification passes.
@@ -163,11 +165,11 @@
 ```text
 Date/time: 2026-10-18
 Task / Epic: FT-1005 / E10 portable release archives
-Git SHA: 1f3a5ff (implementation: archive_package.ps1 and CI archive/payload assertion steps)
-Files changed: scripts/archive_package.ps1, .github/workflows/ci.yml, docs/RELEASE.md, docs/IMPLEMENTATION_STATUS.md
-Actual behavior and UI path: Each CI OS publishes the desktop tree, creates a portable zip outside the source tree, includes it in the artifact set and verifies it through the existing SHA-256 manifest path. The archive is a portable validation package only; no installer or native media dependency is silently bundled.
+Git SHA: b6ebb5a (CI remediation: pinned Windows FFmpeg fallback)
+Files changed: .github/workflows/ci.yml
+Actual behavior and UI path: Windows CI first attempts the existing Chocolatey FFmpeg install and, when the package feed fails, installs the pinned Gyan.FFmpeg 9.0.2 WinGet package, discovers the static executable path and adds it to the current step and subsequent GitHub Actions PATH. The app remains host-dependent; no native media binary is bundled into the product.
 Commands executed + OS: Windows 11 x64 with .NET SDK 10.0.402; focused batch/recipe tests, full Release build/tests and formatting/diff verification, then hosted Windows/macOS/Linux validation.
-Test outputs / exit codes: Archive smoke created and inspected a zip locally; `git diff --check` passed. Hosted run `39082055065` passed documentation, native batch MP4, recipe, advisory, build, format, tests, publish, portable archive payload assertion, checksum and upload validation on Windows, macOS and Linux.
+Test outputs / exit codes: Local WinGet path discovery launched FFmpeg 9.0.2 and `git diff --check` passed. Hosted run `39082588976` passed documentation, native batch MP4, recipe, advisory, build, format, tests, publish, portable archive payload assertion, checksum and upload validation on Windows, macOS and Linux.
 Media fixtures and verification: Hosted synthetic H.264/AAC smoke produced three verified social MP4 targets, plus existing timeline/photo fixtures; no user media, API key or proprietary binary entered Git. Local FFmpeg was unavailable on this Windows host, so native media execution remains hosted evidence.
 Known limitations / blockers: Approved official logo/brand-kit bytes, manual Avalonia UI acceptance, live Gemini provider evidence, licensing/native redistribution, real installers and signing remain open. Portable archives do not close FT-1005.
 Next unblocked task: Continue remaining P0 manual/external release gates; do not close FT-1005 or claim V1 without installer, licensing, branding and release evidence.
