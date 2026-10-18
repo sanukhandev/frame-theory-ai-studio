@@ -147,6 +147,39 @@ public sealed class MediaImportTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task ImportRejectsMediaChangedDuringAnalysis()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-import-change-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "clip.mp4");
+            await File.WriteAllTextAsync(path, "source");
+            var metadata = new MediaSourceMetadata(
+                MediaId.Parse(new string('b', 64)),
+                new Uri(path),
+                MediaKind.Video,
+                8,
+                4,
+                new RationalFrameRate(30, 1),
+                30,
+                TimeSpan.FromSeconds(1));
+            var importer = new FfmpegMediaImporter(
+                new StubProbe(metadata),
+                new MutatingDecoder(),
+                new StubProcessRunner());
+
+            var exception = await Xunit.Assert.ThrowsAsync<MediaImportException>(() =>
+                importer.ImportAsync(new Uri(path), CancellationToken.None));
+
+            Xunit.Assert.Contains("changed while import", exception.Message, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private sealed class StubProbe(MediaSourceMetadata metadata) : IMediaProbe
     {
         public Task<MediaSourceMetadata> ProbeAsync(Uri file, CancellationToken cancellationToken) => Task.FromResult(metadata);
@@ -156,6 +189,15 @@ public sealed class MediaImportTests
     {
         public Task<byte[]> DecodeFrameAsync(Uri file, RationalFrameRate frameRate, long frameIndex, CancellationToken cancellationToken) =>
             Task.FromResult("P6\n1 1\n255\n\0\0\0"u8.ToArray());
+    }
+
+    private sealed class MutatingDecoder : IPreviewFrameDecoder
+    {
+        public async Task<byte[]> DecodeFrameAsync(Uri file, RationalFrameRate frameRate, long frameIndex, CancellationToken cancellationToken)
+        {
+            await File.WriteAllTextAsync(file.LocalPath, "replacement media with a different length", cancellationToken);
+            return "P6\n1 1\n255\n\0\0\0"u8.ToArray();
+        }
     }
 
     private sealed class StubProcessRunner(bool writeOutput = true, int exitCode = 0) : IMediaProcessRunner

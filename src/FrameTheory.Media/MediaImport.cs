@@ -54,6 +54,23 @@ public sealed class FfmpegMediaImporter : IMediaImporter
     public async Task<ImportedMedia> ImportAsync(Uri file, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(file);
+        if (!file.IsFile)
+        {
+            throw new MediaImportException("Only local media files can be imported.");
+        }
+
+        var sourcePath = Path.GetFullPath(file.LocalPath);
+        if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
+        {
+            throw new MediaImportException("Symlinked media paths are not accepted for import.");
+        }
+
+        if (!File.Exists(sourcePath))
+        {
+            throw new FileNotFoundException("The media file was not found.", sourcePath);
+        }
+
+        var sourceStamp = SourceStamp.Read(sourcePath);
         var metadata = await _probe.ProbeAsync(file, cancellationToken);
         byte[]? thumbnail = metadata.Kind == MediaKind.Audio
             ? null
@@ -65,6 +82,11 @@ public sealed class FfmpegMediaImporter : IMediaImporter
         var waveform = metadata.HasAudio || metadata.Kind == MediaKind.Audio
             ? await ExtractWaveformAsync(file, DefaultPeakCount, cancellationToken)
             : Array.Empty<float>();
+        if (!sourceStamp.Matches(sourcePath))
+        {
+            throw new MediaImportException("The selected media changed while import was in progress.");
+        }
+
         return new ImportedMedia(metadata, thumbnail, waveform);
     }
 
@@ -156,5 +178,25 @@ public sealed class FfmpegMediaImporter : IMediaImporter
         }
 
         return peaks;
+    }
+
+    private readonly record struct SourceStamp(long Length, DateTime LastWriteTimeUtc)
+    {
+        public static SourceStamp Read(string path)
+        {
+            var info = new FileInfo(path);
+            return new SourceStamp(info.Length, info.LastWriteTimeUtc);
+        }
+
+        public bool Matches(string path)
+        {
+            if (LocalPathSecurity.ContainsReparsePoint(path) || !File.Exists(path))
+            {
+                return false;
+            }
+
+            var info = new FileInfo(path);
+            return info.Length == Length && info.LastWriteTimeUtc == LastWriteTimeUtc;
+        }
     }
 }
