@@ -331,6 +331,11 @@ jobs:
           if (-not (Test-Path -LiteralPath (Join-Path $installDirectory "ffmpeg.exe")) -or -not (Test-Path -LiteralPath (Join-Path $installDirectory "ffprobe.exe"))) {
             throw "Windows installer did not include the validated FFmpeg/ffprobe pair."
           }
+          $env:FRAME_THEORY_FFMPEG_DIR = $installDirectory
+          $mediaSmoke = dotnet tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4
+          if ($LASTEXITCODE -ne 0 -or $mediaSmoke -notmatch 'kind=Video') {
+            throw "Windows packaged FFmpeg runtime smoke failed: $mediaSmoke"
+          }
           ./scripts/smoke_desktop.ps1 -AssemblyPath (Join-Path $installDirectory "FrameTheory.Desktop.exe") -RequireWindowTitle
           Start-Process -FilePath (Join-Path $installDirectory "unins000.exe") -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait
           if (Test-Path -LiteralPath $installDirectory) {
@@ -356,6 +361,9 @@ jobs:
           test -x "$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
           test -x "$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS/ffmpeg"
           test -x "$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS/ffprobe"
+          FRAME_THEORY_FFMPEG_DIR="$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS" \
+            dotnet tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4 | tee "$RUNNER_TEMP/frame-theory-macos-bundled-media.txt"
+          grep -F 'kind=Video' "$RUNNER_TEMP/frame-theory-macos-bundled-media.txt"
           bundle_version="$(plutil -extract CFBundleShortVersionString raw -o - "$dmg_mount/Frame Theory Studio AI.app/Contents/Info.plist")"
           echo "Mounted DMG bundle version: $bundle_version"
           test "$bundle_version" = "0.1.1"
@@ -392,6 +400,9 @@ jobs:
           sudo dpkg -i artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb
           test -x /opt/frame-theory-studio/ffmpeg
           test -x /opt/frame-theory-studio/ffprobe
+          FRAME_THEORY_FFMPEG_DIR=/opt/frame-theory-studio \
+            dotnet tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4 | tee "$RUNNER_TEMP/frame-theory-linux-bundled-media.txt"
+          grep -F 'kind=Video' "$RUNNER_TEMP/frame-theory-linux-bundled-media.txt"
           cleanup_deb() { sudo dpkg -r frame-theory-studio-ai >/dev/null 2>&1 || true; }
           trap cleanup_deb EXIT
           xvfb-run -a pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath /opt/frame-theory-studio/FrameTheory.Desktop
