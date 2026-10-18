@@ -171,6 +171,21 @@ public sealed class TranscriptionTests
     }
 
     [Xunit.Fact]
+    public void TranscriptResultExposesAnImmutableWordSnapshot()
+    {
+        var words = new List<TranscriptWord>
+        {
+            new("hello", TimeSpan.Zero, TimeSpan.FromMilliseconds(400))
+        };
+        var result = new TranscriptResult(new Uri("file:///spoken.wav"), "sha256:spoken", words);
+
+        words.Clear();
+
+        Xunit.Assert.Single(result.Words);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TranscriptWord>>(result.Words).IsReadOnly);
+    }
+
+    [Xunit.Fact]
     public void WhisperJsonParserLoadsWordTimingsAndRejectsMissingWords()
     {
         var source = new Uri("file:///spoken.wav");

@@ -57,9 +57,9 @@ public sealed record TimedCaption
         End = end;
         Text = text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
         Provenance = provenance;
-        Words = (words ?? [])
+        Words = Array.AsReadOnly((words ?? [])
             .OrderBy(word => word.Start)
-            .ToArray();
+            .ToArray());
         if (Words.Any(word => word.Start < start || word.End > end) ||
             Words.Zip(Words.Skip(1), (previous, current) => previous.End <= current.Start).Any(isValid => !isValid))
         {

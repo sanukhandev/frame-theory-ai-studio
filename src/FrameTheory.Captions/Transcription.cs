@@ -49,7 +49,7 @@ public sealed record TranscriptResult
 
         Source = source;
         SourceFingerprint = sourceFingerprint.Trim();
-        Words = orderedWords;
+        Words = Array.AsReadOnly(orderedWords);
     }
 
     public Uri Source { get; }

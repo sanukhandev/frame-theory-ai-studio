@@ -31,7 +31,7 @@ public sealed class TimedCaptionTests
     [Xunit.Fact]
     public void TimedCaptionRetainsBoundedWordTimingsAndRejectsOverlaps()
     {
-        var words = new[]
+        var words = new List<TimedCaptionWord>
         {
             new TimedCaptionWord("one", TimeSpan.Zero, TimeSpan.FromMilliseconds(400)),
             new TimedCaptionWord("two", TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(1))
@@ -40,6 +40,9 @@ public sealed class TimedCaptionTests
         var caption = new TimedCaption(1, TimeSpan.Zero, TimeSpan.FromSeconds(1), "one two", CaptionProvenance.VerifiedTranscript, words);
 
         Xunit.Assert.Equal(words, caption.Words);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimedCaptionWord>>(caption.Words).IsReadOnly);
+        words.Clear();
+        Xunit.Assert.Equal(2, caption.Words.Count);
         Xunit.Assert.Throws<ArgumentException>(() => new TimedCaption(
             1,
             TimeSpan.Zero,
