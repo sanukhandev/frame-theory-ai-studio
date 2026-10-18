@@ -269,7 +269,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/frame-theory-dmg"
           hdiutil attach -nobrowse -readonly artifacts/installer/FrameTheoryStudioAI-*.dmg -mountpoint "$RUNNER_TEMP/frame-theory-dmg"
           test -x "$RUNNER_TEMP/frame-theory-dmg/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
-          grep -F '<key>CFBundleShortVersionString</key><string>0.1.1</string>' "$RUNNER_TEMP/frame-theory-dmg/Frame Theory Studio AI.app/Contents/Info.plist"
+          test "$(plutil -extract CFBundleShortVersionString raw -o - "$RUNNER_TEMP/frame-theory-dmg/Frame Theory Studio AI.app/Contents/Info.plist")" = "0.1.1"
           pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath "$RUNNER_TEMP/frame-theory-dmg/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
           hdiutil detach "$RUNNER_TEMP/frame-theory-dmg"
       - name: Build Linux DEB validation
