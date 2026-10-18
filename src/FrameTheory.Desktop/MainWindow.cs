@@ -2710,6 +2710,16 @@ public sealed class MainWindow : Window
                 motionAnalysisStatus
             }
         };
+        var previewActionsCard = new Border
+        {
+            Padding = new Thickness(12),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(6),
+            Child = previewActions
+        };
+        AutomationProperties.SetName(previewActionsCard, "Timeline monitor controls");
         var previewCard = new Border
         {
             Padding = new Thickness(12),
@@ -2723,15 +2733,57 @@ public sealed class MainWindow : Window
             }
         };
         var previewGrid = (Grid)previewCard.Child;
-        previewGrid.Children.Add(new Border
+        var monitorFrame = new Border
         {
             MinHeight = 190,
             Margin = new Thickness(0, 0, 12, 0),
             Background = Brushes.Black,
             Child = new Grid { Children = { timelinePreviewEmptyState, timelinePreview } }
+        };
+        AutomationProperties.SetName(monitorFrame, "Timeline program monitor");
+        previewGrid.Children.Add(new StackPanel
+        {
+            Spacing = 6,
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = "PROGRAM MONITOR",
+                    FontSize = 10,
+                    FontWeight = FontWeight.SemiBold,
+                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+                },
+                monitorFrame
+            }
         });
-        previewGrid.Children.Add(previewActions);
-        Grid.SetColumn(previewActions, 1);
+        previewGrid.Children.Add(previewActionsCard);
+        Grid.SetColumn(previewActionsCard, 1);
+        var timelineNavigation = new Border
+        {
+            Padding = new Thickness(12),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(6),
+            Child = new StackPanel
+            {
+                Spacing = 6,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = "TIMELINE NAVIGATION",
+                        FontSize = 10,
+                        FontWeight = FontWeight.SemiBold,
+                        Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+                    },
+                    CreateFlow(new TextBlock { Text = "Frame" }, frameStatus, new TextBlock { Text = "Position" }, positionStatus),
+                    playhead,
+                    ruler
+                }
+            }
+        };
+        AutomationProperties.SetName(timelineNavigation, "Timeline navigation controls");
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
@@ -2747,10 +2799,7 @@ public sealed class MainWindow : Window
                 {
                     new TextBlock { Text = "Frame-accurate timeline", FontSize = 14, FontWeight = FontWeight.SemiBold, Foreground = Brushes.White },
                     previewCard,
-                    CreateSectionLabel("Timeline navigation"),
-                    CreateFlow(new TextBlock { Text = "Frame" }, frameStatus, new TextBlock { Text = "Position" }, positionStatus),
-                    playhead,
-                    ruler,
+                    timelineNavigation,
                     selectionInspector,
                     tracks,
                     analysisSection,
