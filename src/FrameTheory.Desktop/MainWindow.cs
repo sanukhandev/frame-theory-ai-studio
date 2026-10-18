@@ -3227,6 +3227,53 @@ public sealed class MainWindow : Window
         var quickExportStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(quickExportStatus, "Quick export status");
         quickExportStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
+        var quickActionStatus = new Border
+        {
+            Padding = new Thickness(8),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(20, 23, 29)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(5),
+            Child = new StackPanel
+            {
+                Spacing = 4,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = "LOCAL ACTIONS",
+                        FontSize = 10,
+                        FontWeight = FontWeight.SemiBold,
+                        Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+                    },
+                    new StackPanel
+                    {
+                        Spacing = 2,
+                        Children =
+                        {
+                            new TextBlock
+                            {
+                                Text = "PROJECT",
+                                FontSize = 9,
+                                FontWeight = FontWeight.SemiBold,
+                                Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145))
+                            },
+                            quickSaveStatus,
+                            new TextBlock
+                            {
+                                Text = "EXPORT",
+                                FontSize = 9,
+                                FontWeight = FontWeight.SemiBold,
+                                Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145))
+                            },
+                            quickExportStatus
+                        }
+                    }
+                }
+            }
+        };
+        AutomationProperties.SetName(quickActionStatus, "Timeline action status");
+        ToolTip.SetTip(quickActionStatus, "Status for the latest local project save and timeline export.");
         var retryExport = new Button { Content = "Retry last export" };
         AutomationProperties.SetName(retryExport, "Retry last timeline export");
         retryExport.Click += async (_, _) => await viewModel.RetryLastTimelineExportAsync(CancellationToken.None);
@@ -3342,8 +3389,7 @@ public sealed class MainWindow : Window
                     }
                 },
                 CreateFlow(previewCurrentFrame, playTimeline, stopTimeline, quickSaveProject, quickExport),
-                quickSaveStatus,
-                quickExportStatus,
+                quickActionStatus,
                 usePreviewProxy,
                 analyzeMotion,
                 timelinePreviewStatus,
