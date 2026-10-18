@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using FrameTheory.Desktop;
 
 namespace FrameTheory.UnitTests;
 
@@ -14,5 +15,8 @@ public sealed class BrandAssetTests
         Xunit.Assert.True(File.Exists(path), $"Approved logo was not copied to {path}.");
         Xunit.Assert.Equal(0, (int)(File.GetAttributes(path) & FileAttributes.ReparsePoint));
         Xunit.Assert.Equal(ApprovedLogoHash, Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))));
+        Xunit.Assert.True(BrandAssetCatalog.TryGetApprovedLogoPath(out var resolvedPath));
+        Xunit.Assert.Equal(Path.GetFullPath(path), resolvedPath);
+        Xunit.Assert.True(BrandAssetCatalog.IsApprovedLogoPath(path));
     }
 }

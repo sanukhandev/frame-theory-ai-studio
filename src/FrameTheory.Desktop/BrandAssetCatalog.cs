@@ -1,12 +1,15 @@
+using System.Security.Cryptography;
+
 namespace FrameTheory.Desktop;
 
 internal static class BrandAssetCatalog
 {
     public const string ApprovedLogoRelativePath = "assets/brand/frame-theory-original.png";
+    private const string ApprovedLogoSha256 = "0BD29D37FBCC4C753B8870A65E3A02E23460C1A5C305E53E6CD2D9D2F151F388";
 
     public static bool TryGetApprovedLogoPath(out string path)
     {
-        path = Path.Combine(AppContext.BaseDirectory, ApprovedLogoRelativePath);
+        path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ApprovedLogoRelativePath));
         if (!File.Exists(path))
         {
             path = string.Empty;
@@ -16,6 +19,12 @@ internal static class BrandAssetCatalog
         try
         {
             if ((File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0)
+            {
+                path = string.Empty;
+                return false;
+            }
+
+            if (!string.Equals(Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))), ApprovedLogoSha256, StringComparison.Ordinal))
             {
                 path = string.Empty;
                 return false;
@@ -36,8 +45,9 @@ internal static class BrandAssetCatalog
     }
 
     public static bool IsApprovedLogoPath(string path) =>
+        TryGetApprovedLogoPath(out var approvedPath) &&
         string.Equals(
             Path.GetFullPath(path),
-            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ApprovedLogoRelativePath)),
+            approvedPath,
             OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 }
