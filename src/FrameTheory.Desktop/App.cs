@@ -44,6 +44,30 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.PaddingProperty, new Thickness(12, 7))
             }
         });
+        Styles.Add(new Style(selector => selector.OfType<Button>().Class(":pointerover"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 48, 59))),
+                new Setter(TemplatedControl.BorderBrushProperty, accent)
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<Button>().Class(":pressed"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(59, 69, 96))),
+                new Setter(TemplatedControl.BorderBrushProperty, accent)
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<Button>().Class(":disabled"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.ForegroundProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(119, 125, 138))),
+                new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(43, 47, 55)))
+            }
+        });
         Styles.Add(new Style(selector => selector.OfType<TextBox>())
         {
             Setters =
@@ -53,6 +77,13 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70)))
             }
         });
+        Styles.Add(new Style(selector => selector.OfType<TextBox>().Class(":focus"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BorderBrushProperty, accent)
+            }
+        });
         Styles.Add(new Style(selector => selector.OfType<ComboBox>())
         {
             Setters =
@@ -60,6 +91,13 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.BackgroundProperty, input),
                 new Setter(TemplatedControl.ForegroundProperty, foreground),
                 new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70)))
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<ComboBox>().Class(":focus"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BorderBrushProperty, accent)
             }
         });
         Styles.Add(new Style(selector => selector.OfType<ListBox>())

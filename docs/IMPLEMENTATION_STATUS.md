@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Editor interaction-state checkpoint (2026-10-18):** Shared Avalonia styles now give buttons deterministic graphite hover/pressed/disabled states and give text/combo inputs a blue focus border, preserving the dark Frame Theory palette across host themes. The rebuilt Foundation shell test, Release test-project build, formatting and `git diff --check` pass; native pointer/keyboard visual review remains unverified.
+
 **Deterministic dark-theme checkpoint (2026-10-18):** The Avalonia Fluent theme is now explicitly requested as dark before the shared editor styles are installed, preventing host OS theme defaults from producing inconsistent light controls. The rebuilt Foundation shell test passes, the Release test-project build is warning-free, and formatting/diff checks are green. Native visual inspection remains unverified.
 
 **Hosted UI correction checkpoint (2026-10-18):** Hosted run `39123624550` correctly failed the new adaptive-shell test on macOS/Linux because `FoundationTests.cs` lacked its `Avalonia.Layout` import; the local `--no-build` smoke had not compiled that changed test source. The test now rebuilds from source and passes, unnamed string-content buttons receive content-derived automation names after window open, and formatting/diff checks are green. The corrective commit is local and awaits the next exact-ten-commit push.
