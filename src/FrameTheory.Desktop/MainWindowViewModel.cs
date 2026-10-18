@@ -559,7 +559,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             AiRecipeStatusText = $"Saved validated recipe {Path.GetFileName(path)}.";
             return true;
         }
-        catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException)
+        catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException or InvalidDataException)
         {
             _diagnosticsLog.Record("ai-recipe-save-failed", exception);
             AiRecipeStatusText = $"AI recipe save failed: {exception.Message}";
@@ -587,7 +587,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             AiRecipeStatusText = "AI recipe load canceled.";
             return false;
         }
-        catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException or AiPlanFormatException)
+        catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException or InvalidDataException or AiPlanFormatException)
         {
             _diagnosticsLog.Record("ai-recipe-load-failed", exception);
             AiRecipeStatusText = $"AI recipe load failed: {exception.Message}";

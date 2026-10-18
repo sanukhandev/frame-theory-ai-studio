@@ -93,6 +93,26 @@ public sealed class DesktopAiRevisionTests
         Xunit.Assert.Contains("revision failed", viewModel.AiRevisionStatusText, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Xunit.Fact]
+    public async Task DesktopRecipeSaveReportsDirectoryDestinationFailure()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-ai-recipe-destination-");
+        try
+        {
+            var viewModel = new MainWindowViewModel(new WorkspaceCatalog(), new TestCapabilityDetector());
+            viewModel.ValidateAiPlan("""
+                {"schemaVersion":"1.0","planId":"recipe-1","projectId":"active-project","intent":"grade","actions":[{"id":"grade-1","type":"color.adjust","targetId":"active-project","startFrame":0,"durationFrames":1,"params":{"exposureEV":0,"contrast":0,"saturation":0,"temperature":0,"tint":0}}]}
+                """);
+
+            Xunit.Assert.False(await viewModel.SaveAiRecipeAsync(directory.FullName, "Recipe", CancellationToken.None));
+            Xunit.Assert.Contains("recipe save failed", viewModel.AiRecipeStatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private sealed class InMemorySecretStore : ISecretStore
     {
         private string? _secret;

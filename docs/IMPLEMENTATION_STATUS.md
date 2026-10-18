@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**AI-recipe permission checkpoint (2026-10-19):** AI recipe save/load now report permission-denied paths through the AI workspace status boundary instead of escaping local recipe commands. Focused revision/recipe coverage passes.
+
 **Caption-permission checkpoint (2026-10-19):** Caption import, verified transcript import, local Whisper and optional Gemini transcription now report permission failures through the Caption workspace status boundary. Focused transcription coverage passes; no caption mutation occurs on failure.
 
 **Gemini-analysis storage checkpoint (2026-10-19):** Credential-store access failures during optional Gemini analysis and reference-grade requests now remain status results without escaping the AI command. Focused analysis coverage passes; offline/manual editing remains available.
