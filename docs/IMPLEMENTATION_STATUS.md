@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Full local gate checkpoint (2026-10-18):** The current path-security batch passes the full Release solution gate with 244 unit tests and 2 golden tests, 0 failures, repository validation, formatting and `git diff --check`. Native FFmpeg smoke and three-OS packaging remain hosted-only evidence; manual, legal, signing, clean-host and final-audit gates remain open.
+
 **Path-guard regression contract checkpoint (2026-10-18):** Documentation-stage validation now rejects any production C# reintroduction of `FileAttributes.ReparsePoint` outside `LocalPathSecurity`, while requiring every protected entry point to call the shared guard. Validator, formatting and `git diff --check` pass.
 
 **Remaining trust-boundary consolidation checkpoint (2026-10-18):** Photo project source capture, approved-brand loading and preview-cache eviction now use the shared ancestor-aware path guard; static repository validation requires all three entry points to retain it. Focused photo/preview/brand coverage passes 10/10, repository validation, formatting and `git diff --check` pass.
