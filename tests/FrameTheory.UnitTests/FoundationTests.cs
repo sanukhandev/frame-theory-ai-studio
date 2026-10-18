@@ -390,6 +390,7 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(HorizontalAlignment.Left, aspectRatio.HorizontalContentAlignment);
                 timelineSections["Project and export section"].IsExpanded = true;
                 timelineSections["Timeline view section"].IsExpanded = true;
+                timelineSections["Titles and captions section"].IsExpanded = true;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(
                     "Scrub to an exact timeline frame.",
@@ -403,6 +404,16 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Current frame and timeline position.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBlock>().Single(control => AutomationProperties.GetName(control) == "Timeline ruler")));
+                var titleText = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline title text");
+                Xunit.Assert.True(double.IsNaN(titleText.Width));
+                Xunit.Assert.Equal(160, titleText.MinWidth);
+                Xunit.Assert.Equal(360, titleText.MaxWidth);
+                Xunit.Assert.Equal(HorizontalAlignment.Stretch, titleText.HorizontalAlignment);
+                Xunit.Assert.Equal(
+                    "Enter editable title text for the selected timeline position.",
+                    ToolTip.GetTip(titleText));
                 var rulerPlayhead = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline ruler playhead");

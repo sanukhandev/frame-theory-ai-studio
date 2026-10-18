@@ -3260,8 +3260,15 @@ public sealed class MainWindow : Window
         var clearAudio = new Button { Content = "Clear audio" };
         AutomationProperties.SetName(clearAudio, "Clear selected audio settings");
         clearAudio.Click += (_, _) => RunTimelineAction(timeline.ClearSelectedAudioSettings);
-        var titleText = new TextBox { PlaceholderText = "Title text", Width = 220 };
+        var titleText = new TextBox
+        {
+            PlaceholderText = "Title text",
+            MinWidth = 160,
+            MaxWidth = 360,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
         AutomationProperties.SetName(titleText, "Timeline title text");
+        ToolTip.SetTip(titleText, "Enter editable title text for the selected timeline position.");
         var addTitle = new Button { Content = "Add title" };
         AutomationProperties.SetName(addTitle, "Add timeline title");
         addTitle.Click += async (_, _) =>

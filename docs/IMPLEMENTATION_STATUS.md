@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive title-input checkpoint (2026-10-18):** Timeline title entry now stretches within a bounded 160–360px inspector width and exposes a concise editable-title tooltip, preventing the compact captions panel from being dominated by a fixed input. Foundation coverage verifies its bounds and discoverability.
+
 **Responsive monitor-stack checkpoint (2026-10-18):** The Video program monitor now stacks its action rail below the measured 520px compact-card threshold and restores the two-column monitor/action composition above it. Headless adaptive-shell coverage verifies both arrangements and preserves the live controls; native visual and HiDPI acceptance remains open.
 
 **Keyboard edit-history checkpoint (2026-10-18):** Photo undo/redo now routes through standard `Ctrl/Cmd+Z`, `Ctrl/Cmd+Shift+Z` and `Ctrl/Cmd+Y` shortcuts according to the active workspace, while Video/AI preserve the existing approved-AI undo path. Empty-history calls return explicit status without mutation; Foundation coverage exercises the routing contract.
