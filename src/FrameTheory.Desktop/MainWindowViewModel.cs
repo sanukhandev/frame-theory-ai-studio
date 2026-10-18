@@ -820,7 +820,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
         }
 
-        ImportedMedia = imported;
+        ImportedMedia = Array.AsReadOnly(imported.ToArray());
         OnPropertyChanged(nameof(ImportedMedia));
         OnPropertyChanged(nameof(ImportedMediaSummary));
         MediaImportStatusText = newlyImported == 0 && failures.Count == 0
@@ -1164,7 +1164,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 });
             }
 
-            ImportedMedia = importedViewModels;
+            ImportedMedia = Array.AsReadOnly(importedViewModels.ToArray());
             OnPropertyChanged(nameof(ImportedMedia));
             OnPropertyChanged(nameof(ImportedMediaSummary));
             var video = imported.Select(item => item.Media.Metadata).FirstOrDefault(metadata => metadata.Kind == MediaKind.Video);
@@ -1844,9 +1844,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     private void SetMissingTimelineMedia(IReadOnlyList<MediaReference> references)
     {
-        MissingTimelineMedia = references
+        MissingTimelineMedia = Array.AsReadOnly(references
             .Select(reference => new MissingMediaViewModel(reference.Id, reference.RelativePath))
-            .ToArray();
+            .ToArray());
         SelectedMissingTimelineMedia = MissingTimelineMedia.FirstOrDefault();
         OnPropertyChanged(nameof(MissingTimelineMedia));
     }
