@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive photo-preview checkpoint (2026-10-18):** Photo original/edited canvases now stretch within their two-up comparison cards while preserving aspect ratio and a 640px bound, avoiding centered oversized children at compact widths. The adaptive-shell contract verifies both images; native visual and HiDPI acceptance remains open.
+
 **Responsive scopes checkpoint (2026-10-18):** Color waveform and vectorscope previews now keep a 160–240px bounded width, preserve their generated aspect ratio and stretch within the inspector flow instead of forcing fixed 240px children. The adaptive-shell contract verifies both scope images; native visual and HiDPI acceptance remains open.
 
 **Hosted responsive-shell validation checkpoint (2026-10-18):** Quality Gates run `39152462667` for pushed commit `afe2490` passed documentation/schema validation plus Windows, macOS and Linux restore/build/test, native FFmpeg smoke, formatting, headless shell, Windows UI automation, portable archive, Windows installer, macOS DMG, Linux DEB, packaged relaunch and checksum gates. The run validates the responsive project chrome, monitor action rail, fluid monitor/color previews, fluid grade controls, compact header behavior and workspace status density. Manual native visual, 1280x800/HiDPI and screen-reader acceptance remains open; local native SendKeys smoke remains unverified on this host.

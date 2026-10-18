@@ -1117,8 +1117,9 @@ public sealed class MainWindow : Window
         var originalPreview = new Image
         {
             Height = 160,
+            MaxWidth = 640,
             Stretch = Stretch.Uniform,
-            HorizontalAlignment = HorizontalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(originalPreview, "Photo original preview");
@@ -1134,8 +1135,9 @@ public sealed class MainWindow : Window
         var editedPreview = new Image
         {
             Height = 160,
+            MaxWidth = 640,
             Stretch = Stretch.Uniform,
-            HorizontalAlignment = HorizontalAlignment.Center,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(editedPreview, "Photo edit preview");

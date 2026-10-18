@@ -622,6 +622,16 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo original preview empty state")
                     .IsVisible);
+                foreach (var previewName in new[] { "Photo original preview", "Photo edit preview" })
+                {
+                    var preview = window.GetVisualDescendants()
+                        .OfType<Image>()
+                        .Single(control => AutomationProperties.GetName(control) == previewName);
+                    Xunit.Assert.True(double.IsNaN(preview.Width));
+                    Xunit.Assert.Equal(640, preview.MaxWidth);
+                    Xunit.Assert.Equal(Stretch.Uniform, preview.Stretch);
+                    Xunit.Assert.Equal(HorizontalAlignment.Stretch, preview.HorizontalAlignment);
+                }
                 var photoEditorStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo editor status");
