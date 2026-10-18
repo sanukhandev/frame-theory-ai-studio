@@ -224,7 +224,8 @@ public sealed class MainWindow : Window
             Margin = new Thickness(0, 0, 12, 0),
             VerticalAlignment = VerticalAlignment.Center,
             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
-            TextWrapping = TextWrapping.Wrap
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            MaxWidth = 320
         };
         diagnostics.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.DiagnosticsStatusText)));
         return new Border
