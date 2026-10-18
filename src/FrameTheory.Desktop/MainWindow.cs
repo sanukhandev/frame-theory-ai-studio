@@ -370,8 +370,11 @@ public sealed class MainWindow : Window
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
-            Padding = new Thickness(12),
-            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 48, 48)),
+            Padding = new Thickness(16),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 32, 39)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 54, 65)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
             Child = new StackPanel
             {
                 Spacing = 8,
@@ -607,8 +610,11 @@ public sealed class MainWindow : Window
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
-            Padding = new Thickness(12),
-            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 48, 48)),
+            Padding = new Thickness(16),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 32, 39)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 54, 65)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
             Child = new StackPanel
             {
                 Spacing = 8,
@@ -687,8 +693,11 @@ public sealed class MainWindow : Window
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
-            Padding = new Thickness(12),
-            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 48, 48)),
+            Padding = new Thickness(16),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 32, 39)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 54, 65)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
             Child = new StackPanel
             {
                 Spacing = 8,
@@ -824,8 +833,11 @@ public sealed class MainWindow : Window
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
-            Padding = new Thickness(12),
-            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 48, 48)),
+            Padding = new Thickness(16),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 32, 39)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 54, 65)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
             Child = new StackPanel
             {
                 Spacing = 8,
@@ -1008,8 +1020,11 @@ public sealed class MainWindow : Window
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
-            Padding = new Thickness(12),
-            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 48, 48)),
+            Padding = new Thickness(16),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 32, 39)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 54, 65)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
             Child = new StackPanel
             {
                 Spacing = 8,

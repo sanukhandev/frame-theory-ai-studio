@@ -1,5 +1,9 @@
 # Implementation Status — Resume Checkpoint
 
+**Workspace panel surface checkpoint (2026-10-18):** Photo, Color and AI panels now share the production dark surface, border, radius and spacing language used by the Video workspace, without changing their existing commands, previews, consent controls or automation names. Local Release build, formatting and diff checks are green; hosted UI revalidation is pending the next exact-ten-commit push.
+
+**Hosted security-batch revalidation checkpoint (2026-10-18):** Run `39121797572` for pushed commit `464bec7` passed documentation/schema validation and the Windows, macOS and Linux matrix, including restore, advisories, dependency inventory, build, native media, headless/native UI smoke, formatting, tests, packaging, relaunch and checksums. The batch improves path-boundary safety; manual visual UI, legal, signing, clean-host and final-audit gates remain open.
+
 **Timeline workspace hierarchy checkpoint (2026-10-18):** The Video workspace now presents a real preview/action card followed by labeled timeline navigation, analysis, clip editing, motion, audio, captions, project/export and view sections. Existing controls and handlers are unchanged; the Release build and accessible headless shell test pass, with native visual inspection still unverified.
 
 **Production UI shell checkpoint (2026-10-18):** The Avalonia shell now uses the approved logo when available, a compact local-mode brand bar, dark graphite surfaces, a left workspace rail, clearer import drop-zone guidance, stronger card hierarchy and consistent control styling while preserving the functional Video/Photo/Color/AI controls and automation names. The full local Release suite passes 259 unit tests and 2 golden tests; native visual/HiDPI review remains unverified because no native application surface is available in the current computer-use host.
