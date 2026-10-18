@@ -345,29 +345,43 @@ public sealed class MainWindow : Window
 
     private static Control CreateStatusBar(MainWindowViewModel viewModel)
     {
-        var status = new TextBlock
+        var status = new TextBox
         {
+            IsReadOnly = true,
             Margin = new Thickness(16, 0),
             VerticalAlignment = VerticalAlignment.Center,
+            FontSize = 11,
             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(186, 193, 207)),
-            TextTrimming = TextTrimming.CharacterEllipsis
+            TextWrapping = TextWrapping.NoWrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
         };
-        status.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CapabilityStatusText)));
+        status.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.CapabilityStatusText)));
         AutomationProperties.SetName(status, "Capability status");
         ToolTip.SetTip(status, "Local FFmpeg, ffprobe and platform capability status.");
         var refresh = new Button { Content = "Refresh capabilities", Margin = new Thickness(12, 8, 16, 8) };
         AutomationProperties.SetName(refresh, "Refresh capability check");
         ToolTip.SetTip(refresh, "Recheck local FFmpeg, ffprobe and platform capabilities.");
         refresh.Click += async (_, _) => await viewModel.RefreshCapabilitiesAsync(CancellationToken.None);
-        var diagnostics = new TextBlock
+        var diagnostics = new TextBox
         {
+            IsReadOnly = true,
             Margin = new Thickness(0, 0, 12, 0),
             VerticalAlignment = VerticalAlignment.Center,
+            FontSize = 11,
             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
-            TextTrimming = TextTrimming.CharacterEllipsis,
+            TextWrapping = TextWrapping.NoWrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0,
             MaxWidth = 320
         };
-        diagnostics.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.DiagnosticsStatusText)));
+        diagnostics.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.DiagnosticsStatusText)));
         AutomationProperties.SetName(diagnostics, "Diagnostics status");
         ToolTip.SetTip(diagnostics, "Local diagnostics log and failure-reporting status.");
         return new Border

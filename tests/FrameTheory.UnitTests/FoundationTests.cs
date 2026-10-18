@@ -174,11 +174,17 @@ public sealed class FoundationTests
                     ToolTip.GetTip(window.GetVisualDescendants()
                         .OfType<Button>()
                         .Single(control => AutomationProperties.GetName(control) == "Refresh capability check")));
-                Xunit.Assert.Equal(
-                    "Local FFmpeg, ffprobe and platform capability status.",
-                    ToolTip.GetTip(window.GetVisualDescendants()
-                        .OfType<TextBlock>()
-                        .Single(control => AutomationProperties.GetName(control) == "Capability status")));
+                var capabilityStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Capability status");
+                Xunit.Assert.Equal("Local FFmpeg, ffprobe and platform capability status.", ToolTip.GetTip(capabilityStatus));
+                Xunit.Assert.True(capabilityStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, capabilityStatus.FontSize);
+                var diagnosticsStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Diagnostics status");
+                Xunit.Assert.True(diagnosticsStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, diagnosticsStatus.FontSize);
                 Xunit.Assert.Equal(
                     new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
                     tabItems.Select(AutomationProperties.GetName));
