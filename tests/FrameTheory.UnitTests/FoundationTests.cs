@@ -251,6 +251,19 @@ public sealed class FoundationTests
                     Xunit.Assert.Equal(HorizontalAlignment.Stretch, scroller.HorizontalContentAlignment);
                     Xunit.Assert.Equal(VerticalAlignment.Top, scroller.VerticalContentAlignment);
                 });
+                var videoWorkspaceFrame = workspaceScrollers[0].GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => AutomationProperties.GetName(control) == "Video workspace frame");
+                Xunit.Assert.Equal(new Avalonia.Thickness(20), videoWorkspaceFrame.Margin);
+                Xunit.Assert.Equal(new Avalonia.Thickness(24, 22), videoWorkspaceFrame.Padding);
+                window.Width = 960;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(new Avalonia.Thickness(12), videoWorkspaceFrame.Margin);
+                Xunit.Assert.Equal(new Avalonia.Thickness(16, 14), videoWorkspaceFrame.Padding);
+                window.Width = 1280;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(new Avalonia.Thickness(20), videoWorkspaceFrame.Margin);
+                Xunit.Assert.Equal(new Avalonia.Thickness(24, 22), videoWorkspaceFrame.Padding);
                 Xunit.Assert.Equal(
                     new[] { "Video workspace content", "Photo workspace content", "Color workspace content", "AI workspace content" },
                     workspaceScrollers.Select(AutomationProperties.GetName));

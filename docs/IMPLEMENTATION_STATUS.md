@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive workspace-frame checkpoint (2026-10-18):** Each editor workspace now reduces outer margin and padding below the 1120px window breakpoint, preserving the dense media/inspector composition at the 960px minimum while retaining the spacious standard shell. Foundation coverage verifies standard and compact frame geometry across the production workspaces; native visual and HiDPI acceptance remains open.
+
 **Responsive footer checkpoint (2026-10-18):** The bottom capability bar now hides the secondary diagnostics readout below the 1120px window breakpoint while retaining its tooltip/log path, keeping the primary capability status and refresh action readable at the 960px minimum. Attached-window initialization is covered by Foundation geometry tests; native visual and HiDPI acceptance remains open.
 
 **Mode-discovery checkpoint (2026-10-18):** The global `LOCAL MODE · GEMINI OPTIONAL` badge and each workspace mode badge now expose accessible names and explicit offline/consent guidance, making the offline-first boundary visible without relying on color alone. Foundation coverage verifies the shell metadata; live screen-reader acceptance remains open.

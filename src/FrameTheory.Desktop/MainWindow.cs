@@ -891,22 +891,38 @@ public sealed class MainWindow : Window
 
         var stack = new StackPanel { Spacing = 12 };
         stack.Children.AddRange(children);
+        var workspaceFrame = new Border
+        {
+            Margin = new Thickness(20),
+            Padding = new Thickness(24, 22),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(10),
+            Child = stack
+        };
+        AutomationProperties.SetName(workspaceFrame, $"{workspace.Name} workspace frame");
         var workspaceScrollViewer = new ScrollViewer
         {
             HorizontalContentAlignment = HorizontalAlignment.Stretch,
             VerticalContentAlignment = VerticalAlignment.Top,
-            Content = new Border
-            {
-                Margin = new Thickness(20),
-                Padding = new Thickness(24, 22),
-                Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
-                BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
-                BorderThickness = new Thickness(1),
-                CornerRadius = new CornerRadius(10),
-                Child = stack
-            }
+            Content = workspaceFrame
         };
         AutomationProperties.SetName(workspaceScrollViewer, $"{workspace.Name} workspace content");
+        void RefreshWorkspaceFrame(double width)
+        {
+            var topLevel = TopLevel.GetTopLevel(workspaceScrollViewer);
+            var windowWidth = topLevel is Window window && !double.IsNaN(window.Width)
+                ? window.Width
+                : topLevel?.Bounds.Width ?? width;
+            var compact = windowWidth < 1120;
+            workspaceFrame.Margin = compact ? new Thickness(12) : new Thickness(20);
+            workspaceFrame.Padding = compact ? new Thickness(16, 14) : new Thickness(24, 22);
+        }
+
+        workspaceScrollViewer.SizeChanged += (_, args) => RefreshWorkspaceFrame(args.NewSize.Width);
+        workspaceScrollViewer.AttachedToVisualTree += (_, _) => Dispatcher.UIThread.Post(() => RefreshWorkspaceFrame(workspaceScrollViewer.Bounds.Width));
+        RefreshWorkspaceFrame(workspaceScrollViewer.Width);
         return workspaceScrollViewer;
     }
 
