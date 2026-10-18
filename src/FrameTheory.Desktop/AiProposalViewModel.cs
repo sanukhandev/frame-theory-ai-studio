@@ -64,10 +64,13 @@ public sealed class AiProposalViewModel : INotifyPropertyChanged
             OnPropertyChanged();
             OnPropertyChanged(nameof(ApprovedCount));
             OnPropertyChanged(nameof(ApprovalSummary));
+            OnPropertyChanged(nameof(CanApply));
         }
     }
 
     public int ApprovedCount => Actions.Count(action => action.IsApproved);
+
+    public bool CanApply => Actions.Any(action => action.IsApproved);
 
     public string ApprovalSummary => Actions.Count == 0
         ? "No proposal actions to approve."
@@ -158,6 +161,7 @@ public sealed class AiProposalViewModel : INotifyPropertyChanged
         {
             OnPropertyChanged(nameof(ApprovedCount));
             OnPropertyChanged(nameof(ApprovalSummary));
+            OnPropertyChanged(nameof(CanApply));
         }
     }
 

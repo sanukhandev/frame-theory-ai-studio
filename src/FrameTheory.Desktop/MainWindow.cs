@@ -2082,6 +2082,18 @@ public sealed class MainWindow : Window
         approve.Classes.Add("primary");
         AutomationProperties.SetName(approve, "Apply approved AI actions");
         ToolTip.SetTip(approve, "Apply only checked, validated actions transactionally to the editable project.");
+        void RefreshApplyButton()
+        {
+            approve.IsEnabled = viewModel.AiProposal.CanApply;
+        }
+        RefreshApplyButton();
+        viewModel.AiProposal.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(AiProposalViewModel.CanApply))
+            {
+                RefreshApplyButton();
+            }
+        };
         approve.Click += (_, _) => viewModel.ApplyApprovedAiPlan();
         var undo = new Button { Content = "Undo last AI apply" };
         AutomationProperties.SetName(undo, "Undo last AI apply");

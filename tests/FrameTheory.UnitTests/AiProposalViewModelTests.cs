@@ -19,6 +19,7 @@ public sealed class AiProposalViewModelTests
         Xunit.Assert.Single(viewModel.Actions);
         Xunit.Assert.False(viewModel.Actions[0].IsApproved);
         Xunit.Assert.Equal(0, viewModel.ApprovedCount);
+        Xunit.Assert.False(viewModel.CanApply);
         Xunit.Assert.Equal("0 of 1 proposal action(s) approved.", viewModel.ApprovalSummary);
         Xunit.Assert.NotNull(viewModel.ValidatedJson);
         Xunit.Assert.Contains("No project mutation occurred", viewModel.StatusText, StringComparison.Ordinal);
@@ -36,7 +37,11 @@ public sealed class AiProposalViewModelTests
 
         viewModel.Actions[0].IsApproved = true;
         Xunit.Assert.Equal(1, viewModel.ApprovedCount);
+        Xunit.Assert.True(viewModel.CanApply);
         Xunit.Assert.Equal("1 of 1 proposal action(s) approved.", viewModel.ApprovalSummary);
+
+        viewModel.Actions[0].IsApproved = false;
+        Xunit.Assert.False(viewModel.CanApply);
 
         viewModel.RecordApprovals();
 
