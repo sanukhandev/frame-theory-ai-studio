@@ -9,6 +9,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
+using Avalonia.VisualTree;
 using FrameTheory.AI;
 using FrameTheory.Color;
 using FrameTheory.Domain;
@@ -138,6 +139,8 @@ public sealed class MainWindow : Window
         Grid.SetRow(tabs, 1);
         Grid.SetRow(layout.Children[2], 2);
         Content = layout;
+        NameUnnamedButtonsForAccessibility();
+        Opened += (_, _) => NameUnnamedButtonsForAccessibility();
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs args)
@@ -176,6 +179,17 @@ public sealed class MainWindow : Window
         if (shortcut is not null && viewModel.HandleShortcut(shortcut.Value))
         {
             args.Handled = true;
+        }
+    }
+
+    private void NameUnnamedButtonsForAccessibility()
+    {
+        foreach (var button in this.GetVisualDescendants().OfType<Button>())
+        {
+            if (button.Content is string text && !string.IsNullOrWhiteSpace(text) && string.IsNullOrWhiteSpace(AutomationProperties.GetName(button)))
+            {
+                AutomationProperties.SetName(button, text);
+            }
         }
     }
 

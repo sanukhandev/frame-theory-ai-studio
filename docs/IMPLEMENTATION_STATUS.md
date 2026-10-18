@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Hosted UI correction checkpoint (2026-10-18):** Hosted run `39123624550` correctly failed the new adaptive-shell test on macOS/Linux because `FoundationTests.cs` lacked its `Avalonia.Layout` import; the local `--no-build` smoke had not compiled that changed test source. The test now rebuilds from source and passes, unnamed string-content buttons receive content-derived automation names after window open, and formatting/diff checks are green. The corrective commit is local and awaits the next exact-ten-commit push.
+
 **Responsive workspace checkpoint (2026-10-18):** Each workspace content surface now explicitly stretches to the available editor width and anchors at the top of its scroll viewport, with automation coverage for all four workspace containers. The Foundation adaptive-shell test, Desktop Release build, formatting and `git diff --check` pass; native resize/HiDPI review remains unverified.
 
 **UI accessibility checkpoint (2026-10-18):** Every visible editor button with an action now has an explicit automation name, including Photo recovery/editor, Color, Gemini settings, timeline editing/audio/caption controls and timeline navigation. The Foundation shell test fails if a content-bearing button is unnamed; Desktop Release build, focused shell test, formatting and `git diff --check` pass. Native visual, keyboard and HiDPI review remains unverified.
