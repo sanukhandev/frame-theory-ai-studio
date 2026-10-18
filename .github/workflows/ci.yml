@@ -19,7 +19,26 @@ jobs:
           python-version: '3.12'
       - name: Validate release packaging shell syntax
         shell: bash
-        run: sh -n scripts/package.sh
+        run: |
+          sh -n scripts/package.sh
+          sh -n scripts/package_macos_dmg.sh
+          sh -n scripts/package_linux_deb.sh
+      - name: Validate Windows package version guard
+        shell: pwsh
+        run: |
+          $parseErrors = $null
+          $null = [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path scripts/package_windows.ps1),
+            [ref]$null,
+            [ref]$parseErrors)
+          if ($null -ne $parseErrors -and $parseErrors.Count -gt 0) {
+            throw "Windows package script has parse errors: $parseErrors"
+          }
+
+          $output = & pwsh -NoProfile -File scripts/package_windows.ps1 -Version invalid 2>&1
+          if ($LASTEXITCODE -eq 0 -or ($output -notmatch 'ValidatePattern|parameter')) {
+            throw "Windows package version validation did not reject an invalid version."
+          }
       - name: Validate repository docs and schema
         run: python3 scripts/validate_repository.py
 
