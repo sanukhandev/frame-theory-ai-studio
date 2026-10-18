@@ -1651,7 +1651,25 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(photoPreviewCard, "Photo before and after preview");
         ToolTip.SetTip(photoPreviewCard, "Compare the original source pixels with the current non-destructive edit.");
-        Grid.SetColumn(((Grid)photoPreviewCard.Child).Children[1], 1);
+        var photoPreviewGrid = (Grid)photoPreviewCard.Child;
+        void RefreshPhotoPreviewLayout(double width)
+        {
+            var compact = width < 620;
+            photoPreviewGrid.ColumnDefinitions = compact
+                ? new ColumnDefinitions("*")
+                : new ColumnDefinitions("*,*");
+            photoPreviewGrid.RowDefinitions = compact
+                ? new RowDefinitions("Auto,Auto")
+                : new RowDefinitions("Auto");
+            photoPreviewGrid.ColumnSpacing = compact ? 0 : 10;
+            Grid.SetColumn(photoPreviewGrid.Children[0], 0);
+            Grid.SetColumn(photoPreviewGrid.Children[1], compact ? 0 : 1);
+            Grid.SetRow(photoPreviewGrid.Children[0], 0);
+            Grid.SetRow(photoPreviewGrid.Children[1], compact ? 1 : 0);
+        }
+
+        photoPreviewCard.SizeChanged += (_, args) => RefreshPhotoPreviewLayout(args.NewSize.Width);
+        RefreshPhotoPreviewLayout(photoPreviewCard.Width);
         var photoProjectSection = CreateInspectorExpander(
             "Project",
             CreateSectionContent(CreateFlow(open, openProject, saveProject, rotate, undo, redo)),

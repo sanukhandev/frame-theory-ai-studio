@@ -807,6 +807,17 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Compare the original source pixels with the current non-destructive edit.",
                     ToolTip.GetTip(photoComparison));
+                var photoPreviewGrid = Xunit.Assert.IsType<Grid>(photoComparison.Child);
+                photoComparison.Width = 600;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(2, photoPreviewGrid.RowDefinitions.Count);
+                Xunit.Assert.Single(photoPreviewGrid.ColumnDefinitions);
+                Xunit.Assert.Equal(1, Grid.GetRow(photoPreviewGrid.Children[1]));
+                photoComparison.Width = 700;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Single(photoPreviewGrid.RowDefinitions);
+                Xunit.Assert.Equal(2, photoPreviewGrid.ColumnDefinitions.Count);
+                Xunit.Assert.Equal(1, Grid.GetColumn(photoPreviewGrid.Children[1]));
                 tabs.SelectedIndex = 2;
                 Dispatcher.UIThread.RunJobs();
                 var colorBeforePreview = window.GetVisualDescendants()
