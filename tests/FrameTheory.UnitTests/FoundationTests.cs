@@ -1008,6 +1008,8 @@ public sealed class FoundationTests
                     Xunit.Assert.Equal(240, selector.MaxWidth);
                     Xunit.Assert.Equal(HorizontalAlignment.Stretch, selector.HorizontalAlignment);
                 }
+                Xunit.Assert.Contains(colorSections["Reference match section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Source");
+                Xunit.Assert.Contains(colorSections["Reference match section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Reference");
                 Xunit.Assert.Equal(
                     "Choose the local preview whose grade should be matched.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<ComboBox>().Single(control => AutomationProperties.GetName(control) == "Reference source preview")));

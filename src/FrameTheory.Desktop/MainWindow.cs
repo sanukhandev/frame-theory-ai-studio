@@ -2693,7 +2693,7 @@ public sealed class MainWindow : Window
             "Reference match",
             CreateSectionContent(
                 new TextBlock { Text = "Select a source preview and a reference preview. Upload occurs only after explicit consent; the returned grade is reviewable before applying.", TextWrapping = TextWrapping.Wrap },
-                CreateFlow(referenceSource, referenceTarget),
+                CreateFlow(CreateLabeledField("Source", referenceSource), CreateLabeledField("Reference", referenceTarget)),
                 referenceConsent,
                 CreateFlow(analyzeReference, applyReference),
                 referenceStatus),
