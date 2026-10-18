@@ -305,6 +305,12 @@ public sealed record AiPlanValidationResult
     public bool IsValid { get; }
 
     public IReadOnlyList<string> Errors { get; }
+
+    public void Deconstruct(out bool IsValid, out IReadOnlyList<string> Errors)
+    {
+        IsValid = this.IsValid;
+        Errors = this.Errors;
+    }
 }
 
 public static class AiEditPlanValidator

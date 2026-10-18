@@ -24,6 +24,13 @@ public sealed record CapabilityReport
 
     public IReadOnlyList<CapabilityStatus> Entries { get; }
 
+    public void Deconstruct(out string Platform, out string Architecture, out IReadOnlyList<CapabilityStatus> Entries)
+    {
+        Platform = this.Platform;
+        Architecture = this.Architecture;
+        Entries = this.Entries;
+    }
+
     public string Summary =>
         $"{Platform} {Architecture} · " +
         string.Join(" · ", Entries.Where(entry => entry.Name is "FFmpeg" or "ffprobe" or "Storage")

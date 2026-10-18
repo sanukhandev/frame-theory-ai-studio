@@ -110,6 +110,14 @@ public sealed record TimelineFilterGraph
     public string OutputLabel { get; }
 
     public string? AudioOutputLabel { get; }
+
+    public void Deconstruct(out string FilterComplex, out IReadOnlyList<Uri> Inputs, out string OutputLabel, out string? AudioOutputLabel)
+    {
+        FilterComplex = this.FilterComplex;
+        Inputs = this.Inputs;
+        OutputLabel = this.OutputLabel;
+        AudioOutputLabel = this.AudioOutputLabel;
+    }
 }
 
 public sealed class TimelineFilterGraphBuilder

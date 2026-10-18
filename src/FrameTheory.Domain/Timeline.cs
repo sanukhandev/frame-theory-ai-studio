@@ -220,6 +220,13 @@ public sealed record TimelineSeekResult
     public TimeSpan Position { get; }
 
     public IReadOnlyList<TimelineSample> Samples { get; }
+
+    public void Deconstruct(out long TimelineFrame, out TimeSpan Position, out IReadOnlyList<TimelineSample> Samples)
+    {
+        TimelineFrame = this.TimelineFrame;
+        Position = this.Position;
+        Samples = this.Samples;
+    }
 }
 
 public sealed class TimelineGraph
