@@ -11,6 +11,42 @@ namespace FrameTheory.UnitTests;
 public sealed class PhotoProjectPersistenceTests
 {
     [Xunit.Fact]
+    public async Task PhotoHistoryCapabilitiesTrackUndoAndRedoAvailability()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-photo-history-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "photo.png");
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+            var editor = CreateEditor(new JsonProjectRepository());
+
+            Xunit.Assert.False(editor.CanUndo);
+            Xunit.Assert.False(editor.CanRedo);
+            await editor.OpenAsync(sourcePath, CancellationToken.None);
+            Xunit.Assert.False(editor.CanUndo);
+            Xunit.Assert.False(editor.CanRedo);
+
+            editor.RotateRight();
+            Xunit.Assert.True(editor.CanUndo);
+            Xunit.Assert.False(editor.CanRedo);
+            Xunit.Assert.True(editor.Undo());
+            Xunit.Assert.False(editor.CanUndo);
+            Xunit.Assert.True(editor.CanRedo);
+            Xunit.Assert.True(editor.Redo());
+            Xunit.Assert.True(editor.CanUndo);
+            Xunit.Assert.False(editor.CanRedo);
+            Xunit.Assert.True(editor.Undo());
+            editor.RotateRight();
+            Xunit.Assert.True(editor.CanUndo);
+            Xunit.Assert.False(editor.CanRedo);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task PhotoProjectSaveAndOpenRestoresNonDestructiveOperations()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-photo-project-");

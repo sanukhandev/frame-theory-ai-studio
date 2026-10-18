@@ -35,6 +35,10 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
 
     public PhotoEditState? Current => _history?.Current;
 
+    public bool CanUndo => _history?.CanUndo == true;
+
+    public bool CanRedo => _history?.CanRedo == true;
+
     public byte[]? OriginalPreviewPpm => Current?.Source.PreviewPpm;
 
     public byte[]? PreviewPpm => Current?.RenderPreview();
@@ -451,6 +455,8 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(Current));
         OnPropertyChanged(nameof(OriginalPreviewPpm));
         OnPropertyChanged(nameof(PreviewPpm));
+        OnPropertyChanged(nameof(CanUndo));
+        OnPropertyChanged(nameof(CanRedo));
     }
 
     private static string GetSourcePath(Uri source)

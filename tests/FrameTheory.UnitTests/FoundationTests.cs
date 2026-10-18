@@ -739,6 +739,14 @@ public sealed class FoundationTests
                     control => AutomationProperties.GetName(control) == "Timeline selection context");
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Undo last photo edit")
+                    .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Redo last photo edit")
+                    .IsEnabled);
                 var photoRecoverySection = window.GetVisualDescendants()
                     .OfType<Expander>()
                     .Single(control => AutomationProperties.GetName(control) == "Project recovery and media relink section");

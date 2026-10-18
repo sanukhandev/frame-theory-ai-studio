@@ -1429,6 +1429,19 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(redo, "Redo last photo edit");
         ToolTip.SetTip(redo, "Redo the latest photo operation that was undone.");
         redo.Click += (_, _) => editor.Redo();
+        void RefreshPhotoHistoryCommands()
+        {
+            undo.IsEnabled = editor.CanUndo;
+            redo.IsEnabled = editor.CanRedo;
+        }
+        RefreshPhotoHistoryCommands();
+        editor.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(PhotoEditorViewModel.CanUndo) or nameof(PhotoEditorViewModel.CanRedo))
+            {
+                RefreshPhotoHistoryCommands();
+            }
+        };
         var overlayOpacity = new Slider
         {
             Minimum = 0,

@@ -596,6 +596,10 @@ public sealed class PhotoEditHistory
 
     public PhotoEditState Current { get; private set; }
 
+    public bool CanUndo => _undo.Count > 0;
+
+    public bool CanRedo => _redo.Count > 0;
+
     public void Execute(PhotoEditState nextState)
     {
         ArgumentNullException.ThrowIfNull(nextState);
