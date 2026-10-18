@@ -3560,6 +3560,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(export, "Export timeline MP4");
         ToolTip.SetTip(export, "Render the editable timeline to an MP4 using the selected aspect ratio.");
         var batchExport = new Button { Content = "Export all social targets" };
+        batchExport.Classes.Add("primary");
         AutomationProperties.SetName(batchExport, "Export all social video targets");
         batchExport.Click += async (_, _) =>
         {

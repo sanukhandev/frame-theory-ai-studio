@@ -940,7 +940,8 @@ public sealed class FoundationTests
                     "Import local media",
                     "Play timeline preview",
                     "Export timeline MP4",
-                    "Quick export timeline MP4"
+                    "Quick export timeline MP4",
+                    "Export all social video targets"
                 })
                 {
                     Xunit.Assert.Contains(

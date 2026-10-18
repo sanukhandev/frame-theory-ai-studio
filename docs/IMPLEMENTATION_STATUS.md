@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Export action hierarchy checkpoint (2026-10-18):** The multi-target social export action now uses the same production primary-action treatment as single-target timeline export, photo export and approved-edit actions. Foundation coverage verifies the reachable action class; export behavior and cancellation remain unchanged.
+
 **Accessible action-discovery checkpoint (2026-10-18):** The production shell now gives every named button a fallback tooltip when no feature-specific guidance exists, while preserving explicit tooltips for media, export, AI and editing actions. Foundation coverage verifies the fallback on timeline editing controls; native screen-reader acceptance remains open.
 
 **Responsive media-rail checkpoint (2026-10-18):** The shared Video/Photo/Color/AI workspace layout now reduces its local media rail from 300px to 240px below the 1120px window-width breakpoint, preserving inspector space at the 960px minimum while retaining the full rail on the standard 1280px shell. The layout exposes an accessible tooltip and Foundation coverage verifies both widths; native visual and HiDPI acceptance remains open.
