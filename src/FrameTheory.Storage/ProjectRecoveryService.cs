@@ -74,7 +74,7 @@ public sealed class ProjectRecoveryService
         Path.GetDirectoryName(Path.GetFullPath(projectPath))
         ?? throw new ArgumentException("A project directory is required.", nameof(projectPath));
 
-    private static string ResolveContainedPath(string projectDirectory, string relativePath)
+    public static string ResolveContainedPath(string projectDirectory, string relativePath)
     {
         var projectRoot = Path.GetFullPath(projectDirectory).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
         var candidate = Path.GetFullPath(Path.Combine(projectDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar)));

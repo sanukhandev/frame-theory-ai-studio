@@ -458,6 +458,7 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
             throw new InvalidDataException("Photo project sources must remain inside the project directory.");
         }
 
+        sourcePath = ProjectRecoveryService.ResolveContainedPath(projectDirectory, relativePath);
         await using var stream = File.OpenRead(sourcePath);
         var fingerprint = $"sha256:{Convert.ToHexString(await SHA256.HashDataAsync(stream, cancellationToken)).ToLowerInvariant()}";
         return new MediaReference(document.Metadata.Id, relativePath, fingerprint);
@@ -465,9 +466,8 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
 
     private static string ResolveProjectMediaPath(string projectDirectory, MediaReference reference)
     {
-        var sourcePath = Path.GetFullPath(Path.Combine(projectDirectory, reference.RelativePath.Replace('/', Path.DirectorySeparatorChar)));
-        var projectRoot = Path.GetFullPath(projectDirectory).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
-        if (!sourcePath.StartsWith(projectRoot, StringComparison.OrdinalIgnoreCase) || !File.Exists(sourcePath))
+        var sourcePath = ProjectRecoveryService.ResolveContainedPath(projectDirectory, reference.RelativePath);
+        if (!File.Exists(sourcePath))
         {
             throw new FileNotFoundException($"Saved photo is missing or outside the project: {reference.RelativePath}", sourcePath);
         }

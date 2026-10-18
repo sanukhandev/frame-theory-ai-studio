@@ -144,6 +144,49 @@ public sealed class PhotoProjectPersistenceTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task PhotoProjectOpenRejectsSymlinkedMediaDirectory()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-photo-project-boundary-");
+        var projectDirectory = Directory.CreateDirectory(Path.Combine(directory.FullName, "project"));
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-photo-project-external-");
+        try
+        {
+            var mediaDirectory = Directory.CreateDirectory(Path.Combine(projectDirectory.FullName, "media"));
+            var sourcePath = Path.Combine(mediaDirectory.FullName, "photo.png");
+            var externalSourcePath = Path.Combine(externalDirectory.FullName, "photo.png");
+            var projectPath = Path.Combine(projectDirectory.FullName, "photo.ftstudio");
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+            await File.WriteAllBytesAsync(externalSourcePath, [1, 2, 3]);
+            var repository = new JsonProjectRepository();
+            var editor = CreateEditor(repository);
+            await editor.OpenAsync(sourcePath, CancellationToken.None);
+            editor.RotateRight();
+            Xunit.Assert.True(await editor.SaveProjectAsync(projectPath, CancellationToken.None));
+
+            Directory.Delete(mediaDirectory.FullName, recursive: true);
+            Directory.CreateSymbolicLink(mediaDirectory.FullName, externalDirectory.FullName);
+
+            Xunit.Assert.False(await editor.OpenProjectAsync(projectPath, CancellationToken.None));
+            Xunit.Assert.Single(editor.Current!.Operations);
+            Xunit.Assert.Contains("reparse", editor.StatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
+
     private static PhotoEditorViewModel CreateEditor(IProjectRepository repository) => new(
         new PhotoImporter(new StubProbe(), new StubDecoder()),
         new PhotoExporter(new StubProcessRunner(), new StubProbe()),
