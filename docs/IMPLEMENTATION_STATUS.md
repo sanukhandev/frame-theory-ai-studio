@@ -8,7 +8,7 @@
 
 **GitHub issue inventory checkpoint (2026-10-19):** A live `gh issue list` audit reports 55 closed issues and 27 open issues. The six partial P0 gates remain `FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005` and `FT-1006`; no issue is closed from local headless evidence alone.
 
-**Final local Release gate checkpoint (2026-10-19):** The 47-commit local implementation batch passes 271 unit tests and 2 golden tests, builds with 0 warnings/errors, and passes format verification, repository validation and `git diff --check`. Hosted revalidation is intentionally deferred to the owner-requested 50-commit push boundary.
+**FT-1102 small-frame tracker checkpoint (2026-10-19):** Translation tracking now bounds its search radius to each decoded frame and compares valid overlap using normalized error, so small media no longer silently produces zero samples. The regression suite passes 4/4 motion tests with format and diff checks clean; the local fix is unpushed until the next exact 50-commit boundary, and FT-1102 remains open for manual visual-quality acceptance.
 
 **Workspace navigation affordance checkpoint (2026-10-19):** The adaptive shell's Ctrl+1 through Ctrl+4 workspace shortcut hint now has an explicit accessible tooltip explaining each destination. Focused production-shell coverage and format/diff checks pass; native keyboard acceptance remains unverified.
 
