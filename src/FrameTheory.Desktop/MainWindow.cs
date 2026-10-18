@@ -2107,6 +2107,56 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(ruler, "Timeline ruler");
         ToolTip.SetTip(ruler, "Current frame and timeline position.");
         ruler.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.RulerText"));
+        var rulerCanvas = new Canvas { Width = 640, Height = 30 };
+        var rulerVisual = new Border
+        {
+            Padding = new Thickness(8, 4),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(16, 18, 22)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(4),
+            Child = new ScrollViewer
+            {
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
+                Content = rulerCanvas
+            }
+        };
+        AutomationProperties.SetName(rulerVisual, "Timeline visual ruler");
+        void RefreshRulerVisual()
+        {
+            rulerCanvas.Children.Clear();
+            foreach (var tick in timeline.BuildRulerTicks(640))
+            {
+                var left = Math.Max(0, (tick.Frame - timeline.ScrollFrame) / timeline.FramesPerPixel);
+                var tickMark = new Border
+                {
+                    Width = 1,
+                    Height = 8,
+                    Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(95, 125, 255))
+                };
+                Canvas.SetLeft(tickMark, left);
+                Canvas.SetTop(tickMark, 0);
+                rulerCanvas.Children.Add(tickMark);
+                var tickLabel = new TextBlock
+                {
+                    Text = $"{tick.Frame}  {tick.Position.TotalSeconds:0.##}s",
+                    FontSize = 9,
+                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(172, 181, 196))
+                };
+                Canvas.SetLeft(tickLabel, left + 4);
+                Canvas.SetTop(tickLabel, 9);
+                rulerCanvas.Children.Add(tickLabel);
+            }
+        }
+        RefreshRulerVisual();
+        timeline.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(TimelineEditorViewModel.RulerText) or nameof(TimelineEditorViewModel.ScrollFrame) or nameof(TimelineEditorViewModel.FramesPerPixel) or nameof(TimelineEditorViewModel.TotalFrames))
+            {
+                RefreshRulerVisual();
+            }
+        };
         var selectionContext = new TextBox
         {
             IsReadOnly = true,
@@ -2964,6 +3014,7 @@ public sealed class MainWindow : Window
                         Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
                     },
                     CreateFlow(frameReadout, positionReadout),
+                    rulerVisual,
                     playhead,
                     ruler
                 }

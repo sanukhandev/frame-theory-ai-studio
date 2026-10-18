@@ -516,6 +516,7 @@ public sealed class FoundationTests
                     "Timeline frame readout",
                     "Timeline position readout",
                     "Timeline zoom value",
+                    "Timeline visual ruler",
                     "Timeline motion analysis status",
                     "Rough cut status",
                     "Title animation status",
