@@ -1095,7 +1095,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 throw new DirectoryNotFoundException(directory);
             }
 
-            var mediaReferences = _mediaSources.Select(item =>
+            var mediaReferences = new List<MediaReference>(_mediaSources.Count);
+            foreach (var item in _mediaSources)
             {
                 if (!_analysisAssets.TryGetValue(item.Key, out var media))
                 {
@@ -1103,12 +1104,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 }
 
                 var relativePath = Path.GetRelativePath(directory, item.Value.LocalPath);
-                relativePath = Path.GetRelativePath(directory, ProjectRecoveryService.ResolveContainedPath(directory, relativePath));
-                return new MediaReference(
+                var containedPath = ProjectRecoveryService.ResolveContainedPath(directory, relativePath);
+                relativePath = Path.GetRelativePath(directory, containedPath);
+                var fingerprint = await ProjectRecoveryService.ComputeFingerprintAsync(containedPath, cancellationToken);
+                mediaReferences.Add(new MediaReference(
                     item.Key,
                     relativePath,
-                    $"probe:{media.Metadata.SourceUri.AbsoluteUri}");
-            }).ToArray();
+                    fingerprint));
+            }
             var timelineState = TimelineProjectStateJson.Serialize(TimelineEditor.CaptureProjectState());
             var snapshot = new ProjectSnapshot(
                 "active-project",
@@ -1154,7 +1157,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             var timelineState = TimelineProjectStateJson.Deserialize(snapshot.TimelineStateJson);
-            var missing = _timelineProjectRecovery.FindMissingMedia(fullPath, snapshot);
+            var missing = await _timelineProjectRecovery.FindMissingMediaAsync(fullPath, snapshot, cancellationToken);
             if (missing.Count > 0)
             {
                 _pendingTimelineProjectPath = fullPath;
@@ -1263,7 +1266,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 cancellationToken);
             await _timelineProjectRepository.SaveAtomicAsync(_pendingTimelineProjectPath, relinked, cancellationToken);
             _pendingTimelineSnapshot = relinked;
-            var missing = _timelineProjectRecovery.FindMissingMedia(_pendingTimelineProjectPath, relinked);
+            var missing = await _timelineProjectRecovery.FindMissingMediaAsync(
+                _pendingTimelineProjectPath,
+                relinked,
+                cancellationToken);
             if (missing.Count > 0)
             {
                 SetMissingTimelineMedia(missing);

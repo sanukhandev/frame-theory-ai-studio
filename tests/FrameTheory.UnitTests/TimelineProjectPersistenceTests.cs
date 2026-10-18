@@ -195,6 +195,35 @@ public sealed class TimelineProjectPersistenceTests
     }
 
     [Xunit.Fact]
+    public async Task TimelineProjectOpenTreatsChangedMediaAsMissing()
+    {
+        var directory = Path.Combine(Path.GetTempPath(), $"frame-theory-project-fingerprint-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(directory);
+        try
+        {
+            var mediaPath = Path.Combine(directory, "clip.mp4");
+            var projectPath = Path.Combine(directory, "project.ftstudio");
+            await File.WriteAllBytesAsync(mediaPath, [1, 2, 3]);
+            var first = CreateViewModel();
+
+            await first.ImportFilesAsync([mediaPath], CancellationToken.None);
+            Xunit.Assert.True(await first.SaveTimelineProjectAsync(projectPath, CancellationToken.None));
+            await File.WriteAllBytesAsync(mediaPath, [4, 5, 6]);
+
+            var second = CreateViewModel();
+
+            Xunit.Assert.False(await second.OpenTimelineProjectAsync(projectPath, CancellationToken.None));
+            Xunit.Assert.Single(second.MissingTimelineMedia);
+            Xunit.Assert.Contains("missing media", second.TimelineProjectStatusText, StringComparison.OrdinalIgnoreCase);
+            Xunit.Assert.Empty(second.ImportedMedia);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task TimelineProjectOpenOffersMissingMediaRelinkBeforeMutation()
     {
         var directory = Path.Combine(Path.GetTempPath(), $"frame-theory-relink-{Guid.NewGuid():N}");

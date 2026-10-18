@@ -28,6 +28,8 @@
 
 **Import consistency checkpoint (2026-10-19):** Local media import now verifies the source file remains the same size and last-write version across probe, thumbnail and waveform work, rejecting a changed source instead of publishing mixed metadata and analysis. Focused import coverage includes the mutation regression; full release validation is required before the next 50-commit push.
 
+**Timeline media fingerprint checkpoint (2026-10-19):** Timeline projects now save SHA-256 fingerprints for local media and validate them during reopen, treating same-path source replacements as missing media for the existing relink workflow. Legacy `probe:` references remain readable. Focused persistence/recovery coverage passes 20/20; the full release gate is required before the next 50-commit push.
+
 **Gemini upload cleanup checkpoint (2026-10-19):** Temporary Files API cleanup after an invalid provider URI now uses an independent bounded timeout instead of the caller's potentially canceled token, so cancellation cannot skip deletion of an already-uploaded sample. Existing provider cleanup coverage remains green; full release validation is required before the next 50-commit push.
 
 **AI caption execution checkpoint (2026-10-19):** Approved `caption.add` actions now use the caption font explicitly selected in the Video workspace instead of incorrectly requiring the optional title-brand font map. Plans fail clearly without a selected caption font, and success remains one undoable transaction; focused executor coverage includes both paths.

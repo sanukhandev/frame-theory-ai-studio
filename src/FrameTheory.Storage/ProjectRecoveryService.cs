@@ -52,6 +52,26 @@ public sealed class ProjectRecoveryService
             .ToArray();
     }
 
+    public async Task<IReadOnlyList<MediaReference>> FindMissingMediaAsync(
+        string projectPath,
+        ProjectSnapshot snapshot,
+        CancellationToken cancellationToken)
+    {
+        var projectDirectory = GetProjectDirectory(projectPath);
+        var missing = new List<MediaReference>();
+        foreach (var reference in snapshot.MediaReferences)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            var path = ResolveContainedPath(projectDirectory, reference.RelativePath);
+            if (!File.Exists(path) || !await MatchesFingerprintAsync(path, reference.ContentFingerprint, cancellationToken))
+            {
+                missing.Add(reference);
+            }
+        }
+
+        return missing.AsReadOnly();
+    }
+
     public async Task<ProjectSnapshot> RelinkMediaAsync(
         string projectPath,
         ProjectSnapshot snapshot,
@@ -115,7 +135,7 @@ public sealed class ProjectRecoveryService
         }
     }
 
-    private static async Task<string> ComputeFingerprintAsync(string path, CancellationToken cancellationToken)
+    public static async Task<string> ComputeFingerprintAsync(string path, CancellationToken cancellationToken)
     {
         await using var stream = new FileStream(path, new FileStreamOptions
         {
@@ -126,5 +146,19 @@ public sealed class ProjectRecoveryService
         });
         var hash = await SHA256.HashDataAsync(stream, cancellationToken);
         return $"sha256:{Convert.ToHexString(hash).ToLowerInvariant()}";
+    }
+
+    private static async Task<bool> MatchesFingerprintAsync(
+        string path,
+        string expectedFingerprint,
+        CancellationToken cancellationToken)
+    {
+        if (!expectedFingerprint.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var actualFingerprint = await ComputeFingerprintAsync(path, cancellationToken);
+        return string.Equals(actualFingerprint, expectedFingerprint, StringComparison.OrdinalIgnoreCase);
     }
 }
