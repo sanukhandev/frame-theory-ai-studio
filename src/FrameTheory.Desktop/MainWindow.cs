@@ -2098,6 +2098,18 @@ public sealed class MainWindow : Window
         var undo = new Button { Content = "Undo last AI apply" };
         AutomationProperties.SetName(undo, "Undo last AI apply");
         ToolTip.SetTip(undo, "Undo the last successful AI edit transaction without changing source media.");
+        void RefreshAiUndoButton()
+        {
+            undo.IsEnabled = viewModel.TimelineEditor.CanUndoAiEdit;
+        }
+        RefreshAiUndoButton();
+        viewModel.TimelineEditor.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(TimelineEditorViewModel.CanUndoAiEdit))
+            {
+                RefreshAiUndoButton();
+            }
+        };
         undo.Click += (_, _) => viewModel.UndoLastAiEdit();
         var clear = new Button { Content = "Clear proposal" };
         AutomationProperties.SetName(clear, "Clear AI proposal");

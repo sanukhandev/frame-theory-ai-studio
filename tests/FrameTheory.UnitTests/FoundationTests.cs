@@ -1383,6 +1383,10 @@ public sealed class FoundationTests
                     .OfType<Button>()
                     .Single(control => AutomationProperties.GetName(control) == "Apply approved AI actions");
                 Xunit.Assert.False(applyApproved.IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Undo last AI apply")
+                    .IsEnabled);
                 Xunit.Assert.Equal(
                     Avalonia.Media.Color.FromRgb(24, 27, 33),
                     Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(approvalCard.Background).Color);

@@ -184,6 +184,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public TimelineWatermark? Watermark => _watermark;
 
+    public bool CanUndoAiEdit => _aiUndo.Count > 0;
+
     public string WatermarkStatusText => _watermark is null
         ? "No watermark selected; approved brand assets are opt-in."
         : $"Watermark: {Path.GetFileName(_watermark.SourcePath)}";
@@ -609,6 +611,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         SnapEnabled = state.SnapEnabled;
         SetZoom(state.FramesPerPixel);
         _aiUndo.Clear();
+        OnPropertyChanged(nameof(CanUndoAiEdit));
         Refresh();
         _scrollFrame = Math.Clamp(state.ScrollFrame, 0, Math.Max(0, TotalFrames - 1));
         SeekFrame(state.CurrentFrame);
@@ -947,7 +950,11 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _selectedClipStart,
         CurrentFrame);
 
-    internal void CommitAiState(TimelineEditorState state) => _aiUndo.Push(state);
+    internal void CommitAiState(TimelineEditorState state)
+    {
+        _aiUndo.Push(state);
+        OnPropertyChanged(nameof(CanUndoAiEdit));
+    }
 
     internal void RestoreAiStateForAi(TimelineEditorState state) => RestoreAiState(state);
 
@@ -1034,6 +1041,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         }
 
         RestoreAiState(_aiUndo.Pop());
+        OnPropertyChanged(nameof(CanUndoAiEdit));
         return true;
     }
 

@@ -13,10 +13,12 @@ public sealed class AiEditPlanExecutorTests
     {
         var editor = CreateEditor(out var mediaId);
         var action = ColorAction(mediaId.Value);
+        Xunit.Assert.False(editor.CanUndoAiEdit);
 
         var result = AiEditPlanExecutor.Execute([action], editor, new Dictionary<string, string>(), new Dictionary<string, FrameTheory.Color.ColorGrade>());
 
         Xunit.Assert.True(result.IsApplied, result.Message);
+        Xunit.Assert.True(editor.CanUndoAiEdit);
         var source = new Uri(Path.GetFullPath(Path.Combine(Path.GetTempPath(), "frame-theory-ai-source.mp4")));
         File.WriteAllBytes(source.LocalPath, [0]);
         try
@@ -25,6 +27,7 @@ public sealed class AiEditPlanExecutorTests
             var graph = new TimelineFilterGraphBuilder().Build(plan);
             Xunit.Assert.Contains("eq=brightness=", graph.FilterComplex, StringComparison.Ordinal);
             Xunit.Assert.True(editor.UndoAiEdit());
+            Xunit.Assert.False(editor.CanUndoAiEdit);
             Xunit.Assert.Empty(editor.BuildRenderPlan(16, 8, new Dictionary<MediaId, Uri> { [mediaId] = source }).ColorGrades);
         }
         finally
