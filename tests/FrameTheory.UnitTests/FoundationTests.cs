@@ -1876,6 +1876,9 @@ public sealed class FoundationTests
             firstId, source, FrameTheory.Domain.MediaKind.Image, 0, -1, null, 0)).ParamName);
         Xunit.Assert.Equal("canvasHeight", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new FrameTheory.Domain.ProjectSnapshot(
             "project", new FrameTheory.Domain.RationalFrameRate(30, 1), 1, 0, "sRGB")).ParamName);
+
+        var snapshot = new FrameTheory.Domain.ProjectSnapshot("project", new FrameTheory.Domain.RationalFrameRate(30, 1), 1, 1, "sRGB", []);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<FrameTheory.Domain.MediaReference>>(snapshot.MediaReferences).IsReadOnly);
     }
 
     private sealed class TestCapabilityDetector : ICapabilityDetector

@@ -59,4 +59,16 @@ public sealed class TimelineTests
         Xunit.Assert.Equal("timelineDurationFrames", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => TimelineClip.Video(
             mediaId, 0, 30, 0, 0, new RationalFrameRate(30, 1))).ParamName);
     }
+
+    [Xunit.Fact]
+    public void TimelineCollectionsExposeReadOnlyViews()
+    {
+        var mediaId = MediaId.Parse(new string('e', 64));
+        var clip = TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1));
+        var track = new TimelineTrack("video", TimelineTrackKind.Video, [clip]);
+        var graph = new TimelineGraph(new RationalFrameRate(30, 1), [track]);
+
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineClip>>(track.Clips).IsReadOnly);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineTrack>>(graph.Tracks).IsReadOnly);
+    }
 }

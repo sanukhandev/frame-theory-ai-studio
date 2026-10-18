@@ -131,7 +131,7 @@ public sealed record TimelineVideoLayer
 
         Id = id.Trim();
         Order = order;
-        Segments = orderedSegments;
+        Segments = Array.AsReadOnly(orderedSegments);
     }
 
     public string Id { get; }

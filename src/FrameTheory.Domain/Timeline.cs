@@ -186,7 +186,7 @@ public sealed class TimelineTrack
 
         Id = id.Trim();
         Kind = kind;
-        Clips = orderedClips;
+        Clips = Array.AsReadOnly(orderedClips);
     }
 
     public string Id { get; }
@@ -223,7 +223,7 @@ public sealed class TimelineGraph
         }
 
         ProjectFrameRate = projectFrameRate;
-        Tracks = timelineTracks;
+        Tracks = Array.AsReadOnly(timelineTracks);
     }
 
     public RationalFrameRate ProjectFrameRate { get; }

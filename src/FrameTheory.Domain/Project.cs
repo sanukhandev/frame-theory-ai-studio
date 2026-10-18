@@ -74,7 +74,7 @@ public sealed record ProjectSnapshot
         CanvasWidth = canvasWidth;
         CanvasHeight = canvasHeight;
         WorkingColorSpace = workingColorSpace.Trim();
-        MediaReferences = mediaReferences?.ToArray() ?? [];
+        MediaReferences = Array.AsReadOnly(mediaReferences?.ToArray() ?? []);
         ColorPresetName = string.IsNullOrWhiteSpace(colorPresetName) ? null : colorPresetName.Trim();
         TimelineStateJson = string.IsNullOrWhiteSpace(timelineStateJson) ? null : timelineStateJson;
         PhotoStateJson = string.IsNullOrWhiteSpace(photoStateJson) ? null : photoStateJson;

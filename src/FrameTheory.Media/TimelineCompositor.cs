@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.Globalization;
 using FrameTheory.Captions;
 using FrameTheory.Color;
@@ -44,15 +45,15 @@ public sealed record TimelineVideoRenderPlan
         Width = width;
         Height = height;
         DurationFrames = durationFrames;
-        Sources = sources;
-        Layers = layers.OrderBy(layer => layer.Order).ToArray();
-        AudioLayers = (audioLayers ?? []).OrderBy(layer => layer.Order).ToArray();
-        Titles = (titles ?? []).OrderBy(title => title.Order).ToArray();
-        Captions = (captions ?? []).OrderBy(caption => caption.Start).ToArray();
+        Sources = new ReadOnlyDictionary<MediaId, Uri>(new Dictionary<MediaId, Uri>(sources));
+        Layers = Array.AsReadOnly(layers.OrderBy(layer => layer.Order).ToArray());
+        AudioLayers = Array.AsReadOnly((audioLayers ?? []).OrderBy(layer => layer.Order).ToArray());
+        Titles = Array.AsReadOnly((titles ?? []).OrderBy(title => title.Order).ToArray());
+        Captions = Array.AsReadOnly((captions ?? []).OrderBy(caption => caption.Start).ToArray());
         CaptionStyle = captionStyle;
-        ColorGrades = colorGrades is null
+        ColorGrades = new ReadOnlyDictionary<MediaId, ColorGrade>(colorGrades is null
             ? new Dictionary<MediaId, ColorGrade>()
-            : new Dictionary<MediaId, ColorGrade>(colorGrades);
+            : new Dictionary<MediaId, ColorGrade>(colorGrades));
         if (beforeAfterStyle is not null && (beforeAfterRevealFrame < 0 || beforeAfterRevealFrame >= durationFrames))
         {
             throw new ArgumentOutOfRangeException(nameof(beforeAfterRevealFrame));

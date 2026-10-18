@@ -49,6 +49,25 @@ public sealed class TimelineCompositorTests
     }
 
     [Xunit.Fact]
+    public void RenderPlanSnapshotsItsCollections()
+    {
+        var frameRate = new RationalFrameRate(30, 1);
+        var mediaId = MediaId.Parse(new string('f', 64));
+        var sourceUri = new Uri("file:///clip.mp4");
+        var sources = new Dictionary<MediaId, Uri> { [mediaId] = sourceUri };
+        var clip = TimelineClip.Video(mediaId, 0, 30, 0, 30, frameRate);
+        var layer = new TimelineVideoLayer("video", 0, [new TimelineVideoSegment(clip)]);
+        var plan = new TimelineVideoRenderPlan(frameRate, 16, 8, 30, sources, [layer]);
+
+        sources.Clear();
+
+        Xunit.Assert.Single(plan.Sources);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IDictionary<MediaId, Uri>>(plan.Sources).IsReadOnly);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineVideoLayer>>(plan.Layers).IsReadOnly);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineVideoSegment>>(layer.Segments).IsReadOnly);
+    }
+
+    [Xunit.Fact]
     public void SpeedRampGraphKeepsVideoAndAudioOnTheSameTimelineDuration()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-speed-ramp-");
