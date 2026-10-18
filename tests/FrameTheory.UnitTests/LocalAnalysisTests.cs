@@ -54,6 +54,29 @@ public sealed class LocalAnalysisTests
             cancellation.Token));
     }
 
+    [Xunit.Fact]
+    public void AnalysisRequestReportAndSampleProtectCallerCollectionsAndBytes()
+    {
+        var payload = new byte[] { 1, 2, 3 };
+        var sample = new LocalAnalysisSample(new Uri("file:///sample.ppm"), MediaKind.Image, "photo-preview-ppm", null, null, payload);
+        var samples = new List<LocalAnalysisSample> { sample };
+        var report = new LocalMediaAnalysisReport(samples, GeminiAnalysisScope.PhotoPreview, false, payload.Length, "local");
+        var requestAssets = new List<ImportedMedia> { Imported(new Uri("file:///sample.png"), MediaKind.Image, null, 0, TimeSpan.Zero) };
+        var request = new GeminiAnalysisRequest(requestAssets, GeminiAnalysisScope.PhotoPreview, false);
+
+        payload[0] = 9;
+        samples.Clear();
+        requestAssets.Clear();
+        var exposed = sample.Payload;
+        exposed[0] = 8;
+
+        Xunit.Assert.Equal((byte)1, sample.Payload[0]);
+        Xunit.Assert.Single(report.Samples);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<LocalAnalysisSample>>(report.Samples).IsReadOnly);
+        Xunit.Assert.Single(request.Assets);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<ImportedMedia>>(request.Assets).IsReadOnly);
+    }
+
     private static ImportedMedia Imported(
         Uri source,
         MediaKind kind,

@@ -23,7 +23,7 @@ public sealed record GeminiAnalysisRequest
             throw new ArgumentException("At least one local asset and one analysis scope are required.");
         }
 
-        Assets = assets.ToArray();
+        Assets = Array.AsReadOnly(assets.ToArray());
         Scopes = scopes;
         UploadConsent = uploadConsent;
     }
@@ -37,20 +37,67 @@ public sealed record GeminiAnalysisRequest
 
 public sealed record LocalAnalysisProgress(string Stage, double Fraction);
 
-public sealed record LocalAnalysisSample(
-    Uri Source,
-    MediaKind Kind,
-    string SampleKind,
-    long? FrameIndex,
-    TimeSpan? Timestamp,
-    byte[] Payload);
+public sealed record LocalAnalysisSample
+{
+    private readonly byte[] _payload;
 
-public sealed record LocalMediaAnalysisReport(
-    IReadOnlyList<LocalAnalysisSample> Samples,
-    GeminiAnalysisScope Scopes,
-    bool UploadConsent,
-    long EstimatedUploadBytes,
-    string Disclosure);
+    public LocalAnalysisSample(
+        Uri source,
+        MediaKind kind,
+        string sampleKind,
+        long? frameIndex,
+        TimeSpan? timestamp,
+        byte[] payload)
+    {
+        ArgumentNullException.ThrowIfNull(payload);
+        Source = source;
+        Kind = kind;
+        SampleKind = sampleKind;
+        FrameIndex = frameIndex;
+        Timestamp = timestamp;
+        _payload = payload.ToArray();
+    }
+
+    public Uri Source { get; }
+
+    public MediaKind Kind { get; }
+
+    public string SampleKind { get; }
+
+    public long? FrameIndex { get; }
+
+    public TimeSpan? Timestamp { get; }
+
+    public byte[] Payload => _payload.ToArray();
+}
+
+public sealed record LocalMediaAnalysisReport
+{
+    public LocalMediaAnalysisReport(
+        IReadOnlyList<LocalAnalysisSample> Samples,
+        GeminiAnalysisScope Scopes,
+        bool UploadConsent,
+        long EstimatedUploadBytes,
+        string Disclosure)
+    {
+        ArgumentNullException.ThrowIfNull(Samples);
+        this.Samples = Array.AsReadOnly(Samples.ToArray());
+        this.Scopes = Scopes;
+        this.UploadConsent = UploadConsent;
+        this.EstimatedUploadBytes = EstimatedUploadBytes;
+        this.Disclosure = Disclosure;
+    }
+
+    public IReadOnlyList<LocalAnalysisSample> Samples { get; }
+
+    public GeminiAnalysisScope Scopes { get; }
+
+    public bool UploadConsent { get; }
+
+    public long EstimatedUploadBytes { get; }
+
+    public string Disclosure { get; }
+}
 
 public interface ILocalAnalysisSampler
 {
