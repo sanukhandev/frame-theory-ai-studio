@@ -1809,7 +1809,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             CaptionStatusText = "Caption export canceled.";
             return false;
         }
-        catch (Exception exception) when (exception is IOException or InvalidDataException)
+        catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException or UnauthorizedAccessException)
         {
             _diagnosticsLog.Record("caption-export-failed", exception);
             CaptionStatusText = $"Caption export failed: {exception.Message}";

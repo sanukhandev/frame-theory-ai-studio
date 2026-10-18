@@ -171,6 +171,18 @@ public sealed class DesktopTranscriptionTests
     }
 
     [Xunit.Fact]
+    public async Task DesktopCaptionExportReportsInvalidDestinationWithoutEscaping()
+    {
+        var viewModel = new MainWindowViewModel(new WorkspaceCatalog(), new TestCapabilityDetector());
+        viewModel.TimelineEditor.ImportCaptions("1\n00:00:00,000 --> 00:00:01,000\nCaption\n");
+
+        var succeeded = await viewModel.ExportCaptionsAsync("bad\0caption.srt", CancellationToken.None);
+
+        Xunit.Assert.False(succeeded);
+        Xunit.Assert.Contains("Caption export failed", viewModel.CaptionStatusText, StringComparison.Ordinal);
+    }
+
+    [Xunit.Fact]
     public async Task DesktopTranscriptionExtractsVideoAudioBeforeUpload()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-transcription-video-");
