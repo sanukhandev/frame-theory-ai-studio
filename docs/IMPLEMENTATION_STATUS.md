@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Compact editor UI checkpoint (2026-10-18):** The Avalonia shell now presents a compact shared media bin with asset list and local import/drop surface side-by-side, consistent spacing for action rows, full-width selected media rows, and deliberate hover/focus feedback for buttons, fields, selectors and checkboxes. The Foundation shell contract covers the media-bin geometry and accessibility names. The full local Release gate passes with 0 build warnings/errors, 260/260 unit tests, 2/2 golden tests, repository validation, formatting and `git diff --check`; native visual, HiDPI and screen-reader acceptance remains unverified.
+
 **Import-surface accessibility checkpoint (2026-10-18):** Each workspace’s real local drag/drop surface now has an explicit automation name in addition to its supported file-picker action and import status. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native drag/drop and assistive-technology review remains unverified.
 
 **Full local correction-batch gate (2026-10-18):** Media/timeline list focus now retains a blue keyboard edge. After the hosted regression fixes, the local Release solution build passes with 0 warnings/errors, unit tests pass 260/260, golden tests pass 2/2, repository validation and formatting pass, and `git diff --check` is clean. The next hosted run must revalidate the failed macOS/Linux symlink tests and Windows UI smoke before any task closure.
