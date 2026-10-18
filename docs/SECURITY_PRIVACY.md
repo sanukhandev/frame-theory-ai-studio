@@ -9,7 +9,7 @@ Editing is local. Gemini is an **optional online service** that requires a user-
 - Local diagnostics are written only to the per-user application-data log, redact Gemini token shapes plus API-key/authorization assignments, and never send reports over the network.
 - Project saves include media references and edit metadata but no raw API keys and by default no duplicated source media.
 - Separate private per-user cache and thumbnail/transcription directories; user-configurable retention and deletion.
-- Reject path traversal and symlink escapes; never let Gemini choose absolute paths, executable names or file/network actions.
+- Reject path traversal and symlink/reparse-point escapes in every project media path, including parent directories; never let Gemini choose absolute paths, executable names or file/network actions.
 
 ## Upload and model analysis
 - UI explicitly previews **which frames/segments/audio** are being sent and identifies destination/provider.

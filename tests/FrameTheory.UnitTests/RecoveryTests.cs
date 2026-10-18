@@ -72,4 +72,44 @@ public sealed class RecoveryTests
             directory.Delete(true);
         }
     }
+
+    [Xunit.Fact]
+    public void RecoveryRejectsTraversalAndReparsePointDirectories()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-recovery-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-recovery-external-");
+        try
+        {
+            var projectPath = Path.Combine(directory.FullName, "project.ftstudio");
+            var mediaId = MediaId.Create(new Uri("file:///media/clip.mov"), "sha256:clip");
+            Xunit.Assert.Throws<ArgumentException>(() => new MediaReference(mediaId, "../outside/clip.mov", "sha256:clip"));
+            var snapshot = new ProjectSnapshot(
+                "project",
+                new RationalFrameRate(30, 1),
+                1920,
+                1080,
+                "sRGB",
+                [new MediaReference(mediaId, "media/clip.mov", "sha256:clip")]);
+            var recovery = new ProjectRecoveryService(new JsonProjectRepository());
+
+            var mediaDirectory = Path.Combine(directory.FullName, "media");
+            Directory.CreateSymbolicLink(mediaDirectory, externalDirectory.FullName);
+
+            Xunit.Assert.Throws<InvalidDataException>(() => recovery.FindMissingMedia(projectPath, snapshot));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
 }

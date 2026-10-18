@@ -76,16 +76,46 @@ public sealed class ProjectRecoveryService
             throw new InvalidDataException("A media path escapes the project directory.");
         }
 
-        var fileInfo = new FileInfo(candidate);
-        if (fileInfo.Exists)
+        EnsureNoReparsePoint(projectDirectory, candidate);
+        return candidate;
+    }
+
+    private static void EnsureNoReparsePoint(string projectDirectory, string candidate)
+    {
+        if (Directory.Exists(projectDirectory) && IsReparsePoint(projectDirectory))
         {
-            var finalTarget = fileInfo.ResolveLinkTarget(returnFinalTarget: true);
-            if (finalTarget is not null && !finalTarget.FullName.StartsWith(projectRoot, StringComparison.OrdinalIgnoreCase))
+            throw new InvalidDataException("The project directory must not be a reparse point.");
+        }
+
+        var candidateDirectory = Path.GetDirectoryName(candidate)
+            ?? throw new InvalidDataException("A media path must include a containing directory.");
+        var relativeDirectory = Path.GetRelativePath(projectDirectory, candidateDirectory);
+        if (relativeDirectory != ".")
+        {
+            var currentDirectory = projectDirectory;
+            foreach (var segment in relativeDirectory.Split(
+                         [Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar],
+                         StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             {
-                throw new InvalidDataException("A media symlink escapes the project directory.");
+                currentDirectory = Path.Combine(currentDirectory, segment);
+                if (!Directory.Exists(currentDirectory))
+                {
+                    break;
+                }
+
+                if (IsReparsePoint(currentDirectory))
+                {
+                    throw new InvalidDataException("A media path uses a reparse-point directory.");
+                }
             }
         }
 
-        return candidate;
+        if ((File.Exists(candidate) || Directory.Exists(candidate)) && IsReparsePoint(candidate))
+        {
+            throw new InvalidDataException("A media path must not be a reparse point.");
+        }
     }
+
+    private static bool IsReparsePoint(string path) =>
+        (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
 }
