@@ -79,7 +79,7 @@ jobs:
           case "$RUNNER_OS" in
             Linux)
               sudo apt-get update
-              sudo apt-get install -y ffmpeg
+              sudo apt-get install -y ffmpeg xvfb
               ;;
             macOS)
               brew install ffmpeg || brew upgrade ffmpeg
@@ -191,6 +191,21 @@ jobs:
           }
           Expand-Archive -LiteralPath "artifacts/frame-theory-${{ matrix.platform }}-portable.zip" -DestinationPath $packageDirectory
           ./scripts/smoke_desktop.ps1 -AssemblyPath (Join-Path $packageDirectory "FrameTheory.Desktop.dll")
+      - name: Launch extracted portable archive smoke (Unix)
+        if: steps.detect.outputs.has_solution == 'true' && runner.os != 'Windows'
+        shell: pwsh
+        run: |
+          $packageDirectory = Join-Path $env:RUNNER_TEMP "frame-theory-portable-smoke"
+          if (Test-Path -LiteralPath $packageDirectory) {
+            Remove-Item -LiteralPath $packageDirectory -Recurse -Force
+          }
+          Expand-Archive -LiteralPath "artifacts/frame-theory-${{ matrix.platform }}-portable.zip" -DestinationPath $packageDirectory
+          $assemblyPath = Join-Path $packageDirectory "FrameTheory.Desktop.dll"
+          if ($IsLinux) {
+            xvfb-run -a pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath $assemblyPath
+          } else {
+            ./scripts/smoke_desktop.ps1 -AssemblyPath $assemblyPath
+          }
       - name: Create SHA-256 manifest
         if: steps.detect.outputs.has_solution == 'true'
         shell: pwsh
