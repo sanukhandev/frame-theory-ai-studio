@@ -321,6 +321,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(status, "Capability status");
         var refresh = new Button { Content = "Refresh capabilities", Margin = new Thickness(12, 8, 16, 8) };
         AutomationProperties.SetName(refresh, "Refresh capability check");
+        ToolTip.SetTip(refresh, "Recheck local FFmpeg, ffprobe and platform capabilities.");
         refresh.Click += async (_, _) => await viewModel.RefreshCapabilitiesAsync(CancellationToken.None);
         var diagnostics = new TextBlock
         {
@@ -462,6 +463,7 @@ public sealed class MainWindow : Window
         };
         var importMedia = new Button { Content = "Import media", HorizontalAlignment = HorizontalAlignment.Left };
         AutomationProperties.SetName(importMedia, "Import local media");
+        ToolTip.SetTip(importMedia, "Import local video, photo or audio files.");
         importMedia.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(importMedia);

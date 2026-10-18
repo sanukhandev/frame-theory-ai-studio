@@ -169,6 +169,11 @@ public sealed class FoundationTests
                     "Video: Frame-accurate editing, playback and export.",
                     ToolTip.GetTip(tabItems[0]));
                 Xunit.Assert.Equal(
+                    "Recheck local FFmpeg, ffprobe and platform capabilities.",
+                    ToolTip.GetTip(window.GetVisualDescendants()
+                        .OfType<Button>()
+                        .Single(control => AutomationProperties.GetName(control) == "Refresh capability check")));
+                Xunit.Assert.Equal(
                     new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
                     tabItems.Select(AutomationProperties.GetName));
                 var workspaceScrollers = tabItems
