@@ -16,6 +16,7 @@ ffprobe -version
 dotnet restore
 dotnet build --configuration Release
 dotnet test --configuration Release
+dotnet test tests/FrameTheory.UnitTests/FrameTheory.UnitTests.csproj --configuration Release --filter FullyQualifiedName~FoundationTests
 dotnet run --project src/FrameTheory.Desktop
 dotnet run --project tools/FrameTheory.Fixtures -- tools/fixtures/generated
 dotnet tools/FrameTheory.MediaProbeSmoke/bin/Release/net10.0/FrameTheory.MediaProbeSmoke.dll <media-path>
@@ -25,6 +26,7 @@ dotnet tools/FrameTheory.PhotoExportSmoke/bin/Release/net10.0/FrameTheory.PhotoE
 ```
 For a video fixture, the media-import smoke also extracts its first audio track through the transcription preparer, probes the owned temporary WAV, and deletes it on completion.
 The solution targets .NET 10. The desktop shell uses Avalonia 12.1.2 with code-only controls and the Fluent theme; media tasks beginning with FT-003/FT-006 still require FFmpeg/ffprobe.
+The Foundation test filter includes the production `MainWindow` under the test-only Avalonia headless platform. It verifies adaptive bounds, two-way workspace selection, accessibility names and `Ctrl+1..4` input without claiming native rendering, HiDPI hardware or manual macOS/Linux acceptance.
 
 ## Offline verified transcript import
 The Video workspace's **Import verified transcript JSON** action accepts a local audio/video source followed by a JSON sidecar with this shape:
