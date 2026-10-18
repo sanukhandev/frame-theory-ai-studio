@@ -130,6 +130,14 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void TimelineEditorRejectsInvalidBeatWaveformValues()
+    {
+        var editor = new TimelineEditorViewModel();
+
+        Xunit.Assert.Throws<ArgumentException>(() => editor.AddBeatMarkers(MediaId.Parse(new string('a', 64)), [1.1f]));
+    }
+
+    [Xunit.Fact]
     public void TimelineEditorAppliesAnimationPresetsToRenderPlans()
     {
         var source = new Uri("file:///animated.mp4");

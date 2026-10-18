@@ -272,6 +272,11 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     public void AddBeatMarkers(MediaId mediaId, IReadOnlyList<float> waveformPeaks)
     {
         ArgumentNullException.ThrowIfNull(waveformPeaks);
+        if (waveformPeaks.Any(peak => float.IsNaN(peak) || float.IsInfinity(peak) || peak is < 0 or > 1))
+        {
+            throw new ArgumentException("Beat-marker waveform peaks must be finite values from zero through one.", nameof(waveformPeaks));
+        }
+
         _beatMarkerMediaId = mediaId;
         _beatMarkerWaveform = waveformPeaks.ToArray();
         var clip = _audioClips.FirstOrDefault(candidate => candidate.MediaId == mediaId);
