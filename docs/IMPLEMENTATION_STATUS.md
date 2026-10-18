@@ -14,6 +14,8 @@
 
 **FT-1102 motion-validation checkpoint (2026-10-19):** Motion-vector, tracker and stabilization validation now identify the exact invalid argument at their trust boundaries. Focused motion coverage passes 5/5; FT-1102 remains open for manual visual-quality acceptance and the local change remains unpushed until the next exact 50-commit boundary.
 
+**Post-motion Release gate checkpoint (2026-10-19):** The local post-boundary changes pass 273 unit tests and 2 golden tests, build with 0 warnings/errors, pass `dotnet format --verify-no-changes`, repository validation and `git diff --check`. This evidence remains local until the next exact 50-commit push; the six partial P0 gates remain open.
+
 **Workspace navigation affordance checkpoint (2026-10-19):** The adaptive shell's Ctrl+1 through Ctrl+4 workspace shortcut hint now has an explicit accessible tooltip explaining each destination. Focused production-shell coverage and format/diff checks pass; native keyboard acceptance remains unverified.
 
 **Media import affordance checkpoint (2026-10-19):** The shared media-bin drop surface now explains supported local media, the explicit Import action and the local-only default. Focused production-shell coverage and format/diff checks pass; actual native drag/drop acceptance remains unverified.
