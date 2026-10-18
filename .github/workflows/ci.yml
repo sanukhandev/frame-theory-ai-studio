@@ -181,6 +181,41 @@ jobs:
           } finally {
             $archive.Dispose()
           }
+      - name: Build Windows installer validation
+        if: steps.detect.outputs.has_solution == 'true' && runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          choco install innosetup --no-progress -y
+          ./scripts/package_windows.ps1 -OutputDirectory artifacts/installer -PublishDirectory artifacts/installer-publish
+          $installer = Join-Path (Resolve-Path artifacts/installer).Path "FrameTheoryStudioAI-win-x64.exe"
+          $installDirectory = Join-Path $env:RUNNER_TEMP "frame-theory-installed"
+          if (Test-Path -LiteralPath $installDirectory) {
+            Remove-Item -LiteralPath $installDirectory -Recurse -Force
+          }
+          Start-Process -FilePath $installer -ArgumentList @("/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/DIR=$installDirectory") -Wait
+          ./scripts/smoke_desktop.ps1 -AssemblyPath (Join-Path $installDirectory "FrameTheory.Desktop.exe") -RequireWindowTitle
+          Start-Process -FilePath (Join-Path $installDirectory "unins000.exe") -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait
+          if (Test-Path -LiteralPath $installDirectory) {
+            throw "Windows installer uninstall left the installation directory behind."
+          }
+      - name: Build macOS DMG validation
+        if: steps.detect.outputs.has_solution == 'true' && runner.os == 'macOS'
+        shell: bash
+        run: |
+          chmod +x scripts/package_macos_dmg.sh
+          scripts/package_macos_dmg.sh "" artifacts/installer
+          mkdir -p "$RUNNER_TEMP/frame-theory-dmg"
+          hdiutil attach -nobrowse -readonly artifacts/installer/FrameTheoryStudioAI-*.dmg -mountpoint "$RUNNER_TEMP/frame-theory-dmg"
+          test -x "$RUNNER_TEMP/frame-theory-dmg/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
+          hdiutil detach "$RUNNER_TEMP/frame-theory-dmg"
+      - name: Build Linux DEB validation
+        if: steps.detect.outputs.has_solution == 'true' && runner.os == 'Linux'
+        shell: bash
+        run: |
+          chmod +x scripts/package_linux_deb.sh
+          scripts/package_linux_deb.sh linux-x64 artifacts/installer
+          dpkg-deb --info artifacts/installer/frame-theory-studio-ai_0.1.0_amd64.deb
+          dpkg-deb --contents artifacts/installer/frame-theory-studio-ai_0.1.0_amd64.deb | grep -F '/usr/bin/frame-theory-studio-ai'
       - name: Launch extracted portable archive smoke
         if: steps.detect.outputs.has_solution == 'true' && runner.os == 'Windows'
         shell: pwsh

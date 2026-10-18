@@ -1,6 +1,7 @@
 # Editor/build output
 **/bin/
 **/obj/
+artifacts/
 .vs/
 .idea/
 .vscode/*

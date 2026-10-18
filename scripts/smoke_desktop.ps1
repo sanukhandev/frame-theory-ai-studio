@@ -6,19 +6,26 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$dotnetCommand = Get-Command dotnet -ErrorAction SilentlyContinue
-$dotnet = if ($dotnetCommand) {
-    $dotnetCommand.Source
-} else {
-    $userDotnet = Join-Path $env:USERPROFILE ".dotnet/dotnet.exe"
-    if (-not (Test-Path -LiteralPath $userDotnet -PathType Leaf)) {
-        throw "The .NET host executable was not found on PATH or at $userDotnet."
-    }
+$target = (Resolve-Path -LiteralPath $AssemblyPath).Path
+$arguments = @()
+if ([IO.Path]::GetExtension($target) -eq ".dll") {
+    $dotnetCommand = Get-Command dotnet -ErrorAction SilentlyContinue
+    $dotnet = if ($dotnetCommand) {
+        $dotnetCommand.Source
+    } else {
+        $userDotnet = Join-Path $env:USERPROFILE ".dotnet/dotnet.exe"
+        if (-not (Test-Path -LiteralPath $userDotnet -PathType Leaf)) {
+            throw "The .NET host executable was not found on PATH or at $userDotnet."
+        }
 
-    $userDotnet
+        $userDotnet
+    }
+    $executable = $dotnet
+    $arguments = @($target)
+} else {
+    $executable = $target
 }
-$dll = (Resolve-Path -LiteralPath $AssemblyPath).Path
-$process = Start-Process -FilePath $dotnet -ArgumentList @($dll) -WorkingDirectory (Split-Path $dll) -PassThru
+$process = Start-Process -FilePath $executable -ArgumentList $arguments -WorkingDirectory (Split-Path $target) -PassThru
 $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
 $title = $null
 
