@@ -342,6 +342,8 @@ jobs:
           rm -rf "$deb_directory"
           mkdir -p "$deb_directory"
           dpkg-deb --extract artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb "$deb_directory"
+          test -x "$deb_directory/usr/bin/frame-theory-studio-ai"
+          grep -F 'exec /opt/frame-theory-studio/FrameTheory.Desktop' "$deb_directory/usr/bin/frame-theory-studio-ai"
           xvfb-run -a pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath "$deb_directory/opt/frame-theory-studio/FrameTheory.Desktop"
           sudo dpkg -i artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb
           cleanup_deb() { sudo dpkg -r frame-theory-studio-ai >/dev/null 2>&1 || true; }
