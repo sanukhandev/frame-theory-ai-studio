@@ -109,6 +109,7 @@ public sealed class DesktopTranscriptionTests
             Xunit.Assert.Contains(Convert.ToBase64String([7, 8, 9]), requestBody, StringComparison.Ordinal);
             Xunit.Assert.DoesNotContain(Convert.ToBase64String([9, 9, 9]), requestBody, StringComparison.Ordinal);
             Xunit.Assert.Equal("video", viewModel.TimelineEditor.Captions.Single().Text);
+            Xunit.Assert.Equal(Fingerprint(videoPath), viewModel.TimelineEditor.TranscriptSourceFingerprint);
         }
         finally
         {

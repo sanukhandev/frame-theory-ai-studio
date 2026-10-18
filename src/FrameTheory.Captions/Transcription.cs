@@ -608,7 +608,7 @@ public sealed class JsonTranscriptProvider : IProgressiveTranscriptionProvider
             throw new InvalidDataException("The transcript requires a source fingerprint and timed words.");
         }
 
-        var sourceFingerprint = await ComputeFingerprintAsync(sourcePath, cancellationToken);
+        var sourceFingerprint = await TranscriptSourceFingerprint.ComputeAsync(source, cancellationToken);
         if (!string.Equals(document.SourceFingerprint, sourceFingerprint, StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidDataException("The transcript source fingerprint does not match the selected media.");
@@ -629,26 +629,6 @@ public sealed class JsonTranscriptProvider : IProgressiveTranscriptionProvider
         }
     }
 
-    private static async Task<string> ComputeFingerprintAsync(string sourcePath, CancellationToken cancellationToken)
-    {
-        await using var stream = new FileStream(
-            sourcePath,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.Read,
-            64 * 1024,
-            FileOptions.Asynchronous | FileOptions.SequentialScan);
-        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
-        var buffer = new byte[64 * 1024];
-        int bytesRead;
-        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(), cancellationToken)) > 0)
-        {
-            hash.AppendData(buffer.AsSpan(0, bytesRead));
-        }
-
-        return $"sha256:{Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant()}";
-    }
-
     private sealed class TranscriptDocument
     {
         public string? Source { get; set; }
@@ -665,5 +645,46 @@ public sealed class JsonTranscriptProvider : IProgressiveTranscriptionProvider
         public long StartMs { get; set; }
 
         public long EndMs { get; set; }
+    }
+}
+
+public static class TranscriptSourceFingerprint
+{
+    public static async Task<string> ComputeAsync(Uri source, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        cancellationToken.ThrowIfCancellationRequested();
+        if (!source.IsFile)
+        {
+            throw new InvalidDataException("Transcript sources must be local files.");
+        }
+
+        var sourcePath = source.LocalPath;
+        if (!File.Exists(sourcePath))
+        {
+            throw new FileNotFoundException("The transcript source was not found.", sourcePath);
+        }
+
+        if ((File.GetAttributes(sourcePath) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new InvalidDataException("Symlinked transcript sources are not accepted.");
+        }
+
+        await using var stream = new FileStream(
+            sourcePath,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.Read,
+            64 * 1024,
+            FileOptions.Asynchronous | FileOptions.SequentialScan);
+        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        var buffer = new byte[64 * 1024];
+        int bytesRead;
+        while ((bytesRead = await stream.ReadAsync(buffer.AsMemory(), cancellationToken)) > 0)
+        {
+            hash.AppendData(buffer.AsSpan(0, bytesRead));
+        }
+
+        return $"sha256:{Convert.ToHexString(hash.GetHashAndReset()).ToLowerInvariant()}";
     }
 }

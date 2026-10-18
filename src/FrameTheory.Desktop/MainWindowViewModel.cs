@@ -1585,6 +1585,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             CaptionStatusText = $"Preparing approved media: {Path.GetFileName(fullPath)}.";
+            var originalSource = new Uri(fullPath);
+            var originalFingerprint = await TranscriptSourceFingerprint.ComputeAsync(originalSource, cancellationToken);
             await using var preparedSource = await _audioSourcePreparer.PrepareAsync(new Uri(fullPath), cancellationToken);
             CaptionStatusText = $"Uploading approved audio: {Path.GetFileName(fullPath)}.";
             var provider = new GeminiTranscriptionProvider(
@@ -1594,9 +1596,15 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 preparedSource.Source,
                 new Progress<TranscriptionProgress>(update => CaptionStatusText = $"{update.Stage} ({update.Fraction:P0})"),
                 cancellationToken);
+            var currentFingerprint = await TranscriptSourceFingerprint.ComputeAsync(originalSource, cancellationToken);
+            if (!string.Equals(originalFingerprint, currentFingerprint, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidDataException("The selected media changed while transcription was in progress.");
+            }
+
             TimelineEditor.ImportTranscript(new TranscriptResult(
-                new Uri(fullPath),
-                result.SourceFingerprint,
+                originalSource,
+                originalFingerprint,
                 result.Words));
             CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} verified transcript caption cue(s) from {Path.GetFileName(fullPath)}.";
             return true;
