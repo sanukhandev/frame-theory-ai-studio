@@ -163,6 +163,18 @@ public sealed class AiEditPlanExecutorTests
         }).ColorGrades);
     }
 
+    [Xunit.Fact]
+    public void ExecutionResultSnapshotsOutcomes()
+    {
+        var outcomes = new List<AiActionExecutionOutcome> { new("action", true, "Applied.") };
+        var result = new AiPlanExecutionResult(true, "group", outcomes, "Applied.");
+
+        outcomes.Clear();
+
+        Xunit.Assert.Single(result.Outcomes);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<AiActionExecutionOutcome>>(result.Outcomes).IsReadOnly);
+    }
+
     private static TimelineEditorViewModel CreateEditor(out MediaId mediaId)
     {
         mediaId = MediaId.Create(new Uri("file:///fixture.mp4"), "fixture");

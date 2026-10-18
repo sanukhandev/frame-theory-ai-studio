@@ -9,11 +9,36 @@ namespace FrameTheory.Desktop;
 
 public sealed record AiActionExecutionOutcome(string ActionId, bool Applied, string Message);
 
-public sealed record AiPlanExecutionResult(
-    bool IsApplied,
-    string? ChangeGroupId,
-    IReadOnlyList<AiActionExecutionOutcome> Outcomes,
-    string Message);
+public sealed record AiPlanExecutionResult
+{
+    public AiPlanExecutionResult(
+        bool IsApplied,
+        string? ChangeGroupId,
+        IReadOnlyList<AiActionExecutionOutcome> Outcomes,
+        string Message)
+    {
+        this.IsApplied = IsApplied;
+        this.ChangeGroupId = ChangeGroupId;
+        this.Outcomes = Array.AsReadOnly((Outcomes ?? throw new ArgumentNullException(nameof(Outcomes))).ToArray());
+        this.Message = Message;
+    }
+
+    public bool IsApplied { get; }
+
+    public string? ChangeGroupId { get; }
+
+    public IReadOnlyList<AiActionExecutionOutcome> Outcomes { get; }
+
+    public string Message { get; }
+
+    public void Deconstruct(out bool IsApplied, out string? ChangeGroupId, out IReadOnlyList<AiActionExecutionOutcome> Outcomes, out string Message)
+    {
+        IsApplied = this.IsApplied;
+        ChangeGroupId = this.ChangeGroupId;
+        Outcomes = this.Outcomes;
+        Message = this.Message;
+    }
+}
 
 public static class AiEditPlanExecutor
 {
