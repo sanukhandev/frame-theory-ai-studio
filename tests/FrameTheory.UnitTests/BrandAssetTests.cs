@@ -18,5 +18,6 @@ public sealed class BrandAssetTests
         Xunit.Assert.True(BrandAssetCatalog.TryGetApprovedLogoPath(out var resolvedPath));
         Xunit.Assert.Equal(Path.GetFullPath(path), resolvedPath);
         Xunit.Assert.True(BrandAssetCatalog.IsApprovedLogoPath(path));
+        Xunit.Assert.False(BrandAssetCatalog.IsApprovedLogoPath(Path.Combine(Path.GetTempPath(), "not-approved-logo.png")));
     }
 }
