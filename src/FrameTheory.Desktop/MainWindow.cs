@@ -2592,15 +2592,22 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(positionStatus, "Timeline position status");
         ToolTip.SetTip(positionStatus, "Current local timeline timecode.");
         positionStatus.Bind(TextBox.TextProperty, new Binding("TimelineEditor.CurrentTimecode"));
-        var monitorTimecode = new TextBlock
+        var monitorTimecode = new TextBox
         {
+            IsReadOnly = true,
             FontSize = 11,
             FontWeight = FontWeight.SemiBold,
-            Foreground = Brushes.White
+            Foreground = Brushes.White,
+            TextWrapping = TextWrapping.NoWrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
         };
         AutomationProperties.SetName(monitorTimecode, "Timeline monitor timecode");
         ToolTip.SetTip(monitorTimecode, "Current program monitor position.");
-        monitorTimecode.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentTimecode"));
+        monitorTimecode.Bind(TextBox.TextProperty, new Binding("TimelineEditor.CurrentTimecode"));
         var frameReadout = new Border
         {
             Padding = new Thickness(8, 5),

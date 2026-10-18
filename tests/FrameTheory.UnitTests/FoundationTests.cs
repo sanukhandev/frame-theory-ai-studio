@@ -237,9 +237,11 @@ public sealed class FoundationTests
                 tabs.SelectedIndex = 0;
                 Dispatcher.UIThread.RunJobs();
                 var monitorTimecode = window.GetVisualDescendants()
-                    .OfType<TextBlock>()
+                    .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline monitor timecode");
                 Xunit.Assert.Equal(viewModel.TimelineEditor.CurrentTimecode, monitorTimecode.Text);
+                Xunit.Assert.True(monitorTimecode.IsReadOnly);
+                Xunit.Assert.Equal("Current program monitor position.", ToolTip.GetTip(monitorTimecode));
                 var positionStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline position status");
