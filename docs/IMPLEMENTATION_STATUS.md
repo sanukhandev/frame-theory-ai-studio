@@ -56,6 +56,8 @@
 
 **Manual UI gate checkpoint (2026-10-18):** The Release desktop process launches from the managed `FrameTheory.Desktop.dll` with the expected `Frame Theory Studio AI` window title on this Windows host, but the available CUA inventory still returns zero native Windows applications and only browser tabs. FT-901..FT-904 and FT-1002 remain unverified; no interactive acceptance claim is made.
 
+**Desktop shell smoke checkpoint (2026-10-18):** `scripts/smoke_desktop.ps1` now launches the real Release `FrameTheory.Desktop.dll`, waits for the `Frame Theory Studio AI` window title, fails on early exit/timeout and terminates the smoke process. Local Windows execution passed; hosted run `39083391933` passed the same Windows smoke plus the full macOS/Linux quality, native-media, publish, archive and checksum matrix. This proves startup reachability only, not interactive workspace acceptance.
+
 **FT-204 batch-import checkpoint (2026-10-18):** The desktop media browser now retains previously imported media when files arrive in later drag/drop or picker batches, preserves stable media IDs for the visible entries and avoids duplicate browser rows when the same source is imported again. The timeline and analysis dictionaries retain their existing idempotent behavior. Focused desktop import coverage passes 6/6; full local Release tests pass 163/2, build has 0 warnings/errors and formatting verification passes.
 
 **FT-602 Files API trust-boundary checkpoint (2026-10-18):** Audio and visual Gemini Files API adapters now reject returned file URIs unless they are absolute HTTPS URIs on the official Gemini host; a valid returned file name is cleaned up before the typed failure is surfaced. Focused transcription coverage passes 12/12 and reference-analysis coverage passes 3/3; full local Release tests pass 164/2, build has 0 warnings/errors and formatting verification passes.
@@ -166,15 +168,15 @@
 ## Latest execution record
 ```text
 Date/time: 2026-10-18
-Task / Epic: FT-1005 / E10 portable release archives
-Git SHA: b6ebb5a (CI remediation: pinned Windows FFmpeg fallback)
-Files changed: .github/workflows/ci.yml
-Actual behavior and UI path: Windows CI first attempts the existing Chocolatey FFmpeg install and, when the package feed fails, installs the pinned Gyan.FFmpeg 9.0.2 WinGet package, discovers the static executable path and adds it to the current step and subsequent GitHub Actions PATH. The app remains host-dependent; no native media binary is bundled into the product.
-Commands executed + OS: Windows 11 x64 with .NET SDK 10.0.402; focused batch/recipe tests, full Release build/tests and formatting/diff verification, then hosted Windows/macOS/Linux validation.
-Test outputs / exit codes: Local WinGet path discovery launched FFmpeg 9.0.2 and `git diff --check` passed. Hosted run `39082588976` passed documentation, native batch MP4, recipe, advisory, build, format, tests, publish, portable archive payload assertion, checksum and upload validation on Windows, macOS and Linux.
-Media fixtures and verification: Hosted synthetic H.264/AAC smoke produced three verified social MP4 targets, plus existing timeline/photo fixtures; no user media, API key or proprietary binary entered Git. Local FFmpeg was unavailable on this Windows host, so native media execution remains hosted evidence.
-Known limitations / blockers: Approved official logo/brand-kit bytes, manual Avalonia UI acceptance, live Gemini provider evidence, licensing/native redistribution, real installers and signing remain open. Portable archives do not close FT-1005.
-Next unblocked task: Continue remaining P0 manual/external release gates; do not close FT-1005 or claim V1 without installer, licensing, branding and release evidence.
+Task / Epic: FT-1002 / E09-E10 desktop shell launch smoke
+Git SHA: 8aa11b2 (desktop shell launch smoke)
+Files changed: scripts/smoke_desktop.ps1, .github/workflows/ci.yml
+Actual behavior and UI path: The smoke starts the actual Release desktop assembly through the installed .NET host, observes the expected top-level window title, rejects early process exit or timeout and cleans up the process. It runs before FFmpeg installation, proving the manual editor shell can start without Gemini or native media dependencies.
+Commands executed + OS: Windows 11 x64 with the managed .NET host in `%USERPROFILE%\\.dotnet`; `pwsh -NoProfile -File scripts/smoke_desktop.ps1`, `git diff --check`, then hosted Windows/macOS/Linux validation.
+Test outputs / exit codes: Local desktop smoke passed with `Desktop shell window detected: Frame Theory Studio AI`; `git diff --check` passed. Hosted run `39083391933` passed documentation, desktop shell smoke, native batch MP4, recipe, advisory, build, format, tests, publish, portable archive payload assertion, checksum and upload validation on Windows, macOS and Linux.
+Media fixtures and verification: This startup smoke uses no media, FFmpeg, Gemini key or network upload. The same hosted run also exercised the existing synthetic H.264/AAC native-media fixtures; no user media, API key or proprietary binary entered Git.
+Known limitations / blockers: This proves shell startup only. Workspace interaction, playback/save/relink journeys, approved branding, live Gemini provider evidence, licensing/native redistribution, real installers and signing remain open.
+Next unblocked task: Exercise the launched shell through real interactive UI automation when a native app surface is available; otherwise continue remaining P0 external release gates without claiming FT-901..FT-904 or FT-1002 complete.
 ```
 
 **FT-1101 composition checkpoint (2026-10-18):** The Photo workspace exposes Import overlay, Clear overlays, brush-mask and clone-retouch controls with blend-mode and opacity selection. Overlay source files remain local, are never mutated, render through the same `PpmRaster` export path as the base photo, and are saved/reopened as bounded relative project media references with SHA-256 fingerprints. Focused composition/mask/retouch/persistence coverage passes 10/10; hosted native FFmpeg export/reopen reports one overlay, one mask and one retouch stroke. FT-1101 implementation acceptance is complete; manual UI, branding, licensing and installer gates remain separate.
