@@ -277,25 +277,27 @@ public static class TimelineProjectStateJson
             state.VideoSettings.Any(settings => settings is null || settings.Clip is null) ||
             state.AudioSettings.Any(settings => settings is null || settings.Clip is null) ||
             state.ColorGrades.Any(grade => grade is null) || state.Titles.Any(title => title is null) ||
-            state.Captions.Any(caption => caption is null || caption.Words is null || caption.Words.Any(word => word is null)))
+            state.Captions.Any(caption => caption is null || caption.Words is null || caption.Words.Count > MaximumEntries || caption.Words.Any(word => word is null)) ||
+            state.BeatMarkers.Any(marker => marker < 0) ||
+            state.BeatMarkerWaveform.Any(peak => float.IsNaN(peak) || float.IsInfinity(peak) || peak is < 0 or > 1))
         {
             throw new InvalidDataException("The timeline state contains null collections or entries.");
         }
 
         if (state.VideoSettings.Any(settings => settings.SpeedRamp is not null &&
-            (settings.SpeedRamp.Points is null || settings.SpeedRamp.Points.Any(point => point is null))))
+            (settings.SpeedRamp.Points is null || settings.SpeedRamp.Points.Count > MaximumEntries || settings.SpeedRamp.Points.Any(point => point is null))))
         {
             throw new InvalidDataException("The timeline speed-ramp state is incomplete.");
         }
 
         if (state.VideoSettings.Any(settings => settings.Animation is not null &&
-            (settings.Animation.Keyframes is null || settings.Animation.Keyframes.Any(keyframe => keyframe is null || keyframe.Value is null))))
+            (settings.Animation.Keyframes is null || settings.Animation.Keyframes.Count > MaximumEntries || settings.Animation.Keyframes.Any(keyframe => keyframe is null || keyframe.Value is null))))
         {
             throw new InvalidDataException("The timeline animation state is incomplete.");
         }
 
         if (state.Titles.Any(title => title.Animation is not null &&
-            (title.Animation.Keyframes is null || title.Animation.Keyframes.Any(keyframe => keyframe is null || keyframe.Value is null))))
+            (title.Animation.Keyframes is null || title.Animation.Keyframes.Count > MaximumEntries || title.Animation.Keyframes.Any(keyframe => keyframe is null || keyframe.Value is null))))
         {
             throw new InvalidDataException("The title animation state is incomplete.");
         }

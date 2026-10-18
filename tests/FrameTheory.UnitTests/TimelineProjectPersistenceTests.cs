@@ -310,6 +310,8 @@ public sealed class TimelineProjectPersistenceTests
             {
                 VideoClips = Enumerable.Range(0, 10_001).Select(_ => new TimelineClipProjectState()).ToList()
             })));
+        Xunit.Assert.Throws<InvalidDataException>(() => TimelineProjectStateJson.Deserialize(
+            TimelineProjectStateJson.Serialize(new TimelineProjectState { BeatMarkerWaveform = [2f] })));
     }
 
     [Xunit.Fact]
