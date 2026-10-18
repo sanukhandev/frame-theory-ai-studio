@@ -4105,7 +4105,7 @@ public sealed class MainWindow : Window
             Minimum = minimum,
             Maximum = maximum,
             Value = value,
-            Width = 180,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(slider, label);
@@ -4137,12 +4137,19 @@ public sealed class MainWindow : Window
 
             valueLabel.Text = nextValue.ToString("0.00", CultureInfo.InvariantCulture);
         };
-        return new StackPanel
+        var labelText = new TextBlock
         {
-            Orientation = Orientation.Horizontal,
-            Spacing = 8,
-            Children = { new TextBlock { Text = label, Width = 110 }, slider, valueLabel }
+            Text = label,
+            VerticalAlignment = VerticalAlignment.Center
         };
+        var layout = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("110,*,48"),
+            Children = { labelText, slider, valueLabel }
+        };
+        Grid.SetColumn(slider, 1);
+        Grid.SetColumn(valueLabel, 2);
+        return layout;
     }
 
     private static Bitmap? CreateBitmap(byte[]? previewPpm)
