@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive style-input checkpoint (2026-10-18):** Color style-library naming now uses a bounded 140–220px input that stretches with the inspector flow and explains its local-save purpose through a tooltip. Foundation coverage verifies the compact geometry and accessible name.
+
 **Responsive title-input checkpoint (2026-10-18):** Timeline title entry now stretches within a bounded 160–360px inspector width and exposes a concise editable-title tooltip, preventing the compact captions panel from being dominated by a fixed input. Foundation coverage verifies its bounds and discoverability.
 
 **Responsive monitor-stack checkpoint (2026-10-18):** The Video program monitor now stacks its action rail below the measured 520px compact-card threshold and restores the two-column monitor/action composition above it. Headless adaptive-shell coverage verifies both arrangements and preserves the live controls; native visual and HiDPI acceptance remains open.

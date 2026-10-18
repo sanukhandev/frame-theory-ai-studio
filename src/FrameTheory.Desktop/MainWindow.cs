@@ -2085,8 +2085,15 @@ public sealed class MainWindow : Window
         reset.Click += (_, _) => inspector.ResetGrade();
         controls.Children.Add(reset);
         var presetStore = new JsonColorPresetStore();
-        var presetName = new TextBox { PlaceholderText = "Style name", Width = 160 };
+        var presetName = new TextBox
+        {
+            PlaceholderText = "Style name",
+            MinWidth = 140,
+            MaxWidth = 220,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
         AutomationProperties.SetName(presetName, "Color style name");
+        ToolTip.SetTip(presetName, "Name the local reusable color style before saving it.");
         var presetSelection = new ComboBox { Width = 220 };
         AutomationProperties.SetName(presetSelection, "Loaded color styles");
         var presetStatus = new TextBox

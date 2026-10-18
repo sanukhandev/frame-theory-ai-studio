@@ -742,6 +742,16 @@ public sealed class FoundationTests
                 Xunit.Assert.True(colorStyleStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, colorStyleStatus.FontSize);
                 Xunit.Assert.Equal("Status of local reusable color style save and load operations.", ToolTip.GetTip(colorStyleStatus));
+                var colorStyleName = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color style name");
+                Xunit.Assert.True(double.IsNaN(colorStyleName.Width));
+                Xunit.Assert.Equal(140, colorStyleName.MinWidth);
+                Xunit.Assert.Equal(220, colorStyleName.MaxWidth);
+                Xunit.Assert.Equal(HorizontalAlignment.Stretch, colorStyleName.HorizontalAlignment);
+                Xunit.Assert.Equal(
+                    "Name the local reusable color style before saving it.",
+                    ToolTip.GetTip(colorStyleName));
                 var referenceStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Reference analysis status");
