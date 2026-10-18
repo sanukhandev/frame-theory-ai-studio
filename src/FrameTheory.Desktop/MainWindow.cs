@@ -1802,7 +1802,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(selectionInspector, "Timeline selection inspector");
         var tracks = new ListBox
         {
-            Height = 100,
+            Height = 124,
             ItemTemplate = new FuncDataTemplate<TimelineTrackRowViewModel>((item, _) =>
             {
                 if (item is null)
@@ -1837,20 +1837,31 @@ public sealed class MainWindow : Window
                     clips.Children.Add(clipButton);
                 }
 
-                return new StackPanel
+                var trackLabel = new TextBlock
                 {
-                    Spacing = 4,
-                    Children =
-                    {
-                        new TextBlock
-                        {
-                            Text = $"{item.Kind}  ·  {item.Id}",
-                            FontSize = 11,
-                            FontWeight = FontWeight.SemiBold,
-                            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(186, 193, 207))
-                        },
-                        clips
-                    }
+                    Text = $"{item.Kind}  ·  {item.Id}",
+                    FontSize = 11,
+                    FontWeight = FontWeight.SemiBold,
+                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(186, 193, 207)),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    TextTrimming = TextTrimming.CharacterEllipsis
+                };
+                var trackGrid = new Grid
+                {
+                    ColumnDefinitions = new ColumnDefinitions("120,*"),
+                    Children = { trackLabel, clips }
+                };
+                Grid.SetColumn(clips, 1);
+                return new Border
+                {
+                    MinHeight = 48,
+                    Margin = new Thickness(0, 0, 0, 4),
+                    Padding = new Thickness(8, 4),
+                    CornerRadius = new CornerRadius(4),
+                    Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(20, 23, 29)),
+                    BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 54, 65)),
+                    BorderThickness = new Thickness(1),
+                    Child = trackGrid
                 };
             }, supportsRecycling: false)
         };
