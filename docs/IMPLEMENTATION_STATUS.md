@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**UI evidence wording checkpoint (2026-10-18):** `docs/TEST_STRATEGY.md` now distinguishes logical 1280x800/960x640 headless bounds from the DPI-scaled-safe native Windows minimum and records `Ctrl+1..4` coverage accurately. Documentation validation and `git diff --check` pass; native HiDPI/manual cross-platform evidence remains open.
+
 **Trust-boundary policy checkpoint (2026-10-18):** Repository validation now requires the shared reparse-point guard in timeline preview, diagnostics and desktop file-I/O entry points in addition to media, storage, caption and AI consumers. The validator and `git diff --check` pass; this policy evidence is local pending the next exact-ten-commit hosted revalidation.
 
 **Full local post-hardening checkpoint (2026-10-18):** The Release solution passes 256 unit tests and 2 golden tests with 0 failures after temporary-output and diagnostics path hardening; repository validation, formatting and `git diff --check` also pass. This is local evidence pending the next exact-ten-commit hosted revalidation.
