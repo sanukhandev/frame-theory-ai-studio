@@ -220,7 +220,7 @@
 - [x] FT-904 local redacted diagnostics, unhandled-failure capture, stdout/stderr dependency probing, nonzero-exit unknown-state reporting and actionable dependency guidance meet the failure-UX test acceptance; cross-platform interactive failure-UX sign-off remains a separate V1 release gate
 - [x] FT-1001 core unit/golden/adversarial suite, caption provenance coverage and source SHA-256 preservation assertion pass on the hosted Windows/macOS/Linux matrix; broader manual/media journeys remain tracked by FT-1002
 - [~] FT-1002 UC-01..UC-06 executable smoke/test matrix is documented with Windows evidence and hosted photo/video/native-media evidence; interactive and macOS/Linux acceptance remains open
-- [~] FT-1003 dependency inventory and external FFmpeg/native asset assessment are documented; license/CVE clearance and redistribution evidence remain open
+- [~] FT-1003 dependency inventory, advisory evidence, per-OS native bundle manifests and external FFmpeg/native asset assessment are documented; license/CVE clearance and redistribution approval remain open
 - [x] FT-1004 GitHub Actions verifies Windows/macOS/Linux restore/build/format/test/publish jobs and uploads per-OS SHA-256 manifests; optional signing/notarization is not part of this task claim
 - [~] FT-1005 framework-dependent and opt-in self-contained publishes, checksummed portable archives, and unsigned Windows/macOS/Linux validation installers are available; native media bundling, clean-host release acceptance and signing remain open
 - [~] FT-1006 V1 acceptance audit is recorded with 52 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
