@@ -60,6 +60,8 @@
 
 **Portable relaunch checkpoint (2026-10-18):** CI now expands the generated Windows portable ZIP and runs the same real desktop-shell smoke against the extracted `FrameTheory.Desktop.dll`. Hosted run `39083944147` passed extraction and relaunch on Windows, alongside the complete macOS/Linux quality, native-media, archive and checksum matrix. Clean-host installation/relaunch on each target OS and interactive workflow acceptance remain open.
 
+**Cross-platform portable smoke checkpoint (2026-10-18):** The first Unix extension run `39084169917` correctly exposed that `Process.MainWindowTitle` is not populated under macOS or Xvfb Linux; no application failure occurred. Commit `4228d48` now requires the title only on Windows and requires extracted Unix processes to remain alive for the startup window. Hosted run `39084466811` passed extracted-package startup on Windows, macOS and Linux plus the full native-media, test, publish, archive and checksum matrix. This is process/startup evidence, not interactive UI acceptance.
+
 **FT-204 batch-import checkpoint (2026-10-18):** The desktop media browser now retains previously imported media when files arrive in later drag/drop or picker batches, preserves stable media IDs for the visible entries and avoids duplicate browser rows when the same source is imported again. The timeline and analysis dictionaries retain their existing idempotent behavior. Focused desktop import coverage passes 6/6; full local Release tests pass 163/2, build has 0 warnings/errors and formatting verification passes.
 
 **FT-602 Files API trust-boundary checkpoint (2026-10-18):** Audio and visual Gemini Files API adapters now reject returned file URIs unless they are absolute HTTPS URIs on the official Gemini host; a valid returned file name is cleaned up before the typed failure is surfaced. Focused transcription coverage passes 12/12 and reference-analysis coverage passes 3/3; full local Release tests pass 164/2, build has 0 warnings/errors and formatting verification passes.
@@ -170,15 +172,15 @@
 ## Latest execution record
 ```text
 Date/time: 2026-10-18
-Task / Epic: FT-1005 / E10 portable package relaunch
-Git SHA: 3903ab3 (extracted portable archive smoke)
+Task / Epic: FT-1005 / E10 cross-platform portable package relaunch
+Git SHA: 4228d48 (Unix-aware extracted archive smoke)
 Files changed: scripts/smoke_desktop.ps1, .github/workflows/ci.yml
-Actual behavior and UI path: After CI publishes and archives the desktop tree, Windows expands the exact portable ZIP and launches its extracted `FrameTheory.Desktop.dll` through the installed .NET host. The smoke observes the expected window title, rejects early exit or timeout and cleans up the process.
-Commands executed + OS: Windows 11 x64 with the managed .NET host in `%USERPROFILE%\\.dotnet`; local `pwsh -NoProfile -File scripts/smoke_desktop.ps1 -AssemblyPath ...`, `git diff --check`, then hosted Windows/macOS/Linux validation.
-Test outputs / exit codes: Local desktop smoke passed with `Desktop shell window detected: Frame Theory Studio AI`; hosted run `39083944147` passed documentation, desktop shell smoke, extracted portable relaunch, native batch MP4, recipe, advisory, build, format, tests, publish, archive payload assertion, checksum and upload validation on Windows, macOS and Linux.
+Actual behavior and UI path: After CI publishes and archives the desktop tree, each runner expands its exact portable ZIP and launches its extracted `FrameTheory.Desktop.dll` through the installed .NET host. Windows requires the `Frame Theory Studio AI` title; macOS and Linux require the process to remain alive because their process metadata does not expose the native title consistently. All smoke paths reject early exit and clean up the process.
+Commands executed + OS: Windows 11 x64 local strict-title smoke, then hosted Windows/macOS/Linux validation with Xvfb on Linux; `git diff --check` passed.
+Test outputs / exit codes: Local desktop smoke passed with `Desktop shell window detected: Frame Theory Studio AI`; hosted run `39084466811` passed documentation, desktop shell smoke, extracted portable relaunch on all three OSes, native batch MP4, recipe, advisory, build, format, tests, publish, archive payload assertion, checksum and upload validation.
 Media fixtures and verification: The relaunch smoke uses no media, FFmpeg, Gemini key or network upload. The same hosted run exercised the existing synthetic H.264/AAC native-media fixtures; no user media, API key or proprietary binary entered Git.
-Known limitations / blockers: This verifies a framework-dependent portable archive on Windows only. Clean-host install/relaunch on macOS/Linux, installers, native redistribution, signing, approved branding, live Gemini evidence and interactive workspace acceptance remain open.
-Next unblocked task: Continue clean-host/package acceptance on the target OSes when those environments are available; do not close FT-1005 or claim V1 from portable Windows relaunch alone.
+Known limitations / blockers: This verifies framework-dependent portable startup only. Clean-host installation/uninstallation, installers, native redistribution, signing, approved branding, live Gemini evidence and interactive workspace acceptance remain open.
+Next unblocked task: Continue clean-host/package acceptance on target hardware when available; do not close FT-1005 or claim V1 from portable startup alone.
 ```
 
 **FT-1101 composition checkpoint (2026-10-18):** The Photo workspace exposes Import overlay, Clear overlays, brush-mask and clone-retouch controls with blend-mode and opacity selection. Overlay source files remain local, are never mutated, render through the same `PpmRaster` export path as the base photo, and are saved/reopened as bounded relative project media references with SHA-256 fingerprints. Focused composition/mask/retouch/persistence coverage passes 10/10; hosted native FFmpeg export/reopen reports one overlay, one mask and one retouch stroke. FT-1101 implementation acceptance is complete; manual UI, branding, licensing and installer gates remain separate.

@@ -28,8 +28,8 @@ CI also creates `frame-theory-<platform>-portable.zip` from the published deskto
 | Platform | Build/CI compile | Local GUI/media evidence | Installer/signing |
 |---|---|---|---|
 | Windows 11 x64 | Local and hosted CI publish verified; extracted portable archive relaunch passed in `39083944147` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; interactive workspace and clean-host relaunch remain open | Portable validation package available; no installer, signing or notarization |
-| macOS Apple Silicon/Intel | Hosted restore/build/test/publish and native media smoke verified in `39080954139` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; local GUI/package relaunch not run here | Portable validation package path available; no installer or notarization |
-| Linux x64 | Hosted restore/build/test/publish and native media smoke verified in `39080954139` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; local GUI/package relaunch not run here | Portable validation package path available; no installer or signing |
+| macOS Apple Silicon/Intel | Hosted restore/build/test/publish, native media and extracted portable process-liveness smoke verified in `39084466811` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified; local GUI/manual acceptance not run here | Portable validation package path available; no installer or notarization |
+| Linux x64 | Hosted restore/build/test/publish, native media and extracted portable process-liveness smoke verified in `39084466811` | Hosted FFmpeg import/export, project persistence, batch social MP4, AI recipe and native smoke verified under Xvfb; local GUI/manual acceptance not run here | Portable validation package path available; no installer or signing |
 
 ## Release blockers
 
