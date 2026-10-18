@@ -56,6 +56,10 @@ def run() -> int:
         "src/FrameTheory.Photo/PhotoExport.cs",
         "src/FrameTheory.Captions/Transcription.cs",
         "src/FrameTheory.Captions/LocalWhisperTranscription.cs",
+        "src/FrameTheory.Storage/CacheIndex.cs",
+        "src/FrameTheory.AI/AiRecipeStore.cs",
+        "src/FrameTheory.Color/ColorPreset.cs",
+        "src/FrameTheory.Desktop/WorkspaceStateStore.cs",
     ]:
         source = (ROOT / relative_path).read_text(encoding="utf-8")
         assert "LocalPathSecurity.ContainsReparsePoint" in source, f"{relative_path} must use shared local path security"

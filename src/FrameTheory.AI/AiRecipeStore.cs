@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FrameTheory.Domain;
 
 namespace FrameTheory.AI;
 
@@ -120,12 +121,12 @@ public sealed class AiRecipeStore
 
     private static void EnsureRegularPath(string fullPath, string directory)
     {
-        if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) != 0)
+        if (LocalPathSecurity.ContainsReparsePoint(directory))
         {
             throw new InvalidDataException("The AI recipe directory must not be a reparse point.");
         }
 
-        if (File.Exists(fullPath) && (File.GetAttributes(fullPath) & FileAttributes.ReparsePoint) != 0)
+        if (File.Exists(fullPath) && LocalPathSecurity.ContainsReparsePoint(fullPath))
         {
             throw new InvalidDataException("The AI recipe file must not be a reparse point.");
         }

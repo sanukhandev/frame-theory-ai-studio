@@ -1,4 +1,5 @@
 using System.Text.Json;
+using FrameTheory.Domain;
 
 namespace FrameTheory.Desktop;
 
@@ -30,7 +31,7 @@ public sealed class FileWorkspaceStateStore : IWorkspaceStateStore
                 return 0;
             }
 
-            if (IsReparsePoint(_path))
+            if (LocalPathSecurity.ContainsReparsePoint(_path))
             {
                 return 0;
             }
@@ -63,7 +64,7 @@ public sealed class FileWorkspaceStateStore : IWorkspaceStateStore
         try
         {
             Directory.CreateDirectory(directory);
-            if (IsReparsePoint(directory) || (File.Exists(_path) && IsReparsePoint(_path)))
+            if (LocalPathSecurity.ContainsReparsePoint(directory) || (File.Exists(_path) && LocalPathSecurity.ContainsReparsePoint(_path)))
             {
                 return;
             }
@@ -116,9 +117,6 @@ public sealed class FileWorkspaceStateStore : IWorkspaceStateStore
         {
         }
     }
-
-    private static bool IsReparsePoint(string path) =>
-        (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
 
     private sealed record WorkspaceState(int SelectedWorkspaceIndex);
 }

@@ -4,6 +4,8 @@ Audit checkpoint: 2026-10-18, latest verified green complete matrix run `3911616
 
 ## Evidence
 
+- Current shared-store security increment: cache-index, AI-recipe, color-preset and workspace-state stores use the shared ancestor-aware reparse-point guard; focused recovery/recipe/color/foundation coverage passes 29/29, with formatting, repository validation and diff checks clean. Hosted confirmation remains pending.
+
 - GitHub task visibility: 54 implementation issues are closed, including FT-602 and FT-803, and aggregate E08 is closed; remaining implementation issues are partial, blocked, or future P1/P2 work; other epic issues remain open until their aggregate gates pass.
 - Current local batch: recovery, storage, workspace-state, color-golden, process-cancellation, package-integrity and relink-fingerprint changes pass 225 unit tests, 2 golden tests, repository validation, formatting and diff checks. No GitHub task is closed from this local-only evidence; hosted and manual gates remain authoritative.
 - Current local hardening batch: the timeline binding, package/native-manifest traversal and linked-media import/cleanup changes pass the full Release suite at 227 unit tests and 2 golden tests, plus repository validation, formatting and diff checks. This evidence is local until the tenth commit is pushed and hosted revalidation completes.
