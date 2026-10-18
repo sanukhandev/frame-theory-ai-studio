@@ -214,6 +214,8 @@ public sealed class FoundationTests
                     .OfType<ListBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Imported media");
                 Xunit.Assert.NotNull(importedMediaList.ItemTemplate);
+                Xunit.Assert.NotNull(importedMediaList.ItemsPanel);
+                Xunit.Assert.Equal(176, importedMediaList.Height);
                 var importedMediaSummary = window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Imported media summary");
@@ -222,6 +224,7 @@ public sealed class FoundationTests
                     .OfType<ListBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline tracks");
                 Xunit.Assert.NotNull(timelineTracks.ItemTemplate);
+                Xunit.Assert.Equal(124, timelineTracks.Height);
                 var timelineSectionNames = new HashSet<string>(StringComparer.Ordinal)
                 {
                     "Analysis and rough cut section",
