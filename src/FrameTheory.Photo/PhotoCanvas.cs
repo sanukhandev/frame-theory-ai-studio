@@ -64,9 +64,14 @@ public readonly record struct PhotoViewport
 {
     public PhotoViewport(int width, int height)
     {
-        if (width <= 0 || height <= 0)
+        if (width <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(width));
+        }
+
+        if (height <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(height));
         }
 
         Width = width;

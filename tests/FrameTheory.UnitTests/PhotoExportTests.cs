@@ -7,6 +7,13 @@ namespace FrameTheory.UnitTests;
 public sealed class PhotoExportTests
 {
     [Xunit.Fact]
+    public void SocialPhotoPresetReportsTheInvalidDimension()
+    {
+        Xunit.Assert.Equal("width", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new SocialPhotoExportPreset(SocialAspectRatio.Square1By1, 0, 4)).ParamName);
+        Xunit.Assert.Equal("height", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new SocialPhotoExportPreset(SocialAspectRatio.Square1By1, 4, 0)).ParamName);
+    }
+
+    [Xunit.Fact]
     public async Task ExportRendersEditsVerifiesImageAndAtomicallyReplacesDestination()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-photo-export-");

@@ -14,9 +14,14 @@ public sealed record SocialPhotoExportPreset
 {
     public SocialPhotoExportPreset(SocialAspectRatio aspectRatio, int width, int height)
     {
-        if (width <= 0 || height <= 0)
+        if (width <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(width));
+        }
+
+        if (height <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(height));
         }
 
         AspectRatio = aspectRatio;

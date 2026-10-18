@@ -7,6 +7,12 @@ namespace FrameTheory.UnitTests;
 public sealed class PhotoCanvasTests
 {
     [Xunit.Fact]
+    public void ViewportReportsTheInvalidDimension()
+    {
+        Xunit.Assert.Equal("height", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new PhotoViewport(400, 0)).ParamName);
+    }
+
+    [Xunit.Fact]
     public void ImportRequiresAnImageAndCanvasSupportsFit100ZoomAndPan()
     {
         var imageId = MediaId.Parse(new string('f', 64));
