@@ -69,6 +69,7 @@ def run() -> int:
         "src/FrameTheory.Desktop/BrandAssetCatalog.cs",
         "src/FrameTheory.Desktop/MainWindowViewModel.cs",
         "src/FrameTheory.Application/Diagnostics.cs",
+        "src/FrameTheory.Platform/SystemCapabilityDetector.cs",
         "src/FrameTheory.Media/PreviewProxy.cs",
     ]:
         source = (ROOT / relative_path).read_text(encoding="utf-8")

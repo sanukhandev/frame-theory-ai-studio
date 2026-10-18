@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using FrameTheory.Application;
+using FrameTheory.Domain;
 
 namespace FrameTheory.Platform;
 
@@ -232,6 +233,11 @@ public sealed class SystemCapabilityDetector : ICapabilityDetector
         var path = Path.Combine(directory, $"frame-theory-probe-{Guid.NewGuid():N}.tmp");
         try
         {
+            if (LocalPathSecurity.ContainsReparsePoint(path))
+            {
+                return new CapabilityStatus("Storage", CapabilityState.Missing, "The temporary storage probe path is a reparse point.");
+            }
+
             await File.WriteAllTextAsync(path, "probe", cancellationToken);
             return new CapabilityStatus("Storage", CapabilityState.Available, directory);
         }
