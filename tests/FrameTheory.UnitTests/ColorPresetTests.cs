@@ -46,6 +46,8 @@ public sealed class ColorPresetTests
             await Xunit.Assert.ThrowsAsync<ArgumentException>(() => new JsonColorPresetStore().SaveAtomicAsync(path, [preset, new ColorPreset("same", new ColorGrade())], CancellationToken.None));
             await File.WriteAllTextAsync(path, "{ malformed");
             await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => new JsonColorPresetStore().LoadAsync(path, CancellationToken.None));
+            await File.WriteAllTextAsync(path, "{\"presets\":[null]}");
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => new JsonColorPresetStore().LoadAsync(path, CancellationToken.None));
         }
         finally
         {

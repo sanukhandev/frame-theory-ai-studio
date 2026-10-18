@@ -119,7 +119,9 @@ public sealed class JsonColorPresetStore
         {
             var file = await JsonSerializer.DeserializeAsync<PresetFile>(stream, JsonOptions, cancellationToken)
                 ?? throw new InvalidDataException("The preset file is empty.");
-            var presets = file.Presets?.Select(item => item.ToPreset()).ToArray() ?? [];
+            var presets = file.Presets?.Select(item => item is null
+                ? throw new InvalidDataException("The preset file contains a null entry.")
+                : item.ToPreset()).ToArray() ?? [];
             if (presets.GroupBy(preset => preset.Name, StringComparer.OrdinalIgnoreCase).Any(group => group.Count() > 1))
             {
                 throw new InvalidDataException("Preset names must be unique.");
