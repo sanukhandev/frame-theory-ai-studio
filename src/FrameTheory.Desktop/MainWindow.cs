@@ -924,30 +924,17 @@ public sealed class MainWindow : Window
         var relink = new Button { Content = "Relink selected media" };
         AutomationProperties.SetName(relink, "Relink selected photo media");
         relink.Click += async (_, _) => await viewModel.PhotoRecovery.RelinkSelectedAsync(replacementPath.Text ?? string.Empty, CancellationToken.None);
-        return new Border
-        {
-            Margin = new Thickness(0, 16, 0, 0),
-            Padding = new Thickness(16),
-            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 32, 39)),
-            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 54, 65)),
-            BorderThickness = new Thickness(1),
-            CornerRadius = new CornerRadius(8),
-            Child = new StackPanel
-            {
-                Spacing = 8,
-                Children =
-                {
-                    new TextBlock { Text = "Project recovery and media relink", FontWeight = FontWeight.SemiBold },
-                    projectPath,
-                    open,
-                    status,
-                    new TextBlock { Text = "Missing media" },
-                    missingList,
-                    replacementPath,
-                    relink
-                }
-            }
-        };
+        return CreateInspectorExpander(
+            "Project recovery and media relink",
+            CreateSectionContent(
+                projectPath,
+                open,
+                status,
+                new TextBlock { Text = "Missing media" },
+                missingList,
+                replacementPath,
+                relink),
+            expanded: false);
     }
 
     private static Control CreatePhotoEditorPanel(PhotoEditorViewModel editor)

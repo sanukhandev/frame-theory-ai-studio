@@ -377,6 +377,10 @@ public sealed class FoundationTests
                     control => AutomationProperties.GetName(control) == "Timeline selection context");
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
+                var photoRecoverySection = window.GetVisualDescendants()
+                    .OfType<Expander>()
+                    .Single(control => AutomationProperties.GetName(control) == "Project recovery and media relink section");
+                Xunit.Assert.False(photoRecoverySection.IsExpanded);
                 Xunit.Assert.True(window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo preview empty state")
