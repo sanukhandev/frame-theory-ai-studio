@@ -40,7 +40,7 @@ dotnet publish src/FrameTheory.Desktop/FrameTheory.Desktop.csproj \
 cp -R "$publish"/. "$app/Contents/MacOS/"
 mv "$app/Contents/MacOS/FrameTheory.Desktop" "$app/Contents/MacOS/FrameTheoryStudio"
 chmod +x "$app/Contents/MacOS/FrameTheoryStudio"
-cat > "$app/Contents/Info.plist" <<'PLIST'
+cat > "$app/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
