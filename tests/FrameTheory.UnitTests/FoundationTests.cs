@@ -273,6 +273,12 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Imported media summary");
                 Xunit.Assert.Equal(viewModel.ImportedMediaSummary, importedMediaSummary.Text);
                 Xunit.Assert.Equal(
+                    "No media selected",
+                    window.GetVisualDescendants()
+                        .OfType<TextBlock>()
+                        .Single(control => AutomationProperties.GetName(control) == "Selected media summary")
+                        .Text);
+                Xunit.Assert.Equal(
                     "Imported local media available to the active workspace.",
                     ToolTip.GetTip(importedMediaList));
                 var mediaSearch = window.GetVisualDescendants()
@@ -655,6 +661,7 @@ public sealed class FoundationTests
                     "Media import status",
                     "Search imported media",
                     "Clear media search",
+                    "Selected media summary",
                     "Media search empty state",
                     "Media bin empty state",
                     "Timeline preview status",

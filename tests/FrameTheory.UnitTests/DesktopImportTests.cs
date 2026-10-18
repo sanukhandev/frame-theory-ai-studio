@@ -255,6 +255,12 @@ public sealed class DesktopImportTests
                     .OfType<Border>()
                     .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Selected media badge: second.mp4")
                     .IsVisible);
+                Xunit.Assert.Equal(
+                    "VIDEO  ·  second.mp4",
+                    window.GetVisualDescendants()
+                        .OfType<TextBlock>()
+                        .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Selected media summary")
+                        .Text);
                 search.Text = "second";
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Single(mediaList.Items);
