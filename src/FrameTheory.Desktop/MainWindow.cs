@@ -1911,22 +1911,38 @@ public sealed class MainWindow : Window
             BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
             BorderThickness = new Thickness(1),
             Child = CreateFlow(
-                new StackPanel
+                new Border
                 {
-                    Spacing = 4,
-                    Children =
+                    Padding = new Thickness(8),
+                    Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
+                    BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(6),
+                    Child = new StackPanel
                     {
-                        new TextBlock { Text = "WAVEFORM", FontSize = 10, FontWeight = FontWeight.SemiBold },
-                        waveformScope
+                        Spacing = 4,
+                        Children =
+                        {
+                            new TextBlock { Text = "WAVEFORM", FontSize = 10, FontWeight = FontWeight.SemiBold, Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(172, 181, 196)) },
+                            waveformScope
+                        }
                     }
                 },
-                new StackPanel
+                new Border
                 {
-                    Spacing = 4,
-                    Children =
+                    Padding = new Thickness(8),
+                    Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
+                    BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(6),
+                    Child = new StackPanel
                     {
-                        new TextBlock { Text = "VECTORSCOPE", FontSize = 10, FontWeight = FontWeight.SemiBold },
-                        vectorscope
+                        Spacing = 4,
+                        Children =
+                        {
+                            new TextBlock { Text = "VECTORSCOPE", FontSize = 10, FontWeight = FontWeight.SemiBold, Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(172, 181, 196)) },
+                            vectorscope
+                        }
                     }
                 })
         };
