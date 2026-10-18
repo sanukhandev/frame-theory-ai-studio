@@ -846,7 +846,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                     TimelineEditor.AddMedia(media.Metadata);
                     TimelineEditor.AddBeatMarkers(media.Metadata.Id, media.WaveformPeaks);
                 }
-                catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException)
+                catch (Exception exception) when (exception is ArgumentException or IOException or InvalidDataException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException)
                 {
                     _diagnosticsLog.Record("media-import-failed", exception);
                     failures.Add($"{Path.GetFileName(path)} ({exception.Message})");

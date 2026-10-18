@@ -202,6 +202,11 @@ public sealed record MediaSourceMetadata
             throw new ArgumentException("Video metadata requires a frame rate.", nameof(frameRate));
         }
 
+        if (kind == MediaKind.Video && durationFrames <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(durationFrames), "Video metadata requires a positive frame count.");
+        }
+
         Id = id;
         SourceUri = sourceUri;
         Kind = kind;
