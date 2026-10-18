@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Hosted media-browser validation checkpoint (2026-10-18):** Run `39134452039` for pushed commit `d63f0f8` is green across documentation/schema, Windows, macOS and Linux restore/build/test, native FFmpeg media smoke, formatting, headless desktop shell, Windows UI Automation, portable archives, installers, packaged relaunch and checksums. The run validates the real media filename filter, no-match state, disabled-until-needed Clear action, primary action hierarchy and prior timeline/media surfaces. Manual native visual/HiDPI/screen-reader acceptance remains open.
+
 **Media search completion checkpoint (2026-10-18):** The asset browser now supports local filename filtering, an accessible no-match state and a disabled-until-needed Clear action. Full local validation passes 261 unit tests, 2 golden tests, repository validation, formatting and `git diff --check`; this is the tenth commit since the last push and is ready for hosted revalidation.
 
 **Media search empty-state checkpoint (2026-10-18):** The local media filter now presents an accessible `No matching media.` state when a query returns zero assets and hides it for an empty query or populated results. The full local gate passes 261 unit tests, 2 golden tests, repository validation, formatting and `git diff --check`; hosted revalidation is pending the next exact-ten-commit push.
