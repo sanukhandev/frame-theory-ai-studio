@@ -80,6 +80,28 @@ public sealed class ExportQueueTests
         Xunit.Assert.Equal(receipt, await job.Completion);
     }
 
+    [Xunit.Fact]
+    public async Task DisposingQueueCancelsActiveAndQueuedJobs()
+    {
+        var queue = new ExportQueueService();
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var active = queue.Enqueue(async cancellationToken =>
+        {
+            started.SetResult();
+            await Task.Delay(Timeout.InfiniteTimeSpan, cancellationToken);
+            return Receipt("active");
+        });
+        var queued = queue.Enqueue(_ => Task.FromResult(Receipt("queued")));
+
+        await started.Task;
+        await queue.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(2));
+
+        await Xunit.Assert.ThrowsAnyAsync<OperationCanceledException>(() => active.Completion);
+        await Xunit.Assert.ThrowsAnyAsync<OperationCanceledException>(() => queued.Completion);
+        Xunit.Assert.Equal(ExportQueueJobState.Canceled, active.State);
+        Xunit.Assert.Equal(ExportQueueJobState.Canceled, queued.State);
+    }
+
     private static ExportReceipt Receipt(string name) => new(
         Guid.NewGuid(),
         Path.Combine(Path.GetTempPath(), name + ".mp4"),

@@ -206,6 +206,17 @@ public sealed class ExportQueueService : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        ExportQueueJob[] jobs;
+        lock (_history)
+        {
+            jobs = _history.ToArray();
+        }
+
+        foreach (var job in jobs)
+        {
+            job.TryCancel();
+        }
+
         _queue.Writer.TryComplete();
         _shutdown.Cancel();
         try
