@@ -18,6 +18,7 @@ Audit checkpoint: 2026-10-18, latest verified green complete matrix run `3911831
 - Current desktop media-state hardening: imported media and missing-media collections now expose read-only view-model snapshots, preserving selection/relink state outside command paths. Focused desktop import coverage includes the regression; native UI acceptance remains open.
 - Current desktop workspace-state hardening: workspace catalog results are snapshotted at the shell boundary, preserving navigation state from caller-owned collection mutation. Focused Foundation coverage includes the regression; native UI acceptance remains open.
 - Current photo recovery-state hardening: missing-media recovery results now expose a read-only snapshot, preserving relink selection state until explicit recovery commands. Focused photo-recovery coverage includes the regression; native UI acceptance remains open.
+- Current imported-media view hardening: media-card thumbnail bytes and waveform peaks are defensively copied, preserving preview and analysis inputs from downstream mutation. Focused desktop import coverage includes the regression; native UI acceptance remains open.
 
 ## Evidence
 

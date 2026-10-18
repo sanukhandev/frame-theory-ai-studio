@@ -51,6 +51,8 @@ public sealed class DesktopImportTests
         Xunit.Assert.Equal("2 assets", viewModel.ImportedMediaSummary);
         Xunit.Assert.All(viewModel.ImportedMedia, media => Xunit.Assert.Equal(MediaKind.Video, media.Kind));
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<ImportedMediaViewModel>>(viewModel.ImportedMedia).IsReadOnly);
+        var imported = viewModel.ImportedMedia[0];
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<float>>(imported.WaveformPeaks!).IsReadOnly);
         Xunit.Assert.Equal(2, viewModel.TimelineEditor.TrackRows.Single(track => track.Kind == TimelineTrackKind.Video).Clips.Count);
         Xunit.Assert.Contains("2 file(s) available", viewModel.MediaImportStatusText, StringComparison.Ordinal);
     }

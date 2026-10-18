@@ -28,14 +28,44 @@ public enum EditorShortcut
     RedoCurrentEdit
 }
 
-public sealed record ImportedMediaViewModel(
-    string Name,
-    string Summary,
-    byte[]? ThumbnailPpm = null,
-    MediaKind? Kind = null,
-    IReadOnlyList<float>? WaveformPeaks = null)
+public sealed record ImportedMediaViewModel
 {
+    private readonly byte[]? _thumbnailPpm;
+
+    public ImportedMediaViewModel(
+        string Name,
+        string Summary,
+        byte[]? ThumbnailPpm = null,
+        MediaKind? Kind = null,
+        IReadOnlyList<float>? WaveformPeaks = null)
+    {
+        this.Name = Name;
+        this.Summary = Summary;
+        _thumbnailPpm = ThumbnailPpm?.ToArray();
+        this.Kind = Kind;
+        this.WaveformPeaks = WaveformPeaks is null ? null : Array.AsReadOnly(WaveformPeaks.ToArray());
+    }
+
+    public string Name { get; }
+
+    public string Summary { get; }
+
+    public byte[]? ThumbnailPpm => _thumbnailPpm?.ToArray();
+
+    public MediaKind? Kind { get; }
+
+    public IReadOnlyList<float>? WaveformPeaks { get; }
+
     public MediaId? Id { get; init; }
+
+    public void Deconstruct(out string Name, out string Summary, out byte[]? ThumbnailPpm, out MediaKind? Kind, out IReadOnlyList<float>? WaveformPeaks)
+    {
+        Name = this.Name;
+        Summary = this.Summary;
+        ThumbnailPpm = this.ThumbnailPpm;
+        Kind = this.Kind;
+        WaveformPeaks = this.WaveformPeaks;
+    }
 
     public override string ToString() => $"{Name} — {Summary}";
 }
