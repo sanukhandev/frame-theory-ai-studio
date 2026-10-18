@@ -43,6 +43,22 @@ def run() -> int:
     assert "FrameTheory.LocalWhisperSmoke" in solution, "Local Whisper acceptance smoke must remain in the solution"
     development = (ROOT/"docs/DEVELOPMENT.md").read_text(encoding="utf-8")
     assert "FrameTheory.LocalWhisperSmoke" in development, "Local Whisper acceptance command must remain documented"
+    path_security = (ROOT / "src/FrameTheory.Domain/LocalPathSecurity.cs").read_text(encoding="utf-8")
+    assert "ContainsReparsePoint" in path_security, "Shared local path security guard must remain present"
+    for relative_path in [
+        "src/FrameTheory.Media/MediaProbe.cs",
+        "src/FrameTheory.Media/FrameDecoder.cs",
+        "src/FrameTheory.Media/MediaImport.cs",
+        "src/FrameTheory.Media/AudioSourcePreparer.cs",
+        "src/FrameTheory.Media/PreviewProxy.cs",
+        "src/FrameTheory.Media/MediaExport.cs",
+        "src/FrameTheory.Media/TimelineCompositor.cs",
+        "src/FrameTheory.Photo/PhotoExport.cs",
+        "src/FrameTheory.Captions/Transcription.cs",
+        "src/FrameTheory.Captions/LocalWhisperTranscription.cs",
+    ]:
+        source = (ROOT / relative_path).read_text(encoding="utf-8")
+        assert "LocalPathSecurity.ContainsReparsePoint" in source, f"{relative_path} must use shared local path security"
     asset = ROOT / "assets/brand/frame-theory-original.png"
     assert asset.is_file() and not asset.is_symlink(), "Approved Frame Theory logo asset must be a regular file"
     assert hashlib.sha256(asset.read_bytes()).hexdigest().upper() == "0BD29D37FBCC4C753B8870A65E3A02E23460C1A5C305E53E6CD2D9D2F151F388", "Approved Frame Theory logo checksum changed"
