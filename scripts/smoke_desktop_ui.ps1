@@ -114,7 +114,7 @@ try {
         )
         "Photo workspace" = @("Open image", "Open photo project")
         "Color workspace" = @("Before", "After", "Analyze approved visual reference", "Apply reviewed reference grade")
-        "AI workspace" = @("Analyze approved samples with Gemini", "Validate AI proposal", "Apply approved AI actions", "Undo last AI apply", "Ask Gemini to revise proposal")
+        "AI workspace" = @("Analyze approved samples with Gemini", "Validate AI proposal", "Apply approved AI actions", "Undo last AI apply", "Ask Gemini to revise proposal", "Gemini activity log")
     }
     $controlAliases = @{
         "Preview current frame" = @("Preview current timeline frame", "Preview current frame")

@@ -576,6 +576,9 @@ public sealed class MainWindow : Window
         var usageStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(usageStatus, "Gemini usage status");
         usageStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.GeminiUsageStatusText)));
+        var activityLog = new TextBox { IsReadOnly = true, Height = 100, TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(activityLog, "Gemini activity log");
+        activityLog.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.GeminiActivityLogText)));
         _ = settings.LoadAsync(CancellationToken.None);
         return new Border
         {
@@ -598,7 +601,8 @@ public sealed class MainWindow : Window
                     uploadConsent,
                     new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { prepareAnalysis, analyzeApprovedSamples } },
                     analysisStatus,
-                    usageStatus
+                    usageStatus,
+                    activityLog
                 }
             }
         };

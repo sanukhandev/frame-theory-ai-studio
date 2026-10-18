@@ -49,6 +49,8 @@ public sealed class DesktopAiAnalysisTests
         Xunit.Assert.Contains("review 1 editable action", viewModel.AnalysisStatusText, StringComparison.Ordinal);
         Xunit.Assert.Contains("input=12, output=8, total=20", viewModel.GeminiUsageStatusText, StringComparison.Ordinal);
         Xunit.Assert.Contains("approved samples=1", viewModel.GeminiUsageStatusText, StringComparison.Ordinal);
+        Xunit.Assert.Contains("plan succeeded", viewModel.GeminiActivityLogText, StringComparison.Ordinal);
+        Xunit.Assert.Contains("inline_images=1", viewModel.GeminiActivityLogText, StringComparison.Ordinal);
     }
 
     private sealed class ImageImporter : IMediaImporter

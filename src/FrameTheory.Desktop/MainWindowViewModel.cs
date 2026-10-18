@@ -62,6 +62,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _captionStatusText = "No captions imported.";
     private string _analysisStatusText = "No local AI analysis prepared.";
     private string _geminiUsageStatusText = "No Gemini usage recorded.";
+    private string _geminiActivityLogText = "No Gemini activity recorded.";
     private string _referenceAnalysisStatusText = "No Gemini reference grade requested.";
     private ColorGrade? _pendingReferenceGrade;
     private string _roughCutStatusText = "No rough-cut plan prepared.";
@@ -346,6 +347,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    public string GeminiActivityLogText
+    {
+        get => _geminiActivityLogText;
+        private set
+        {
+            if (value == _geminiActivityLogText)
+            {
+                return;
+            }
+
+            _geminiActivityLogText = value;
+            OnPropertyChanged();
+        }
+    }
+
     public string ReferenceAnalysisStatusText
     {
         get => _referenceAnalysisStatusText;
@@ -535,6 +551,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             var result = await client.CreateFollowUpAsync(prompt, _lastGeminiInteractionId, cancellationToken);
             _lastGeminiInteractionId = result.InteractionId;
             GeminiUsageStatusText = FormatGeminiUsage(result.Usage, result.Attempts);
+            RefreshGeminiActivityLog();
             ValidateAiPlan(result.OutputText);
             AiRevisionStatusText = AiProposal.Actions.Count == 0
                 ? "Gemini returned a response that failed local plan validation; no mutation occurred."
@@ -543,12 +560,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            RefreshGeminiActivityLog();
             AiRevisionStatusText = "Gemini revision canceled; no mutation occurred.";
             return false;
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidOperationException or HttpRequestException)
         {
             _diagnosticsLog.Record("gemini-revision-failed", exception);
+            RefreshGeminiActivityLog();
             AiRevisionStatusText = $"Gemini revision failed: {exception.Message}";
             return false;
         }
@@ -1206,6 +1225,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 result.Attempts,
                 result.UploadedSampleCount,
                 result.UploadedBytes);
+            RefreshGeminiActivityLog();
             ValidateAiPlan(result.PlanJson);
             if (AiProposal.ValidatedJson is null)
             {
@@ -1219,12 +1239,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            RefreshGeminiActivityLog();
             AnalysisStatusText = "Gemini analysis canceled; no project mutation occurred.";
             return false;
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidDataException or InvalidOperationException or HttpRequestException)
         {
             _diagnosticsLog.Record("gemini-analysis-failed", exception);
+            RefreshGeminiActivityLog();
             AnalysisStatusText = $"Gemini analysis failed: {exception.Message}";
             return false;
         }
@@ -1271,17 +1293,20 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 cancellationToken);
             _pendingReferenceGrade = result.Grade;
             GeminiUsageStatusText = FormatGeminiUsage(result.Usage, result.Attempts, 2);
+            RefreshGeminiActivityLog();
             ReferenceAnalysisStatusText = "Reference grade ready for review; apply it only after checking the before/after preview.";
             return true;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
+            RefreshGeminiActivityLog();
             ReferenceAnalysisStatusText = "Gemini reference matching canceled; no grade was applied.";
             return false;
         }
         catch (Exception exception) when (exception is ArgumentException or InvalidDataException or InvalidOperationException or HttpRequestException)
         {
             _diagnosticsLog.Record("gemini-reference-analysis-failed", exception);
+            RefreshGeminiActivityLog();
             ReferenceAnalysisStatusText = $"Gemini reference matching failed: {exception.Message}";
             return false;
         }
@@ -1604,6 +1629,24 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             ? $", approved samples={uploadedSampleCount}{(uploadedBytes is { } bytes ? $", uploaded bytes={bytes}" : string.Empty)}"
             : string.Empty;
         return $"Gemini usage: {tokenSummary}; attempts={attempts}{uploadSummary}.";
+    }
+
+    private void RefreshGeminiActivityLog()
+    {
+        if (_geminiInteractionHistory is not IGeminiInteractionHistoryReader reader)
+        {
+            return;
+        }
+
+        var records = reader.ReadRecent();
+        GeminiActivityLogText = records.Count == 0
+            ? "No Gemini activity recorded."
+            : string.Join(
+                Environment.NewLine,
+                records.Select(record =>
+                    $"{record.Timestamp.ToLocalTime():yyyy-MM-dd HH:mm:ss} {record.OperationName ?? "interaction"} " +
+                    $"{(record.Succeeded ? "succeeded" : "failed")}; scope={record.ScopeSummary ?? "not recorded"}; " +
+                    $"attempts={record.Attempts}; total_tokens={record.Usage?.TotalTokens?.ToString() ?? "n/a"}"));
     }
 
     private bool TryCreateVisualSample(ImportedMediaViewModel? item, out LocalAnalysisSample sample)

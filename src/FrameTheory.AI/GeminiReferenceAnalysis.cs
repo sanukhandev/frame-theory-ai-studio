@@ -111,6 +111,7 @@ public sealed class GeminiReferenceAnalysisClient
             GeminiImageInput.CreateText("Return only JSON with exactly these numeric fields: exposureEV, contrast, saturation, temperature, tint. Compare the source images to the reference images and recommend a bounded editable color grade. Do not describe the images or return commands. Each value must be finite and within exposureEV -4..4 and all other fields -1..1.")
         };
         var total = request.SourceSamples.Count + request.ReferenceSamples.Count;
+        var scopeSummary = $"source_visual_samples={request.SourceSamples.Count}; reference_visual_samples={request.ReferenceSamples.Count}";
         var completed = 0;
         var inlineBytes = 0L;
         var promptCharacterCount = inputs[0].Text!.Length;
@@ -247,7 +248,9 @@ public sealed class GeminiReferenceAnalysisClient
                 StatusCode: responseStatusCode,
                 attempts,
                 promptCharacterCount,
-                result.Usage));
+                result.Usage,
+                OperationName: "reference-analysis",
+                ScopeSummary: scopeSummary));
             return result;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -255,12 +258,12 @@ public sealed class GeminiReferenceAnalysisClient
             var exception = new GeminiReferenceAnalysisException(
                 "Gemini reference analysis was canceled.",
                 failureKind: GeminiProviderFailureKind.Cancellation);
-            RecordFailure(exception, attempts, promptCharacterCount);
+            RecordFailure(exception, attempts, promptCharacterCount, scopeSummary);
             throw exception;
         }
         catch (GeminiReferenceAnalysisException exception)
         {
-            RecordFailure(exception, attempts, promptCharacterCount);
+            RecordFailure(exception, attempts, promptCharacterCount, scopeSummary);
             throw;
         }
         catch (HttpRequestException exception)
@@ -269,7 +272,7 @@ public sealed class GeminiReferenceAnalysisClient
                 "Gemini reference analysis could not reach the provider.",
                 innerException: exception,
                 failureKind: GeminiProviderFailureKind.Transport);
-            RecordFailure(wrapped, attempts, promptCharacterCount);
+            RecordFailure(wrapped, attempts, promptCharacterCount, scopeSummary);
             throw wrapped;
         }
         finally
@@ -282,7 +285,7 @@ public sealed class GeminiReferenceAnalysisClient
         }
     }
 
-    private void RecordFailure(GeminiReferenceAnalysisException exception, int attempts, int promptCharacterCount)
+    private void RecordFailure(GeminiReferenceAnalysisException exception, int attempts, int promptCharacterCount, string scopeSummary)
     {
         _diagnostics?.Record("gemini.reference-analysis.failed", exception);
         _history?.Record(new GeminiInteractionRecord(
@@ -294,7 +297,9 @@ public sealed class GeminiReferenceAnalysisClient
             exception.StatusCode,
             attempts,
             promptCharacterCount,
-            null));
+            null,
+            OperationName: "reference-analysis",
+            ScopeSummary: scopeSummary));
     }
 
     private static bool IsRetryable(HttpStatusCode statusCode) =>

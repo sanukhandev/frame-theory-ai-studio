@@ -127,7 +127,9 @@ public sealed record GeminiInteractionRecord(
     HttpStatusCode? StatusCode,
     int Attempts,
     int PromptCharacterCount,
-    GeminiUsage? Usage);
+    GeminiUsage? Usage,
+    string? OperationName = null,
+    string? ScopeSummary = null);
 
 public interface IGeminiInteractionHistory
 {
@@ -136,7 +138,12 @@ public interface IGeminiInteractionHistory
     void Record(GeminiInteractionRecord record);
 }
 
-public sealed class FileGeminiInteractionHistory : IGeminiInteractionHistory
+public interface IGeminiInteractionHistoryReader
+{
+    IReadOnlyList<GeminiInteractionRecord> ReadRecent(int maximumEntries = 20);
+}
+
+public sealed class FileGeminiInteractionHistory : IGeminiInteractionHistory, IGeminiInteractionHistoryReader
 {
     private readonly object _sync = new();
 
@@ -168,6 +175,46 @@ public sealed class FileGeminiInteractionHistory : IGeminiInteractionHistory
         }
         catch
         {
+        }
+    }
+
+    public IReadOnlyList<GeminiInteractionRecord> ReadRecent(int maximumEntries = 20)
+    {
+        if (maximumEntries < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(maximumEntries));
+        }
+
+        try
+        {
+            lock (_sync)
+            {
+                if (!File.Exists(LogPath))
+                {
+                    return [];
+                }
+
+                var records = new List<GeminiInteractionRecord>();
+                foreach (var line in File.ReadLines(LogPath))
+                {
+                    try
+                    {
+                        if (JsonSerializer.Deserialize<GeminiInteractionRecord>(line) is { } record)
+                        {
+                            records.Add(record);
+                        }
+                    }
+                    catch (JsonException)
+                    {
+                    }
+                }
+
+                return records.TakeLast(maximumEntries).ToArray();
+            }
+        }
+        catch
+        {
+            return [];
         }
     }
 }
@@ -371,6 +418,7 @@ public sealed class GeminiInteractionsClient : IGeminiClient
         var promptCharacterCount = inputs
             .Where(input => input.Text is not null)
             .Sum(input => input.Text!.Length);
+        var scopeSummary = DescribeInputScope(inputs);
         var attempts = 0;
         try
         {
@@ -435,7 +483,9 @@ public sealed class GeminiInteractionsClient : IGeminiClient
                         StatusCode: response.StatusCode,
                         attempts,
                         promptCharacterCount,
-                        result.Usage));
+                        result.Usage,
+                        OperationName: operationName,
+                        ScopeSummary: scopeSummary));
                     return result;
                 }
                 catch (HttpRequestException exception) when (attempts < _options.MaximumAttempts)
@@ -457,27 +507,27 @@ public sealed class GeminiInteractionsClient : IGeminiClient
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
             var exception = new GeminiProviderException($"Gemini {operationName} was canceled.", GeminiProviderFailureKind.Cancellation);
-            RecordFailure(operationName, exception, attempts, promptCharacterCount);
+            RecordFailure(operationName, exception, attempts, promptCharacterCount, scopeSummary);
             throw exception;
         }
         catch (GeminiProviderException exception)
         {
-            RecordFailure(operationName, exception, attempts, promptCharacterCount);
+            RecordFailure(operationName, exception, attempts, promptCharacterCount, scopeSummary);
             throw;
         }
         catch (HttpRequestException exception)
         {
             var wrapped = new GeminiProviderException($"Gemini {operationName} could not reach the provider.", GeminiProviderFailureKind.Transport, innerException: exception);
-            RecordFailure(operationName, wrapped, attempts, promptCharacterCount);
+            RecordFailure(operationName, wrapped, attempts, promptCharacterCount, scopeSummary);
             throw wrapped;
         }
 
         var exhausted = new GeminiProviderException($"Gemini {operationName} exhausted its retry budget.", GeminiProviderFailureKind.Transport);
-        RecordFailure(operationName, exhausted, attempts, promptCharacterCount);
+        RecordFailure(operationName, exhausted, attempts, promptCharacterCount, scopeSummary);
         throw exhausted;
     }
 
-    private void RecordFailure(string operationName, GeminiProviderException exception, int attempts, int promptCharacterCount)
+    private void RecordFailure(string operationName, GeminiProviderException exception, int attempts, int promptCharacterCount, string scopeSummary)
     {
         _diagnostics?.Record($"gemini.{operationName}.failed", exception);
         _history?.Record(new GeminiInteractionRecord(
@@ -489,7 +539,17 @@ public sealed class GeminiInteractionsClient : IGeminiClient
             exception.StatusCode,
             attempts,
             promptCharacterCount,
-            null));
+            null,
+            OperationName: operationName,
+            ScopeSummary: scopeSummary));
+    }
+
+    private static string DescribeInputScope(IReadOnlyList<GeminiInteractionInput> inputs)
+    {
+        var textCount = inputs.Count(input => input.Type == "text");
+        var inlineImageCount = inputs.Count(input => input.Type == "image" && input.Data is not null);
+        var hostedImageCount = inputs.Count(input => input.Type == "image" && input.Uri is not null);
+        return $"text={textCount}; inline_images={inlineImageCount}; hosted_images={hostedImageCount}";
     }
 
     private static bool IsRetryable(HttpStatusCode statusCode) =>

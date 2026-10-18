@@ -67,6 +67,8 @@ public sealed class DesktopAiRevisionTests
             Xunit.Assert.Empty(viewModel.TimelineEditor.Captions);
             Xunit.Assert.Equal(plan, viewModel.AiProposal.ValidatedJson);
             Xunit.Assert.Contains("input=12, output=8, total=20", viewModel.GeminiUsageStatusText, StringComparison.Ordinal);
+            Xunit.Assert.Contains("follow-up succeeded", viewModel.GeminiActivityLogText, StringComparison.Ordinal);
+            Xunit.Assert.Contains("scope=text=1", viewModel.GeminiActivityLogText, StringComparison.Ordinal);
             Xunit.Assert.DoesNotContain("revision-secret", requestBodies[0]);
             var history = await File.ReadAllTextAsync(historyPath);
             Xunit.Assert.DoesNotContain("add a caption", history);
