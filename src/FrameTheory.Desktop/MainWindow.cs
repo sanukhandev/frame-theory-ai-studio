@@ -883,11 +883,22 @@ public sealed class MainWindow : Window
     {
         var layout = new Grid
         {
-            ColumnDefinitions = new ColumnDefinitions("300,*"),
+            ColumnDefinitions = new ColumnDefinitions("300,1,*"),
             ColumnSpacing = 12,
-            Children = { mediaBin, editor }
+            Children =
+            {
+                mediaBin,
+                new Border
+                {
+                    Width = 1,
+                    Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 54, 65)),
+                    VerticalAlignment = VerticalAlignment.Stretch
+                },
+                editor
+            }
         };
-        Grid.SetColumn(editor, 1);
+        Grid.SetColumn(layout.Children[1], 1);
+        Grid.SetColumn(editor, 2);
         AutomationProperties.SetName(layout, automationName);
         return layout;
     }
