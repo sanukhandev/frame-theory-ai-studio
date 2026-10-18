@@ -1790,7 +1790,15 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(validate, "Validate AI proposal");
         ToolTip.SetTip(validate, "Schema-check the plan and show its allowlisted editable actions before applying.");
         validate.Click += (_, _) => viewModel.ValidateAiPlan(planJson.Text ?? string.Empty);
-        var revisionInstruction = new TextBox { PlaceholderText = "Natural-language revision request", Width = 420 };
+        var revisionInstruction = new TextBox
+        {
+            PlaceholderText = "Natural-language revision request",
+            MinWidth = 220,
+            MaxWidth = 420,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
+        AutomationProperties.SetName(revisionInstruction, "AI revision instruction");
+        ToolTip.SetTip(revisionInstruction, "Describe a bounded revision to the validated proposal; Gemini cannot execute commands.");
         var requestRevision = new Button { Content = "Ask Gemini to revise" };
         AutomationProperties.SetName(requestRevision, "Ask Gemini to revise proposal");
         ToolTip.SetTip(requestRevision, "Request a bounded natural-language revision of the current proposal.");
@@ -1825,7 +1833,13 @@ public sealed class MainWindow : Window
         var clear = new Button { Content = "Clear proposal" };
         AutomationProperties.SetName(clear, "Clear AI proposal");
         clear.Click += (_, _) => viewModel.AiProposal.Clear();
-        var recipeName = new TextBox { PlaceholderText = "Recipe name", Width = 180 };
+        var recipeName = new TextBox
+        {
+            PlaceholderText = "Recipe name",
+            MinWidth = 140,
+            MaxWidth = 180,
+            HorizontalAlignment = HorizontalAlignment.Stretch
+        };
         AutomationProperties.SetName(recipeName, "AI recipe name");
         var saveRecipe = new Button { Content = "Save recipe" };
         AutomationProperties.SetName(saveRecipe, "Save validated AI recipe");
@@ -2169,7 +2183,9 @@ public sealed class MainWindow : Window
         };
         var referenceSource = new ComboBox
         {
-            Width = 240,
+            MinWidth = 160,
+            MaxWidth = 240,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             ItemTemplate = new FuncDataTemplate<ImportedMediaViewModel>((item, _) =>
             {
                 if (item is null)
@@ -2204,7 +2220,9 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(referenceSource, "Reference source preview");
         var referenceTarget = new ComboBox
         {
-            Width = 240,
+            MinWidth = 160,
+            MaxWidth = 240,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
             ItemTemplate = new FuncDataTemplate<ImportedMediaViewModel>((item, _) =>
             {
                 if (item is null)

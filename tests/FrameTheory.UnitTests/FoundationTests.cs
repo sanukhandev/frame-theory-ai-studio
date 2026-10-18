@@ -728,6 +728,16 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Inspect the post-grade waveform and vectorscope generated from the local preview.",
                     ToolTip.GetTip(colorScopes));
+                foreach (var selectorName in new[] { "Reference source preview", "Reference target preview" })
+                {
+                    var selector = window.GetVisualDescendants()
+                        .OfType<ComboBox>()
+                        .Single(control => AutomationProperties.GetName(control) == selectorName);
+                    Xunit.Assert.True(double.IsNaN(selector.Width));
+                    Xunit.Assert.Equal(160, selector.MinWidth);
+                    Xunit.Assert.Equal(240, selector.MaxWidth);
+                    Xunit.Assert.Equal(HorizontalAlignment.Stretch, selector.HorizontalAlignment);
+                }
                 foreach (var scopeName in new[] { "Color waveform scope", "Color vectorscope" })
                 {
                     var scope = window.GetVisualDescendants()
@@ -786,6 +796,12 @@ public sealed class FoundationTests
                 Xunit.Assert.True(aiRevisionStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, aiRevisionStatus.FontSize);
                 Xunit.Assert.Equal("Status of the latest bounded AI proposal revision.", ToolTip.GetTip(aiRevisionStatus));
+                var aiRevisionInstruction = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "AI revision instruction");
+                Xunit.Assert.True(double.IsNaN(aiRevisionInstruction.Width));
+                Xunit.Assert.Equal(220, aiRevisionInstruction.MinWidth);
+                Xunit.Assert.Equal(420, aiRevisionInstruction.MaxWidth);
                 var recipeSection = window.GetVisualDescendants()
                     .OfType<Expander>()
                     .Single(control => AutomationProperties.GetName(control) == "Reusable recipe section");

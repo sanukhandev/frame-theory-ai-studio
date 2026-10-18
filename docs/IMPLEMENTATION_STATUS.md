@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive inspector-input checkpoint (2026-10-18):** AI revision and recipe inputs now use bounded minimum/maximum widths, and Color reference selectors stretch within a 160–240px bound. The controls retain their existing commands while wrapping cleanly in compact inspector flows; the adaptive-shell contract verifies their geometry and automation names.
+
 **Responsive photo-preview checkpoint (2026-10-18):** Photo original/edited canvases now stretch within their two-up comparison cards while preserving aspect ratio and a 640px bound, avoiding centered oversized children at compact widths. The adaptive-shell contract verifies both images; native visual and HiDPI acceptance remains open.
 
 **Responsive scopes checkpoint (2026-10-18):** Color waveform and vectorscope previews now keep a 160–240px bounded width, preserve their generated aspect ratio and stretch within the inspector flow instead of forcing fixed 240px children. The adaptive-shell contract verifies both scope images; native visual and HiDPI acceptance remains open.
