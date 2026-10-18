@@ -109,6 +109,13 @@ public sealed class DesktopImportTests
                     .Single(control => Avalonia.Automation.AutomationProperties.GetName(control)?.StartsWith("Select Video clip", StringComparison.Ordinal) == true);
                 Xunit.Assert.Contains("(selected)", Avalonia.Automation.AutomationProperties.GetName(selectedClipButton), StringComparison.Ordinal);
                 Xunit.Assert.Contains("Selected.", ToolTip.GetTip(selectedClipButton) as string, StringComparison.Ordinal);
+
+                var secondWindowClipButton = window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control)?.StartsWith("Select Video clip", StringComparison.Ordinal) == true);
+                secondWindowClipButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal("clip.mp4", Xunit.Assert.IsType<ImportedMediaViewModel>(mediaList.SelectedItem).Name);
             }
             finally
             {

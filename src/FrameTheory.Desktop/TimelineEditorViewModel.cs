@@ -199,6 +199,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         }
     }
 
+    public string? SelectedMediaId => FindSelected()?.Clip.MediaId.Value;
+
     public string RulerText => string.Join("  |  ", BuildRulerTicks(640).Select(tick => tick.ToString()));
 
     public void AddMedia(MediaSourceMetadata metadata)
@@ -1456,6 +1458,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
                 _selectedClipStart == clip.TimelineRange.StartFrame)).ToArray())).ToArray();
         OnPropertyChanged(nameof(TrackRows));
         OnPropertyChanged(nameof(SelectionContextText));
+        OnPropertyChanged(nameof(SelectedMediaId));
         OnPropertyChanged(nameof(RulerText));
     }
 

@@ -573,6 +573,22 @@ public sealed class MainWindow : Window
                 RefreshMediaList();
             }
         };
+        viewModel.TimelineEditor.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName != nameof(TimelineEditorViewModel.SelectedMediaId) || viewModel.TimelineEditor.SelectedMediaId is not { } selectedMediaId)
+            {
+                return;
+            }
+
+            if (importedList.ItemsSource is IEnumerable<ImportedMediaViewModel> visibleMedia)
+            {
+                var selected = visibleMedia.FirstOrDefault(item => item.Id?.Value == selectedMediaId);
+                if (selected is not null)
+                {
+                    importedList.SelectedItem = selected;
+                }
+            }
+        };
         RefreshMediaList();
         importedList.SelectionChanged += (_, _) =>
         {
