@@ -91,6 +91,8 @@ public sealed class FfmpegMediaExporter : IMediaExporter
             throw new DirectoryNotFoundException(outputDirectory);
         }
 
+        EnsureNotReparsePoint(outputDirectory, "Export directory");
+
         if (string.Equals(sourcePath, outputPath, StringComparison.OrdinalIgnoreCase))
         {
             throw new MediaExportException("The export destination cannot replace the source media.");

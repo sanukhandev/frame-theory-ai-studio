@@ -103,6 +103,45 @@ public sealed class PhotoExportTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task PhotoExportRejectsSymlinkedDestinationDirectory()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-photo-export-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-photo-export-external-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.png");
+            await File.WriteAllTextAsync(sourcePath, "source");
+            var destinationDirectory = Path.Combine(directory.FullName, "exports");
+            Directory.CreateSymbolicLink(destinationDirectory, externalDirectory.FullName);
+            var destinationPath = Path.Combine(destinationDirectory, "output.png");
+            var exporter = new PhotoExporter(
+                new StubProcessRunner(),
+                new StubProbe(new Uri(destinationPath)));
+
+            await Xunit.Assert.ThrowsAsync<PhotoExportException>(() => exporter.ExportAsync(
+                new PhotoEditState(Document(new Uri(sourcePath))),
+                destinationPath,
+                new PhotoExportOptions(PhotoExportFormat.Png),
+                null,
+                CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
+
     private static PhotoDocument Document(Uri sourceUri) => new(
         sourceUri,
         new MediaSourceMetadata(

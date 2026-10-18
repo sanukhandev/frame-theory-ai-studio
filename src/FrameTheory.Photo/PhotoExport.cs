@@ -113,6 +113,8 @@ public sealed class PhotoExporter
             throw new DirectoryNotFoundException(outputDirectory);
         }
 
+        EnsureNotReparsePoint(outputDirectory, "Photo export directory");
+
         if (string.Equals(sourcePath, outputPath, StringComparison.OrdinalIgnoreCase))
         {
             throw new PhotoExportException("The export destination cannot replace the source photo.");

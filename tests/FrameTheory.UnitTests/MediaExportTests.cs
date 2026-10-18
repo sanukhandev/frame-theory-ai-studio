@@ -73,6 +73,45 @@ public sealed class MediaExportTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task ExportRejectsSymlinkedDestinationDirectory()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-export-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-export-external-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            await File.WriteAllTextAsync(sourcePath, "source");
+            var destinationDirectory = Path.Combine(directory.FullName, "exports");
+            Directory.CreateSymbolicLink(destinationDirectory, externalDirectory.FullName);
+            var destinationPath = Path.Combine(destinationDirectory, "output.mp4");
+            var exporter = new FfmpegMediaExporter(
+                new StubProcessRunner(),
+                new StubProbe(Metadata(new Uri(destinationPath), hasAudio: true)));
+
+            await Xunit.Assert.ThrowsAsync<MediaExportException>(() => exporter.ExportAsync(
+                new Uri(sourcePath),
+                destinationPath,
+                new ExportPreset(8, 4, new RationalFrameRate(30, 1)),
+                null,
+                CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
+
     private static MediaSourceMetadata Metadata(Uri uri, bool hasAudio) => new(
         MediaId.Create(uri, "export-test"), uri, MediaKind.Video, 8, 4,
         new RationalFrameRate(30, 1), 30, TimeSpan.FromSeconds(1), colorProfile: "bt709/bt709/bt709/tv", hasAudio: hasAudio);
