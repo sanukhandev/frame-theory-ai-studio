@@ -66,6 +66,11 @@ def run() -> int:
     ]:
         source = (ROOT / relative_path).read_text(encoding="utf-8")
         assert "LocalPathSecurity.ContainsReparsePoint" in source, f"{relative_path} must use shared local path security"
+    for source_path in (ROOT / "src").rglob("*.cs"):
+        if source_path == ROOT / "src/FrameTheory.Domain/LocalPathSecurity.cs":
+            continue
+        source = source_path.read_text(encoding="utf-8")
+        assert "FileAttributes.ReparsePoint" not in source, f"{source_path.relative_to(ROOT)} must use shared local path security"
     asset = ROOT / "assets/brand/frame-theory-original.png"
     assert asset.is_file() and not asset.is_symlink(), "Approved Frame Theory logo asset must be a regular file"
     assert hashlib.sha256(asset.read_bytes()).hexdigest().upper() == "0BD29D37FBCC4C753B8870A65E3A02E23460C1A5C305E53E6CD2D9D2F151F388", "Approved Frame Theory logo checksum changed"
