@@ -41,6 +41,8 @@ The Video workspace's **Import verified transcript JSON** action accepts a local
 
 The source URI must match the selected file and the provider recomputes the source SHA-256 before importing editable verified caption cues. Linked source or sidecar files, mismatched fingerprints, invalid timing and cancellation leave the current timeline unchanged. This is an offline interchange path for a separately licensed local ASR tool; no ASR executable or model is bundled by this repository. Remote transcription also fingerprints the original selected media before and after processing, rejecting returned words if that source changes while derived audio is being sent.
 
+The Video workspace also exposes **Transcribe with local Whisper**. It requires the user to select a local Whisper CLI executable, a local model file and the source media. The adapter invokes only that selected executable through fixed argument-list parameters (`--model`, `--output_format json`, `--word_timestamps True`, `--output_dir`, `--task transcribe` and the selected source), parses segment word timings, verifies the original source SHA-256 before and after processing, deletes temporary JSON output and never downloads or bundles a model.
+
 ## Repository target layout
 ```text
 src/
