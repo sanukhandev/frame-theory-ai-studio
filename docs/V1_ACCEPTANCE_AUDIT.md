@@ -83,6 +83,7 @@ Audit checkpoint: 2026-10-18, latest verified green complete matrix run `3911831
 - Local branded-output evidence: the 2026-10-18 FFmpeg 9.0.2 synthetic timeline smoke reported `watermark=approved`, ffprobe verified video/audio streams, and branded batch outputs covered landscape/square/portrait dimensions; this does not replace hosted three-OS or release-owner review.
 - Local branded project evidence: the same smoke saved and reopened the approved watermark as the portable bundled reference rather than an install-specific absolute path; custom watermark paths remain explicitly local assets.
 - Current media-import integrity hardening: commit `b2731e7` protects imported thumbnails and waveform peaks from caller mutation; focused media-import coverage passes 5/5. This remains local evidence pending the next 50-commit push.
+- Current AI/photo state-integrity hardening: commits `a1da5f8`, `9318f76`, `20852cc`, `b564253` and `fb7413d` protect approved plan parameters, local/reference analysis payloads, timed words, photo edit collections and raster pixels; focused suites pass 13, 7, 6 and 21 tests respectively. These local changes remain pending the next 50-commit push.
 
 ## P0 blockers before V1
 

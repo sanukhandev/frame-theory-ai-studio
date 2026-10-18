@@ -44,6 +44,8 @@
 
 **Media import snapshot checkpoint (2026-10-19):** Imported thumbnails and waveform peaks now use defensive snapshots, preventing downstream mutation from changing imported analysis. Focused media-import coverage passes 5/5 with format and diff checks clean; the local fix remains unpushed until the next exact 50-commit boundary.
 
+**AI/photo state-integrity checkpoint (2026-10-19):** Approved AI actions, local analysis payloads, reference samples, caption words, transcript words, photo edit history, layer masks and raster pixels now expose defensive snapshots at mutation boundaries. Focused AI/reference coverage passes 13/7/6 and focused photo coverage passes 21; format and diff checks are clean. The local changes remain unpushed until the next exact 50-commit boundary.
+
 **Post-rough-cut Release gate checkpoint (2026-10-19):** The local changes pass 277 unit tests and 2 golden tests, build with 0 warnings/errors, pass `dotnet format --verify-no-changes`, repository validation through `py scripts/validate_repository.py` and `git diff --check`. The validator correctly remains blocked by six tracked partial P0 tasks; this is not a V1 completion claim. The local commits remain unpushed until the next exact 50-commit boundary.
 
 **Workspace navigation affordance checkpoint (2026-10-19):** The adaptive shell's Ctrl+1 through Ctrl+4 workspace shortcut hint now has an explicit accessible tooltip explaining each destination. Focused production-shell coverage and format/diff checks pass; native keyboard acceptance remains unverified.
