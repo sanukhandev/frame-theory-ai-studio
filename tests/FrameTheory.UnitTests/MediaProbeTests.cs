@@ -110,6 +110,27 @@ public sealed class MediaProbeTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task FfprobeAdapterKeepsGenericErrorWhenProcessHasNoDetails()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-probe-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "clip.mp4");
+            await File.WriteAllTextAsync(path, "synthetic placeholder");
+            var runner = new StubProcessRunner(string.Empty, 1);
+
+            var exception = await Xunit.Assert.ThrowsAsync<MediaProbeException>(() =>
+                new FfprobeMediaProbe(runner).ProbeAsync(new Uri(path), CancellationToken.None));
+
+            Xunit.Assert.Equal("ffprobe could not read the media file.", exception.Message);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private sealed class StubProcessRunner(string standardOutput, int exitCode = 0, string standardError = "") : IMediaProcessRunner
     {
         public string? Executable { get; private set; }
