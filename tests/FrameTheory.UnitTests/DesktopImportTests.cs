@@ -128,6 +128,51 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task SelectingTimelineClipSynchronizesMediaBinSelection()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new BatchImporter());
+        await session.Dispatch(() =>
+        {
+            viewModel.ImportFilesAsync(["first.mp4", "second.mp4"], CancellationToken.None).GetAwaiter().GetResult();
+            var second = viewModel.ImportedMedia.Single(item => item.Name == "second.mp4");
+            var window = new MainWindow(viewModel);
+            try
+            {
+                window.Show();
+                var mediaList = window.GetVisualDescendants()
+                    .OfType<ListBox>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Imported media");
+                var clipButtons = window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Where(control => Avalonia.Automation.AutomationProperties.GetName(control)?.StartsWith("Select Video clip", StringComparison.Ordinal) == true)
+                    .OrderBy(control => Avalonia.Controls.Canvas.GetLeft(control))
+                    .ToArray();
+
+                Xunit.Assert.Equal(2, clipButtons.Length);
+                clipButtons[1].RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Dispatcher.UIThread.RunJobs();
+
+                Xunit.Assert.Equal(second.Id?.Value, viewModel.TimelineEditor.SelectedMediaId);
+                Xunit.Assert.Same(second, mediaList.SelectedItem);
+                Xunit.Assert.Contains(
+                    "(selected)",
+                    Avalonia.Automation.AutomationProperties.GetName(window.GetVisualDescendants()
+                        .OfType<Button>()
+                        .Single(control => Avalonia.Automation.AutomationProperties.GetName(control)?.Contains("(selected)", StringComparison.Ordinal) == true)),
+                    StringComparison.Ordinal);
+            }
+            finally
+            {
+                window.Close();
+            }
+        }, CancellationToken.None);
+    }
+
+    [Xunit.Fact]
     public async Task TimelineLanePositionsClipsByFrameStart()
     {
         using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
