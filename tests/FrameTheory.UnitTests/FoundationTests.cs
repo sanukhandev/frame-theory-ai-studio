@@ -375,6 +375,9 @@ public sealed class FoundationTests
                 var mediaBin = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Media bin");
+                Xunit.Assert.Equal(
+                    "Drop supported local video, photo or audio files here, or use Import media; files stay on this device.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Border>().Single(control => AutomationProperties.GetName(control) == "Local media import drop zone")));
                 var mediaBinGrid = Xunit.Assert.IsType<Grid>(mediaBin.Child);
                 Xunit.Assert.Equal(5, mediaBinGrid.RowDefinitions.Count);
                 Xunit.Assert.Contains(mediaBin.GetVisualDescendants().OfType<Grid>(), control => control.ColumnDefinitions.Count == 2);

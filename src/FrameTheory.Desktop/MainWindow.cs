@@ -879,6 +879,7 @@ public sealed class MainWindow : Window
             }
         };
         AutomationProperties.SetName(importZone, "Local media import drop zone");
+        ToolTip.SetTip(importZone, "Drop supported local video, photo or audio files here, or use Import media; files stay on this device.");
         var mediaBinPanel = CreateMediaBin(importZone, importStatus, importedList, mediaSearch, mediaTypeFilter, clearMediaSearch, mediaSearchEmptyState, mediaEmptyState, selectedMediaSummary);
         var children = new List<Control>
         {
