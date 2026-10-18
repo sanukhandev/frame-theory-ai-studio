@@ -80,6 +80,27 @@ jobs:
             exit 1
           fi
           echo "$output" | grep -F 'Invalid package version'
+      - name: Validate native media bundle guards
+        shell: pwsh
+        run: |
+          $windowsScripts = @('scripts/package.ps1', 'scripts/package_windows.ps1')
+          foreach ($path in $windowsScripts) {
+            $content = Get-Content -LiteralPath $path -Raw
+            if ($content -notmatch 'FfmpegDirectory' -or $content -notmatch 'ffmpeg\.exe' -or $content -notmatch 'ffprobe\.exe') {
+              throw "$path does not validate the Windows FFmpeg/ffprobe bundle pair."
+            }
+          }
+          $unixScripts = @('scripts/package.sh', 'scripts/package_macos_dmg.sh', 'scripts/package_linux_deb.sh')
+          foreach ($path in $unixScripts) {
+            $content = Get-Content -LiteralPath $path -Raw
+            if ($content -notmatch 'ffmpeg_directory' -or $content -notmatch 'ffmpeg' -or $content -notmatch 'ffprobe') {
+              throw "$path does not validate the Unix FFmpeg/ffprobe bundle pair."
+            }
+          }
+          $locator = Get-Content -LiteralPath 'src/FrameTheory.Media/FfmpegExecutableLocator.cs' -Raw
+          if ($locator -notmatch 'FRAME_THEORY_FFMPEG_DIR' -or $locator -notmatch 'AppContext\.BaseDirectory') {
+            throw 'Runtime media-tool locator does not cover the reviewed bundle directory and install directory.'
+          }
       - name: Validate package manifest guards
         shell: pwsh
         run: |
