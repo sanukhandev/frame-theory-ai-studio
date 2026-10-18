@@ -94,14 +94,14 @@ public sealed class JsonColorPresetStore
     public async Task<IReadOnlyList<ColorPreset>> LoadAsync(string path, CancellationToken cancellationToken)
     {
         var fullPath = Path.GetFullPath(path);
+        var directory = Path.GetDirectoryName(fullPath)
+            ?? throw new ArgumentException("A preset directory is required.", nameof(path));
+        EnsureRegularPath(fullPath, directory);
         var fileInfo = new FileInfo(fullPath);
         if (!fileInfo.Exists)
         {
             throw new FileNotFoundException("The preset file was not found.", fullPath);
         }
-
-        EnsureRegularPath(fullPath, fileInfo.DirectoryName
-            ?? throw new ArgumentException("A preset directory is required.", nameof(path)));
 
         if (fileInfo.Length > MaximumPresetBytes)
         {
@@ -146,7 +146,7 @@ public sealed class JsonColorPresetStore
             throw new InvalidDataException("The preset directory must not be a reparse point.");
         }
 
-        if (File.Exists(fullPath) && LocalPathSecurity.ContainsReparsePoint(fullPath))
+        if (LocalPathSecurity.ContainsReparsePoint(fullPath))
         {
             throw new InvalidDataException("The preset file must not be a reparse point.");
         }

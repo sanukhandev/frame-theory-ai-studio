@@ -101,13 +101,13 @@ public sealed class JsonCacheIndexStore
     public async Task<CacheIndex> LoadAsync(string path, CancellationToken cancellationToken)
     {
         var fullPath = Path.GetFullPath(path);
+        var directory = Path.GetDirectoryName(fullPath)
+            ?? throw new ArgumentException("A cache directory is required.", nameof(path));
+        EnsureRegularPath(fullPath, directory);
         if (!File.Exists(fullPath))
         {
             return new CacheIndex();
         }
-
-        EnsureRegularPath(fullPath, Path.GetDirectoryName(fullPath)
-            ?? throw new ArgumentException("A cache directory is required.", nameof(path)));
 
         if (new FileInfo(fullPath).Length > MaximumIndexBytes)
         {
@@ -145,7 +145,7 @@ public sealed class JsonCacheIndexStore
             throw new InvalidDataException("The cache index directory must not be a reparse point.");
         }
 
-        if (File.Exists(fullPath) && LocalPathSecurity.ContainsReparsePoint(fullPath))
+        if (LocalPathSecurity.ContainsReparsePoint(fullPath))
         {
             throw new InvalidDataException("The cache index file must not be a reparse point.");
         }

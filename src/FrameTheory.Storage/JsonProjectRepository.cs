@@ -57,14 +57,14 @@ public sealed class JsonProjectRepository : IProjectRepository
     public async Task<ProjectSnapshot> LoadAsync(string path, CancellationToken cancellationToken)
     {
         var fullPath = GetFullPath(path);
+        var directory = Path.GetDirectoryName(fullPath)
+            ?? throw new ArgumentException("A project directory is required.", nameof(path));
+        EnsureRegularProjectPath(fullPath, directory);
         var fileInfo = new FileInfo(fullPath);
         if (!fileInfo.Exists)
         {
             throw new FileNotFoundException("The project file was not found.", fullPath);
         }
-
-        EnsureRegularProjectPath(fullPath, fileInfo.DirectoryName
-            ?? throw new ArgumentException("A project directory is required.", nameof(path)));
 
         if (fileInfo.Length > MaximumProjectBytes)
         {
@@ -111,7 +111,7 @@ public sealed class JsonProjectRepository : IProjectRepository
             throw new InvalidDataException("The project directory must not be a reparse point.");
         }
 
-        if (File.Exists(fullPath) && LocalPathSecurity.ContainsReparsePoint(fullPath))
+        if (LocalPathSecurity.ContainsReparsePoint(fullPath))
         {
             throw new InvalidDataException("The project file must not be a reparse point.");
         }

@@ -95,6 +95,13 @@ public sealed class RecoveryTests
                 store.LoadAsync(linkedPath, CancellationToken.None));
             await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
                 store.SaveAtomicAsync(linkedPath, index, CancellationToken.None));
+
+            var danglingPath = Path.Combine(directory.FullName, "dangling.json");
+            File.CreateSymbolicLink(danglingPath, Path.Combine(externalDirectory.FullName, "missing.json"));
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                store.LoadAsync(danglingPath, CancellationToken.None));
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                store.SaveAtomicAsync(danglingPath, index, CancellationToken.None));
         }
         catch (UnauthorizedAccessException)
         {

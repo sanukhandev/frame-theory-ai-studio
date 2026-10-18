@@ -26,12 +26,12 @@ public sealed class FileWorkspaceStateStore : IWorkspaceStateStore
     {
         try
         {
-            if (!File.Exists(_path))
+            if (LocalPathSecurity.ContainsReparsePoint(_path))
             {
                 return 0;
             }
 
-            if (LocalPathSecurity.ContainsReparsePoint(_path))
+            if (!File.Exists(_path))
             {
                 return 0;
             }
@@ -64,7 +64,7 @@ public sealed class FileWorkspaceStateStore : IWorkspaceStateStore
         try
         {
             Directory.CreateDirectory(directory);
-            if (LocalPathSecurity.ContainsReparsePoint(directory) || (File.Exists(_path) && LocalPathSecurity.ContainsReparsePoint(_path)))
+            if (LocalPathSecurity.ContainsReparsePoint(directory) || LocalPathSecurity.ContainsReparsePoint(_path))
             {
                 return;
             }

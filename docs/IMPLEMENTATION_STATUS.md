@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Dangling-loader checkpoint (2026-10-18):** Atomic project, cache, recipe, preset and workspace loaders now run the shared path guard before missing-file fallbacks, and final-path checks no longer depend on `File.Exists`; a dangling cache link is rejected instead of being treated as an empty cache. Focused storage/color/AI/foundation/project coverage passes 38/38; formatting and `git diff --check` pass.
+
 **Current batch correction checkpoint (2026-10-18):** Hosted run `39119313079` correctly exposed that a physical `1280x800` UI Automation rectangle is invalid under runner DPI scaling (`1028x749`). The native smoke now retains its scaled-safe `960x640` minimum; exact `1280x800` and `960x640` logical bounds remain covered by the production headless tests. The failed hosted run is not release evidence and a new exact-ten-commit revalidation batch is required.
 
 **Gemini parent-link regression checkpoint (2026-10-18):** Interaction-history coverage now proves record/read refuses a log beneath a linked parent directory and never creates the external target. Focused Gemini interaction coverage passes 11/11; formatting and `git diff --check` pass.

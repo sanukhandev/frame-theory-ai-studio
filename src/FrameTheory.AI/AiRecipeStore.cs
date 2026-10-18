@@ -60,14 +60,14 @@ public sealed class AiRecipeStore
     public async Task<AiRecipe> LoadAsync(string path, CancellationToken cancellationToken)
     {
         var fullPath = GetFullPath(path);
+        var directory = Path.GetDirectoryName(fullPath)
+            ?? throw new ArgumentException("A recipe directory is required.", nameof(path));
+        EnsureRegularPath(fullPath, directory);
         var fileInfo = new FileInfo(fullPath);
         if (!fileInfo.Exists)
         {
             throw new FileNotFoundException("The AI recipe was not found.", fullPath);
         }
-
-        EnsureRegularPath(fullPath, fileInfo.DirectoryName
-            ?? throw new ArgumentException("A recipe directory is required.", nameof(path)));
 
         if (fileInfo.Length > MaximumRecipeBytes)
         {
@@ -126,7 +126,7 @@ public sealed class AiRecipeStore
             throw new InvalidDataException("The AI recipe directory must not be a reparse point.");
         }
 
-        if (File.Exists(fullPath) && LocalPathSecurity.ContainsReparsePoint(fullPath))
+        if (LocalPathSecurity.ContainsReparsePoint(fullPath))
         {
             throw new InvalidDataException("The AI recipe file must not be a reparse point.");
         }
