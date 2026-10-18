@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Dangling-link checkpoint (2026-10-18):** `LocalPathSecurity` now inspects the requested path before walking ancestors and treats missing-entry attribute errors as a normal walk step, so dangling file links cannot bypass the reparse-point guard used by local stores and media boundaries. Focused Foundation coverage passes 19/19, formatting and `git diff --check` pass.
+
 **Shared ancestor regression checkpoint (2026-10-18):** Foundation coverage now verifies that a future file beneath a linked directory is rejected by `LocalPathSecurity`, covering the non-existent destination case used by atomic stores. Focused Foundation coverage passes 18/18; formatting and `git diff --check` pass.
 
 **Shared-store guard checkpoint (2026-10-18):** Cache-index, AI-recipe, color-preset and workspace-state stores now use the shared `LocalPathSecurity.ContainsReparsePoint` walk, including existing files and parent ancestors, instead of independent final-entry checks. Focused recovery/recipe/color/foundation coverage passes 29/29; formatting, repository validation and `git diff --check` pass. This is local evidence pending the next exact-ten-commit push and hosted revalidation.

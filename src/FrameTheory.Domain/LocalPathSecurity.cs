@@ -5,14 +5,12 @@ public static class LocalPathSecurity
     public static bool ContainsReparsePoint(string path)
     {
         var fullPath = Path.GetFullPath(path);
-        var current = File.Exists(fullPath) || Directory.Exists(fullPath)
-            ? fullPath
-            : Path.GetDirectoryName(fullPath);
+        var current = fullPath;
         while (!string.IsNullOrWhiteSpace(current))
         {
             var normalizedCurrent = Path.TrimEndingDirectorySeparator(current);
-            if (!IsMacOsSystemAlias(normalizedCurrent) &&
-                (File.GetAttributes(current) & FileAttributes.ReparsePoint) != 0)
+            if (!IsMacOsSystemAlias(normalizedCurrent) && TryGetAttributes(current, out var attributes) &&
+                (attributes & FileAttributes.ReparsePoint) != 0)
             {
                 return true;
             }
@@ -27,6 +25,25 @@ public static class LocalPathSecurity
         }
 
         return false;
+    }
+
+    private static bool TryGetAttributes(string path, out FileAttributes attributes)
+    {
+        try
+        {
+            attributes = File.GetAttributes(path);
+            return true;
+        }
+        catch (FileNotFoundException)
+        {
+            attributes = default;
+            return false;
+        }
+        catch (DirectoryNotFoundException)
+        {
+            attributes = default;
+            return false;
+        }
     }
 
     private static bool IsMacOsSystemAlias(string path) =>

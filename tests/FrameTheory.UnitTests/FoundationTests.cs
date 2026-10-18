@@ -63,6 +63,32 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public void LocalPathSecurityRejectsDanglingReparsePoint()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-path-security-dangling-");
+        try
+        {
+            var linkedPath = Path.Combine(directory.FullName, "dangling.json");
+            File.CreateSymbolicLink(linkedPath, Path.Combine(directory.FullName, "missing.json"));
+
+            Xunit.Assert.True(LocalPathSecurity.ContainsReparsePoint(linkedPath));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public void DesktopShellProvidesAllRequiredWorkspaces()
     {
         var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
