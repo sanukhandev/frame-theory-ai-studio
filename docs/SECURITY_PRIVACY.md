@@ -20,7 +20,7 @@ Editing is local. Gemini is an **optional online service** that requires a user-
 - Gemini plan prompts are limited to 32,000 characters, and transcript results are limited to 100,000 source-timed words before timeline materialization.
 - Gemini response bodies are bounded to 4 MiB before deserialization and oversized responses are reported as malformed provider output.
 - Transcription fingerprints are computed from the selected original media before and after remote processing; a changed source is rejected without applying returned captions.
-- Local Whisper is opt-in and uses only user-selected local executable/model files with fixed `ArgumentList` arguments; Gemini cannot select or invoke that executable, and no local model or binary is bundled or downloaded.
+- Local Whisper is opt-in and uses only user-selected local executable/model files with fixed `ArgumentList` arguments; Gemini cannot select or invoke that executable, and no local model or binary is bundled or downloaded. Its stderr diagnostics are read with a bounded 64 KiB accumulator before user-facing truncation.
 - Do not promise data is never retained by the third-party model; link to provider terms and display network/privacy notice.
 - Manual editing, presets, imports, exports and saved projects work offline without API access.
 

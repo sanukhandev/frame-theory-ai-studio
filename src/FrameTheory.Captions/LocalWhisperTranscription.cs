@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 using System.Text.Json;
 
 namespace FrameTheory.Captions;
@@ -42,6 +43,7 @@ public sealed record LocalWhisperOptions
 public sealed class WhisperCliTranscriptionProvider : IProgressiveTranscriptionProvider
 {
     private const int MaximumJsonBytes = 10 * 1024 * 1024;
+    private const int MaximumDiagnosticCharacters = 64 * 1024;
     private readonly LocalWhisperOptions _options;
 
     public WhisperCliTranscriptionProvider(LocalWhisperOptions options)
@@ -115,7 +117,7 @@ public sealed class WhisperCliTranscriptionProvider : IProgressiveTranscriptionP
                 throw new InvalidOperationException("The local Whisper process could not be started.", exception);
             }
 
-            var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+            var errorTask = ReadBoundedDiagnosticsAsync(process.StandardError, cancellationToken);
             try
             {
                 await process.WaitForExitAsync(cancellationToken);
@@ -175,6 +177,23 @@ public sealed class WhisperCliTranscriptionProvider : IProgressiveTranscriptionP
     private static string TrimError(string error) => string.IsNullOrWhiteSpace(error)
         ? "no diagnostic output"
         : error.Trim().Length <= 1000 ? error.Trim() : $"{error.Trim()[..1000]}…";
+
+    private static async Task<string> ReadBoundedDiagnosticsAsync(StreamReader reader, CancellationToken cancellationToken)
+    {
+        var diagnostics = new StringBuilder();
+        var buffer = new char[4096];
+        int read;
+        while ((read = await reader.ReadAsync(buffer.AsMemory(), cancellationToken)) > 0)
+        {
+            var remaining = MaximumDiagnosticCharacters - diagnostics.Length;
+            if (remaining > 0)
+            {
+                diagnostics.Append(buffer, 0, Math.Min(read, remaining));
+            }
+        }
+
+        return diagnostics.ToString();
+    }
 
     private static void TryKill(Process process)
     {
