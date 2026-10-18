@@ -405,9 +405,21 @@ public sealed class MainWindow : Window
 
     private static Control CreateWorkspaceContent(WorkspaceViewModel workspace, MainWindowViewModel viewModel)
     {
-        var importStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var importStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(importStatus, "Media import status");
-        importStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.MediaImportStatusText)));
+        ToolTip.SetTip(importStatus, "Status for local media import and relink operations.");
+        importStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.MediaImportStatusText)));
         var mediaCards = new Dictionary<ImportedMediaViewModel, Border>();
         var mediaSelectionBadges = new Dictionary<ImportedMediaViewModel, Border>();
         var selectedMediaBackground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(49, 67, 111));
@@ -912,7 +924,7 @@ public sealed class MainWindow : Window
 
     private static Control CreateMediaBin(
         Border importZone,
-        TextBlock importStatus,
+        Control importStatus,
         ListBox importedList,
         TextBox mediaSearch,
         ComboBox mediaTypeFilter,

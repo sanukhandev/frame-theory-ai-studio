@@ -185,6 +185,12 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Diagnostics status");
                 Xunit.Assert.True(diagnosticsStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, diagnosticsStatus.FontSize);
+                var importStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Media import status");
+                Xunit.Assert.True(importStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, importStatus.FontSize);
+                Xunit.Assert.Equal("Status for local media import and relink operations.", ToolTip.GetTip(importStatus));
                 Xunit.Assert.Equal(
                     new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
                     tabItems.Select(AutomationProperties.GetName));
