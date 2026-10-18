@@ -512,12 +512,12 @@ public sealed class MainWindow : Window
                 {
                     new TextBlock { Text = "Non-destructive photo editor", FontWeight = FontWeight.SemiBold },
                     preview,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { open, openProject, saveProject, rotate, undo } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { importOverlay, clearOverlays, overlayBlend, overlayOpacity } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { applyMask, maskX, maskY, maskRadius, maskStrength, clearMask } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { applyRetouch, retouchX, retouchY, retouchRadius, retouchOffsetX, retouchOffsetY, retouchStrength, clearRetouch } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { gradeExposure, addGrade, maskGrade, clearGradeMask } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { format, quality, socialPreset, export } },
+                    CreateFlow(open, openProject, saveProject, rotate, undo),
+                    CreateFlow(importOverlay, clearOverlays, overlayBlend, overlayOpacity),
+                    CreateFlow(applyMask, maskX, maskY, maskRadius, maskStrength, clearMask),
+                    CreateFlow(applyRetouch, retouchX, retouchY, retouchRadius, retouchOffsetX, retouchOffsetY, retouchStrength, clearRetouch),
+                    CreateFlow(gradeExposure, addGrade, maskGrade, clearGradeMask),
+                    CreateFlow(format, quality, socialPreset, export),
                     status
                 }
             }
@@ -594,12 +594,12 @@ public sealed class MainWindow : Window
                     new TextBlock { Text = "Manual import, editing, preview and export never require a key.", TextWrapping = TextWrapping.Wrap },
                     model,
                     apiKey,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { save, clear } },
+                    CreateFlow(save, clear),
                     status,
                     new TextBlock { Text = "Analysis scope (prepared locally; no upload occurs here):", FontWeight = FontWeight.SemiBold },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { videoFrames, audioWaveform, photoPreview } },
+                    CreateFlow(videoFrames, audioWaveform, photoPreview),
                     uploadConsent,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { prepareAnalysis, analyzeApprovedSamples } },
+                    CreateFlow(prepareAnalysis, analyzeApprovedSamples),
                     analysisStatus,
                     usageStatus,
                     activityLog
@@ -730,10 +730,10 @@ public sealed class MainWindow : Window
                     new TextBlock { Text = "AI proposal review", FontWeight = FontWeight.SemiBold },
                     new TextBlock { Text = "Plans are untrusted data. Only checked actions are applied, atomically, through editable timeline operations; failures roll back the whole group.", TextWrapping = TextWrapping.Wrap },
                     planJson,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { revisionInstruction, requestRevision } },
+                    CreateFlow(revisionInstruction, requestRevision),
                     revisionStatus,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { validate, approve, undo, clear } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { recipeName, saveRecipe, loadRecipe } },
+                    CreateFlow(validate, approve, undo, clear),
+                    CreateFlow(recipeName, saveRecipe, loadRecipe),
                     recipeStatus,
                     approvalSummary,
                     actions,
@@ -915,28 +915,16 @@ public sealed class MainWindow : Window
                     status,
                     new TextBlock { Text = "Optional Gemini reference match", FontWeight = FontWeight.SemiBold },
                     new TextBlock { Text = "Select a source preview and a reference preview. Upload occurs only after explicit consent; the returned grade is reviewable before applying.", TextWrapping = TextWrapping.Wrap },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { referenceSource, referenceTarget } },
+                    CreateFlow(referenceSource, referenceTarget),
                     referenceConsent,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { analyzeReference, applyReference } },
+                    CreateFlow(analyzeReference, applyReference),
                     referenceStatus,
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Horizontal,
-                        Spacing = 12,
-                        Children =
-                        {
-                            new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "Before" }, beforeImage, beforeSummary } },
-                            new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "After" }, afterImage, afterSummary } }
-                        }
-                    },
+                    CreateFlow(
+                        new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "Before" }, beforeImage, beforeSummary } },
+                        new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "After" }, afterImage, afterSummary } }),
                     scopeSummary,
                     controls,
-                    new StackPanel
-                    {
-                        Orientation = Orientation.Horizontal,
-                        Spacing = 8,
-                        Children = { presetName, savePreset, loadPreset, presetSelection, applyPreset }
-                    },
+                    CreateFlow(presetName, savePreset, loadPreset, presetSelection, applyPreset),
                     presetStatus
                 }
             }
@@ -1422,42 +1410,53 @@ public sealed class MainWindow : Window
                 Children =
                 {
                     new TextBlock { Text = "Frame-accurate timeline", FontWeight = FontWeight.SemiBold },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { timelinePreview, new StackPanel { Spacing = 8, Children = { previewCurrentFrame, playTimeline, stopTimeline, usePreviewProxy, analyzeMotion, timelinePreviewStatus, timelinePerformanceStatus, motionAnalysisStatus } } } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { new TextBlock { Text = "Frame" }, frameStatus, new TextBlock { Text = "Position" }, positionStatus } },
+                    CreateFlow(timelinePreview, new StackPanel { Spacing = 8, Children = { previewCurrentFrame, playTimeline, stopTimeline, usePreviewProxy, analyzeMotion, timelinePreviewStatus, timelinePerformanceStatus, motionAnalysisStatus } }),
+                    CreateFlow(new TextBlock { Text = "Frame" }, frameStatus, new TextBlock { Text = "Position" }, positionStatus),
                     playhead,
                     ruler,
                     selectionContext,
                     tracks,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { beatDetection, beatMarkers } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { prepareRoughCut, applyRoughCut } },
+                    CreateFlow(beatDetection, beatMarkers),
+                    CreateFlow(prepareRoughCut, applyRoughCut),
                     roughCutStatus,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { back, forward, select, selectAudio, scrollBack, scrollForward } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { copy, paste, split, trim, move, rippleDelete } },
+                    CreateFlow(back, forward, select, selectAudio, scrollBack, scrollForward),
+                    CreateFlow(copy, paste, split, trim, move, rippleDelete),
                     operationStatus,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { fadeIn, pushIn, clearAnimation } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { new TextBlock { Text = "Speed" }, speedRampStart, new TextBlock { Text = "to" }, speedRampEnd, applySpeedRamp, clearSpeedRamp } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { new TextBlock { Text = "Stabilization radius" }, stabilizationRadius, applyStabilization, clearStabilization } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { muteAudio, gainAudio, fadeAudio, duckAudio, clearDucking, clearAudio } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { titleText, addTitle, fadeTitle, pushTitle } },
+                    CreateFlow(fadeIn, pushIn, clearAnimation),
+                    CreateFlow(new TextBlock { Text = "Speed" }, speedRampStart, new TextBlock { Text = "to" }, speedRampEnd, applySpeedRamp, clearSpeedRamp),
+                    CreateFlow(new TextBlock { Text = "Stabilization radius" }, stabilizationRadius, applyStabilization, clearStabilization),
+                    CreateFlow(muteAudio, gainAudio, fadeAudio, duckAudio, clearDucking, clearAudio),
+                    CreateFlow(titleText, addTitle, fadeTitle, pushTitle),
                     titleAnimationStatus,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { importCaptions, exportCaptions } },
+                    CreateFlow(importCaptions, exportCaptions),
                     kineticCaptions,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { transcribeAudio, transcriptionConsent } },
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { captionFont } },
+                    CreateFlow(transcribeAudio, transcriptionConsent),
+                    CreateFlow(captionFont),
                     captionStatus,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { saveProject, openProject } },
+                    CreateFlow(saveProject, openProject),
                     missingTimelineMedia,
                     timelineReplacementPath,
                     relinkTimelineMedia,
                     projectStatus,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { aspectRatio, export, batchExport, cancelExport, retryExport } },
+                    CreateFlow(aspectRatio, export, batchExport, cancelExport, retryExport),
                     exportStatus,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { selectWatermark, clearWatermark } },
+                    CreateFlow(selectWatermark, clearWatermark),
                     watermarkStatus,
-                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { snap, new TextBlock { Text = "Zoom" }, zoom } }
+                    CreateFlow(snap, new TextBlock { Text = "Zoom" }, zoom)
                 }
             }
         };
+    }
+
+    private static WrapPanel CreateFlow(params Control[] children)
+    {
+        var panel = new WrapPanel { Orientation = Orientation.Horizontal };
+        foreach (var child in children)
+        {
+            panel.Children.Add(child);
+        }
+
+        return panel;
     }
 
     private static Control CreateGradeControl(string label, double minimum, double maximum, float value, Action<float> setter)
