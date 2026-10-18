@@ -184,7 +184,7 @@ try {
         "After" = @("Color grade after preview", "After")
     }
     $sectionsByTab = @{
-        "Video workspace" = @("Titles and captions section")
+        "Video workspace" = @("Titles and captions section", "Project and export section")
         "Color workspace" = @("Reference match section", "Scopes section")
         "AI workspace" = @("Activity section")
     }
