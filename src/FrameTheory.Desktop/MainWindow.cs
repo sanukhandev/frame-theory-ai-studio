@@ -2438,6 +2438,36 @@ public sealed class MainWindow : Window
                     Content = clipCanvas
                 };
                 AutomationProperties.SetName(clipViewport, $"{item.Kind} timeline clip viewport");
+                var applyingTimelineScroll = false;
+                void AlignClipViewport()
+                {
+                    if (!clipViewport.IsAttachedToVisualTree())
+                    {
+                        return;
+                    }
+
+                    applyingTimelineScroll = true;
+                    clipViewport.Offset = new Avalonia.Vector(timeline.ScrollFrame / timeline.FramesPerPixel, 0);
+                    applyingTimelineScroll = false;
+                }
+
+                clipViewport.ScrollChanged += (_, _) =>
+                {
+                    if (applyingTimelineScroll || !clipViewport.IsAttachedToVisualTree())
+                    {
+                        return;
+                    }
+
+                    var requestedFrame = Math.Clamp(
+                        (long)Math.Round(clipViewport.Offset.X * timeline.FramesPerPixel, MidpointRounding.AwayFromZero),
+                        0,
+                        Math.Max(0, timeline.TotalFrames - 1));
+                    if (requestedFrame != timeline.ScrollFrame)
+                    {
+                        timeline.ScrollBy(requestedFrame - timeline.ScrollFrame);
+                    }
+                };
+                clipViewport.AttachedToVisualTree += (_, _) => Dispatcher.UIThread.Post(AlignClipViewport);
 
                 var trackLabel = new TextBlock
                 {
