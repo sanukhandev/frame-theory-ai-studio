@@ -191,6 +191,7 @@ public sealed class TimelineEditorTests
         editor.AddBeatMarkers(metadata.Id, [0.8f]);
 
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineTrackRowViewModel>>(editor.TrackRows).IsReadOnly);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineClipRowViewModel>>(editor.TrackRows[0].Clips).IsReadOnly);
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<long>>(editor.BeatMarkers).IsReadOnly);
     }
 

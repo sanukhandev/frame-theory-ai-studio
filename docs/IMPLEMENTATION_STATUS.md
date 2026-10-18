@@ -34,6 +34,8 @@
 
 **Imported-media view integrity checkpoint (2026-10-19):** Imported media view models now defensively copy thumbnail bytes and waveform peaks, preventing downstream preview or analysis consumers from mutating the media-bin snapshot. Focused desktop import coverage includes the regression; native UI acceptance remains open.
 
+**Timeline row integrity checkpoint (2026-10-19):** Nested timeline clip rows now expose read-only snapshots alongside the protected outer row collection, preventing binding mutation of the visible timeline rail. Focused timeline-editor coverage includes the regression; native UI acceptance remains open.
+
 **50-commit push boundary checkpoint (2026-10-19):** The requested local batch is complete at exactly 50 commits ahead of `origin/main`. The final local Release gate passes 271 unit tests and 2 golden tests, a warning-free Release build, format verification, repository validation and `git diff --check`; hosted revalidation is the next required evidence.
 
 **GitHub issue inventory checkpoint (2026-10-19):** A live `gh issue list` audit reports 55 closed issues and 27 open issues. The six partial P0 gates remain `FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005` and `FT-1006`; no issue is closed from local headless evidence alone.

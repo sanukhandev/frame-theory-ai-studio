@@ -1457,15 +1457,17 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     private void RefreshRows()
     {
-        TrackRows = Array.AsReadOnly(_graph.Tracks.Select(track => new TimelineTrackRowViewModel(
-            track.Id,
-            track.Kind,
-            track.Clips.Select(clip => new TimelineClipRowViewModel(
-                clip.MediaId.Value,
-                clip.TimelineRange.StartFrame,
-                clip.TimelineRange.Length,
-                string.Equals(_selectedTrackId, track.Id, StringComparison.OrdinalIgnoreCase) &&
-                _selectedClipStart == clip.TimelineRange.StartFrame)).ToArray())).ToArray());
+        TrackRows = Array.AsReadOnly(
+            _graph.Tracks.Select(track => new TimelineTrackRowViewModel(
+                track.Id,
+                track.Kind,
+                Array.AsReadOnly(track.Clips.Select(clip => new TimelineClipRowViewModel(
+                    clip.MediaId.Value,
+                    clip.TimelineRange.StartFrame,
+                    clip.TimelineRange.Length,
+                    string.Equals(_selectedTrackId, track.Id, StringComparison.OrdinalIgnoreCase) &&
+                    _selectedClipStart == clip.TimelineRange.StartFrame)).ToArray())))
+            .ToArray());
         OnPropertyChanged(nameof(TrackRows));
         OnPropertyChanged(nameof(SelectionContextText));
         OnPropertyChanged(nameof(SelectedMediaId));
