@@ -2432,11 +2432,11 @@ public sealed class MainWindow : Window
         var timeline = viewModel.TimelineEditor;
         var timelinePreview = new Image
         {
-            Width = 320,
-            Height = 180,
             Stretch = Stretch.Uniform,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            VerticalAlignment = VerticalAlignment.Stretch,
+            MaxWidth = 640,
+            MaxHeight = 360
         };
         AutomationProperties.SetName(timelinePreview, "Timeline current frame preview");
         var timelinePreviewEmptyState = new TextBlock

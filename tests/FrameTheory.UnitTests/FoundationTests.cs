@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
 using Avalonia.Layout;
+using Avalonia.Media;
 using Avalonia.Themes.Fluent;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -476,6 +477,14 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline preview empty state")
                     .IsVisible);
+                var timelinePreview = window.GetVisualDescendants()
+                    .OfType<Image>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline current frame preview");
+                Xunit.Assert.True(double.IsNaN(timelinePreview.Width));
+                Xunit.Assert.True(double.IsNaN(timelinePreview.Height));
+                Xunit.Assert.Equal(HorizontalAlignment.Stretch, timelinePreview.HorizontalAlignment);
+                Xunit.Assert.Equal(VerticalAlignment.Stretch, timelinePreview.VerticalAlignment);
+                Xunit.Assert.Equal(Stretch.Uniform, timelinePreview.Stretch);
                 var playTimeline = window.GetVisualDescendants()
                     .OfType<Button>()
                     .Single(control => AutomationProperties.GetName(control) == "Play timeline preview");

@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive monitor checkpoint (2026-10-18):** The program-monitor image no longer forces a 320×180 child into the responsive editor column. It now preserves aspect ratio while stretching to the available monitor surface with bounded 640×360 maximums, preventing minimum-window clipping; the adaptive-shell contract verifies unset fixed dimensions, stretch alignment and uniform scaling.
+
 **Monitor action-rail checkpoint (2026-10-18):** The Video program monitor now keeps frame preview/playback transport in one row and places the output framing, quick-save and MP4 export controls under a separate `OUTPUT` label. This reduces mixed-action density without changing command wiring; the adaptive-shell contract verifies the live output label and existing export controls. Native visual acceptance remains open.
 
 **Project chrome checkpoint (2026-10-18):** The top editor chrome now exposes a real `Current project title` bound to the timeline project lifecycle. It starts honestly as `Untitled project` and changes only after a successful local save or reopen, keeping the compact CapCut-inspired shell informative without presenting fabricated save state. Focused adaptive-shell coverage includes the title and tooltip; native visual acceptance remains open.
