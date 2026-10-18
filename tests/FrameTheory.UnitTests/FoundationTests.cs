@@ -329,14 +329,39 @@ public sealed class FoundationTests
                 Xunit.Assert.DoesNotContain(window.GetVisualDescendants()
                     .OfType<TextBox>(),
                     textBox => !string.IsNullOrWhiteSpace(textBox.PlaceholderText) && string.IsNullOrWhiteSpace(AutomationProperties.GetName(textBox)));
+                foreach (var primaryActionName in new[]
+                {
+                    "Import local media",
+                    "Play timeline preview",
+                    "Export timeline MP4"
+                })
+                {
+                    Xunit.Assert.Contains(
+                        window.GetVisualDescendants().OfType<Button>(),
+                        button => AutomationProperties.GetName(button) == primaryActionName && button.Classes.Contains("primary"));
+                }
 
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(1, viewModel.SelectedWorkspaceIndex);
+                Xunit.Assert.Contains(
+                    window.GetVisualDescendants().OfType<Button>(),
+                    button => AutomationProperties.GetName(button) == "Export photo image" && button.Classes.Contains("primary"));
 
                 viewModel.SelectedWorkspaceIndex = 2;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(2, tabs.SelectedIndex);
+                foreach (var primaryActionName in new[]
+                {
+                    "Apply loaded color style",
+                    "Analyze approved visual reference",
+                    "Apply reviewed reference grade"
+                })
+                {
+                    Xunit.Assert.Contains(
+                        window.GetVisualDescendants().OfType<Button>(),
+                        button => AutomationProperties.GetName(button) == primaryActionName && button.Classes.Contains("primary"));
+                }
 
                 var shortcuts = new[]
                 {
@@ -354,6 +379,16 @@ public sealed class FoundationTests
                         .OfType<Control>()
                         .Select(AutomationProperties.GetName)
                         .Where(name => !string.IsNullOrWhiteSpace(name))!);
+                }
+                foreach (var primaryActionName in new[]
+                {
+                    "Analyze approved samples with Gemini",
+                    "Apply approved AI actions"
+                })
+                {
+                    Xunit.Assert.Contains(
+                        window.GetVisualDescendants().OfType<Button>(),
+                        button => AutomationProperties.GetName(button) == primaryActionName && button.Classes.Contains("primary"));
                 }
 
                 foreach (var requiredName in new[]
