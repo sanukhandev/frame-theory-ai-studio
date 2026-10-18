@@ -310,13 +310,17 @@ jobs:
           chmod +x scripts/package_macos_dmg.sh
           scripts/package_macos_dmg.sh "" artifacts/installer 0.1.1
           mkdir -p "$RUNNER_TEMP/frame-theory-dmg"
-          hdiutil attach -nobrowse -readonly artifacts/installer/FrameTheoryStudioAI-*.dmg -mountpoint "$RUNNER_TEMP/frame-theory-dmg"
-          test -x "$RUNNER_TEMP/frame-theory-dmg/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
-          bundle_version="$(plutil -extract CFBundleShortVersionString raw -o - "$RUNNER_TEMP/frame-theory-dmg/Frame Theory Studio AI.app/Contents/Info.plist")"
+          dmg_mount="$RUNNER_TEMP/frame-theory-dmg"
+          cleanup_dmg() { hdiutil detach "$dmg_mount" >/dev/null 2>&1 || true; }
+          trap cleanup_dmg EXIT
+          hdiutil attach -nobrowse -readonly artifacts/installer/FrameTheoryStudioAI-*.dmg -mountpoint "$dmg_mount"
+          test -x "$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
+          bundle_version="$(plutil -extract CFBundleShortVersionString raw -o - "$dmg_mount/Frame Theory Studio AI.app/Contents/Info.plist")"
           echo "Mounted DMG bundle version: $bundle_version"
           test "$bundle_version" = "0.1.1"
-          pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath "$RUNNER_TEMP/frame-theory-dmg/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
-          hdiutil detach "$RUNNER_TEMP/frame-theory-dmg"
+          pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath "$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
+          hdiutil detach "$dmg_mount"
+          trap - EXIT
       - name: Build Linux DEB validation
         if: steps.detect.outputs.has_solution == 'true' && runner.os == 'Linux'
         shell: bash
