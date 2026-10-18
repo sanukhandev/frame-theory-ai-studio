@@ -2917,6 +2917,7 @@ public sealed class MainWindow : Window
             Child = playbackState
         };
         AutomationProperties.SetName(playbackBadge, "Timeline playback state badge");
+        ToolTip.SetTip(playbackBadge, "Current local timeline preview state: READY or PLAYING.");
         void RefreshPlaybackControls()
         {
             var isPlaying = viewModel.IsTimelinePreviewPlaying;

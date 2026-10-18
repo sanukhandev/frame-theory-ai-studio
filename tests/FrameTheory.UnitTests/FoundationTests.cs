@@ -669,6 +669,9 @@ public sealed class FoundationTests
                         .Single(control => AutomationProperties.GetName(control) == "Timeline playback state")
                         .Text);
                 Xunit.Assert.Equal(
+                    "Current local timeline preview state: READY or PLAYING.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Border>().Single(control => AutomationProperties.GetName(control) == "Timeline playback state badge")));
+                Xunit.Assert.Equal(
                     viewModel.TimelineExportStatusText,
                     window.GetVisualDescendants()
                         .OfType<TextBox>()
