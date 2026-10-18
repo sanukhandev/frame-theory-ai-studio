@@ -825,19 +825,24 @@ public sealed class MainWindow : Window
         var modeBackground = workspace.Name == "AI"
             ? new SolidColorBrush(Avalonia.Media.Color.FromRgb(43, 34, 61))
             : new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 44, 42));
-        var status = new TextBlock
+        var status = new TextBox
         {
+            IsReadOnly = true,
             MaxWidth = 380,
             FontSize = 11,
             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
             HorizontalAlignment = HorizontalAlignment.Right,
             TextWrapping = TextWrapping.NoWrap,
-            TextTrimming = TextTrimming.CharacterEllipsis,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0,
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(status, "Active workspace status");
         ToolTip.SetTip(status, "Live save, export, edit or provider status for the active workspace.");
-        status.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.ActiveWorkspaceStatusText)));
+        status.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.ActiveWorkspaceStatusText)));
         var mode = new Border
         {
             Margin = new Thickness(12, 2, 0, 0),
