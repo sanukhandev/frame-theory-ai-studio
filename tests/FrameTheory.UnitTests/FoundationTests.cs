@@ -173,6 +173,14 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Media bin");
                 var mediaBinGrid = Xunit.Assert.IsType<Grid>(mediaBin.Child);
                 Xunit.Assert.Equal(2, mediaBinGrid.ColumnDefinitions.Count);
+                var importedMediaList = window.GetVisualDescendants()
+                    .OfType<ListBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Imported media");
+                Xunit.Assert.NotNull(importedMediaList.ItemTemplate);
+                var timelineTracks = window.GetVisualDescendants()
+                    .OfType<ListBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline tracks");
+                Xunit.Assert.NotNull(timelineTracks.ItemTemplate);
 
                 var performanceStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
