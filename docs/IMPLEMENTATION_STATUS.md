@@ -42,6 +42,8 @@
 
 **Gemini settings-state integrity checkpoint (2026-10-19):** The optional Gemini model selector now exposes a read-only catalog snapshot, preventing UI consumers from mutating supported-model state. Focused desktop AI coverage includes the regression; live-provider acceptance remains open.
 
+**Timeline preview-state integrity checkpoint (2026-10-19):** Timeline preview PPM bytes are now copied on assignment and retrieval, preventing UI consumers from mutating cached preview data or decoder-owned buffers. Focused desktop preview coverage includes the regression; native preview acceptance remains open.
+
 **50-commit push boundary checkpoint (2026-10-19):** The requested local batch is complete at exactly 50 commits ahead of `origin/main`. The final local Release gate passes 271 unit tests and 2 golden tests, a warning-free Release build, format verification, repository validation and `git diff --check`; hosted revalidation is the next required evidence.
 
 **GitHub issue inventory checkpoint (2026-10-19):** A live `gh issue list` audit reports 55 closed issues and 27 open issues. The six partial P0 gates remain `FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005` and `FT-1006`; no issue is closed from local headless evidence alone.

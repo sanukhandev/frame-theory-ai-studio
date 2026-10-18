@@ -24,6 +24,7 @@ Audit checkpoint: 2026-10-18, latest verified green complete matrix run `3911831
 - Current batch-export hardening: validated targets are snapshotted before asynchronous export, preserving output ordering and completion counts during caller mutation. Focused batch-export coverage includes the regression; native interruption acceptance remains open.
 - Current timeline row-contract hardening: `TimelineTrackRowViewModel` snapshots caller-provided clips while preserving public deconstruction and formatting. Focused timeline-editor coverage includes the regression; native UI acceptance remains open.
 - Current Gemini settings hardening: the optional model selector exposes a read-only supported-model snapshot, preserving the provider allowlist from UI mutation. Focused desktop AI coverage includes the regression; live-provider acceptance remains open.
+- Current timeline preview hardening: preview PPM bytes are copied on assignment and retrieval, preserving cached frames from UI or decoder mutation. Focused desktop preview coverage includes the regression; native preview acceptance remains open.
 
 ## Evidence
 

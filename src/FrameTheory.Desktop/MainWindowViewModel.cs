@@ -222,10 +222,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public byte[]? TimelinePreviewPpm
     {
-        get => _timelinePreviewPpm;
+        get => _timelinePreviewPpm?.ToArray();
         private set
         {
-            _timelinePreviewPpm = value;
+            _timelinePreviewPpm = value?.ToArray();
             OnPropertyChanged();
         }
     }
