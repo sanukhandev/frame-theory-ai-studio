@@ -1,6 +1,8 @@
 # Implementation Status — Resume Checkpoint
 
-**UIA guard checkpoint (2026-10-18):** Repository validation now requires the native UI smoke to include explicit inspector-section expansion and coverage for Video titles/captions, Color reference matching and AI activity before checking nested controls. Documentation validation, PowerShell parsing and diff checks pass; the next hosted correction run remains pending.
+**Latest hosted inspector validation checkpoint (2026-10-18):** Run `39131287232` for pushed commit `53c0f0b` passed documentation/schema validation and Windows, macOS and Linux quality jobs. It includes the corrected Windows UI Automation smoke, which successfully navigated collapsed Video/Color/AI inspector sections before finding nested controls, plus native FFmpeg media smoke, 261 unit tests, 2 golden tests, formatting, portable archives, Windows installer, macOS DMG, Linux DEB, packaged relaunch and checksum artifacts. Manual native visual/HiDPI/screen-reader acceptance remains open.
+
+**UIA guard checkpoint (2026-10-18):** Repository validation now requires the native UI smoke to include explicit inspector-section expansion and coverage for Video titles/captions, Color reference matching and AI activity before checking nested controls. Documentation validation, PowerShell parsing and diff checks pass; hosted confirmation is green in run `39131287232`.
 
 **Explicit label regression checkpoint (2026-10-18):** The adaptive shell contract now asserts stable names for Photo edit/reset/mask/retouch actions, AI proposal clearing, and timeline motion/audio/title actions. Focused shell coverage and the full local Release gate pass: 261 unit tests, 2 golden tests, formatting and `git diff --check`. Hosted UI smoke remains pending on the next exact-ten-commit push.
 
