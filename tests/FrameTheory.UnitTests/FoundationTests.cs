@@ -91,6 +91,11 @@ public sealed class FoundationTests
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline preview performance status");
                 Xunit.Assert.Equal(viewModel.TimelinePerformanceStatusText, performanceStatus.Text);
+                var automationNames = new HashSet<string>(StringComparer.Ordinal);
+                automationNames.UnionWith(window.GetVisualDescendants()
+                    .OfType<Control>()
+                    .Select(AutomationProperties.GetName)
+                    .Where(name => !string.IsNullOrWhiteSpace(name))!);
 
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
@@ -112,6 +117,30 @@ public sealed class FoundationTests
                     window.KeyPress(key, RawInputModifiers.Control, physicalKey, key.ToString());
                     window.KeyRelease(key, RawInputModifiers.Control, physicalKey, key.ToString());
                     Xunit.Assert.Equal(workspaceName, viewModel.SelectedWorkspace.Name);
+                    automationNames.UnionWith(window.GetVisualDescendants()
+                        .OfType<Control>()
+                        .Select(AutomationProperties.GetName)
+                        .Where(name => !string.IsNullOrWhiteSpace(name))!);
+                }
+
+                foreach (var requiredName in new[]
+                {
+                    "Imported media",
+                    "Preview current timeline frame",
+                    "Save timeline project",
+                    "Open timeline project",
+                    "Export timeline MP4",
+                    "Color grade before preview",
+                    "Color grade after preview",
+                    "Analyze approved visual reference",
+                    "Apply reviewed reference grade",
+                    "Analyze approved samples with Gemini",
+                    "Validate AI proposal",
+                    "Apply approved AI actions",
+                    "Undo last AI apply"
+                })
+                {
+                    Xunit.Assert.Contains(requiredName, automationNames);
                 }
             }
             finally
