@@ -1,6 +1,6 @@
 # Dependency Inventory and Redistribution Assessment
 
-Generated from `dotnet list FrameTheory.sln package --include-transitive` on 2026-10-17 with .NET SDK 10.0.100. This is an inventory checkpoint, not a completed legal clearance.
+Generated from `dotnet list FrameTheory.sln package --include-transitive` on 2026-10-18 with .NET SDK 10.0.100 after the test-only Avalonia headless dependency was restored. This is an inventory checkpoint, not a completed legal clearance.
 
 The reproducible CI/local vulnerability check is `pwsh ./scripts/check_nuget_vulnerabilities.ps1`. The NuGet advisory feed returned no vulnerable package records on 2026-10-17; the generated JSON report is retained as a CI artifact. A clean advisory result does not replace license, codec-patent or native redistribution review.
 
