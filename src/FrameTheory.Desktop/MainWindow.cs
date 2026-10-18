@@ -1888,6 +1888,9 @@ public sealed class MainWindow : Window
                 {
                     var clipButton = new Button
                     {
+                        MinWidth = 128,
+                        HorizontalContentAlignment = HorizontalAlignment.Left,
+                        VerticalContentAlignment = VerticalAlignment.Center,
                         Margin = new Thickness(0, 0, 6, 4),
                         Padding = new Thickness(8, 4),
                         Background = new SolidColorBrush(clip.IsSelected
@@ -1901,7 +1904,8 @@ public sealed class MainWindow : Window
                         {
                             Text = $"{clip.MediaId[..Math.Min(8, clip.MediaId.Length)]}  {clip.StartFrame}–{clip.StartFrame + clip.DurationFrames - 1}",
                             FontSize = 11,
-                            Foreground = Brushes.White
+                            Foreground = Brushes.White,
+                            TextTrimming = TextTrimming.CharacterEllipsis
                         }
                     };
                     AutomationProperties.SetName(clipButton, $"Select {item.Kind} clip {clip.MediaId}");

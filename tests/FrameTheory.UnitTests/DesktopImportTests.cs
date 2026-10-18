@@ -1,6 +1,7 @@
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Interactivity;
+using Avalonia.Layout;
 using Avalonia.Themes.Fluent;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -74,6 +75,8 @@ public sealed class DesktopImportTests
                     .OfType<Button>()
                     .Single(control => Avalonia.Automation.AutomationProperties.GetName(control)?.StartsWith("Select Video clip", StringComparison.Ordinal) == true);
                 Xunit.Assert.Contains("frames 0–29", ToolTip.GetTip(clipButton) as string, StringComparison.Ordinal);
+                Xunit.Assert.Equal(128, clipButton.MinWidth);
+                Xunit.Assert.Equal(HorizontalAlignment.Left, clipButton.HorizontalContentAlignment);
                 mediaList.SelectedIndex = 0;
                 Dispatcher.UIThread.RunJobs();
 
