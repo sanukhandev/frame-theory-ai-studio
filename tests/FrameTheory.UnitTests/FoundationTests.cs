@@ -502,6 +502,8 @@ public sealed class FoundationTests
                     "Timeline program monitor",
                     "Timeline monitor controls",
                     "Timeline navigation controls",
+                    "Timeline frame readout",
+                    "Timeline position readout",
                     "Timeline motion analysis status",
                     "Rough cut status",
                     "Title animation status",

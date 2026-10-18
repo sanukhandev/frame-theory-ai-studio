@@ -2013,6 +2013,42 @@ public sealed class MainWindow : Window
         var positionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(positionStatus, "Timeline position status");
         positionStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentPosition"));
+        var frameReadout = new Border
+        {
+            Padding = new Thickness(8, 5),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(16, 18, 22)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(4),
+            Child = new StackPanel
+            {
+                Spacing = 2,
+                Children =
+                {
+                    new TextBlock { Text = "FRAME", FontSize = 9, FontWeight = FontWeight.SemiBold, Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190)) },
+                    frameStatus
+                }
+            }
+        };
+        AutomationProperties.SetName(frameReadout, "Timeline frame readout");
+        var positionReadout = new Border
+        {
+            Padding = new Thickness(8, 5),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(16, 18, 22)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(4),
+            Child = new StackPanel
+            {
+                Spacing = 2,
+                Children =
+                {
+                    new TextBlock { Text = "POSITION", FontSize = 9, FontWeight = FontWeight.SemiBold, Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190)) },
+                    positionStatus
+                }
+            }
+        };
+        AutomationProperties.SetName(positionReadout, "Timeline position readout");
         var ruler = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(ruler, "Timeline ruler");
         ToolTip.SetTip(ruler, "Current frame and timeline position.");
@@ -2805,7 +2841,7 @@ public sealed class MainWindow : Window
                         FontWeight = FontWeight.SemiBold,
                         Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
                     },
-                    CreateFlow(new TextBlock { Text = "Frame" }, frameStatus, new TextBlock { Text = "Position" }, positionStatus),
+                    CreateFlow(frameReadout, positionReadout),
                     playhead,
                     ruler
                 }
