@@ -186,6 +186,34 @@ public sealed class DesktopTranscriptionTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task DesktopVerifiedTranscriptImportHonorsCancellationWithoutMutation()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-transcript-cancel-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "spoken.wav");
+            var transcriptPath = Path.Combine(directory.FullName, "spoken.transcript.json");
+            await File.WriteAllTextAsync(sourcePath, "offline media");
+            await File.WriteAllTextAsync(transcriptPath, "{}");
+            var viewModel = new MainWindowViewModel(new WorkspaceCatalog(), new TestCapabilityDetector());
+            viewModel.TimelineEditor.ImportCaptions("1\n00:00:00,100 --> 00:00:00,400\nExisting\n");
+            using var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+
+            var succeeded = await viewModel.ImportTranscriptAsync(sourcePath, transcriptPath, cancellation.Token);
+
+            Xunit.Assert.False(succeeded);
+            Xunit.Assert.Single(viewModel.TimelineEditor.Captions);
+            Xunit.Assert.Equal("Existing", viewModel.TimelineEditor.Captions[0].Text);
+            Xunit.Assert.Contains("canceled", viewModel.CaptionStatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private static string Fingerprint(string path)
         => $"sha256:{Convert.ToHexString(SHA256.HashData(File.ReadAllBytes(path))).ToLowerInvariant()}";
 
