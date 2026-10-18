@@ -55,5 +55,6 @@ cat > "$app/Contents/Info.plist" <<PLIST
 </dict>
 </plist>
 PLIST
+plutil -lint "$app/Contents/Info.plist"
 hdiutil create -volname "Frame Theory Studio AI" -srcfolder "$app" -ov -format UDZO "$output/FrameTheoryStudioAI-$rid.dmg"
 printf 'Built unsigned macOS DMG: %s\n' "$output/FrameTheoryStudioAI-$rid.dmg"
