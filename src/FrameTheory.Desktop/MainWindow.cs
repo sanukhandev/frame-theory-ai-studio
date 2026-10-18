@@ -3215,6 +3215,9 @@ public sealed class MainWindow : Window
         var exportStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(exportStatus, "Timeline export status");
         exportStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
+        var quickExportStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(quickExportStatus, "Quick export status");
+        quickExportStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
         var retryExport = new Button { Content = "Retry last export" };
         AutomationProperties.SetName(retryExport, "Retry last timeline export");
         retryExport.Click += async (_, _) => await viewModel.RetryLastTimelineExportAsync(CancellationToken.None);
@@ -3330,6 +3333,7 @@ public sealed class MainWindow : Window
                     }
                 },
                 CreateFlow(previewCurrentFrame, playTimeline, stopTimeline, quickExport),
+                quickExportStatus,
                 usePreviewProxy,
                 analyzeMotion,
                 timelinePreviewStatus,

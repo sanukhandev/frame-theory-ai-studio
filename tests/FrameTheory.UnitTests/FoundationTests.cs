@@ -394,6 +394,12 @@ public sealed class FoundationTests
                         .OfType<TextBlock>()
                         .Single(control => AutomationProperties.GetName(control) == "Timeline playback state")
                         .Text);
+                Xunit.Assert.Equal(
+                    viewModel.TimelineExportStatusText,
+                    window.GetVisualDescendants()
+                        .OfType<TextBlock>()
+                        .Single(control => AutomationProperties.GetName(control) == "Quick export status")
+                        .Text);
                 Xunit.Assert.False(window.GetVisualDescendants()
                     .OfType<Button>()
                     .Single(control => AutomationProperties.GetName(control) == "Stop timeline preview")
