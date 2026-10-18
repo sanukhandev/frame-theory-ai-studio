@@ -29,4 +29,21 @@ public sealed class RoughCutPlannerTests
         Xunit.Assert.Throws<ArgumentException>(() => new RoughCutSource("bad", 0, 10, [1.1f]));
         Xunit.Assert.Throws<ArgumentException>(() => RoughCutPlanner.Create([new RoughCutSource("one", 0, 10, [])]));
     }
+
+    [Xunit.Fact]
+    public void RoughCutModelsExposeImmutableSnapshots()
+    {
+        var peaks = new List<float> { 0.5f };
+        var source = new RoughCutSource("source", 0, 10, peaks);
+        var segments = new List<RoughCutSegment> { new("source", 0, 0, 10, 0.5) };
+        var plan = new RoughCutPlan(segments);
+
+        peaks[0] = 0;
+        segments.Clear();
+
+        Xunit.Assert.Equal(0.5f, source.WaveformPeaks[0]);
+        Xunit.Assert.Single(plan.Segments);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<float>>(source.WaveformPeaks).IsReadOnly);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<RoughCutSegment>>(plan.Segments).IsReadOnly);
+    }
 }

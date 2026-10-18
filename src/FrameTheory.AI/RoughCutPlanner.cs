@@ -23,7 +23,7 @@ public sealed class RoughCutSource
         MediaId = mediaId;
         TimelineStartFrame = timelineStartFrame;
         DurationFrames = durationFrames;
-        WaveformPeaks = waveformPeaks.ToArray();
+        WaveformPeaks = Array.AsReadOnly(waveformPeaks.ToArray());
     }
 
     public string MediaId { get; }
@@ -46,8 +46,8 @@ public sealed class RoughCutPlan
 {
     internal RoughCutPlan(IReadOnlyList<RoughCutSegment> segments)
     {
-        Segments = segments;
-        TotalFrames = segments.Sum(segment => segment.DurationFrames);
+        Segments = Array.AsReadOnly(segments.ToArray());
+        TotalFrames = Segments.Sum(segment => segment.DurationFrames);
     }
 
     public IReadOnlyList<RoughCutSegment> Segments { get; }
