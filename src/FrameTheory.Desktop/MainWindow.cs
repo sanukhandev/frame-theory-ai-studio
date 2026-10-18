@@ -1743,6 +1743,7 @@ public sealed class MainWindow : Window
                         }
                     };
                     AutomationProperties.SetName(clipButton, $"Select {item.Kind} clip {clip.MediaId}");
+                    ToolTip.SetTip(clipButton, $"{item.Kind} clip · frames {clip.StartFrame}–{clip.StartFrame + clip.DurationFrames - 1}");
                     clipButton.Click += (_, _) => timeline.SelectMedia(clip.MediaId, item.Kind);
                     clips.Children.Add(clipButton);
                 }
