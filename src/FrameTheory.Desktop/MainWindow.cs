@@ -3385,7 +3385,9 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(prepareRoughCut, "Plan waveform activity rough cut");
         prepareRoughCut.Click += (_, _) => viewModel.PrepareRoughCutPlan();
         var applyRoughCut = new Button { Content = "Apply reviewed rough cut" };
+        applyRoughCut.Classes.Add("primary");
         AutomationProperties.SetName(applyRoughCut, "Apply reviewed rough cut");
+        ToolTip.SetTip(applyRoughCut, "Apply the reviewed waveform rough cut as editable timeline operations.");
         applyRoughCut.Click += (_, _) => viewModel.ApplyRoughCutPlan();
         var roughCutStatus = new TextBox
         {

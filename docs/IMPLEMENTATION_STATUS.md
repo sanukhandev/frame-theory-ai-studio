@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 11 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 13 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
 
 **FT-901 photo-inspector grouping checkpoint (2026-10-19):** The Photo mask-and-retouch inspector now presents separate `OVERLAY MASK` and `CLONE RETOUCH` groups, reducing control density without changing edit behavior. Headless production-shell coverage verifies both groups are reachable and the full Release gate passes 271 unit tests and 2 golden tests with a warning-free build, format verification, repository validation and `git diff --check`. Native visual and screen-reader acceptance remains open.
 
@@ -11,6 +11,8 @@
 **FT-901 motion-field checkpoint (2026-10-19):** Timeline speed-ramp and stabilization inputs now keep persistent compact labels and range guidance beside their default values, improving scanability in the Motion and speed inspector without changing the underlying timeline commands. Focused production-shell coverage and formatting verification pass.
 
 **Release gate checkpoint (2026-10-19):** After the photo, color-reference and timeline motion UI refinements, the full local Release gate passes 271 unit tests and 2 golden tests, the solution builds with 0 warnings/errors, `dotnet format --verify-no-changes`, repository validation and `git diff --check` pass. No hosted revalidation is claimed before the requested 50-commit push.
+
+**FT-901 action-hierarchy checkpoint (2026-10-19):** The reviewed waveform rough-cut action now uses the production primary-action treatment and explains that it applies editable timeline operations, matching the established export/apply hierarchy. Focused production-shell coverage and formatting verification pass.
 
 **FT-901 workspace-render checkpoint (2026-10-19):** The production Skia-backed headless shell now captures all four Video, Photo, Color and AI workspaces at the compact 960×640 surface after real tab selection. Focused render coverage passes 2/2; the full Release suite passes 271 unit tests and 2 golden tests with format verification, repository validation and `git diff --check` green. This strengthens responsive-render evidence but does not replace native visual or screen-reader review.
 

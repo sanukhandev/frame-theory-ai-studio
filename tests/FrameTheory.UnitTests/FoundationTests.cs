@@ -1142,7 +1142,8 @@ public sealed class FoundationTests
                     "Play timeline preview",
                     "Export timeline MP4",
                     "Quick export timeline MP4",
-                    "Export all social video targets"
+                    "Export all social video targets",
+                    "Apply reviewed rough cut"
                 })
                 {
                     Xunit.Assert.Contains(
@@ -1158,6 +1159,9 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Render the editable timeline to an MP4 using the selected aspect ratio.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Export timeline MP4")));
+                Xunit.Assert.Equal(
+                    "Apply the reviewed waveform rough cut as editable timeline operations.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Apply reviewed rough cut")));
 
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
