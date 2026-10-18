@@ -29,6 +29,8 @@ public sealed record TranscriptWord
 
 public sealed record TranscriptResult
 {
+    private const int MaximumWords = 100_000;
+
     public TranscriptResult(Uri source, string sourceFingerprint, IEnumerable<TranscriptWord> words)
     {
         ArgumentNullException.ThrowIfNull(source);
@@ -38,10 +40,10 @@ public sealed record TranscriptResult
         }
 
         ArgumentNullException.ThrowIfNull(words);
-        var orderedWords = words.OrderBy(word => word.Start).ToArray();
-        if (orderedWords.Length == 0 || orderedWords.Zip(orderedWords.Skip(1), (previous, current) => previous.End <= current.Start).Any(isValid => !isValid))
+        var orderedWords = words.Take(MaximumWords + 1).OrderBy(word => word.Start).ToArray();
+        if (orderedWords.Length == 0 || orderedWords.Length > MaximumWords || orderedWords.Zip(orderedWords.Skip(1), (previous, current) => previous.End <= current.Start).Any(isValid => !isValid))
         {
-            throw new ArgumentException("Transcript words must be non-empty and non-overlapping.", nameof(words));
+            throw new ArgumentException("Transcript words must be non-empty, non-overlapping and within the supported limit.", nameof(words));
         }
 
         Source = source;

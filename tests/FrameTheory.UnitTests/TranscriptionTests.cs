@@ -159,6 +159,18 @@ public sealed class TranscriptionTests
     }
 
     [Xunit.Fact]
+    public void TranscriptResultRejectsAnExcessiveWordCount()
+    {
+        var words = Enumerable.Range(0, 100_001)
+            .Select(index => new TranscriptWord($"word{index}", TimeSpan.FromMilliseconds(index * 10), TimeSpan.FromMilliseconds(index * 10 + 5)));
+
+        Xunit.Assert.Throws<ArgumentException>(() => new TranscriptResult(
+            new Uri("file:///spoken.wav"),
+            "sha256:spoken",
+            words));
+    }
+
+    [Xunit.Fact]
     public async Task GeminiProviderUploadsOnlyWithConsentAndPreservesTimedWordProvenance()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-transcript-");
