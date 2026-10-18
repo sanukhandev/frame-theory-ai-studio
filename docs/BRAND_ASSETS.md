@@ -6,7 +6,7 @@
 - Official logo: **only the original logo file provided in Frame Theory project sources** (current source attachment titled `Elegant Frame Theory Monogram.png`). Treat that source as authoritative; never redraw, invent, restyle, vector-trace, letter-substitute or recolor it.
 
 ## Asset availability
-The approved source attachment has been copied byte-for-byte to `assets/brand/frame-theory-original.png`. Its SHA-256 is `0BD29D37FBCC4C753B8870A65E3A02E23460C1A5C305E53E6CD2D9D2F151F388`; CI and the unit suite reject drift or reparse-point substitution. No reconstruction or stand-in logo is permitted. The logo is RGB; do not assert transparent background.
+The approved source attachment has been copied byte-for-byte to `assets/brand/frame-theory-original.png`. Its SHA-256 is `0BD29D37FBCC4C753B8870A65E3A02E23460C1A5C305E53E6CD2D9D2F151F388`; CI, the unit suite and the runtime watermark resolver reject drift or reparse-point substitution. No reconstruction or stand-in logo is permitted. The logo is RGB; do not assert transparent background.
 
 ## Use
 - Preserve exact image content, aspect ratio, typography and brand colors; only lossless placement/scaling is permitted.
