@@ -3934,6 +3934,7 @@ public sealed class MainWindow : Window
             MinHeight = 0
         };
         AutomationProperties.SetName(quickSaveStatus, "Quick save status");
+        ToolTip.SetTip(quickSaveStatus, "Current local quick-save project status.");
         quickSaveStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineProjectStatusText)));
         var openProject = new Button { Content = "Open timeline project" };
         AutomationProperties.SetName(openProject, "Open timeline project");
@@ -4078,6 +4079,7 @@ public sealed class MainWindow : Window
             MinHeight = 0
         };
         AutomationProperties.SetName(quickExportStatus, "Quick export status");
+        ToolTip.SetTip(quickExportStatus, "Current local quick-export status.");
         quickExportStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
         var quickActionStatus = new Border
         {
