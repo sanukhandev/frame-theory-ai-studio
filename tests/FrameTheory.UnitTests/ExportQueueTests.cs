@@ -102,6 +102,17 @@ public sealed class ExportQueueTests
         Xunit.Assert.Equal(ExportQueueJobState.Canceled, queued.State);
     }
 
+    [Xunit.Fact]
+    public async Task DisposingQueueTwiceIsSafe()
+    {
+        var queue = new ExportQueueService();
+
+        await queue.DisposeAsync();
+        await queue.DisposeAsync();
+
+        Xunit.Assert.Throws<InvalidOperationException>(() => queue.Enqueue(_ => Task.FromResult(Receipt("closed"))));
+    }
+
     private static ExportReceipt Receipt(string name) => new(
         Guid.NewGuid(),
         Path.Combine(Path.GetTempPath(), name + ".mp4"),

@@ -156,6 +156,7 @@ public sealed class ExportQueueService : IAsyncDisposable
     private readonly Channel<WorkItem> _queue = Channel.CreateUnbounded<WorkItem>();
     private readonly CancellationTokenSource _shutdown = new();
     private readonly Task _worker;
+    private int _disposed;
 
     public ExportQueueService() => _worker = Task.Run(ProcessAsync);
 
@@ -206,6 +207,12 @@ public sealed class ExportQueueService : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
+        {
+            await _worker.ConfigureAwait(false);
+            return;
+        }
+
         ExportQueueJob[] jobs;
         lock (_history)
         {
