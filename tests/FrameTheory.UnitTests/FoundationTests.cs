@@ -226,6 +226,9 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Imported media summary");
                 Xunit.Assert.Equal(viewModel.ImportedMediaSummary, importedMediaSummary.Text);
+                Xunit.Assert.Equal(
+                    "Imported local media available to the active workspace.",
+                    ToolTip.GetTip(importedMediaList));
                 var mediaSearch = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Search imported media");

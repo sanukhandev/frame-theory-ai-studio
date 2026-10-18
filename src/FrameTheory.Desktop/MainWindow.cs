@@ -462,6 +462,7 @@ public sealed class MainWindow : Window
             }, supportsRecycling: false)
         };
         AutomationProperties.SetName(importedList, "Imported media");
+        ToolTip.SetTip(importedList, "Imported local media available to the active workspace.");
         var mediaSearch = new TextBox
         {
             Width = 190,
