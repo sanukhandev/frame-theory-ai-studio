@@ -226,6 +226,10 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Search imported media");
                 Xunit.Assert.Equal(190, mediaSearch.Width);
                 Xunit.Assert.Equal("Filter imported media by filename.", ToolTip.GetTip(mediaSearch));
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => AutomationProperties.GetName(control) == "Media search empty state")
+                    .IsVisible);
                 var timelineTracks = window.GetVisualDescendants()
                     .OfType<ListBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline tracks");
@@ -408,6 +412,7 @@ public sealed class FoundationTests
                     "Workspace keyboard shortcuts",
                     "Media import status",
                     "Search imported media",
+                    "Media search empty state",
                     "Timeline preview status",
                     "Timeline motion analysis status",
                     "Rough cut status",
