@@ -683,35 +683,31 @@ public sealed class MainWindow : Window
         };
         if (workspace.Name == "Photo")
         {
-            children.Add(mediaBinPanel);
-            children.Add(CreatePhotoRecoveryPanel(viewModel));
+            var photoEditor = new StackPanel { Spacing = 12 };
+            photoEditor.Children.Add(CreatePhotoRecoveryPanel(viewModel));
             if (viewModel.PhotoEditor is not null)
             {
-                children.Add(CreatePhotoEditorPanel(viewModel.PhotoEditor));
+                photoEditor.Children.Add(CreatePhotoEditorPanel(viewModel.PhotoEditor));
             }
+
+            children.Add(CreateMediaWorkspaceLayout(mediaBinPanel, photoEditor, "Photo editor workspace layout"));
         }
         else if (workspace.Name == "Color")
         {
-            children.Add(mediaBinPanel);
-            children.Add(CreateColorInspectorPanel(viewModel));
+            children.Add(CreateMediaWorkspaceLayout(mediaBinPanel, CreateColorInspectorPanel(viewModel), "Color editor workspace layout"));
         }
         else if (workspace.Name == "Video")
         {
-            var editorLayout = new Grid
-            {
-                ColumnDefinitions = new ColumnDefinitions("300,*"),
-                ColumnSpacing = 12,
-                Children = { mediaBinPanel, CreateTimelinePanel(viewModel) }
-            };
-            Grid.SetColumn(editorLayout.Children[1], 1);
-            AutomationProperties.SetName(editorLayout, "Video editor workspace layout");
-            children.Add(editorLayout);
+            children.Add(CreateMediaWorkspaceLayout(mediaBinPanel, CreateTimelinePanel(viewModel), "Video editor workspace layout"));
         }
         else if (workspace.Name == "AI")
         {
-            children.Add(mediaBinPanel);
-            children.Add(CreateGeminiSettingsPanel(viewModel));
-            children.Add(CreateAiProposalPanel(viewModel));
+            var aiEditor = new StackPanel
+            {
+                Spacing = 12,
+                Children = { CreateGeminiSettingsPanel(viewModel), CreateAiProposalPanel(viewModel) }
+            };
+            children.Add(CreateMediaWorkspaceLayout(mediaBinPanel, aiEditor, "AI editor workspace layout"));
         }
 
         var stack = new StackPanel { Spacing = 12 };
@@ -884,6 +880,19 @@ public sealed class MainWindow : Window
         grid.Children.Add(importZone);
         Grid.SetColumn(importZone, 1);
         return mediaBin;
+    }
+
+    private static Control CreateMediaWorkspaceLayout(Control mediaBin, Control editor, string automationName)
+    {
+        var layout = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("300,*"),
+            ColumnSpacing = 12,
+            Children = { mediaBin, editor }
+        };
+        Grid.SetColumn(editor, 1);
+        AutomationProperties.SetName(layout, automationName);
+        return layout;
     }
 
     private static Control CreatePhotoRecoveryPanel(MainWindowViewModel viewModel)

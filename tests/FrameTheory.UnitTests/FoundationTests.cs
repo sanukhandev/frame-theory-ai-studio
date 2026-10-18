@@ -209,6 +209,19 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Video editor workspace layout");
                 Xunit.Assert.Equal(2, videoEditorLayout.ColumnDefinitions.Count);
                 Xunit.Assert.Equal(300, videoEditorLayout.ColumnDefinitions[0].Width.Value);
+                for (var workspaceIndex = 1; workspaceIndex < tabItems.Length; workspaceIndex++)
+                {
+                    tabs.SelectedIndex = workspaceIndex;
+                    Dispatcher.UIThread.RunJobs();
+                    var workspaceName = new[] { "Video", "Photo", "Color", "AI" }[workspaceIndex];
+                    var editorLayout = window.GetVisualDescendants()
+                        .OfType<Grid>()
+                        .Single(control => AutomationProperties.GetName(control) == $"{workspaceName} editor workspace layout");
+                    Xunit.Assert.Equal(2, editorLayout.ColumnDefinitions.Count);
+                    Xunit.Assert.Equal(300, editorLayout.ColumnDefinitions[0].Width.Value);
+                }
+                tabs.SelectedIndex = 0;
+                Dispatcher.UIThread.RunJobs();
                 var monitorTimecode = window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline monitor timecode");
