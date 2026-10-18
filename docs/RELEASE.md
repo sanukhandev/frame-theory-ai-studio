@@ -17,6 +17,18 @@ pwsh ./scripts/package.ps1 -RuntimeIdentifier win-x64 -OutputDirectory artifacts
 sh ./scripts/package.sh linux-x64 artifacts/package true
 ```
 
+Release owners may provide a separately reviewed native FFmpeg directory as the final argument. It must contain both `ffmpeg` and `ffprobe` for Unix packages, or `ffmpeg.exe` and `ffprobe.exe` for Windows; the scripts copy both beside the application and fail closed when either binary is missing:
+
+```text
+pwsh ./scripts/package.ps1 -RuntimeIdentifier win-x64 -OutputDirectory artifacts/package -SelfContained -FfmpegDirectory C:\reviewed\ffmpeg
+pwsh ./scripts/package_windows.ps1 -FfmpegDirectory C:\reviewed\ffmpeg
+sh ./scripts/package.sh linux-x64 artifacts/package true /reviewed/ffmpeg
+sh ./scripts/package_macos_dmg.sh osx-arm64 artifacts/installer 0.1.1 /reviewed/ffmpeg
+sh ./scripts/package_linux_deb.sh linux-x64 artifacts/installer 0.1.1 /reviewed/ffmpeg
+```
+
+The application resolves bundled binaries from its install directory before falling back to `PATH`. Supplying a directory is not license approval: release owners must record the exact build, checksums, configure flags, notices, codec obligations and redistribution permission in the release evidence before distributing it.
+
 The output is a validation publish, not an installer. Windows installer packaging is currently x64-only (`win-x64`); it must be tested on the matching host before distribution.
 
 CI writes `SHA256SUMS.txt` for the complete validation artifact set and verifies every listed file before upload with `pwsh ./scripts/verify_package.ps1`. The verifier rejects malformed, duplicate, escaping, missing, modified or unlisted nested files.
