@@ -296,10 +296,10 @@ public sealed record AiPlanValidationContext
 
 public sealed record AiPlanValidationResult
 {
-    public AiPlanValidationResult(bool isValid, IReadOnlyList<string> errors)
+    public AiPlanValidationResult(bool IsValid, IReadOnlyList<string> Errors)
     {
-        IsValid = isValid;
-        Errors = Array.AsReadOnly((errors ?? throw new ArgumentNullException(nameof(errors))).ToArray());
+        this.IsValid = IsValid;
+        this.Errors = Array.AsReadOnly((Errors ?? throw new ArgumentNullException(nameof(Errors))).ToArray());
     }
 
     public bool IsValid { get; }

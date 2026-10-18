@@ -11,11 +11,11 @@ public sealed record CapabilityStatus(string Name, CapabilityState State, string
 
 public sealed record CapabilityReport
 {
-    public CapabilityReport(string platform, string architecture, IReadOnlyList<CapabilityStatus> entries)
+    public CapabilityReport(string Platform, string Architecture, IReadOnlyList<CapabilityStatus> Entries)
     {
-        Platform = platform;
-        Architecture = architecture;
-        Entries = Array.AsReadOnly((entries ?? throw new ArgumentNullException(nameof(entries))).ToArray());
+        this.Platform = Platform;
+        this.Architecture = Architecture;
+        this.Entries = Array.AsReadOnly((Entries ?? throw new ArgumentNullException(nameof(Entries))).ToArray());
     }
 
     public string Platform { get; }

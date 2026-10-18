@@ -95,12 +95,12 @@ public sealed record TimelineVideoRenderPlan
 
 public sealed record TimelineFilterGraph
 {
-    public TimelineFilterGraph(string filterComplex, IReadOnlyList<Uri> inputs, string outputLabel, string? audioOutputLabel)
+    public TimelineFilterGraph(string FilterComplex, IReadOnlyList<Uri> Inputs, string OutputLabel, string? AudioOutputLabel)
     {
-        FilterComplex = filterComplex;
-        Inputs = Array.AsReadOnly((inputs ?? throw new ArgumentNullException(nameof(inputs))).ToArray());
-        OutputLabel = outputLabel;
-        AudioOutputLabel = audioOutputLabel;
+        this.FilterComplex = FilterComplex;
+        this.Inputs = Array.AsReadOnly((Inputs ?? throw new ArgumentNullException(nameof(Inputs))).ToArray());
+        this.OutputLabel = OutputLabel;
+        this.AudioOutputLabel = AudioOutputLabel;
     }
 
     public string FilterComplex { get; }

@@ -208,11 +208,11 @@ public sealed record TimelineSample(
 
 public sealed record TimelineSeekResult
 {
-    public TimelineSeekResult(long timelineFrame, TimeSpan position, IReadOnlyList<TimelineSample> samples)
+    public TimelineSeekResult(long TimelineFrame, TimeSpan Position, IReadOnlyList<TimelineSample> Samples)
     {
-        TimelineFrame = timelineFrame;
-        Position = position;
-        Samples = Array.AsReadOnly((samples ?? throw new ArgumentNullException(nameof(samples))).ToArray());
+        this.TimelineFrame = TimelineFrame;
+        this.Position = Position;
+        this.Samples = Array.AsReadOnly((Samples ?? throw new ArgumentNullException(nameof(Samples))).ToArray());
     }
 
     public long TimelineFrame { get; }
