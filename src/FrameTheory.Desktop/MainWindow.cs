@@ -459,7 +459,30 @@ public sealed class MainWindow : Window
             }, supportsRecycling: false)
         };
         AutomationProperties.SetName(importedList, "Imported media");
-        importedList.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(MainWindowViewModel.ImportedMedia)));
+        var mediaSearch = new TextBox
+        {
+            Width = 190,
+            PlaceholderText = "Search media"
+        };
+        AutomationProperties.SetName(mediaSearch, "Search imported media");
+        ToolTip.SetTip(mediaSearch, "Filter imported media by filename.");
+        void RefreshMediaList()
+        {
+            var query = mediaSearch.Text?.Trim();
+            importedList.ItemsSource = string.IsNullOrEmpty(query)
+                ? viewModel.ImportedMedia
+                : viewModel.ImportedMedia.Where(item => item.Name.Contains(query, StringComparison.OrdinalIgnoreCase)).ToArray();
+        }
+
+        mediaSearch.TextChanged += (_, _) => RefreshMediaList();
+        viewModel.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(MainWindowViewModel.ImportedMedia))
+            {
+                RefreshMediaList();
+            }
+        };
+        RefreshMediaList();
         importedList.SelectionChanged += (_, _) =>
         {
             if (importedList.SelectedItem is not ImportedMediaViewModel item || item.Id is not MediaId mediaId)
@@ -563,7 +586,7 @@ public sealed class MainWindow : Window
                     TextWrapping = TextWrapping.Wrap
                 }
             },
-            CreateMediaBin(importZone, importStatus, importedList)
+            CreateMediaBin(importZone, importStatus, importedList, mediaSearch)
         };
         if (workspace.Name == "Photo")
         {
@@ -688,7 +711,7 @@ public sealed class MainWindow : Window
         return header;
     }
 
-    private static Control CreateMediaBin(Border importZone, TextBlock importStatus, ListBox importedList)
+    private static Control CreateMediaBin(Border importZone, TextBlock importStatus, ListBox importedList, TextBox mediaSearch)
     {
         importZone.Margin = new Thickness(0);
         var mediaBin = new Border
@@ -722,7 +745,7 @@ public sealed class MainWindow : Window
             {
                 new Grid
                 {
-                    ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                    ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"),
                     Children =
                     {
                         new TextBlock
@@ -732,6 +755,7 @@ public sealed class MainWindow : Window
                             FontWeight = FontWeight.SemiBold,
                             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
                         },
+                        mediaSearch,
                         assetSummary
                     }
                 },
@@ -739,7 +763,8 @@ public sealed class MainWindow : Window
                 importStatus
             }
         });
-        Grid.SetColumn(assetSummary, 1);
+        Grid.SetColumn(mediaSearch, 1);
+        Grid.SetColumn(assetSummary, 2);
         grid.Children.Add(importZone);
         Grid.SetColumn(importZone, 1);
         return mediaBin;

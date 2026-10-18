@@ -210,6 +210,7 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Media bin");
                 var mediaBinGrid = Xunit.Assert.IsType<Grid>(mediaBin.Child);
                 Xunit.Assert.Equal(2, mediaBinGrid.ColumnDefinitions.Count);
+                Xunit.Assert.Contains(mediaBin.GetVisualDescendants().OfType<Grid>(), control => control.ColumnDefinitions.Count == 3);
                 var importedMediaList = window.GetVisualDescendants()
                     .OfType<ListBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Imported media");
@@ -220,6 +221,11 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Imported media summary");
                 Xunit.Assert.Equal(viewModel.ImportedMediaSummary, importedMediaSummary.Text);
+                var mediaSearch = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Search imported media");
+                Xunit.Assert.Equal(190, mediaSearch.Width);
+                Xunit.Assert.Equal("Filter imported media by filename.", ToolTip.GetTip(mediaSearch));
                 var timelineTracks = window.GetVisualDescendants()
                     .OfType<ListBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline tracks");
@@ -401,6 +407,7 @@ public sealed class FoundationTests
                     "Diagnostics status",
                     "Workspace keyboard shortcuts",
                     "Media import status",
+                    "Search imported media",
                     "Timeline preview status",
                     "Timeline motion analysis status",
                     "Rough cut status",
