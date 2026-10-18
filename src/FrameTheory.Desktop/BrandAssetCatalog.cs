@@ -11,15 +11,15 @@ internal static class BrandAssetCatalog
     public static bool TryGetApprovedLogoPath(out string path)
     {
         path = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ApprovedLogoRelativePath));
-        if (!File.Exists(path))
-        {
-            path = string.Empty;
-            return false;
-        }
-
         try
         {
             if (LocalPathSecurity.ContainsReparsePoint(path))
+            {
+                path = string.Empty;
+                return false;
+            }
+
+            if (!File.Exists(path))
             {
                 path = string.Empty;
                 return false;

@@ -76,14 +76,14 @@ public sealed class FfmpegAudioSourcePreparer : IAudioSourcePreparer
         }
 
         var sourcePath = Path.GetFullPath(source.LocalPath);
-        if (!File.Exists(sourcePath))
-        {
-            throw new FileNotFoundException("The audio source was not found.", sourcePath);
-        }
-
         if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new InvalidDataException("Symlinked audio sources are not accepted.");
+        }
+
+        if (!File.Exists(sourcePath))
+        {
+            throw new FileNotFoundException("The audio source was not found.", sourcePath);
         }
 
         var extension = Path.GetExtension(sourcePath);

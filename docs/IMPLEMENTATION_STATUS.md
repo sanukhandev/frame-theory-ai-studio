@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Audio/brand dangling-path checkpoint (2026-10-18):** Audio preparation and approved-logo verification now inspect the shared reparse-point guard before existence or hashing fallbacks. A dangling audio-link regression and brand/audio focused coverage pass 8/8; formatting, repository validation and `git diff --check` pass. This is local evidence pending the next exact-ten-commit hosted revalidation.
+
 **Media/caption dangling-path checkpoint (2026-10-18):** Probe, decode, preview, export, timeline, photo and transcription consumers now run the shared reparse-point guard before missing-file fallbacks; export destinations are guarded even when the final entry does not exist. A dangling media-link regression passes, and the focused media/caption/export suite passes 61/61; formatting, repository validation and `git diff --check` pass. This is local evidence pending the next exact-ten-commit hosted revalidation.
 
 **Dangling-loader checkpoint (2026-10-18):** Atomic project, cache, recipe, preset and workspace loaders now run the shared path guard before missing-file fallbacks, and final-path checks no longer depend on `File.Exists`; a dangling cache link is rejected instead of being treated as an empty cache. Focused storage/color/AI/foundation/project coverage passes 38/38; formatting and `git diff --check` pass.

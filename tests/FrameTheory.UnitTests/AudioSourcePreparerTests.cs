@@ -124,6 +124,34 @@ public sealed class AudioSourcePreparerTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task DanglingAudioSymlinkIsRejectedBeforeMissingFileFallback()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-audio-source-dangling-");
+        try
+        {
+            var linkedPath = Path.Combine(directory.FullName, "linked.wav");
+            File.CreateSymbolicLink(linkedPath, Path.Combine(directory.FullName, "missing.wav"));
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                new FfmpegAudioSourcePreparer(new StubProcessRunner())
+                    .PrepareAsync(new Uri(linkedPath), CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
     private sealed class StubProcessRunner : IMediaProcessRunner
     {
         public int InvocationCount { get; private set; }
