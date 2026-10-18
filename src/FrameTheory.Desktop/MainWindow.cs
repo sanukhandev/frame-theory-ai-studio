@@ -279,6 +279,7 @@ public sealed class MainWindow : Window
     private static Control CreateWorkspaceContent(WorkspaceViewModel workspace, MainWindowViewModel viewModel)
     {
         var importStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(importStatus, "Media import status");
         importStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.MediaImportStatusText)));
         var importedList = new ListBox
         {
@@ -1182,6 +1183,7 @@ public sealed class MainWindow : Window
         var timelinePreview = new Image { Width = 320, Height = 180, Stretch = Stretch.Uniform };
         AutomationProperties.SetName(timelinePreview, "Timeline current frame preview");
         var timelinePreviewStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(timelinePreviewStatus, "Timeline preview status");
         timelinePreviewStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePreviewStatusText)));
         var timelinePerformanceStatus = new TextBox { IsReadOnly = true, TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(timelinePerformanceStatus, "Timeline preview performance status");
@@ -1190,6 +1192,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(analyzeMotion, "Analyze timeline motion");
         analyzeMotion.Click += async (_, _) => await viewModel.AnalyzeTimelineMotionAsync(CancellationToken.None);
         var motionAnalysisStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(motionAnalysisStatus, "Timeline motion analysis status");
         motionAnalysisStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.MotionAnalysisStatusText)));
         void RefreshTimelinePreview() => timelinePreview.Source = CreateBitmap(viewModel.TimelinePreviewPpm);
         viewModel.PropertyChanged += (_, args) =>
@@ -1255,6 +1258,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(applyRoughCut, "Apply reviewed rough cut");
         applyRoughCut.Click += (_, _) => viewModel.ApplyRoughCutPlan();
         var roughCutStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(roughCutStatus, "Rough cut status");
         roughCutStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.RoughCutStatusText)));
         var snap = new CheckBox { Content = "Snap to clip boundaries" };
         AutomationProperties.SetName(snap, "Snap timeline edits to clip boundaries");
@@ -1420,6 +1424,7 @@ public sealed class MainWindow : Window
         var pushTitle = new Button { Content = "Push title in" };
         pushTitle.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToLastTitle(TimelineAnimationPreset.PushIn));
         var titleAnimationStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(titleAnimationStatus, "Title animation status");
         titleAnimationStatus.Bind(TextBlock.TextProperty, new Binding(nameof(TimelineEditorViewModel.TitleAnimationStatus)));
         var importCaptions = new Button { Content = "Import SRT" };
         AutomationProperties.SetName(importCaptions, "Import SRT captions");
@@ -1502,6 +1507,7 @@ public sealed class MainWindow : Window
             Mode = BindingMode.TwoWay
         });
         var captionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(captionStatus, "Caption status");
         captionStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CaptionStatusText)));
         var transcriptionConsent = new CheckBox { Content = "I approve uploading this exact local audio file or extracted video audio track to Gemini" };
         AutomationProperties.SetName(transcriptionConsent, "Gemini transcription upload consent");
@@ -1670,6 +1676,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(relinkTimelineMedia, "Relink selected timeline media");
         relinkTimelineMedia.Click += async (_, _) => await viewModel.RelinkSelectedTimelineMediaAsync(timelineReplacementPath.Text ?? string.Empty, CancellationToken.None);
         var projectStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(projectStatus, "Timeline project status");
         projectStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineProjectStatusText)));
         var aspectRatio = new ComboBox { ItemsSource = new[] { "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
         AutomationProperties.SetName(aspectRatio, "Video export aspect ratio");
@@ -1699,11 +1706,13 @@ public sealed class MainWindow : Window
             }
         };
         var exportStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(exportStatus, "Timeline export status");
         exportStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineExportStatusText)));
         var retryExport = new Button { Content = "Retry last export" };
         AutomationProperties.SetName(retryExport, "Retry last timeline export");
         retryExport.Click += async (_, _) => await viewModel.RetryLastTimelineExportAsync(CancellationToken.None);
         var watermarkStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(watermarkStatus, "Watermark status");
         watermarkStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.WatermarkStatusText"));
         var useApprovedWatermark = new Button { Content = "Use Frame Theory watermark" };
         AutomationProperties.SetName(useApprovedWatermark, "Use approved Frame Theory watermark");
