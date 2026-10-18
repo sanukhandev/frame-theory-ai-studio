@@ -350,6 +350,17 @@ jobs:
           if ($LASTEXITCODE -ne 0 -or -not ($mediaSmoke -match 'kind=Video') -or -not ($mediaSmoke -match 'has_audio=True')) {
             throw "Windows packaged FFmpeg runtime smoke failed: $mediaSmoke"
           }
+          $dotnetPath = Join-Path $env:DOTNET_ROOT "dotnet.exe"
+          $previousPath = $env:PATH
+          try {
+            $env:PATH = "$env:DOTNET_ROOT;$env:SystemRoot\System32"
+            $isolatedMediaSmoke = & $dotnetPath tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4
+            if ($LASTEXITCODE -ne 0 -or -not ($isolatedMediaSmoke -match 'kind=Video') -or -not ($isolatedMediaSmoke -match 'has_audio=True')) {
+              throw "Windows packaged FFmpeg clean-PATH smoke failed: $isolatedMediaSmoke"
+            }
+          } finally {
+            $env:PATH = $previousPath
+          }
           ./scripts/smoke_desktop.ps1 -AssemblyPath (Join-Path $installDirectory "FrameTheory.Desktop.exe") -RequireWindowTitle
           Start-Process -FilePath (Join-Path $installDirectory "unins000.exe") -ArgumentList "/VERYSILENT", "/SUPPRESSMSGBOXES", "/NORESTART" -Wait
           if (Test-Path -LiteralPath $installDirectory) {
@@ -380,6 +391,13 @@ jobs:
           FRAME_THEORY_FFMPEG_DIR="$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS" \
             dotnet tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4 | tee "$RUNNER_TEMP/frame-theory-macos-bundled-media.txt"
           grep -F 'kind=Video' "$RUNNER_TEMP/frame-theory-macos-bundled-media.txt"
+          dotnet_path="$(command -v dotnet)"
+          clean_path="$RUNNER_TEMP/frame-theory-empty-path"
+          mkdir -p "$clean_path"
+          FRAME_THEORY_FFMPEG_DIR="$dmg_mount/Frame Theory Studio AI.app/Contents/MacOS" PATH="$clean_path" \
+            "$dotnet_path" tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4 | tee "$RUNNER_TEMP/frame-theory-macos-bundled-media-clean-path.txt"
+          grep -F 'kind=Video' "$RUNNER_TEMP/frame-theory-macos-bundled-media-clean-path.txt"
+          grep -F 'has_audio=True' "$RUNNER_TEMP/frame-theory-macos-bundled-media-clean-path.txt"
           bundle_version="$(plutil -extract CFBundleShortVersionString raw -o - "$dmg_mount/Frame Theory Studio AI.app/Contents/Info.plist")"
           echo "Mounted DMG bundle version: $bundle_version"
           test "$bundle_version" = "0.1.1"
@@ -422,6 +440,13 @@ jobs:
           FRAME_THEORY_FFMPEG_DIR=/opt/frame-theory-studio \
             dotnet tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4 | tee "$RUNNER_TEMP/frame-theory-linux-bundled-media.txt"
           grep -F 'kind=Video' "$RUNNER_TEMP/frame-theory-linux-bundled-media.txt"
+          dotnet_path="$(command -v dotnet)"
+          clean_path="$RUNNER_TEMP/frame-theory-empty-path"
+          mkdir -p "$clean_path"
+          FRAME_THEORY_FFMPEG_DIR=/opt/frame-theory-studio PATH="$clean_path" \
+            "$dotnet_path" tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaImportSmoke.dll artifacts/media-smoke/clip.mp4 | tee "$RUNNER_TEMP/frame-theory-linux-bundled-media-clean-path.txt"
+          grep -F 'kind=Video' "$RUNNER_TEMP/frame-theory-linux-bundled-media-clean-path.txt"
+          grep -F 'has_audio=True' "$RUNNER_TEMP/frame-theory-linux-bundled-media-clean-path.txt"
           cleanup_deb() { sudo dpkg -r frame-theory-studio-ai >/dev/null 2>&1 || true; }
           trap cleanup_deb EXIT
           xvfb-run -a pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath /opt/frame-theory-studio/FrameTheory.Desktop
