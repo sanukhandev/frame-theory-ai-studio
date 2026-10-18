@@ -2134,7 +2134,7 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(monitorTimecode, "Timeline monitor timecode");
         ToolTip.SetTip(monitorTimecode, "Current program monitor position.");
-        monitorTimecode.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentPosition"));
+        monitorTimecode.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentTimecode"));
         var frameReadout = new Border
         {
             Padding = new Thickness(8, 5),

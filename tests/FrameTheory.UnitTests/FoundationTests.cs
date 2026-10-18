@@ -212,7 +212,7 @@ public sealed class FoundationTests
                 var monitorTimecode = window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline monitor timecode");
-                Xunit.Assert.Equal(viewModel.TimelineEditor.CurrentPosition.ToString(), monitorTimecode.Text);
+                Xunit.Assert.Equal(viewModel.TimelineEditor.CurrentTimecode, monitorTimecode.Text);
                 var activeWorkspaceStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Active workspace status");

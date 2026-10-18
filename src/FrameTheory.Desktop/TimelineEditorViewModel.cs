@@ -87,6 +87,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public TimeSpan CurrentPosition => _projectFrameRate.TimeAtFrame(CurrentFrame);
 
+    public string CurrentTimecode => $"{CurrentPosition.ToString(@"hh\:mm\:ss\.fff", CultureInfo.InvariantCulture)} · F{CurrentFrame}";
+
     public long TotalFrames { get; private set; } = 1;
 
     public double FramesPerPixel
@@ -1337,6 +1339,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         var result = _transport.Seek(target);
         OnPropertyChanged(nameof(CurrentFrame));
         OnPropertyChanged(nameof(CurrentPosition));
+        OnPropertyChanged(nameof(CurrentTimecode));
         RefreshRows();
         return result;
     }
