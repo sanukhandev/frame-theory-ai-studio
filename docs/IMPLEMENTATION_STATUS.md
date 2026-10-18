@@ -46,6 +46,8 @@
 
 **Media permission checkpoint (2026-10-19):** Permission-denied imports now remain ordinary per-file failures in the desktop media-bin workflow instead of escaping the import command and interrupting the UI. Focused import coverage includes the access-denied contract; full release validation remains required before the next 50-commit push.
 
+**Preview-proxy error checkpoint (2026-10-19):** Preview-proxy failures now flow through the existing timeline preview status boundary instead of escaping the Video workspace command. Focused desktop preview coverage includes a real failed-proxy path; full release validation remains required before the next 50-commit push.
+
 **Gemini upload cleanup checkpoint (2026-10-19):** Temporary Files API cleanup after an invalid provider URI now uses an independent bounded timeout instead of the caller's potentially canceled token, so cancellation cannot skip deletion of an already-uploaded sample. Existing provider cleanup coverage remains green; full release validation is required before the next 50-commit push.
 
 **AI caption execution checkpoint (2026-10-19):** Approved `caption.add` actions now use the caption font explicitly selected in the Video workspace instead of incorrectly requiring the optional title-brand font map. Plans fail clearly without a selected caption font, and success remains one undoable transaction; focused executor coverage includes both paths.

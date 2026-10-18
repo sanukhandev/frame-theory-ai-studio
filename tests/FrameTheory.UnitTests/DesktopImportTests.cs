@@ -546,6 +546,36 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task PreviewProxyFailureIsReportedWithoutEscapingTheUi()
+    {
+        var sourcePath = Path.Combine(Path.GetTempPath(), $"frame-theory-preview-failure-{Guid.NewGuid():N}.mp4");
+        var cachePath = Path.Combine(Path.GetTempPath(), $"frame-theory-preview-failure-cache-{Guid.NewGuid():N}");
+        await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+        try
+        {
+            var viewModel = new MainWindowViewModel(
+                new WorkspaceCatalog(),
+                new StubCapabilityDetector(),
+                new VideoImporter(),
+                timelinePreviewDecoder: new StubPreviewDecoder(),
+                timelinePreviewProxy: new FfmpegPreviewProxyService(new FailingProxyProcessRunner(), cachePath));
+            await viewModel.ImportFilesAsync([sourcePath], CancellationToken.None);
+            viewModel.UseTimelinePreviewProxy = true;
+
+            Xunit.Assert.False(await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None));
+            Xunit.Assert.Contains("Timeline preview failed", viewModel.TimelinePreviewStatusText, StringComparison.Ordinal);
+        }
+        finally
+        {
+            File.Delete(sourcePath);
+            if (Directory.Exists(cachePath))
+            {
+                Directory.Delete(cachePath, recursive: true);
+            }
+        }
+    }
+
+    [Xunit.Fact]
     public async Task TimelineCompositorPreviewFailureIsReportedWithoutEscapingTheUi()
     {
         var viewModel = new MainWindowViewModel(
@@ -816,6 +846,12 @@ public sealed class DesktopImportTests
             File.WriteAllBytes(arguments[^1], [1]);
             return Task.FromResult(new MediaProcessResult(0, string.Empty, string.Empty));
         }
+    }
+
+    private sealed class FailingProxyProcessRunner : IMediaProcessRunner
+    {
+        public Task<MediaProcessResult> RunAsync(string executable, IReadOnlyList<string> arguments, CancellationToken cancellationToken) =>
+            Task.FromResult(new MediaProcessResult(1, string.Empty, "proxy failed"));
     }
 
     private sealed class BlockingPreviewDecoder : IPreviewFrameDecoder
