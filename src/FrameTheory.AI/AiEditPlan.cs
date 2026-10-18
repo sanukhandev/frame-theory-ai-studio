@@ -1,22 +1,71 @@
+using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace FrameTheory.AI;
 
-public sealed record AiEditAction(
-    string Id,
-    string Type,
-    string TargetId,
-    long StartFrame,
-    long DurationFrames,
-    IReadOnlyDictionary<string, JsonElement> Params);
+public sealed record AiEditAction
+{
+    public AiEditAction(
+        string id,
+        string type,
+        string targetId,
+        long startFrame,
+        long durationFrames,
+        IReadOnlyDictionary<string, JsonElement> parameters)
+    {
+        ArgumentNullException.ThrowIfNull(parameters);
+        Id = id;
+        Type = type;
+        TargetId = targetId;
+        StartFrame = startFrame;
+        DurationFrames = durationFrames;
+        Params = new ReadOnlyDictionary<string, JsonElement>(parameters.ToDictionary(
+            pair => pair.Key,
+            pair => pair.Value.Clone(),
+            StringComparer.Ordinal));
+    }
 
-public sealed record AiEditPlan(
-    string SchemaVersion,
-    string PlanId,
-    string ProjectId,
-    string Intent,
-    IReadOnlyList<AiEditAction> Actions);
+    public string Id { get; }
+
+    public string Type { get; }
+
+    public string TargetId { get; }
+
+    public long StartFrame { get; }
+
+    public long DurationFrames { get; }
+
+    public IReadOnlyDictionary<string, JsonElement> Params { get; }
+}
+
+public sealed record AiEditPlan
+{
+    public AiEditPlan(
+        string schemaVersion,
+        string planId,
+        string projectId,
+        string intent,
+        IReadOnlyList<AiEditAction> actions)
+    {
+        ArgumentNullException.ThrowIfNull(actions);
+        SchemaVersion = schemaVersion;
+        PlanId = planId;
+        ProjectId = projectId;
+        Intent = intent;
+        Actions = Array.AsReadOnly(actions.ToArray());
+    }
+
+    public string SchemaVersion { get; }
+
+    public string PlanId { get; }
+
+    public string ProjectId { get; }
+
+    public string Intent { get; }
+
+    public IReadOnlyList<AiEditAction> Actions { get; }
+}
 
 public sealed class AiPlanFormatException : FormatException
 {

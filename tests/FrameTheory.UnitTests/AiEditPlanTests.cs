@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FrameTheory.AI;
 
 namespace FrameTheory.UnitTests;
@@ -47,6 +48,28 @@ public sealed class AiEditPlanTests
               {"id":"a","type":"clip.split","targetId":"x","startFrame":0,"durationFrames":1,"params":{}},
               {"id":"a","type":"clip.split","targetId":"x","startFrame":1,"durationFrames":1,"params":{}}] }
             """));
+    }
+
+    [Xunit.Fact]
+    public void EditPlanSnapshotsActionsAndParameters()
+    {
+        var parameters = new Dictionary<string, JsonElement>
+        {
+            ["text"] = JsonDocument.Parse("\"hello\"").RootElement.Clone()
+        };
+        var actions = new List<AiEditAction>
+        {
+            new("caption", "caption.add", "caption-track", 0, 10, parameters)
+        };
+        var plan = new AiEditPlan("1.0", "plan-1", "project-1", "caption", actions);
+
+        parameters.Clear();
+        actions.Clear();
+
+        Xunit.Assert.Single(plan.Actions);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<AiEditAction>>(plan.Actions).IsReadOnly);
+        Xunit.Assert.Single(plan.Actions[0].Params);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IDictionary<string, JsonElement>>(plan.Actions[0].Params).IsReadOnly);
     }
 
     [Xunit.Fact]
