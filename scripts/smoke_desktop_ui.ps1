@@ -80,6 +80,18 @@ try {
         throw "Desktop window bounds were too small: $($bounds.Width)x$($bounds.Height)."
     }
 
+    $transformPattern = $null
+    if (-not $window.TryGetCurrentPattern([System.Windows.Automation.TransformPattern]::Pattern, [ref]$transformPattern)) {
+        throw "Desktop window does not expose the resize pattern needed for adaptive-layout smoke."
+    }
+
+    $transformPattern.Resize(960, 640)
+    Start-Sleep -Milliseconds 500
+    $minimumBounds = $window.Current.BoundingRectangle
+    if ($minimumBounds.Width -lt 960 -or $minimumBounds.Height -lt 640) {
+        throw "Desktop window could not retain its supported minimum bounds: $($minimumBounds.Width)x$($minimumBounds.Height)."
+    }
+
     $workspacesCondition = New-Object System.Windows.Automation.PropertyCondition(
         [System.Windows.Automation.AutomationElement]::NameProperty,
         "Workspaces")
@@ -150,7 +162,7 @@ try {
     }
 
     $refresh.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
-    Write-Output "Desktop UI automation passed: bounds=$($bounds.Width)x$($bounds.Height), tabs=$($tabs.Count), controls=$($observedControls.Count)."
+    Write-Output "Desktop UI automation passed: bounds=$($bounds.Width)x$($bounds.Height), minimum=$($minimumBounds.Width)x$($minimumBounds.Height), tabs=$($tabs.Count), controls=$($observedControls.Count)."
 } finally {
     if (-not $process.HasExited) {
         Stop-Process -Id $process.Id -Force
