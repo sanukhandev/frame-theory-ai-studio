@@ -100,9 +100,19 @@ public sealed class FoundationTests
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(2, tabs.SelectedIndex);
 
-                window.KeyPress(Key.D3, RawInputModifiers.Control, PhysicalKey.Digit3, "3");
-                window.KeyRelease(Key.D3, RawInputModifiers.Control, PhysicalKey.Digit3, "3");
-                Xunit.Assert.Equal("Color", viewModel.SelectedWorkspace.Name);
+                var shortcuts = new[]
+                {
+                    (Key.D1, PhysicalKey.Digit1, "Video"),
+                    (Key.D2, PhysicalKey.Digit2, "Photo"),
+                    (Key.D3, PhysicalKey.Digit3, "Color"),
+                    (Key.D4, PhysicalKey.Digit4, "AI")
+                };
+                foreach (var (key, physicalKey, workspaceName) in shortcuts)
+                {
+                    window.KeyPress(key, RawInputModifiers.Control, physicalKey, key.ToString());
+                    window.KeyRelease(key, RawInputModifiers.Control, physicalKey, key.ToString());
+                    Xunit.Assert.Equal(workspaceName, viewModel.SelectedWorkspace.Name);
+                }
             }
             finally
             {
