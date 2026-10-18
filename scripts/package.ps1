@@ -15,6 +15,11 @@ dotnet publish src/FrameTheory.Desktop/FrameTheory.Desktop.csproj `
     --output $OutputDirectory
 
 if (-not [string]::IsNullOrWhiteSpace($FfmpegDirectory)) {
+    $directoryItem = Get-Item -LiteralPath $FfmpegDirectory -ErrorAction Stop
+    if ($directoryItem.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+        throw "FfmpegDirectory cannot be a reparse-point directory."
+    }
+
     $toolRoot = (Resolve-Path -LiteralPath $FfmpegDirectory -ErrorAction Stop).Path
     foreach ($toolName in @("ffmpeg.exe", "ffprobe.exe")) {
         $toolPath = Join-Path $toolRoot $toolName

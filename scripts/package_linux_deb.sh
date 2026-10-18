@@ -33,6 +33,10 @@ if [ -n "$ffmpeg_directory" ]; then
     printf 'FFmpeg directory does not exist: %s\n' "$ffmpeg_directory" >&2
     exit 1
   fi
+  if [ -L "$ffmpeg_directory" ]; then
+    printf 'FFmpeg directory cannot be a symlink.\n' >&2
+    exit 1
+  fi
   for tool in ffmpeg ffprobe; do
     if [ ! -f "$ffmpeg_directory/$tool" ]; then
       printf 'FFmpeg directory must contain %s\n' "$tool" >&2
