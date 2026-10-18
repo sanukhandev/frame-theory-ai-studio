@@ -2,7 +2,9 @@ param(
     [string]$RuntimeIdentifier = "win-x64",
     [string]$OutputDirectory = "artifacts/installer",
     [string]$PublishDirectory = "artifacts/installer-publish",
-    [string]$InnoSetupCompiler = "iscc.exe"
+    [string]$InnoSetupCompiler = "iscc.exe",
+    [ValidatePattern('^\d+\.\d+\.\d+([.-][0-9A-Za-z.-]+)?$')]
+    [string]$Version = "0.1.0"
 )
 
 $ErrorActionPreference = "Stop"
@@ -33,7 +35,7 @@ if (-not $compiler) {
 
 $outputPath = [IO.Path]::GetFullPath($OutputDirectory)
 New-Item -ItemType Directory -Force -Path $outputPath | Out-Null
-& $compilerPath "/DPublishDir=$publishPath" "/DOutputDir=$outputPath" "/DAppVersion=0.1.0" "packaging/windows/FrameTheoryStudio.iss"
+& $compilerPath "/DPublishDir=$publishPath" "/DOutputDir=$outputPath" "/DAppVersion=$Version" "packaging/windows/FrameTheoryStudio.iss"
 if ($LASTEXITCODE -ne 0) {
     throw "Inno Setup failed with exit code $LASTEXITCODE."
 }

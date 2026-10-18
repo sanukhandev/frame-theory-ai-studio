@@ -8,6 +8,11 @@ if [ -z "$rid" ]; then
   [ "$machine" = "x86_64" ] && rid="osx-x64"
 fi
 output="${2:-artifacts/installer}"
+version="${3:-0.1.0}"
+if ! printf '%s\n' "$version" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z.-]+)?$'; then
+  printf 'Invalid package version: %s\n' "$version" >&2
+  exit 1
+fi
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
 
@@ -32,8 +37,8 @@ cat > "$app/Contents/Info.plist" <<'PLIST'
   <key>CFBundleIdentifier</key><string>ai.frametheory.studio</string>
   <key>CFBundleName</key><string>Frame Theory Studio AI</string>
   <key>CFBundlePackageType</key><string>APPL</string>
-  <key>CFBundleShortVersionString</key><string>0.1.0</string>
-  <key>CFBundleVersion</key><string>0.1.0</string>
+  <key>CFBundleShortVersionString</key><string>$version</string>
+  <key>CFBundleVersion</key><string>$version</string>
 </dict>
 </plist>
 PLIST
