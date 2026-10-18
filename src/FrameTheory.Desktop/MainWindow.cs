@@ -2952,12 +2952,22 @@ public sealed class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(slider, label);
+        var valueLabel = new TextBlock
+        {
+            Width = 48,
+            Text = value.ToString("0.00", CultureInfo.InvariantCulture),
+            TextAlignment = TextAlignment.Right,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(172, 181, 196)),
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        AutomationProperties.SetName(valueLabel, $"{label} value");
         slider.ValueChanged += (_, args) => setter((float)args.NewValue);
+        slider.ValueChanged += (_, args) => valueLabel.Text = args.NewValue.ToString("0.00", CultureInfo.InvariantCulture);
         return new StackPanel
         {
             Orientation = Orientation.Horizontal,
             Spacing = 8,
-            Children = { new TextBlock { Text = label, Width = 110 }, slider }
+            Children = { new TextBlock { Text = label, Width = 110 }, slider, valueLabel }
         };
     }
 
