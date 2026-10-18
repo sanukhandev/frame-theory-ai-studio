@@ -68,6 +68,39 @@ public sealed class GeminiInteractionsTests
     }
 
     [Xunit.Fact]
+    public void FileHistoryTrimsOversizedLogsToRecentRecords()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-history-limit-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "usage.jsonl");
+            var history = new FileGeminiInteractionHistory(path);
+            for (var index = 0; index < 220; index++)
+            {
+                history.Record(new GeminiInteractionRecord(
+                    DateTimeOffset.UtcNow.AddSeconds(index),
+                    $"model-{index}",
+                    null,
+                    true,
+                    null,
+                    null,
+                    1,
+                    1,
+                    null,
+                    ScopeSummary: new string('x', 6000)));
+            }
+
+            Xunit.Assert.True(new FileInfo(path).Length <= 1024 * 1024);
+            Xunit.Assert.Equal("model-219", history.ReadRecent(1).Single().ModelId);
+            Xunit.Assert.True(history.ReadRecent(500).Count < 220);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public void FileHistoryDoesNotFollowReparsePointLogPath()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-history-boundary-");

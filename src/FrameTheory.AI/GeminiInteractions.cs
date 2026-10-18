@@ -148,6 +148,8 @@ public interface IGeminiInteractionHistoryReader
 
 public sealed class FileGeminiInteractionHistory : IGeminiInteractionHistory, IGeminiInteractionHistoryReader
 {
+    private const long MaximumLogBytes = 1024 * 1024;
+    private const int MaximumRetainedRecordsAfterTrim = 100;
     private readonly object _sync = new();
 
     public FileGeminiInteractionHistory(string? logPath = null)
@@ -179,6 +181,11 @@ public sealed class FileGeminiInteractionHistory : IGeminiInteractionHistory, IG
             lock (_sync)
             {
                 File.AppendAllText(LogPath, line);
+                if (new FileInfo(LogPath).Length > MaximumLogBytes)
+                {
+                    var retained = ReadRecent(MaximumRetainedRecordsAfterTrim);
+                    File.WriteAllLines(LogPath, retained.Select(record => JsonSerializer.Serialize(record)));
+                }
             }
         }
         catch
