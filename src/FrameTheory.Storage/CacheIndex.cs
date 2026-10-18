@@ -50,7 +50,7 @@ public sealed class CacheIndex
             evicted.Add(entry);
         }
 
-        return evicted;
+        return Array.AsReadOnly(evicted.ToArray());
     }
 }
 

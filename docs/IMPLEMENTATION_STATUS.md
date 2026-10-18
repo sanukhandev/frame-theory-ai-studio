@@ -46,6 +46,8 @@
 
 **Cache-index integrity checkpoint (2026-10-19):** Cache index entries now expose an actual read-only collection view instead of a mutable array behind `IReadOnlyCollection`, preserving recovery metadata from caller mutation. Focused recovery coverage includes the regression; clean-host release acceptance remains open.
 
+**Cache-eviction integrity checkpoint (2026-10-19):** Cache eviction now returns an actual read-only result snapshot, preserving the recorded eviction set from caller mutation. Focused recovery coverage includes the regression; clean-host release acceptance remains open.
+
 **50-commit push boundary checkpoint (2026-10-19):** The requested local batch is complete at exactly 50 commits ahead of `origin/main`. The final local Release gate passes 271 unit tests and 2 golden tests, a warning-free Release build, format verification, repository validation and `git diff --check`; hosted revalidation is the next required evidence.
 
 **GitHub issue inventory checkpoint (2026-10-19):** A live `gh issue list` audit reports 55 closed issues and 27 open issues. The six partial P0 gates remain `FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005` and `FT-1006`; no issue is closed from local headless evidence alone.

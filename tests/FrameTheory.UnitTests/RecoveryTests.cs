@@ -62,6 +62,7 @@ public sealed class RecoveryTests
             var evicted = index.EvictToSize(8);
 
             Xunit.Assert.Equal("old", Xunit.Assert.Single(evicted).Key);
+            Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<CacheIndexEntry>>(evicted).IsReadOnly);
             var path = Path.Combine(directory.FullName, "cache-index.json");
             var store = new JsonCacheIndexStore();
             await store.SaveAtomicAsync(path, index, CancellationToken.None);
