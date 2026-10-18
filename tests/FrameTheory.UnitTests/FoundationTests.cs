@@ -166,6 +166,17 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Current editable project name. It changes after a successful local save or reopen.",
                     ToolTip.GetTip(projectTitle));
+                var localMode = window.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => AutomationProperties.GetName(control) == "Local mode with optional Gemini");
+                Xunit.Assert.Equal(
+                    "Manual editing, preview and export stay local; Gemini is optional.",
+                    ToolTip.GetTip(localMode));
+                Xunit.Assert.Equal(
+                    "LOCAL WORKSPACE workspace mode",
+                    AutomationProperties.GetName(window.GetVisualDescendants()
+                        .OfType<Border>()
+                        .Single(control => AutomationProperties.GetName(control) == "LOCAL WORKSPACE workspace mode")));
                 var navigationLabels = tabItems
                     .Select(tab => Xunit.Assert.IsType<Grid>(tab.Header).Children
                         .OfType<StackPanel>()

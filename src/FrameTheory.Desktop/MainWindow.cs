@@ -134,6 +134,21 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(projectTitle, "Current project title");
         ToolTip.SetTip(projectTitle, "Current editable project name. It changes after a successful local save or reopen.");
         projectTitle.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.ProjectTitleText)));
+        var localMode = new Border
+        {
+            Padding = new Thickness(10, 5),
+            CornerRadius = new CornerRadius(5),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 44, 42)),
+            Child = new TextBlock
+            {
+                Text = "LOCAL MODE  ·  GEMINI OPTIONAL",
+                FontSize = 10,
+                FontWeight = FontWeight.SemiBold,
+                Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(148, 218, 188))
+            }
+        };
+        AutomationProperties.SetName(localMode, "Local mode with optional Gemini");
+        ToolTip.SetTip(localMode, "Manual editing, preview and export stay local; Gemini is optional.");
 
         var header = new Border
         {
@@ -165,19 +180,7 @@ public sealed class MainWindow : Window
                         Children =
                         {
                             shortcutHint,
-                            new Border
-                            {
-                                Padding = new Thickness(10, 5),
-                                CornerRadius = new CornerRadius(5),
-                                Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 44, 42)),
-                                Child = new TextBlock
-                                {
-                                    Text = "LOCAL MODE  ·  GEMINI OPTIONAL",
-                                    FontSize = 10,
-                                    FontWeight = FontWeight.SemiBold,
-                                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(148, 218, 188))
-                                }
-                            }
+                            localMode
                         }
                     }
                 }
@@ -936,6 +939,10 @@ public sealed class MainWindow : Window
                 Foreground = modeForeground
             }
         };
+        AutomationProperties.SetName(mode, $"{modeLabel} workspace mode");
+        ToolTip.SetTip(mode, workspace.Name == "AI"
+            ? "Gemini is optional and only runs after explicit consent."
+            : "This workspace runs locally without Gemini.");
         var header = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("*,Auto"),

@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Mode-discovery checkpoint (2026-10-18):** The global `LOCAL MODE · GEMINI OPTIONAL` badge and each workspace mode badge now expose accessible names and explicit offline/consent guidance, making the offline-first boundary visible without relying on color alone. Foundation coverage verifies the shell metadata; live screen-reader acceptance remains open.
+
 **Local responsive-shell gate checkpoint (2026-10-18):** The UI follow-up batch passes `dotnet build FrameTheory.sln --configuration Release --no-restore --warnaserror` with 0 warnings/errors, 266 unit tests, 2 golden tests, repository/schema validation, `dotnet format --verify-no-changes` and `git diff --check`. Hosted revalidation is intentionally deferred until the next exact-ten push; native visual, HiDPI and screen-reader acceptance remains open.
 
 **Accessible input-discovery checkpoint (2026-10-18):** Editable fields that receive an accessible name now also receive a fallback tooltip when no control-specific guidance is configured. Existing secure-key, consent and workflow tooltips remain authoritative; the focused Foundation shell suite remains green.
