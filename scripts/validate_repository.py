@@ -52,6 +52,7 @@ def run() -> int:
         "src/FrameTheory.Media/MediaProbe.cs",
         "src/FrameTheory.Media/FrameDecoder.cs",
         "src/FrameTheory.Media/MediaImport.cs",
+        "src/FrameTheory.Media/TimelinePreview.cs",
         "src/FrameTheory.Media/AudioSourcePreparer.cs",
         "src/FrameTheory.Media/PreviewProxy.cs",
         "src/FrameTheory.AI/GeminiInteractions.cs",
@@ -66,6 +67,8 @@ def run() -> int:
         "src/FrameTheory.Desktop/WorkspaceStateStore.cs",
         "src/FrameTheory.Desktop/PhotoEditorViewModel.cs",
         "src/FrameTheory.Desktop/BrandAssetCatalog.cs",
+        "src/FrameTheory.Desktop/MainWindowViewModel.cs",
+        "src/FrameTheory.Application/Diagnostics.cs",
         "src/FrameTheory.Media/PreviewProxy.cs",
     ]:
         source = (ROOT / relative_path).read_text(encoding="utf-8")

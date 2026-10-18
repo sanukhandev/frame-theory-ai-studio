@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Trust-boundary policy checkpoint (2026-10-18):** Repository validation now requires the shared reparse-point guard in timeline preview, diagnostics and desktop file-I/O entry points in addition to media, storage, caption and AI consumers. The validator and `git diff --check` pass; this policy evidence is local pending the next exact-ten-commit hosted revalidation.
+
 **Full local post-hardening checkpoint (2026-10-18):** The Release solution passes 256 unit tests and 2 golden tests with 0 failures after temporary-output and diagnostics path hardening; repository validation, formatting and `git diff --check` also pass. This is local evidence pending the next exact-ten-commit hosted revalidation.
 
 **Diagnostics privacy checkpoint (2026-10-18):** Local diagnostics now uses the shared reparse-point guard for both the log directory and file, matching Gemini history behavior; linked diagnostics destinations are ignored without writing through to the external target. Focused diagnostics/history coverage passes 14/14, with formatting, repository validation and `git diff --check` green. This is local evidence pending the next exact-ten-commit hosted revalidation.
