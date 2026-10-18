@@ -2146,7 +2146,7 @@ public sealed class MainWindow : Window
         frameStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentFrame"));
         var positionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(positionStatus, "Timeline position status");
-        positionStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentPosition"));
+        positionStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentTimecode"));
         var monitorTimecode = new TextBlock
         {
             FontSize = 11,
