@@ -31,9 +31,18 @@ if [ -n "$ffmpeg_directory" ]; then
       printf 'FFmpeg directory cannot contain a symlink: %s\n' "$tool" >&2
       exit 1
     fi
-    cp "$ffmpeg_directory/$tool" "$output/$tool"
-    chmod +x "$output/$tool"
   done
+  for bundle_file in "$ffmpeg_directory"/*; do
+    [ -e "$bundle_file" ] || continue
+    if [ -L "$bundle_file" ]; then
+      printf 'FFmpeg directory cannot contain a symlink: %s\n' "$(basename "$bundle_file")" >&2
+      exit 1
+    fi
+    if [ -f "$bundle_file" ]; then
+      cp "$bundle_file" "$output/$(basename "$bundle_file")"
+    fi
+  done
+  chmod +x "$output/ffmpeg" "$output/ffprobe"
 fi
 
 manifest="$output/SHA256SUMS.txt"

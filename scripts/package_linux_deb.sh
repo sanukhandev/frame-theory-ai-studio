@@ -42,9 +42,18 @@ if [ -n "$ffmpeg_directory" ]; then
       printf 'FFmpeg directory cannot contain a symlink: %s\n' "$tool" >&2
       exit 1
     fi
-    cp "$ffmpeg_directory/$tool" "$publish/$tool"
-    chmod +x "$publish/$tool"
   done
+  for bundle_file in "$ffmpeg_directory"/*; do
+    [ -e "$bundle_file" ] || continue
+    if [ -L "$bundle_file" ]; then
+      printf 'FFmpeg directory cannot contain a symlink: %s\n' "$(basename "$bundle_file")" >&2
+      exit 1
+    fi
+    if [ -f "$bundle_file" ]; then
+      cp "$bundle_file" "$publish/$(basename "$bundle_file")"
+    fi
+  done
+  chmod +x "$publish/ffmpeg" "$publish/ffprobe"
 fi
 cat > "$root/DEBIAN/control" <<CONTROL
 Package: frame-theory-studio-ai

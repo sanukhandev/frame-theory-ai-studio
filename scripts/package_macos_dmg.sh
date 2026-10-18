@@ -55,9 +55,18 @@ if [ -n "$ffmpeg_directory" ]; then
       printf 'FFmpeg directory cannot contain a symlink: %s\n' "$tool" >&2
       exit 1
     fi
-    cp "$ffmpeg_directory/$tool" "$app/Contents/MacOS/$tool"
-    chmod +x "$app/Contents/MacOS/$tool"
   done
+  for bundle_file in "$ffmpeg_directory"/*; do
+    [ -e "$bundle_file" ] || continue
+    if [ -L "$bundle_file" ]; then
+      printf 'FFmpeg directory cannot contain a symlink: %s\n' "$(basename "$bundle_file")" >&2
+      exit 1
+    fi
+    if [ -f "$bundle_file" ]; then
+      cp "$bundle_file" "$app/Contents/MacOS/$(basename "$bundle_file")"
+    fi
+  done
+  chmod +x "$app/Contents/MacOS/ffmpeg" "$app/Contents/MacOS/ffprobe"
 fi
 cat > "$app/Contents/Info.plist" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
