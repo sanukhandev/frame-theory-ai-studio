@@ -45,4 +45,36 @@ public sealed class DiagnosticsTests
             directory.Delete(true);
         }
     }
+
+    [Xunit.Fact]
+    public void LocalDiagnosticsRejectsLinkedLogPath()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-diagnostics-link-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-diagnostics-external-");
+        try
+        {
+            var targetPath = Path.Combine(externalDirectory.FullName, "studio.log");
+            var linkedPath = Path.Combine(directory.FullName, "studio.log");
+            File.WriteAllText(targetPath, "original");
+            File.CreateSymbolicLink(linkedPath, targetPath);
+
+            new FileDiagnosticsLog(linkedPath).Record("should-not-write");
+
+            Xunit.Assert.Equal("original", File.ReadAllText(targetPath));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
 }

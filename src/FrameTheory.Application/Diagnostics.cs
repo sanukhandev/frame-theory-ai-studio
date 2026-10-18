@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using FrameTheory.Domain;
 
 namespace FrameTheory.Application;
 
@@ -30,6 +31,11 @@ public sealed class FileDiagnosticsLog : IDiagnosticsLog
         {
             var directory = Path.GetDirectoryName(LogPath);
             if (string.IsNullOrWhiteSpace(directory))
+            {
+                return;
+            }
+
+            if (LocalPathSecurity.ContainsReparsePoint(directory) || LocalPathSecurity.ContainsReparsePoint(LogPath))
             {
                 return;
             }
