@@ -67,6 +67,19 @@ public sealed class ExportQueueTests
         Xunit.Assert.Contains(queue.History, item => item.Id == job.Id && item.ErrorMessage == "transient export failure");
     }
 
+    [Xunit.Fact]
+    public async Task CancelingACompletedJobDoesNotRewriteItsTerminalState()
+    {
+        await using var queue = new ExportQueueService();
+        var job = queue.Enqueue(_ => Task.FromResult(Receipt("completed")));
+
+        var receipt = await job.Completion;
+        job.Cancel();
+
+        Xunit.Assert.Equal(ExportQueueJobState.Succeeded, job.State);
+        Xunit.Assert.Equal(receipt, await job.Completion);
+    }
+
     private static ExportReceipt Receipt(string name) => new(
         Guid.NewGuid(),
         Path.Combine(Path.GetTempPath(), name + ".mp4"),

@@ -19,6 +19,7 @@ public sealed record ExportQueueHistoryEntry(
 
 public sealed class ExportQueueJob
 {
+    private readonly object _sync = new();
     private readonly CancellationTokenSource _cancellation;
     private readonly TaskCompletionSource<ExportReceipt> _completion;
     private readonly Func<CancellationToken, Task<ExportReceipt>> _operation;
@@ -43,14 +44,53 @@ public sealed class ExportQueueJob
 
     public Task<ExportReceipt> Completion { get; }
 
-    public ExportQueueJobState State => _state;
-
-    public int Attempts => _attempts;
-
-    public string? ErrorMessage => _errorMessage;
-
-    public void Cancel()
+    public ExportQueueJobState State
     {
+        get
+        {
+            lock (_sync)
+            {
+                return _state;
+            }
+        }
+    }
+
+    public int Attempts
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return _attempts;
+            }
+        }
+    }
+
+    public string? ErrorMessage
+    {
+        get
+        {
+            lock (_sync)
+            {
+                return _errorMessage;
+            }
+        }
+    }
+
+    public void Cancel() => _ = TryCancel();
+
+    internal bool TryCancel()
+    {
+        lock (_sync)
+        {
+            if (_state is ExportQueueJobState.Succeeded or ExportQueueJobState.Failed or ExportQueueJobState.Canceled)
+            {
+                return false;
+            }
+
+            _state = ExportQueueJobState.Canceled;
+        }
+
         try
         {
             _cancellation.Cancel();
@@ -59,23 +99,56 @@ public sealed class ExportQueueJob
         {
         }
 
-        _state = ExportQueueJobState.Canceled;
         _completion.TrySetCanceled();
+        return true;
     }
 
     internal Func<CancellationToken, Task<ExportReceipt>> Operation => _operation;
 
-    internal void MarkRunning() => _state = ExportQueueJobState.Running;
-
-    internal void MarkSucceeded() => _state = ExportQueueJobState.Succeeded;
-
-    internal void MarkFailed(Exception exception)
+    internal void MarkRunning()
     {
-        _errorMessage = exception.Message;
-        _state = ExportQueueJobState.Failed;
+        lock (_sync)
+        {
+            _state = ExportQueueJobState.Running;
+        }
     }
 
-    internal void MarkAttempt() => _attempts++;
+    internal bool TryMarkSucceeded()
+    {
+        lock (_sync)
+        {
+            if (_state != ExportQueueJobState.Running)
+            {
+                return false;
+            }
+
+            _state = ExportQueueJobState.Succeeded;
+            return true;
+        }
+    }
+
+    internal bool TryMarkFailed(Exception exception)
+    {
+        lock (_sync)
+        {
+            if (_state != ExportQueueJobState.Running)
+            {
+                return false;
+            }
+
+            _errorMessage = exception.Message;
+            _state = ExportQueueJobState.Failed;
+            return true;
+        }
+    }
+
+    internal void MarkAttempt()
+    {
+        lock (_sync)
+        {
+            _attempts++;
+        }
+    }
 }
 
 public sealed class ExportQueueService : IAsyncDisposable
@@ -165,23 +238,24 @@ public sealed class ExportQueueService : IAsyncDisposable
                     var receipt = await item.Operation(item.Cancellation.Token).ConfigureAwait(false);
                     if (item.Cancellation.IsCancellationRequested)
                     {
-                        item.Job.Cancel();
+                        item.Job.TryCancel();
                     }
-                    else
+                    else if (item.Job.TryMarkSucceeded())
                     {
-                        item.Job.MarkSucceeded();
                         item.Completion.TrySetResult(receipt);
                     }
                 }
                 catch (OperationCanceledException exception)
                 {
-                    item.Job.Cancel();
+                    item.Job.TryCancel();
                     item.Completion.TrySetCanceled(exception.CancellationToken);
                 }
                 catch (Exception exception)
                 {
-                    item.Job.MarkFailed(exception);
-                    item.Completion.TrySetException(exception);
+                    if (item.Job.TryMarkFailed(exception))
+                    {
+                        item.Completion.TrySetException(exception);
+                    }
                 }
                 finally
                 {
