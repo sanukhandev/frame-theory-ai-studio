@@ -394,6 +394,11 @@ public sealed class MainWindow : Window
         var importStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(importStatus, "Media import status");
         importStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.MediaImportStatusText)));
+        var mediaCards = new Dictionary<ImportedMediaViewModel, Border>();
+        var selectedMediaBackground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(49, 67, 111));
+        var unselectedMediaBackground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 33, 40));
+        var selectedMediaBorder = new SolidColorBrush(Avalonia.Media.Color.FromRgb(95, 125, 255));
+        var unselectedMediaBorder = new SolidColorBrush(Avalonia.Media.Color.FromRgb(59, 68, 83));
         var importedList = new ListBox
         {
             Height = 176,
@@ -426,8 +431,8 @@ public sealed class MainWindow : Window
                     Margin = new Thickness(2, 2, 6, 6),
                     Padding = new Thickness(6),
                     CornerRadius = new CornerRadius(5),
-                    Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 33, 40)),
-                    BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(59, 68, 83)),
+                    Background = unselectedMediaBackground,
+                    BorderBrush = unselectedMediaBorder,
                     BorderThickness = new Thickness(1),
                     Child = new StackPanel
                     {
@@ -482,6 +487,7 @@ public sealed class MainWindow : Window
                 };
                 AutomationProperties.SetName(card, $"Imported media card: {item.Name}");
                 ToolTip.SetTip(card, $"{item.Kind?.ToString() ?? "Media"} · {item.Name} · {item.Summary}");
+                mediaCards[item] = card;
                 return card;
             }, supportsRecycling: false)
         };
@@ -531,6 +537,7 @@ public sealed class MainWindow : Window
             var filtered = string.IsNullOrEmpty(query)
                 ? viewModel.ImportedMedia
                 : viewModel.ImportedMedia.Where(item => item.Name.Contains(query, StringComparison.OrdinalIgnoreCase)).ToArray();
+            mediaCards.Clear();
             importedList.ItemsSource = filtered;
             if (selectedId is { } id)
             {
@@ -539,6 +546,22 @@ public sealed class MainWindow : Window
             clearMediaSearch.IsEnabled = !string.IsNullOrEmpty(query);
             mediaSearchEmptyState.IsVisible = !string.IsNullOrEmpty(query) && filtered.Count == 0;
             mediaEmptyState.IsVisible = viewModel.ImportedMedia.Count == 0;
+            Dispatcher.UIThread.Post(RefreshSelectedMediaCard);
+        }
+
+        void RefreshSelectedMediaCard()
+        {
+            foreach (var card in mediaCards.Values)
+            {
+                card.Background = unselectedMediaBackground;
+                card.BorderBrush = unselectedMediaBorder;
+            }
+
+            if (importedList.SelectedItem is ImportedMediaViewModel selected && mediaCards.TryGetValue(selected, out var selectedCard))
+            {
+                selectedCard.Background = selectedMediaBackground;
+                selectedCard.BorderBrush = selectedMediaBorder;
+            }
         }
 
         mediaSearch.TextChanged += (_, _) => RefreshMediaList();
@@ -559,6 +582,7 @@ public sealed class MainWindow : Window
             }
 
             preservedSelection = item;
+            RefreshSelectedMediaCard();
             if (item.ThumbnailPpm is not null)
             {
                 viewModel.ColorInspector.SetSource(item.ThumbnailPpm);

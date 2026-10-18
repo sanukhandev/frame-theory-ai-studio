@@ -95,6 +95,12 @@ public sealed class DesktopImportTests
                 Dispatcher.UIThread.RunJobs();
 
                 Xunit.Assert.Contains("Selected Video clip", viewModel.TimelineEditor.SelectionContextText, StringComparison.Ordinal);
+                Xunit.Assert.Equal(
+                    Avalonia.Media.Color.FromRgb(49, 67, 111),
+                    Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(mediaCard.Background).Color);
+                Xunit.Assert.Equal(
+                    Avalonia.Media.Color.FromRgb(95, 125, 255),
+                    Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(mediaCard.BorderBrush).Color);
             }
             finally
             {
