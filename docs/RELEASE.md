@@ -19,7 +19,7 @@ sh ./scripts/package.sh linux-x64 artifacts/package true
 
 The output is a validation publish, not an installer. Windows installer packaging is currently x64-only (`win-x64`); it must be tested on the matching host before distribution.
 
-CI writes `SHA256SUMS.txt` for the complete validation artifact set and verifies every listed file before upload with `pwsh ./scripts/verify_package.ps1`. The verifier rejects malformed, duplicate, escaping, missing or modified entries.
+CI writes `SHA256SUMS.txt` for the complete validation artifact set and verifies every listed file before upload with `pwsh ./scripts/verify_package.ps1`. The verifier rejects malformed, duplicate, escaping, missing, modified or unlisted nested files.
 
 CI also creates `frame-theory-<platform>-portable.zip` from the published desktop tree with `pwsh ./scripts/archive_package.ps1`. This is a portable validation archive, not a native FFmpeg bundle. The same matrix now creates unsigned Windows Inno Setup, macOS DMG and Linux DEB validation installers.
 
