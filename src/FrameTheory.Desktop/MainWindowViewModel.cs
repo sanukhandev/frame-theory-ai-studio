@@ -1266,9 +1266,6 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             var projectPath = _pendingTimelineProjectPath;
-            _pendingTimelineProjectPath = null;
-            _pendingTimelineSnapshot = null;
-            SetMissingTimelineMedia([]);
             return await OpenTimelineProjectAsync(projectPath, cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
