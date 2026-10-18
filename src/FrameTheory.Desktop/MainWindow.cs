@@ -1978,6 +1978,8 @@ public sealed class MainWindow : Window
             TextWrapping = TextWrapping.Wrap,
             PlaceholderText = "Paste a schema v1 AI edit plan JSON for local validation"
         };
+        AutomationProperties.SetName(planJson, "AI edit plan JSON");
+        ToolTip.SetTip(planJson, "Paste a schema v1 plan for local validation; no action is applied before review.");
         var actions = new StackPanel { Spacing = 4 };
         var emptyActions = new TextBlock
         {
@@ -2216,7 +2218,10 @@ public sealed class MainWindow : Window
         recipeStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.AiRecipeStatusText)));
         var planSection = CreateInspectorExpander(
             "Plan input and revision",
-            CreateSectionContent(planJson, CreateFlow(revisionInstruction, requestRevision), revisionStatus),
+            CreateSectionContent(
+                CreateLabeledField("Plan JSON", planJson),
+                CreateFlow(CreateLabeledField("Revision", revisionInstruction), requestRevision),
+                revisionStatus),
             expanded: true);
         var reviewSection = CreateInspectorExpander(
             "Review and apply",

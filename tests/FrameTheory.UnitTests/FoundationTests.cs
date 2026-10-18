@@ -1083,6 +1083,17 @@ public sealed class FoundationTests
                 Xunit.Assert.True(double.IsNaN(aiRevisionInstruction.Width));
                 Xunit.Assert.Equal(220, aiRevisionInstruction.MinWidth);
                 Xunit.Assert.Equal(420, aiRevisionInstruction.MaxWidth);
+                var aiPlanJson = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "AI edit plan JSON");
+                Xunit.Assert.Equal(
+                    "Paste a schema v1 plan for local validation; no action is applied before review.",
+                    ToolTip.GetTip(aiPlanJson));
+                var planSection = window.GetVisualDescendants()
+                    .OfType<Expander>()
+                    .Single(control => AutomationProperties.GetName(control) == "Plan input and revision section");
+                Xunit.Assert.Contains(planSection.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Plan JSON");
+                Xunit.Assert.Contains(planSection.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Revision");
                 var recipeSection = window.GetVisualDescendants()
                     .OfType<Expander>()
                     .Single(control => AutomationProperties.GetName(control) == "Reusable recipe section");
