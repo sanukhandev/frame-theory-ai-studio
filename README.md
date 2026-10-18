@@ -48,6 +48,8 @@ These are design choices to validate in working spikes, not promises about compl
 4. Build and test with commands documented in the repository **after the solution exists**. Never report a test as passed unless it ran.
 5. Set your Gemini key via the application's OS-secure settings screen; never commit keys, tokens, or private user media.
 
+For an offline package that carries a separately reviewed native media build, pass its directory to the package script; it must contain both `ffmpeg` and `ffprobe` (or the Windows `.exe` pair). The packager rejects symlink/reparse-point inputs, and native license/codec review is still required before redistribution.
+
 ## Documentation
 
 | Document | Purpose |
