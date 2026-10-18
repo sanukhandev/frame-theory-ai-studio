@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Primitives;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Styling;
 using FrameTheory.Application;
@@ -84,6 +85,14 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.BorderBrushProperty, accent)
             }
         });
+        Styles.Add(new Style(selector => selector.OfType<TextBox>().Class(":pointerover"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(36, 41, 49))),
+                new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(79, 91, 113)))
+            }
+        });
         Styles.Add(new Style(selector => selector.OfType<ComboBox>())
         {
             Setters =
@@ -157,7 +166,8 @@ public sealed class App : Avalonia.Application
         {
             Setters =
             {
-                new Setter(TemplatedControl.PaddingProperty, new Thickness(10, 7))
+                new Setter(TemplatedControl.PaddingProperty, new Thickness(10, 7)),
+                new Setter(ContentControl.HorizontalContentAlignmentProperty, HorizontalAlignment.Stretch)
             }
         });
         Styles.Add(new Style(selector => selector.OfType<ListBoxItem>().Class(":pointerover"))
