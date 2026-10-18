@@ -985,6 +985,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 }
 
                 var relativePath = Path.GetRelativePath(directory, item.Value.LocalPath);
+                relativePath = Path.GetRelativePath(directory, ProjectRecoveryService.ResolveContainedPath(directory, relativePath));
                 return new MediaReference(
                     item.Key,
                     relativePath,

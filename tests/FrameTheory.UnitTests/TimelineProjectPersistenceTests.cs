@@ -253,6 +253,43 @@ public sealed class TimelineProjectPersistenceTests
     }
 
     [Xunit.Fact]
+    public async Task TimelineProjectSaveRejectsSymlinkedMediaDirectory()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-timeline-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-timeline-external-");
+        try
+        {
+            var projectDirectory = Directory.CreateDirectory(Path.Combine(directory.FullName, "project"));
+            var mediaDirectory = Path.Combine(projectDirectory.FullName, "media");
+            Directory.CreateSymbolicLink(mediaDirectory, externalDirectory.FullName);
+            var sourcePath = Path.Combine(mediaDirectory, "clip.mp4");
+            await File.WriteAllBytesAsync(Path.Combine(externalDirectory.FullName, "clip.mp4"), [1, 2, 3]);
+            var viewModel = CreateViewModel();
+
+            await viewModel.ImportFilesAsync([sourcePath], CancellationToken.None);
+
+            Xunit.Assert.False(await viewModel.SaveTimelineProjectAsync(
+                Path.Combine(projectDirectory.FullName, "project.ftstudio"),
+                CancellationToken.None));
+            Xunit.Assert.Contains("reparse", viewModel.TimelineProjectStatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public void TimelineStateRejectsMalformedJson()
     {
         Xunit.Assert.Throws<InvalidDataException>(() => TimelineProjectStateJson.Deserialize("{not-json"));
