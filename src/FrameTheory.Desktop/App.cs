@@ -143,6 +143,31 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.ForegroundProperty, foreground)
             }
         });
+        Styles.Add(new Style(selector => selector.OfType<Expander>())
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(20, 23, 29))),
+                new Setter(TemplatedControl.ForegroundProperty, foreground),
+                new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 54, 65))),
+                new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(0, 1, 0, 0))
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<Expander>().Class(":pointerover"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 33, 40)))
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<Expander>().Class(":focus"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BorderBrushProperty, accent),
+                new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(0, 1, 0, 0))
+            }
+        });
         Styles.Add(new Style(selector => selector.OfType<TabItem>())
         {
             Setters =

@@ -212,7 +212,12 @@ public sealed class FoundationTests
                 Xunit.Assert.False(timelineSections["Analysis and rough cut section"].IsExpanded);
                 Xunit.Assert.True(timelineSections["Clip editing section"].IsExpanded);
                 Xunit.Assert.True(timelineSections["Project and export section"].IsExpanded);
-                Xunit.Assert.All(timelineSections.Values, section => Xunit.Assert.NotNull(ToolTip.GetTip(section)));
+                Xunit.Assert.All(timelineSections.Values, section =>
+                {
+                    Xunit.Assert.NotNull(ToolTip.GetTip(section));
+                    Xunit.Assert.NotNull(section.Background);
+                    Xunit.Assert.NotNull(section.BorderBrush);
+                });
                 Xunit.Assert.All(
                     window.GetVisualDescendants()
                         .OfType<ComboBox>()
