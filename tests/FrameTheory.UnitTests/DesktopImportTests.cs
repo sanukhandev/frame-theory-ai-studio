@@ -85,6 +85,8 @@ public sealed class DesktopImportTests
                     .Single(control => control.Width == 4);
                 Xunit.Assert.Contains("frames 0–29", ToolTip.GetTip(clipButton) as string, StringComparison.Ordinal);
                 Xunit.Assert.Contains("Video · clip.mp4", ToolTip.GetTip(mediaCard) as string, StringComparison.Ordinal);
+                Xunit.Assert.Equal(124, mediaCard.Width);
+                Xunit.Assert.Equal(110, mediaCard.GetVisualDescendants().OfType<Image>().Single().Width);
                 Xunit.Assert.Contains("Video track Video 1", ToolTip.GetTip(videoLane) as string, StringComparison.Ordinal);
                 Xunit.Assert.Equal(
                     Avalonia.Media.Color.FromRgb(95, 125, 255),

@@ -418,17 +418,17 @@ public sealed class MainWindow : Window
 
                 var thumbnail = new Image
                 {
-                    Width = 158,
-                    Height = 64,
+                    Width = 110,
+                    Height = 52,
                     Stretch = Stretch.UniformToFill,
                     Source = CreateBitmap(item.ThumbnailPpm)
                 };
                 AutomationProperties.SetName(thumbnail, $"Thumbnail for {item.Name}");
                 var card = new Border
                 {
-                    Width = 172,
-                    Height = 112,
-                    Margin = new Thickness(2, 2, 6, 6),
+                    Width = 124,
+                    Height = 96,
+                    Margin = new Thickness(2, 2, 4, 4),
                     Padding = new Thickness(6),
                     CornerRadius = new CornerRadius(5),
                     Background = unselectedMediaBackground,
@@ -441,8 +441,8 @@ public sealed class MainWindow : Window
                         {
                             new Border
                             {
-                                Width = 158,
-                                Height = 64,
+                                Width = 110,
+                                Height = 52,
                                 Background = Brushes.Black,
                                 Child = new Grid
                                 {
