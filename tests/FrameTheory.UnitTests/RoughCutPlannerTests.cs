@@ -31,6 +31,16 @@ public sealed class RoughCutPlannerTests
     }
 
     [Xunit.Fact]
+    public void SourceReportsTheInvalidFrameBound()
+    {
+        var startException = Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new RoughCutSource("source", -1, 10, []));
+        var durationException = Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new RoughCutSource("source", 0, 0, []));
+
+        Xunit.Assert.Equal("timelineStartFrame", startException.ParamName);
+        Xunit.Assert.Equal("durationFrames", durationException.ParamName);
+    }
+
+    [Xunit.Fact]
     public void RoughCutModelsExposeImmutableSnapshots()
     {
         var peaks = new List<float> { 0.5f };

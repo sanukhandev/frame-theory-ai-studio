@@ -9,9 +9,14 @@ public sealed class RoughCutSource
             throw new ArgumentException("A bounded media ID is required.", nameof(mediaId));
         }
 
-        if (timelineStartFrame < 0 || durationFrames <= 0)
+        if (timelineStartFrame < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(timelineStartFrame));
+        }
+
+        if (durationFrames <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(durationFrames));
         }
 
         ArgumentNullException.ThrowIfNull(waveformPeaks);
