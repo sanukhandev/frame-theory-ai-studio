@@ -152,6 +152,11 @@ try {
     $controlsByTab = @{
         "Video workspace" = @(
             "Imported media",
+            "Search imported media",
+            "Clear media search",
+            "Timeline tracks",
+            "Timeline selection inspector",
+            "Timeline operation status",
             "Preview current frame",
             "Timeline preview performance status",
             "Play timeline",
