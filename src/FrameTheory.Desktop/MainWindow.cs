@@ -395,6 +395,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(importStatus, "Media import status");
         importStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.MediaImportStatusText)));
         var mediaCards = new Dictionary<ImportedMediaViewModel, Border>();
+        var mediaSelectionBadges = new Dictionary<ImportedMediaViewModel, Border>();
         var selectedMediaBackground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(49, 67, 111));
         var unselectedMediaBackground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 33, 40));
         var selectedMediaBorder = new SolidColorBrush(Avalonia.Media.Color.FromRgb(95, 125, 255));
@@ -424,6 +425,24 @@ public sealed class MainWindow : Window
                     Source = CreateBitmap(item.ThumbnailPpm)
                 };
                 AutomationProperties.SetName(thumbnail, $"Thumbnail for {item.Name}");
+                var selectedBadge = new Border
+                {
+                    IsVisible = false,
+                    Margin = new Thickness(4),
+                    Padding = new Thickness(4, 2),
+                    CornerRadius = new CornerRadius(3),
+                    Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(95, 125, 255)),
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    VerticalAlignment = VerticalAlignment.Top,
+                    Child = new TextBlock
+                    {
+                        Text = "SELECTED",
+                        FontSize = 8,
+                        FontWeight = FontWeight.SemiBold,
+                        Foreground = Brushes.White
+                    }
+                };
+                AutomationProperties.SetName(selectedBadge, $"Selected media badge: {item.Name}");
                 var card = new Border
                 {
                     Width = 124,
@@ -445,12 +464,12 @@ public sealed class MainWindow : Window
                                 Height = 52,
                                 Background = Brushes.Black,
                                 Child = new Grid
-                                {
-                                    Children =
-                                    {
-                                        thumbnail,
-                                        new Border
                                         {
+                                            Children =
+                                            {
+                                                thumbnail,
+                                        new Border
+                                                {
                                             Margin = new Thickness(4),
                                             Padding = new Thickness(3, 1),
                                             CornerRadius = new CornerRadius(3),
@@ -463,11 +482,12 @@ public sealed class MainWindow : Window
                                                 FontSize = 8,
                                                 FontWeight = FontWeight.SemiBold,
                                                 Foreground = Brushes.White
+                                                    }
+                                                },
+                                                selectedBadge
                                             }
                                         }
-                                    }
-                                }
-                            },
+                                },
                             new TextBlock
                             {
                                 Text = item.Name,
@@ -488,6 +508,7 @@ public sealed class MainWindow : Window
                 AutomationProperties.SetName(card, $"Imported media card: {item.Name}");
                 ToolTip.SetTip(card, $"{item.Kind?.ToString() ?? "Media"} · {item.Name} · {item.Summary}");
                 mediaCards[item] = card;
+                mediaSelectionBadges[item] = selectedBadge;
                 return card;
             }, supportsRecycling: false)
         };
@@ -554,6 +575,7 @@ public sealed class MainWindow : Window
                 .Where(item => string.IsNullOrEmpty(query) || item.Name.Contains(query, StringComparison.OrdinalIgnoreCase))
                 .ToArray();
             mediaCards.Clear();
+            mediaSelectionBadges.Clear();
             importedList.ItemsSource = filtered;
             if (selectedId is { } id)
             {
@@ -572,11 +594,19 @@ public sealed class MainWindow : Window
                 card.Background = unselectedMediaBackground;
                 card.BorderBrush = unselectedMediaBorder;
             }
+            foreach (var badge in mediaSelectionBadges.Values)
+            {
+                badge.IsVisible = false;
+            }
 
             if (importedList.SelectedItem is ImportedMediaViewModel selected && mediaCards.TryGetValue(selected, out var selectedCard))
             {
                 selectedCard.Background = selectedMediaBackground;
                 selectedCard.BorderBrush = selectedMediaBorder;
+                if (mediaSelectionBadges.TryGetValue(selected, out var selectedBadge))
+                {
+                    selectedBadge.IsVisible = true;
+                }
             }
         }
 

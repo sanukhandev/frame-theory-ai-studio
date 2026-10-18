@@ -235,6 +235,10 @@ public sealed class DesktopImportTests
                 Xunit.Assert.Equal(2, mediaList.Items.Count);
                 mediaList.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.True(window.GetVisualDescendants()
+                    .OfType<Border>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Selected media badge: second.mp4")
+                    .IsVisible);
                 search.Text = "second";
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Single(mediaList.Items);
