@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using FrameTheory.AI;
 using FrameTheory.Application;
 using FrameTheory.Captions;
+using FrameTheory.Color;
 using FrameTheory.Domain;
 using FrameTheory.Media;
 using FrameTheory.Platform;
@@ -60,6 +61,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private string _captionStatusText = "No captions imported.";
     private string _analysisStatusText = "No local AI analysis prepared.";
     private string _geminiUsageStatusText = "No Gemini usage recorded.";
+    private string _referenceAnalysisStatusText = "No Gemini reference grade requested.";
+    private ColorGrade? _pendingReferenceGrade;
     private string _roughCutStatusText = "No rough-cut plan prepared.";
     private string _aiRevisionStatusText = "No Gemini revision requested.";
     private string _aiRecipeStatusText = "No AI recipe loaded.";
@@ -321,6 +324,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             _geminiUsageStatusText = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string ReferenceAnalysisStatusText
+    {
+        get => _referenceAnalysisStatusText;
+        private set
+        {
+            if (value == _referenceAnalysisStatusText)
+            {
+                return;
+            }
+
+            _referenceAnalysisStatusText = value;
             OnPropertyChanged();
         }
     }
@@ -1177,6 +1195,77 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    public async Task<bool> AnalyzeColorReferenceAsync(
+        ImportedMediaViewModel? sourceItem,
+        ImportedMediaViewModel? referenceItem,
+        bool uploadConsent,
+        CancellationToken cancellationToken)
+    {
+        if (!TryCreateVisualSample(sourceItem, out var source) || !TryCreateVisualSample(referenceItem, out var reference))
+        {
+            ReferenceAnalysisStatusText = "Select two imported media previews before requesting a reference grade.";
+            return false;
+        }
+
+        if (!uploadConsent)
+        {
+            ReferenceAnalysisStatusText = "Reference matching stopped: explicitly approve uploading the selected source and reference previews first.";
+            return false;
+        }
+
+        ColorInspector.SetSource(source.Payload);
+        try
+        {
+            var apiKey = await GeminiSettings.ReadApiKeyAsync(cancellationToken);
+            if (string.IsNullOrWhiteSpace(apiKey))
+            {
+                ReferenceAnalysisStatusText = "Reference matching requires a stored key; local grading remains available offline.";
+                return false;
+            }
+
+            var client = new GeminiReferenceAnalysisClient(
+                _transcriptionHttpClient,
+                new GeminiClientOptions(apiKey, GeminiSettings.SelectedModelId, TimeSpan.FromMinutes(2), 3, TimeSpan.FromSeconds(1)),
+                _geminiInteractionHistory,
+                _diagnosticsLog);
+            _pendingReferenceGrade = null;
+            ReferenceAnalysisStatusText = $"Uploading only {sourceItem!.Name} and {referenceItem!.Name} to Gemini after consent...";
+            var result = await client.AnalyzeAsync(
+                new GeminiReferenceAnalysisRequest([source], [reference], uploadConsent: true),
+                new Progress<LocalAnalysisProgress>(update => ReferenceAnalysisStatusText = $"{update.Stage} ({update.Fraction:P0})"),
+                cancellationToken);
+            _pendingReferenceGrade = result.Grade;
+            GeminiUsageStatusText = FormatGeminiUsage(result.Usage, result.Attempts, 2);
+            ReferenceAnalysisStatusText = "Reference grade ready for review; apply it only after checking the before/after preview.";
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            ReferenceAnalysisStatusText = "Gemini reference matching canceled; no grade was applied.";
+            return false;
+        }
+        catch (Exception exception) when (exception is ArgumentException or InvalidDataException or InvalidOperationException or HttpRequestException)
+        {
+            _diagnosticsLog.Record("gemini-reference-analysis-failed", exception);
+            ReferenceAnalysisStatusText = $"Gemini reference matching failed: {exception.Message}";
+            return false;
+        }
+    }
+
+    public bool ApplyPendingReferenceGrade()
+    {
+        if (_pendingReferenceGrade is not { } grade)
+        {
+            ReferenceAnalysisStatusText = "Analyze an approved source/reference pair before applying a grade.";
+            return false;
+        }
+
+        ColorInspector.ApplyGrade(grade);
+        _pendingReferenceGrade = null;
+        ReferenceAnalysisStatusText = "Applied the reviewed Gemini reference grade; the change remains editable and undoable through the color controls.";
+        return true;
+    }
+
     public async Task<bool> ExportTimelineAsync(string destinationPath, CancellationToken cancellationToken, SocialAspectRatio? aspectRatio = null)
     {
         if (_timelineExporter is null)
@@ -1471,15 +1560,35 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         GeminiUsage? usage,
         int attempts,
         int uploadedSampleCount = 0,
-        long uploadedBytes = 0)
+        long? uploadedBytes = null)
     {
         var tokenSummary = usage is null
             ? "provider usage unavailable"
             : $"input={usage.InputTokens?.ToString() ?? "n/a"}, output={usage.OutputTokens?.ToString() ?? "n/a"}, total={usage.TotalTokens?.ToString() ?? "n/a"}";
         var uploadSummary = uploadedSampleCount > 0
-            ? $", approved samples={uploadedSampleCount}, uploaded bytes={uploadedBytes}"
+            ? $", approved samples={uploadedSampleCount}{(uploadedBytes is { } bytes ? $", uploaded bytes={bytes}" : string.Empty)}"
             : string.Empty;
         return $"Gemini usage: {tokenSummary}; attempts={attempts}{uploadSummary}.";
+    }
+
+    private bool TryCreateVisualSample(ImportedMediaViewModel? item, out LocalAnalysisSample sample)
+    {
+        if (item?.Id is { } id &&
+            _analysisAssets.TryGetValue(id, out var media) &&
+            media.ThumbnailPpm is { } thumbnail)
+        {
+            sample = new LocalAnalysisSample(
+                media.Metadata.SourceUri,
+                media.Metadata.Kind,
+                media.Metadata.Kind == MediaKind.Video ? "video-frame-ppm" : "photo-preview-ppm",
+                0,
+                TimeSpan.Zero,
+                thumbnail);
+            return true;
+        }
+
+        sample = null!;
+        return false;
     }
 }
 

@@ -8,6 +8,50 @@ namespace FrameTheory.UnitTests;
 public sealed class GeminiReferenceAnalysisTests
 {
     [Xunit.Fact]
+    public async Task ReferenceAnalysisRetriesRateLimitAndRecordsUsage()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-reference-retry-");
+        try
+        {
+            var calls = 0;
+            var historyPath = Path.Combine(directory.FullName, "usage.jsonl");
+            using var client = new HttpClient(new StubHandler(_ =>
+            {
+                calls++;
+                if (calls == 1)
+                {
+                    return new HttpResponseMessage((HttpStatusCode)429)
+                    {
+                        Headers = { RetryAfter = new System.Net.Http.Headers.RetryConditionHeaderValue(TimeSpan.Zero) }
+                    };
+                }
+
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent("{\"id\":\"interactions/reference-1\",\"status\":\"completed\",\"output_text\":\"{\\\"exposureEV\\\":0,\\\"contrast\\\":0,\\\"saturation\\\":0,\\\"temperature\\\":0,\\\"tint\\\":0}\",\"usage\":{\"total_input_tokens\":4,\"total_output_tokens\":3,\"total_tokens\":7}}", Encoding.UTF8, "application/json")
+                };
+            }));
+
+            var result = await new GeminiReferenceAnalysisClient(
+                client,
+                new GeminiClientOptions("test-secret", "gemini-test", TimeSpan.FromSeconds(5), 2, TimeSpan.Zero),
+                new FileGeminiInteractionHistory(historyPath))
+                .AnalyzeAsync(new GeminiReferenceAnalysisRequest([Sample()], [Sample()], uploadConsent: true), null, CancellationToken.None);
+
+            Xunit.Assert.Equal(2, calls);
+            Xunit.Assert.Equal(2, result.Attempts);
+            Xunit.Assert.Equal(7, result.Usage?.TotalTokens);
+            var history = await File.ReadAllTextAsync(historyPath);
+            Xunit.Assert.Contains("Succeeded", history);
+            Xunit.Assert.Contains("TotalTokens", history);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task ReferenceAnalysisUploadsOnlyWithConsentAndReturnsEditableGrade()
     {
         var requests = new List<HttpRequestMessage>();

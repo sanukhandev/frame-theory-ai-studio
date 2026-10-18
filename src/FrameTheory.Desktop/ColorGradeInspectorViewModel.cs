@@ -162,6 +162,13 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
         NotifyPreviewChanged();
     }
 
+    public void ApplyGrade(ColorGrade grade)
+    {
+        _lut = null;
+        SetGrade(grade);
+        StatusText = "Applied the reviewed reference grade to the local color preview.";
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
 
     private void SetGrade(ColorGrade grade)

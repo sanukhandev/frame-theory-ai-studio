@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FrameTheory.Application;
 using FrameTheory.Color;
 
 namespace FrameTheory.AI;
@@ -46,17 +47,28 @@ public sealed class GeminiReferenceAnalysisRequest
     }
 }
 
-public sealed record GeminiReferenceAnalysisResult(ColorGrade Grade, string ProviderResponse, int Attempts);
+public sealed record GeminiReferenceAnalysisResult(
+    ColorGrade Grade,
+    string ProviderResponse,
+    int Attempts,
+    GeminiUsage? Usage = null);
 
 public sealed class GeminiReferenceAnalysisException : InvalidOperationException
 {
-    public GeminiReferenceAnalysisException(string message, HttpStatusCode? statusCode = null, Exception? innerException = null)
+    public GeminiReferenceAnalysisException(
+        string message,
+        HttpStatusCode? statusCode = null,
+        Exception? innerException = null,
+        GeminiProviderFailureKind? failureKind = null)
         : base(message, innerException)
     {
         StatusCode = statusCode;
+        FailureKind = failureKind;
     }
 
     public HttpStatusCode? StatusCode { get; }
+
+    public GeminiProviderFailureKind? FailureKind { get; }
 }
 
 public sealed class GeminiReferenceAnalysisClient
@@ -68,11 +80,19 @@ public sealed class GeminiReferenceAnalysisClient
     private static readonly Uri FilesApiEndpoint = new("https://generativelanguage.googleapis.com/v1beta/");
     private readonly HttpClient _httpClient;
     private readonly GeminiClientOptions _options;
+    private readonly IGeminiInteractionHistory? _history;
+    private readonly IDiagnosticsLog? _diagnostics;
 
-    public GeminiReferenceAnalysisClient(HttpClient httpClient, GeminiClientOptions options)
+    public GeminiReferenceAnalysisClient(
+        HttpClient httpClient,
+        GeminiClientOptions options,
+        IGeminiInteractionHistory? history = null,
+        IDiagnosticsLog? diagnostics = null)
     {
         _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         _options = options ?? throw new ArgumentNullException(nameof(options));
+        _history = history;
+        _diagnostics = diagnostics;
     }
 
     public async Task<GeminiReferenceAnalysisResult> AnalyzeAsync(
@@ -93,6 +113,8 @@ public sealed class GeminiReferenceAnalysisClient
         var total = request.SourceSamples.Count + request.ReferenceSamples.Count;
         var completed = 0;
         var inlineBytes = 0L;
+        var promptCharacterCount = inputs[0].Text!.Length;
+        var attempts = 0;
         var uploadedFiles = new List<GeminiUploadedFile>();
         try
         {
@@ -126,31 +148,80 @@ public sealed class GeminiReferenceAnalysisClient
                 progress?.Report(new LocalAnalysisProgress("Preparing consented reference samples", completed / (double)total));
             }
 
-            using var requestMessage = new HttpRequestMessage(HttpMethod.Post, InteractionsEndpoint)
-            {
-                Content = JsonContent.Create(new GeminiInteractionRequest(
-                    _options.ModelId,
-                    inputs,
-                    new GeminiResponseFormat("text", "application/json")))
-            };
-            requestMessage.Headers.TryAddWithoutValidation("x-goog-api-key", _options.ApiKey);
             progress?.Report(new LocalAnalysisProgress("Uploading approved reference samples", 0));
-            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            timeout.CancelAfter(_options.Timeout);
-            using var response = await _httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
-            if (!response.IsSuccessStatusCode)
+            GeminiInteractionResponse? interaction = null;
+            HttpStatusCode? responseStatusCode = null;
+            for (attempts = 1; attempts <= _options.MaximumAttempts; attempts++)
             {
-                throw new GeminiReferenceAnalysisException(
-                    $"Gemini reference analysis failed with HTTP {(int)response.StatusCode} ({response.StatusCode}).",
-                    response.StatusCode);
+                cancellationToken.ThrowIfCancellationRequested();
+                try
+                {
+                    using var requestMessage = new HttpRequestMessage(HttpMethod.Post, InteractionsEndpoint)
+                    {
+                        Content = JsonContent.Create(new GeminiInteractionRequest(
+                            _options.ModelId,
+                            inputs,
+                            new GeminiResponseFormat("text", "application/json")))
+                    };
+                    requestMessage.Headers.TryAddWithoutValidation("x-goog-api-key", _options.ApiKey);
+                    using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    timeout.CancelAfter(_options.Timeout);
+                    using var response = await _httpClient.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, timeout.Token);
+                    responseStatusCode = response.StatusCode;
+                    if (IsRetryable(response.StatusCode) && attempts < _options.MaximumAttempts)
+                    {
+                        _diagnostics?.Record("gemini.reference-analysis.retry");
+                        await Task.Delay(
+                            GeminiInteractionsClient.CalculateRetryDelay(_options.RetryDelay, attempts, GetRetryAfter(response)),
+                            cancellationToken);
+                        continue;
+                    }
+
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        throw CreateProviderException(response.StatusCode);
+                    }
+
+                    await using var responseStream = await response.Content.ReadAsStreamAsync(timeout.Token);
+                    interaction = await JsonSerializer.DeserializeAsync<GeminiInteractionResponse>(responseStream, cancellationToken: timeout.Token)
+                        ?? throw new GeminiReferenceAnalysisException("Gemini returned an empty reference-analysis response.", failureKind: GeminiProviderFailureKind.MalformedResponse);
+                    break;
+                }
+                catch (HttpRequestException exception) when (attempts < _options.MaximumAttempts)
+                {
+                    _diagnostics?.Record("gemini.reference-analysis.retry", exception);
+                    await Task.Delay(
+                        GeminiInteractionsClient.CalculateRetryDelay(_options.RetryDelay, attempts, null),
+                        cancellationToken);
+                }
+                catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && attempts < _options.MaximumAttempts)
+                {
+                    _diagnostics?.Record("gemini.reference-analysis.retry");
+                    await Task.Delay(
+                        GeminiInteractionsClient.CalculateRetryDelay(_options.RetryDelay, attempts, null),
+                        cancellationToken);
+                }
+                catch (OperationCanceledException exception) when (!cancellationToken.IsCancellationRequested)
+                {
+                    throw new GeminiReferenceAnalysisException(
+                        "Gemini reference analysis timed out.",
+                        innerException: exception,
+                        failureKind: GeminiProviderFailureKind.Timeout);
+                }
             }
 
-            await using var responseStream = await response.Content.ReadAsStreamAsync(timeout.Token);
-            var interaction = await JsonSerializer.DeserializeAsync<GeminiInteractionResponse>(responseStream, cancellationToken: timeout.Token)
-                ?? throw new GeminiReferenceAnalysisException("Gemini returned an empty reference-analysis response.");
+            if (interaction is null)
+            {
+                throw new GeminiReferenceAnalysisException(
+                    "Gemini reference analysis exhausted its retry budget.",
+                    failureKind: GeminiProviderFailureKind.Transport);
+            }
+
             if (!string.Equals(interaction.Status, "completed", StringComparison.OrdinalIgnoreCase))
             {
-                throw new GeminiReferenceAnalysisException($"Gemini reference analysis did not complete (status: {interaction.Status ?? "unknown"}).");
+                throw new GeminiReferenceAnalysisException(
+                    $"Gemini reference analysis did not complete (status: {interaction.Status ?? "unknown"}).",
+                    failureKind: GeminiProviderFailureKind.MalformedResponse);
             }
 
             var output = interaction.OutputText ?? interaction.Steps?
@@ -160,11 +231,46 @@ public sealed class GeminiReferenceAnalysisClient
                 .FirstOrDefault(text => !string.IsNullOrWhiteSpace(text));
             if (string.IsNullOrWhiteSpace(output))
             {
-                throw new GeminiReferenceAnalysisException("Gemini returned no reference grade recommendation.");
+                throw new GeminiReferenceAnalysisException(
+                    "Gemini returned no reference grade recommendation.",
+                    failureKind: GeminiProviderFailureKind.MalformedResponse);
             }
 
             progress?.Report(new LocalAnalysisProgress("Reference grade ready for review", 1));
-            return new GeminiReferenceAnalysisResult(ParseGrade(output), output, 1);
+            var result = new GeminiReferenceAnalysisResult(ParseGrade(output), output, attempts, interaction.Usage?.ToUsage());
+            _history?.Record(new GeminiInteractionRecord(
+                DateTimeOffset.UtcNow,
+                _options.ModelId,
+                interaction.Id,
+                Succeeded: true,
+                FailureKind: null,
+                StatusCode: responseStatusCode,
+                attempts,
+                promptCharacterCount,
+                result.Usage));
+            return result;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            var exception = new GeminiReferenceAnalysisException(
+                "Gemini reference analysis was canceled.",
+                failureKind: GeminiProviderFailureKind.Cancellation);
+            RecordFailure(exception, attempts, promptCharacterCount);
+            throw exception;
+        }
+        catch (GeminiReferenceAnalysisException exception)
+        {
+            RecordFailure(exception, attempts, promptCharacterCount);
+            throw;
+        }
+        catch (HttpRequestException exception)
+        {
+            var wrapped = new GeminiReferenceAnalysisException(
+                "Gemini reference analysis could not reach the provider.",
+                innerException: exception,
+                failureKind: GeminiProviderFailureKind.Transport);
+            RecordFailure(wrapped, attempts, promptCharacterCount);
+            throw wrapped;
         }
         finally
         {
@@ -175,6 +281,57 @@ public sealed class GeminiReferenceAnalysisClient
             }
         }
     }
+
+    private void RecordFailure(GeminiReferenceAnalysisException exception, int attempts, int promptCharacterCount)
+    {
+        _diagnostics?.Record("gemini.reference-analysis.failed", exception);
+        _history?.Record(new GeminiInteractionRecord(
+            DateTimeOffset.UtcNow,
+            _options.ModelId,
+            null,
+            Succeeded: false,
+            exception.FailureKind,
+            exception.StatusCode,
+            attempts,
+            promptCharacterCount,
+            null));
+    }
+
+    private static bool IsRetryable(HttpStatusCode statusCode) =>
+        statusCode == HttpStatusCode.RequestTimeout ||
+        statusCode == (HttpStatusCode)429 ||
+        (int)statusCode >= 500;
+
+    private static TimeSpan? GetRetryAfter(HttpResponseMessage response)
+    {
+        var retryAfter = response.Headers.RetryAfter;
+        if (retryAfter?.Delta is { } delta)
+        {
+            return delta;
+        }
+
+        return retryAfter?.Date is { } date ? date - DateTimeOffset.UtcNow : null;
+    }
+
+    private static GeminiReferenceAnalysisException CreateProviderException(HttpStatusCode statusCode) => statusCode switch
+    {
+        HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden => new GeminiReferenceAnalysisException(
+            "Gemini rejected the configured API key.",
+            statusCode,
+            failureKind: GeminiProviderFailureKind.InvalidKey),
+        (HttpStatusCode)429 => new GeminiReferenceAnalysisException(
+            "Gemini rate limit reached after the bounded retry budget.",
+            statusCode,
+            failureKind: GeminiProviderFailureKind.RateLimit),
+        HttpStatusCode.PaymentRequired => new GeminiReferenceAnalysisException(
+            "Gemini reported a quota or billing limit.",
+            statusCode,
+            failureKind: GeminiProviderFailureKind.Quota),
+        _ => new GeminiReferenceAnalysisException(
+            $"Gemini reference analysis failed with HTTP {(int)statusCode} ({statusCode}).",
+            statusCode,
+            failureKind: GeminiProviderFailureKind.Transport)
+    };
 
     private async Task<GeminiUploadedFile> UploadFileAsync(
         byte[] payload,
@@ -388,6 +545,9 @@ public sealed class GeminiReferenceAnalysisClient
 
     private sealed class GeminiInteractionResponse
     {
+        [JsonPropertyName("id")]
+        public string? Id { get; set; }
+
         [JsonPropertyName("status")]
         public string? Status { get; set; }
 
@@ -396,6 +556,23 @@ public sealed class GeminiReferenceAnalysisClient
 
         [JsonPropertyName("steps")]
         public GeminiStep[]? Steps { get; set; }
+
+        [JsonPropertyName("usage")]
+        public GeminiUsageDocument? Usage { get; set; }
+    }
+
+    private sealed class GeminiUsageDocument
+    {
+        [JsonPropertyName("total_input_tokens")]
+        public int? TotalInputTokens { get; set; }
+
+        [JsonPropertyName("total_output_tokens")]
+        public int? TotalOutputTokens { get; set; }
+
+        [JsonPropertyName("total_tokens")]
+        public int? TotalTokens { get; set; }
+
+        public GeminiUsage ToUsage() => new(TotalInputTokens, TotalOutputTokens, TotalTokens);
     }
 
     private sealed class GeminiStep

@@ -854,6 +854,46 @@ public sealed class MainWindow : Window
                 presetStatus.Text = "Load and select a style first.";
             }
         };
+        var referenceSource = new ComboBox { Width = 240 };
+        AutomationProperties.SetName(referenceSource, "Reference source preview");
+        var referenceTarget = new ComboBox { Width = 240 };
+        AutomationProperties.SetName(referenceTarget, "Reference target preview");
+        var referenceConsent = new CheckBox { Content = "I approve uploading these exact previews to Gemini" };
+        var analyzeReference = new Button { Content = "Analyze approved visual reference" };
+        AutomationProperties.SetName(analyzeReference, "Analyze approved visual reference");
+        var applyReference = new Button { Content = "Apply reviewed reference grade" };
+        AutomationProperties.SetName(applyReference, "Apply reviewed reference grade");
+        var referenceStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        referenceStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.ReferenceAnalysisStatusText)));
+        void RefreshReferenceSources()
+        {
+            referenceSource.ItemsSource = viewModel.ImportedMedia;
+            referenceTarget.ItemsSource = viewModel.ImportedMedia;
+            if (referenceSource.SelectedIndex < 0 && viewModel.ImportedMedia.Count > 0)
+            {
+                referenceSource.SelectedIndex = 0;
+            }
+
+            if (referenceTarget.SelectedIndex < 0 && viewModel.ImportedMedia.Count > 1)
+            {
+                referenceTarget.SelectedIndex = 1;
+            }
+        }
+
+        viewModel.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(MainWindowViewModel.ImportedMedia))
+            {
+                RefreshReferenceSources();
+            }
+        };
+        RefreshReferenceSources();
+        analyzeReference.Click += async (_, _) => await viewModel.AnalyzeColorReferenceAsync(
+            referenceSource.SelectedItem as ImportedMediaViewModel,
+            referenceTarget.SelectedItem as ImportedMediaViewModel,
+            referenceConsent.IsChecked == true,
+            CancellationToken.None);
+        applyReference.Click += (_, _) => viewModel.ApplyPendingReferenceGrade();
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
@@ -866,6 +906,12 @@ public sealed class MainWindow : Window
                 {
                     new TextBlock { Text = "Color grade inspector", FontWeight = FontWeight.SemiBold },
                     status,
+                    new TextBlock { Text = "Optional Gemini reference match", FontWeight = FontWeight.SemiBold },
+                    new TextBlock { Text = "Select a source preview and a reference preview. Upload occurs only after explicit consent; the returned grade is reviewable before applying.", TextWrapping = TextWrapping.Wrap },
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { referenceSource, referenceTarget } },
+                    referenceConsent,
+                    new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8, Children = { analyzeReference, applyReference } },
+                    referenceStatus,
                     new StackPanel
                     {
                         Orientation = Orientation.Horizontal,

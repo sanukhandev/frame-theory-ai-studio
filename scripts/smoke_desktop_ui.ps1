@@ -31,7 +31,7 @@ Add-Type -AssemblyName UIAutomationTypes
 $process = Start-Process -FilePath $executable -ArgumentList $arguments -WorkingDirectory (Split-Path $target) -PassThru
 $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
 $root = [System.Windows.Automation.AutomationElement]::RootElement
-$windowCondition = New-Object System.Windows.Automation.PropertyCondition(
+$windowNameCondition = New-Object System.Windows.Automation.PropertyCondition(
     [System.Windows.Automation.AutomationElement]::NameProperty,
     "Frame Theory Studio AI")
 $window = $null
@@ -39,7 +39,7 @@ $window = $null
 try {
     function Find-NamedControl([string]$name) {
         $candidates = if ($controlAliases.ContainsKey($name)) { $controlAliases[$name] } else { @($name) }
-        while ([DateTime]::UtcNow -lt $deadline) {
+        while ([DateTime]::UtcNow -lt $uiDeadline) {
             foreach ($candidate in $candidates) {
                 $condition = New-Object System.Windows.Automation.PropertyCondition(
                     [System.Windows.Automation.AutomationElement]::NameProperty,
@@ -61,7 +61,9 @@ try {
             throw "Desktop UI process exited before exposing its window (exit code $($process.ExitCode))."
         }
 
-        $window = $root.FindFirst([System.Windows.Automation.TreeScope]::Children, $windowCondition)
+        $window = $root.FindAll([System.Windows.Automation.TreeScope]::Children, $windowNameCondition) |
+            Where-Object { $_.Current.ProcessId -eq $process.Id } |
+            Select-Object -First 1
         if ($null -eq $window) {
             Start-Sleep -Milliseconds 250
         }
@@ -70,6 +72,8 @@ try {
     if ($null -eq $window) {
         throw "Desktop UI window was not found within $TimeoutSeconds seconds."
     }
+
+    $uiDeadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
 
     $bounds = $window.Current.BoundingRectangle
     if ($bounds.Width -lt 960 -or $bounds.Height -lt 640) {
@@ -108,7 +112,7 @@ try {
             "Export composite MP4"
         )
         "Photo workspace" = @("Open image", "Open photo project")
-        "Color workspace" = @("Before", "After")
+        "Color workspace" = @("Before", "After", "Analyze approved visual reference", "Apply reviewed reference grade")
         "AI workspace" = @("Analyze approved samples with Gemini")
     }
     $controlAliases = @{
