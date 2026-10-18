@@ -660,6 +660,7 @@ public sealed class MainWindow : Window
             }
         };
         AutomationProperties.SetName(importZone, "Local media import drop zone");
+        var mediaBinPanel = CreateMediaBin(importZone, importStatus, importedList, mediaSearch, clearMediaSearch, mediaSearchEmptyState, mediaEmptyState);
         var children = new List<Control>
         {
             CreateWorkspaceHeader(workspace, viewModel),
@@ -678,11 +679,11 @@ public sealed class MainWindow : Window
                     Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(171, 218, 198)),
                     TextWrapping = TextWrapping.Wrap
                 }
-            },
-            CreateMediaBin(importZone, importStatus, importedList, mediaSearch, clearMediaSearch, mediaSearchEmptyState, mediaEmptyState)
+            }
         };
         if (workspace.Name == "Photo")
         {
+            children.Add(mediaBinPanel);
             children.Add(CreatePhotoRecoveryPanel(viewModel));
             if (viewModel.PhotoEditor is not null)
             {
@@ -691,14 +692,24 @@ public sealed class MainWindow : Window
         }
         else if (workspace.Name == "Color")
         {
+            children.Add(mediaBinPanel);
             children.Add(CreateColorInspectorPanel(viewModel));
         }
         else if (workspace.Name == "Video")
         {
-            children.Add(CreateTimelinePanel(viewModel));
+            var editorLayout = new Grid
+            {
+                ColumnDefinitions = new ColumnDefinitions("300,*"),
+                ColumnSpacing = 12,
+                Children = { mediaBinPanel, CreateTimelinePanel(viewModel) }
+            };
+            Grid.SetColumn(editorLayout.Children[1], 1);
+            AutomationProperties.SetName(editorLayout, "Video editor workspace layout");
+            children.Add(editorLayout);
         }
         else if (workspace.Name == "AI")
         {
+            children.Add(mediaBinPanel);
             children.Add(CreateGeminiSettingsPanel(viewModel));
             children.Add(CreateAiProposalPanel(viewModel));
         }

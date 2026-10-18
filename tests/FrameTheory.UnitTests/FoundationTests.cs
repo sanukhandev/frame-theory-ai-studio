@@ -204,6 +204,11 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     new[] { "Video workspace content", "Photo workspace content", "Color workspace content", "AI workspace content" },
                     workspaceScrollers.Select(AutomationProperties.GetName));
+                var videoEditorLayout = workspaceScrollers[0].GetVisualDescendants()
+                    .OfType<Grid>()
+                    .Single(control => AutomationProperties.GetName(control) == "Video editor workspace layout");
+                Xunit.Assert.Equal(2, videoEditorLayout.ColumnDefinitions.Count);
+                Xunit.Assert.Equal(300, videoEditorLayout.ColumnDefinitions[0].Width.Value);
                 var activeWorkspaceStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Active workspace status");
