@@ -204,9 +204,19 @@ public sealed class FoundationTests
                     .OfType<ListBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline tracks");
                 Xunit.Assert.NotNull(timelineTracks.ItemTemplate);
+                var timelineSectionNames = new HashSet<string>(StringComparer.Ordinal)
+                {
+                    "Analysis and rough cut section",
+                    "Clip editing section",
+                    "Motion and speed section",
+                    "Audio section",
+                    "Titles and captions section",
+                    "Project and export section",
+                    "Timeline view section"
+                };
                 var timelineSections = window.GetVisualDescendants()
                     .OfType<Expander>()
-                    .Where(control => AutomationProperties.GetName(control)?.EndsWith(" section", StringComparison.Ordinal) == true)
+                    .Where(control => timelineSectionNames.Contains(AutomationProperties.GetName(control)!))
                     .ToDictionary(control => AutomationProperties.GetName(control)!);
                 Xunit.Assert.Equal(7, timelineSections.Count);
                 Xunit.Assert.False(timelineSections["Analysis and rough cut section"].IsExpanded);
@@ -260,18 +270,25 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "AI proposal empty state")
                     .IsVisible);
+                var automationNames = new HashSet<string>(StringComparer.Ordinal);
+                for (var workspaceIndex = 0; workspaceIndex < tabs.Items.Count; workspaceIndex++)
+                {
+                    tabs.SelectedIndex = workspaceIndex;
+                    Dispatcher.UIThread.RunJobs();
+                    foreach (var section in window.GetVisualDescendants().OfType<Expander>())
+                    {
+                        section.IsExpanded = true;
+                    }
+
+                    Dispatcher.UIThread.RunJobs();
+                    automationNames.UnionWith(window.GetVisualDescendants()
+                        .OfType<Control>()
+                        .Select(AutomationProperties.GetName)
+                        .Where(name => !string.IsNullOrWhiteSpace(name))!);
+                }
+
                 tabs.SelectedIndex = 0;
                 Dispatcher.UIThread.RunJobs();
-                foreach (var section in timelineSections.Values)
-                {
-                    section.IsExpanded = true;
-                }
-                Dispatcher.UIThread.RunJobs();
-                var automationNames = new HashSet<string>(StringComparer.Ordinal);
-                automationNames.UnionWith(window.GetVisualDescendants()
-                    .OfType<Control>()
-                    .Select(AutomationProperties.GetName)
-                    .Where(name => !string.IsNullOrWhiteSpace(name))!);
                 Xunit.Assert.DoesNotContain(window.GetVisualDescendants()
                     .OfType<Button>(),
                     button => button.Content is not null && string.IsNullOrWhiteSpace(AutomationProperties.GetName(button)));

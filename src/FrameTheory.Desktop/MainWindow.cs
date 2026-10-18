@@ -1014,6 +1014,28 @@ public sealed class MainWindow : Window
             BorderThickness = new Thickness(1),
             Child = new Grid { Children = { previewEmptyState, preview } }
         };
+        var photoProjectSection = CreateInspectorExpander(
+            "Project",
+            CreateSectionContent(CreateFlow(open, openProject, saveProject, rotate, undo)),
+            expanded: true);
+        var photoLayersSection = CreateInspectorExpander(
+            "Layers and blend",
+            CreateSectionContent(CreateFlow(importOverlay, clearOverlays, overlayBlend, overlayOpacity)),
+            expanded: true);
+        var photoMaskSection = CreateInspectorExpander(
+            "Mask and retouch",
+            CreateSectionContent(
+                CreateFlow(applyMask, maskX, maskY, maskRadius, maskStrength, clearMask),
+                CreateFlow(applyRetouch, retouchX, retouchY, retouchRadius, retouchOffsetX, retouchOffsetY, retouchStrength, clearRetouch)),
+            expanded: false);
+        var photoGradeSection = CreateInspectorExpander(
+            "Grade",
+            CreateSectionContent(CreateFlow(gradeExposure, addGrade, maskGrade, clearGradeMask)),
+            expanded: true);
+        var photoExportSection = CreateInspectorExpander(
+            "Export",
+            CreateSectionContent(CreateFlow(format, quality, socialPreset, export)),
+            expanded: true);
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
@@ -1029,17 +1051,11 @@ public sealed class MainWindow : Window
                 {
                     new TextBlock { Text = "Non-destructive photo editor", FontSize = 14, FontWeight = FontWeight.SemiBold, Foreground = Brushes.White },
                     photoPreviewCard,
-                    CreateSectionLabel("Project"),
-                    CreateFlow(open, openProject, saveProject, rotate, undo),
-                    CreateSectionLabel("Layers and blend"),
-                    CreateFlow(importOverlay, clearOverlays, overlayBlend, overlayOpacity),
-                    CreateSectionLabel("Mask and retouch"),
-                    CreateFlow(applyMask, maskX, maskY, maskRadius, maskStrength, clearMask),
-                    CreateFlow(applyRetouch, retouchX, retouchY, retouchRadius, retouchOffsetX, retouchOffsetY, retouchStrength, clearRetouch),
-                    CreateSectionLabel("Grade"),
-                    CreateFlow(gradeExposure, addGrade, maskGrade, clearGradeMask),
-                    CreateSectionLabel("Export"),
-                    CreateFlow(format, quality, socialPreset, export),
+                    photoProjectSection,
+                    photoLayersSection,
+                    photoMaskSection,
+                    photoGradeSection,
+                    photoExportSection,
                     status
                 }
             }
@@ -1112,6 +1128,22 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(activityLog, "Gemini activity log");
         activityLog.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.GeminiActivityLogText)));
         _ = settings.LoadAsync(CancellationToken.None);
+        var providerSection = CreateInspectorExpander(
+            "Provider",
+            CreateSectionContent(model, apiKey, CreateFlow(save, clear), status),
+            expanded: true);
+        var consentSection = CreateInspectorExpander(
+            "Consent and analysis scope",
+            CreateSectionContent(
+                new TextBlock { Text = "Samples are prepared locally; upload occurs only after explicit consent.", TextWrapping = TextWrapping.Wrap },
+                CreateFlow(videoFrames, audioWaveform, photoPreview),
+                uploadConsent,
+                CreateFlow(prepareAnalysis, analyzeApprovedSamples)),
+            expanded: true);
+        var activitySection = CreateInspectorExpander(
+            "Activity",
+            CreateSectionContent(analysisStatus, usageStatus, activityLog),
+            expanded: false);
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
@@ -1127,20 +1159,9 @@ public sealed class MainWindow : Window
                 {
                     new TextBlock { Text = "Optional Gemini Creative Director", FontSize = 14, FontWeight = FontWeight.SemiBold, Foreground = Brushes.White },
                     new TextBlock { Text = "Manual import, editing, preview and export never require a key.", TextWrapping = TextWrapping.Wrap },
-                    CreateSectionLabel("Provider"),
-                    model,
-                    apiKey,
-                    CreateFlow(save, clear),
-                    status,
-                    CreateSectionLabel("Consent and analysis scope"),
-                    new TextBlock { Text = "Samples are prepared locally; upload occurs only after explicit consent.", TextWrapping = TextWrapping.Wrap },
-                    CreateFlow(videoFrames, audioWaveform, photoPreview),
-                    uploadConsent,
-                    CreateFlow(prepareAnalysis, analyzeApprovedSamples),
-                    CreateSectionLabel("Activity"),
-                    analysisStatus,
-                    usageStatus,
-                    activityLog
+                    providerSection,
+                    consentSection,
+                    activitySection
                 }
             }
         };
@@ -1274,6 +1295,18 @@ public sealed class MainWindow : Window
         var recipeStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(recipeStatus, "AI recipe status");
         recipeStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AiRecipeStatusText)));
+        var planSection = CreateInspectorExpander(
+            "Plan input and revision",
+            CreateSectionContent(planJson, CreateFlow(revisionInstruction, requestRevision), revisionStatus),
+            expanded: true);
+        var reviewSection = CreateInspectorExpander(
+            "Review and apply",
+            CreateSectionContent(CreateFlow(validate, approve, undo, clear), approvalSummary, actions, status),
+            expanded: true);
+        var recipeSection = CreateInspectorExpander(
+            "Reusable recipe",
+            CreateSectionContent(CreateFlow(recipeName, saveRecipe, loadRecipe), recipeStatus),
+            expanded: false);
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
@@ -1289,18 +1322,9 @@ public sealed class MainWindow : Window
                 {
                     new TextBlock { Text = "AI proposal review", FontSize = 14, FontWeight = FontWeight.SemiBold, Foreground = Brushes.White },
                     new TextBlock { Text = "Plans are untrusted data. Only checked actions are applied, atomically, through editable timeline operations; failures roll back the whole group.", TextWrapping = TextWrapping.Wrap },
-                    CreateSectionLabel("Plan input and revision"),
-                    planJson,
-                    CreateFlow(revisionInstruction, requestRevision),
-                    revisionStatus,
-                    CreateSectionLabel("Review and apply"),
-                    CreateFlow(validate, approve, undo, clear),
-                    CreateSectionLabel("Reusable recipe"),
-                    CreateFlow(recipeName, saveRecipe, loadRecipe),
-                    recipeStatus,
-                    approvalSummary,
-                    actions,
-                    status
+                    planSection,
+                    reviewSection,
+                    recipeSection
                 }
             }
         };
@@ -1581,6 +1605,27 @@ public sealed class MainWindow : Window
                 new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "BEFORE", FontSize = 10, FontWeight = FontWeight.SemiBold }, new Grid { Children = { beforeEmptyState, beforeImage } }, beforeSummary } },
                 new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "AFTER", FontSize = 10, FontWeight = FontWeight.SemiBold }, new Grid { Children = { afterEmptyState, afterImage } }, afterSummary } })
         };
+        var referenceSection = CreateInspectorExpander(
+            "Reference match",
+            CreateSectionContent(
+                new TextBlock { Text = "Select a source preview and a reference preview. Upload occurs only after explicit consent; the returned grade is reviewable before applying.", TextWrapping = TextWrapping.Wrap },
+                CreateFlow(referenceSource, referenceTarget),
+                referenceConsent,
+                CreateFlow(analyzeReference, applyReference),
+                referenceStatus),
+            expanded: false);
+        var beforeAfterSection = CreateInspectorExpander(
+            "Before and after",
+            CreateSectionContent(colorPreviewCard, scopeSummary),
+            expanded: true);
+        var gradeSection = CreateInspectorExpander(
+            "Grade controls",
+            CreateSectionContent(controls),
+            expanded: true);
+        var styleSection = CreateInspectorExpander(
+            "Style library",
+            CreateSectionContent(CreateFlow(presetName, savePreset, loadPreset, presetSelection, applyPreset), presetStatus),
+            expanded: false);
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
@@ -1596,20 +1641,10 @@ public sealed class MainWindow : Window
                 {
                     new TextBlock { Text = "Color grade inspector", FontSize = 14, FontWeight = FontWeight.SemiBold, Foreground = Brushes.White },
                     status,
-                    CreateSectionLabel("Reference match"),
-                    new TextBlock { Text = "Select a source preview and a reference preview. Upload occurs only after explicit consent; the returned grade is reviewable before applying.", TextWrapping = TextWrapping.Wrap },
-                    CreateFlow(referenceSource, referenceTarget),
-                    referenceConsent,
-                    CreateFlow(analyzeReference, applyReference),
-                    referenceStatus,
-                    CreateSectionLabel("Before and after"),
-                    colorPreviewCard,
-                    scopeSummary,
-                    CreateSectionLabel("Grade controls"),
-                    controls,
-                    CreateSectionLabel("Style library"),
-                    CreateFlow(presetName, savePreset, loadPreset, presetSelection, applyPreset),
-                    presetStatus
+                    referenceSection,
+                    beforeAfterSection,
+                    gradeSection,
+                    styleSection
                 }
             }
         };
