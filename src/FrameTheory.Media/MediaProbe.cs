@@ -45,7 +45,7 @@ public sealed class FfprobeMediaProbe : IMediaProbe
             throw new FileNotFoundException("The media file was not found.", path);
         }
 
-        if (MediaPathSecurity.ContainsReparsePoint(path))
+        if (LocalPathSecurity.ContainsReparsePoint(path))
         {
             throw new MediaProbeException("Symlinked media paths are not accepted by the probe.");
         }

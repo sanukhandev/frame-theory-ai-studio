@@ -226,6 +226,38 @@ public sealed class TranscriptionTests
     }
 
     [Xunit.Fact]
+    public async Task LocalWhisperOptionsRejectsFilesUnderSymlinkedParent()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-local-whisper-parent-link-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-local-whisper-parent-external-");
+        try
+        {
+            var linkedDirectory = Path.Combine(directory.FullName, "engine");
+            Directory.CreateSymbolicLink(linkedDirectory, externalDirectory.FullName);
+            var executablePath = Path.Combine(linkedDirectory, "whisper.exe");
+            var modelPath = Path.Combine(linkedDirectory, "model.bin");
+            await File.WriteAllBytesAsync(Path.Combine(externalDirectory.FullName, "whisper.exe"), [1]);
+            await File.WriteAllBytesAsync(Path.Combine(externalDirectory.FullName, "model.bin"), [2]);
+
+            Xunit.Assert.Throws<InvalidDataException>(() => new LocalWhisperOptions(executablePath, modelPath));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task GeminiProviderUploadsOnlyWithConsentAndPreservesTimedWordProvenance()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-transcript-");
@@ -514,6 +546,39 @@ public sealed class TranscriptionTests
         finally
         {
             directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
+    public async Task GeminiProviderRejectsSourceUnderSymlinkedParent()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-transcript-parent-link-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-gemini-transcript-parent-external-");
+        try
+        {
+            var linkedDirectory = Path.Combine(directory.FullName, "media");
+            Directory.CreateSymbolicLink(linkedDirectory, externalDirectory.FullName);
+            var sourcePath = Path.Combine(linkedDirectory, "spoken.wav");
+            await File.WriteAllBytesAsync(Path.Combine(externalDirectory.FullName, "spoken.wav"), [1, 2, 3]);
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => new GeminiTranscriptionProvider(
+                new HttpClient(),
+                new GeminiTranscriptionOptions("test-secret", uploadConsent: true))
+                .TranscribeAsync(new Uri(sourcePath), CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
         }
     }
 

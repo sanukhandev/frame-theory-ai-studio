@@ -1,5 +1,7 @@
 namespace FrameTheory.Media;
 
+using FrameTheory.Domain;
+
 public sealed class PreparedAudioSource : IAsyncDisposable
 {
     private string? _temporaryPath;
@@ -79,7 +81,7 @@ public sealed class FfmpegAudioSourcePreparer : IAudioSourcePreparer
             throw new FileNotFoundException("The audio source was not found.", sourcePath);
         }
 
-        if (MediaPathSecurity.ContainsReparsePoint(sourcePath))
+        if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new InvalidDataException("Symlinked audio sources are not accepted.");
         }

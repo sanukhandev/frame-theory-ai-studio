@@ -241,7 +241,7 @@ public sealed class PhotoExporter
 
     private static void EnsureNotReparsePoint(string path, string description)
     {
-        if (MediaPathSecurity.ContainsReparsePoint(path))
+        if (LocalPathSecurity.ContainsReparsePoint(path))
         {
             throw new PhotoExportException($"{description} symlink paths are not accepted.");
         }

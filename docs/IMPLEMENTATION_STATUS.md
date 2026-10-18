@@ -32,7 +32,9 @@
 
 **Current unpushed exporter hardening checkpoint (2026-10-18):** The video/photo destination-directory and timeline-compositor path guards pass the full local Release gate at 238 unit tests and 2 golden tests with 0 failures; formatting, repository validation and `git diff --check` also pass. This is local evidence only until the next ten-commit push and hosted revalidation.
 
-**Media path security checkpoint (2026-10-18):** `MediaPathSecurity` now walks existing media files, destination directories and their parents, rejecting reparse-point escapes consistently across probe, decode, waveform import, audio preparation, preview proxy, video export, timeline compositor and photo export. Focused media/path coverage passes 37/37; hosted confirmation remains pending.
+**Media path security checkpoint (2026-10-18):** `LocalPathSecurity` now walks existing media files, destination directories and their parents, rejecting reparse-point escapes consistently across probe, decode, waveform import, audio preparation, preview proxy, video export, timeline compositor and photo export. Focused media/path coverage passes 37/37; hosted confirmation remains pending.
+
+**Unified local path security checkpoint (2026-10-18):** The reparse-point walk now lives in `FrameTheory.Domain.LocalPathSecurity` and is shared by media/photo processing plus Gemini transcription and local Whisper executable/model/source validation. Focused transcription coverage passes 27/27, including linked-parent source rejection; hosted confirmation remains pending.
 
 **Media import boundary checkpoint (2026-10-18):** Waveform extraction now independently rejects reparse-point media paths before invoking FFmpeg, even when a composed or test probe adapter does not enforce the same rule, and best-effort cleanup cannot mask the original import failure. Focused media-import coverage passes 4/4, the Release build is warning-free through the focused compile, formatting and diff checks pass, and original source bytes remain untouched.
 

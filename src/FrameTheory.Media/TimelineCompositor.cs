@@ -637,7 +637,7 @@ public sealed class TimelineFilterGraphBuilder
             throw new FileNotFoundException("A timeline source file was not found.", path);
         }
 
-        if (MediaPathSecurity.ContainsReparsePoint(path))
+        if (LocalPathSecurity.ContainsReparsePoint(path))
         {
             throw new MediaExportException("Symlinked timeline sources are not accepted.");
         }
@@ -658,7 +658,7 @@ public sealed class TimelineFilterGraphBuilder
             throw new FileNotFoundException("The selected watermark file was not found.", watermark.SourcePath);
         }
 
-        if (MediaPathSecurity.ContainsReparsePoint(watermark.SourcePath))
+        if (LocalPathSecurity.ContainsReparsePoint(watermark.SourcePath))
         {
             throw new MediaExportException("Symlinked watermark files are not accepted.");
         }
@@ -676,7 +676,7 @@ public sealed class TimelineFilterGraphBuilder
             throw new FileNotFoundException("The selected title font was not found.", path);
         }
 
-        if (MediaPathSecurity.ContainsReparsePoint(path))
+        if (LocalPathSecurity.ContainsReparsePoint(path))
         {
             throw new MediaExportException("Symlinked title fonts are not accepted.");
         }
@@ -789,12 +789,12 @@ public sealed class FfmpegTimelineVideoExporter : ITimelineVideoExporter
             throw new DirectoryNotFoundException(outputDirectory);
         }
 
-        if (MediaPathSecurity.ContainsReparsePoint(outputDirectory))
+        if (LocalPathSecurity.ContainsReparsePoint(outputDirectory))
         {
             throw new MediaExportException("Export directories that are symlinks are not accepted.");
         }
 
-        if (File.Exists(outputPath) && MediaPathSecurity.ContainsReparsePoint(outputPath))
+        if (File.Exists(outputPath) && LocalPathSecurity.ContainsReparsePoint(outputPath))
         {
             throw new MediaExportException("Export destinations that are symlinks are not accepted.");
         }

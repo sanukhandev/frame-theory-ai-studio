@@ -90,7 +90,7 @@ public sealed class FfmpegFrameDecoder : IPreviewFrameDecoder, IRgbaPreviewFrame
             throw new FileNotFoundException("The media file was not found.", path);
         }
 
-        if (MediaPathSecurity.ContainsReparsePoint(path))
+        if (LocalPathSecurity.ContainsReparsePoint(path))
         {
             throw new MediaDecodeException("Symlinked media paths are not accepted by the decoder.");
         }

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using System.Text.Json;
+using FrameTheory.Domain;
 
 namespace FrameTheory.Captions;
 
@@ -31,7 +32,7 @@ public sealed record LocalWhisperOptions
             throw new FileNotFoundException(missingMessage, fullPath);
         }
 
-        if ((File.GetAttributes(fullPath) & FileAttributes.ReparsePoint) != 0)
+        if (LocalPathSecurity.ContainsReparsePoint(fullPath))
         {
             throw new InvalidDataException("Local Whisper executable and model files must not be reparse points.");
         }
@@ -72,7 +73,7 @@ public sealed class WhisperCliTranscriptionProvider : IProgressiveTranscriptionP
             throw new FileNotFoundException("The local Whisper source was not found.", sourcePath);
         }
 
-        if ((File.GetAttributes(sourcePath) & FileAttributes.ReparsePoint) != 0)
+        if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new InvalidDataException("Local Whisper sources must not be reparse points.");
         }

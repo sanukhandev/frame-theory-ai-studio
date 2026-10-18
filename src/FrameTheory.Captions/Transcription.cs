@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using FrameTheory.Domain;
 
 namespace FrameTheory.Captions;
 
@@ -168,7 +169,7 @@ public sealed class GeminiTranscriptionProvider : IProgressiveTranscriptionProvi
             throw new FileNotFoundException("The transcription source was not found.", sourcePath);
         }
 
-        if ((File.GetAttributes(sourcePath) & FileAttributes.ReparsePoint) != 0)
+        if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new InvalidDataException("Symlinked transcription sources are not accepted.");
         }
@@ -585,7 +586,7 @@ public sealed class JsonTranscriptProvider : IProgressiveTranscriptionProvider
             throw new FileNotFoundException("The transcript source was not found.", sourcePath);
         }
 
-        if ((File.GetAttributes(sourcePath) & FileAttributes.ReparsePoint) != 0)
+        if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new InvalidDataException("Symlinked transcript sources are not accepted.");
         }
@@ -595,7 +596,7 @@ public sealed class JsonTranscriptProvider : IProgressiveTranscriptionProvider
             throw new FileNotFoundException("The transcript JSON file was not found.", _transcriptPath);
         }
 
-        if ((File.GetAttributes(_transcriptPath) & FileAttributes.ReparsePoint) != 0)
+        if (LocalPathSecurity.ContainsReparsePoint(_transcriptPath))
         {
             throw new InvalidDataException("Symlinked transcript files are not accepted.");
         }
@@ -695,7 +696,7 @@ public static class TranscriptSourceFingerprint
             throw new FileNotFoundException("The transcript source was not found.", sourcePath);
         }
 
-        if ((File.GetAttributes(sourcePath) & FileAttributes.ReparsePoint) != 0)
+        if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new InvalidDataException("Symlinked transcript sources are not accepted.");
         }

@@ -61,7 +61,7 @@ public sealed class FfmpegMediaImporter : IMediaImporter
         }
 
         var path = Path.GetFullPath(file.LocalPath);
-        if (MediaPathSecurity.ContainsReparsePoint(path))
+        if (LocalPathSecurity.ContainsReparsePoint(path))
         {
             throw new MediaImportException("Symlinked media paths are not accepted for waveform extraction.");
         }

@@ -1,5 +1,6 @@
 using System.Security.Cryptography;
 using System.Text;
+using FrameTheory.Domain;
 
 namespace FrameTheory.Media;
 
@@ -62,13 +63,13 @@ public sealed class FfmpegPreviewProxyService
             throw new FileNotFoundException("The preview source was not found.", sourcePath);
         }
 
-        if (MediaPathSecurity.ContainsReparsePoint(sourcePath))
+        if (LocalPathSecurity.ContainsReparsePoint(sourcePath))
         {
             throw new PreviewProxyException("Symlinked preview sources are not accepted.");
         }
 
         Directory.CreateDirectory(_cacheDirectory);
-        if (MediaPathSecurity.ContainsReparsePoint(_cacheDirectory))
+        if (LocalPathSecurity.ContainsReparsePoint(_cacheDirectory))
         {
             throw new PreviewProxyException("Symlinked preview cache directories are not accepted.");
         }
@@ -82,7 +83,7 @@ public sealed class FfmpegPreviewProxyService
         {
             if (File.Exists(outputPath))
             {
-                if (MediaPathSecurity.ContainsReparsePoint(outputPath))
+                if (LocalPathSecurity.ContainsReparsePoint(outputPath))
                 {
                     throw new PreviewProxyException("Symlinked preview cache entries are not accepted.");
                 }
