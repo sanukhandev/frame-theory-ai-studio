@@ -1519,7 +1519,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             _lastTimelineExportRequest = new TimelineExportRequest(plan, destinationPath, preset);
             return await RunTimelineExportAsync(_lastTimelineExportRequest, retryOf: null, cancellationToken);
         }
-        catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidOperationException or MediaExportException or MediaProbeException)
+        catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException or InvalidDataException or InvalidOperationException or MediaExportException or MediaProbeException)
         {
             _diagnosticsLog.Record("timeline-export-failed", exception);
             TimelineExportStatusText = $"Timeline export failed: {exception.Message}";
@@ -1577,7 +1577,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             TimelineExportStatusText = "Batch timeline export canceled.";
             return false;
         }
-        catch (Exception exception) when (exception is ArgumentException or DirectoryNotFoundException or IOException or InvalidDataException or InvalidOperationException or MediaExportException or MediaProbeException)
+        catch (Exception exception) when (exception is ArgumentException or DirectoryNotFoundException or IOException or UnauthorizedAccessException or InvalidDataException or InvalidOperationException or MediaExportException or MediaProbeException)
         {
             _diagnosticsLog.Record("timeline-batch-export-failed", exception);
             TimelineExportStatusText = $"Batch timeline export failed: {exception.Message}";
@@ -1635,7 +1635,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             TimelineExportStatusText = "Timeline export canceled.";
             return false;
         }
-        catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidOperationException or MediaExportException or MediaProbeException)
+        catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException or InvalidDataException or InvalidOperationException or MediaExportException or MediaProbeException)
         {
             _diagnosticsLog.Record("timeline-export-failed", exception);
             TimelineExportStatusText = $"Timeline export failed: {exception.Message}";

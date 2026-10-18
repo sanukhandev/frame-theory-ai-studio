@@ -562,6 +562,20 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task TimelineExportArgumentFailureIsReportedWithoutEscapingTheUi()
+    {
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new VideoImporter(),
+            timelineExporter: new ArgumentFailingTimelineExporter());
+        await viewModel.ImportFilesAsync(["timeline.mp4"], CancellationToken.None);
+
+        Xunit.Assert.False(await viewModel.ExportTimelineAsync("timeline-output.mp4", CancellationToken.None));
+        Xunit.Assert.Contains("Timeline export failed", viewModel.TimelineExportStatusText, StringComparison.Ordinal);
+    }
+
+    [Xunit.Fact]
     public async Task TimelinePreviewCanUseAndReuseBoundedProxy()
     {
         var sourcePath = Path.Combine(Path.GetTempPath(), $"frame-theory-preview-source-{Guid.NewGuid():N}.mp4");
@@ -901,6 +915,17 @@ public sealed class DesktopImportTests
                 preset.FrameRate.TimeAtFrame(plan.DurationFrames));
             return Task.FromResult(new ExportReceipt(Guid.NewGuid(), destinationPath, 1, metadata));
         }
+    }
+
+    private sealed class ArgumentFailingTimelineExporter : ITimelineVideoExporter
+    {
+        public Task<ExportReceipt> ExportAsync(
+            TimelineVideoRenderPlan plan,
+            string destinationPath,
+            ExportPreset preset,
+            IProgress<ExportProgress>? progress,
+            CancellationToken cancellationToken) =>
+            throw new ArgumentException("invalid export destination", nameof(destinationPath));
     }
 
     private sealed class StubPreviewDecoder : IPreviewFrameDecoder
