@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Current hardening batch checkpoint (2026-10-18):** Full local Release validation previously passed 226 unit tests and 2 golden tests with 0 failures; the current focused media-import suite now passes 4/4 after the cleanup hardening. Repository validation and `git diff --check` also pass. The current batch includes the timeline status binding, package/native-manifest traversal hardening and linked-media import guard. It remains local until the tenth commit is complete and pushed for hosted revalidation.
+**Current hardening batch checkpoint (2026-10-18):** Full local Release validation passes 227 unit tests and 2 golden tests with 0 failures; repository validation, formatting and `git diff --check` also pass. The current batch includes the timeline status binding, package/native-manifest traversal hardening and linked-media import/cleanup guards. It remains local until the tenth commit is pushed for hosted revalidation.
 
 **Media import boundary checkpoint (2026-10-18):** Waveform extraction now independently rejects reparse-point media paths before invoking FFmpeg, even when a composed or test probe adapter does not enforce the same rule, and best-effort cleanup cannot mask the original import failure. Focused media-import coverage passes 4/4, the Release build is warning-free through the focused compile, formatting and diff checks pass, and original source bytes remain untouched.
 
