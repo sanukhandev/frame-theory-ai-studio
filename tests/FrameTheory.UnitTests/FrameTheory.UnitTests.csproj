@@ -25,4 +25,9 @@
     <ProjectReference Include="..\..\src\FrameTheory.Platform\FrameTheory.Platform.csproj" />
     <ProjectReference Include="..\..\src\FrameTheory.Storage\FrameTheory.Storage.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\assets\brand\frame-theory-original.png" Link="assets\brand\frame-theory-original.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

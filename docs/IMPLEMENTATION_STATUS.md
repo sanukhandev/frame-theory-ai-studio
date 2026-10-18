@@ -22,6 +22,8 @@
 
 **FT-1003 native provenance verification hosted checkpoint (2026-10-18):** Run `39101406586` passed documentation/schema validation and the Windows, macOS and Linux jobs with pre-package native manifest hash verification. The verifier checked exact file sets, byte lengths, SHA-256 values and both native tool records for each staged bundle; this is reproducible provenance evidence, not legal, codec or redistribution approval.
 
+**FT-803 approved watermark asset checkpoint (2026-10-18):** The policy-named source attachment `Elegant Frame Theory Monogram.png` is now imported byte-for-byte at `assets/brand/frame-theory-original.png` with SHA-256 `0BD29D37FBCC4C753B8870A65E3A02E23460C1A5C305E53E6CD2D9D2F151F388`. The desktop Video workspace exposes an explicit approved-watermark action, publishes the asset beside the application, and the timeline smoke exercises the real watermark filter when the asset is present. Release-owner rights/visual review and hosted branded-output confirmation remain open.
+
 **FT-1005 native media bundle checkpoint (2026-10-18):** Optional release-owner-supplied FFmpeg/ffprobe directories are now validated as a complete pair and copied into portable, Windows, macOS and Linux package payloads; the runtime resolves adjacent binaries before falling back to `PATH`. Local Release validation passes 195 unit tests and 2 golden tests, the desktop build has 0 warnings/errors, formatting/diff checks pass, and all three shell packagers pass syntax checks. Hosted confirmation is required; this does not clear native license, codec, redistribution, signing or clean-host gates.
 
 **FT-1005 bundle trust-boundary checkpoint (2026-10-18):** Windows package scripts reject reparse-point native tools and Unix package scripts reject symlinked tools; CI now statically guards those checks and runs the packaged media-import smoke through `FRAME_THEORY_FFMPEG_DIR` on each installer path. The locator regression suite passes 2/2; hosted confirmation remains pending for this hardening batch.
@@ -60,7 +62,7 @@
 
 **FT-802 checkpoint:** Video and Photo workspaces expose the same 16:9, 1:1 and 9:16 presets. Photo exports cover-crop to exact dimensions, preserve metadata/source bytes, and use the shared cancellable export queue when hosted by the desktop view model.
 
-**FT-803 checkpoint:** Timeline editing now offers amplitude-peak and energy-onset beat marker modes plus an explicit local PNG/JPEG/WebP watermark selection path. Watermarks are validated, looped for the full render, opacity-adjusted and overlaid non-destructively; no approved Frame Theory logo asset is present in the repository, so branded output remains unverified.
+**FT-803 checkpoint:** Timeline editing now offers amplitude-peak and energy-onset beat marker modes plus explicit approved and custom PNG/JPEG/WebP watermark paths. Watermarks are validated, looped for the full render, opacity-adjusted and overlaid non-destructively; the approved Frame Theory source is now packaged and byte-verified, while release-owner rights/visual review and hosted branded-output confirmation remain open.
 
 **FT-602 checkpoint:** The Video workspace now offers a consent-gated “Transcribe approved audio” action. It reads the OS-stored Gemini key, sends only approved local audio or a bounded FFmpeg-extracted first audio track from an approved local video through the real transcription provider, uses the resumable Files API for audio over 20 MiB, deletes the temporary remote file, rejects ungrounded responses, groups source-timed words into editable verified caption cues, and preserves the source SHA-256 in editor state. The live API/key/spoken fixture and local ASR remain unverified.
 
@@ -213,7 +215,7 @@
 - [x] FT-705 transactional executor for approved grades, clip edits, transitions, titles, captions, keyframes, audio, trusted presets and bounded Reel actions across multiple clips; real two-clip FFmpeg export smoke verified
 - [x] FT-801 editable multi-clip before/after split, wipe and timed-reveal composition with real FFmpeg output; no watermark asset was invented
 - [x] FT-802 real MP4 and Photo social aspect presets for 16:9, 1:1 and 9:16, PNG/JPEG quality export, exact-dimension verification and shared cancellable queue path
-- [~] FT-803 imported user audio, waveform-derived amplitude/energy beat markers and existing creative title/caption slots; approved watermark asset verification remains open
+- [~] FT-803 imported user audio, waveform-derived amplitude/energy beat markers, creative title/caption slots and packaged approved-watermark selection; release-owner rights/visual review and hosted branded-output acceptance remain open
 - [x] FT-804 single-worker cancellable background export queue with Video workspace cancellation, retry, in-memory job history and real FFmpeg retry smoke; macOS/Linux interruption acceptance remains unverified
 - [x] Timeline project save/open preserves editable timeline state, reimports relative media and remaps media IDs without mutating the current project on failed open
 - [~] Timeline project missing-media detection, transactional relink and moved-project recovery are implemented and tested; manual cross-platform UI acceptance remains open

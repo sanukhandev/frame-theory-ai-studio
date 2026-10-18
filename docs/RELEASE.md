@@ -51,7 +51,7 @@ Run `39101406586` emits and verifies per-OS native-bundle provenance manifests c
 
 ## Release blockers
 
-- Approved Frame Theory logo bytes are absent from the repository; no replacement asset is allowed.
+- The approved Frame Theory logo bytes are now packaged and hash-verified; release-owner rights/visual review and branded-output confirmation are still required, and no replacement asset is allowed.
 - An opt-in reviewed native bundle mechanism is validated, but the exact production FFmpeg/ffprobe build, license mode, codec notices and redistribution path are not approved.
 - The application license is undecided.
 - Clean-host install/relaunch/recover, package checksums on each target host, native media redistribution, and code-signing/notarization evidence are still required before V1.

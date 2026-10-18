@@ -160,6 +160,20 @@ jobs:
             throw "A sibling-prefix manifest escape was not rejected."
           }
           $global:LASTEXITCODE = 0
+      - name: Verify approved Frame Theory logo asset
+        shell: pwsh
+        run: |
+          $path = 'assets/brand/frame-theory-original.png'
+          $expected = '0BD29D37FBCC4C753B8870A65E3A02E23460C1A5C305E53E6CD2D9D2F151F388'
+          if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+            throw "Approved Frame Theory logo asset is missing."
+          }
+          if ((Get-Item -LiteralPath $path).Attributes -band [IO.FileAttributes]::ReparsePoint) {
+            throw "Approved Frame Theory logo asset must not be a reparse point."
+          }
+          if ((Get-FileHash -Algorithm SHA256 -LiteralPath $path).Hash -ne $expected) {
+            throw "Approved Frame Theory logo asset checksum changed."
+          }
       - name: Validate repository docs and schema
         run: python3 scripts/validate_repository.py
 
@@ -288,6 +302,7 @@ jobs:
           grep -F 'rough-cut-output=' artifacts/media-smoke/timeline.txt
           grep -F 'reel-output=' artifacts/media-smoke/timeline.txt
           grep -F 'project-roundtrip=' artifacts/media-smoke/timeline.txt
+          grep -F 'watermark=approved' artifacts/media-smoke/timeline.txt
           grep -F 'stabilization=5' artifacts/media-smoke/timeline.txt
           ffmpeg -hide_banner -loglevel error -y \
             -i artifacts/media-smoke/fixtures/test_chart.ppm \

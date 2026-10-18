@@ -1373,7 +1373,20 @@ public sealed class MainWindow : Window
         retryExport.Click += async (_, _) => await viewModel.RetryLastTimelineExportAsync(CancellationToken.None);
         var watermarkStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         watermarkStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.WatermarkStatusText"));
+        var useApprovedWatermark = new Button { Content = "Use Frame Theory watermark" };
+        AutomationProperties.SetName(useApprovedWatermark, "Use approved Frame Theory watermark");
+        useApprovedWatermark.Click += (_, _) =>
+        {
+            if (!BrandAssetCatalog.TryGetApprovedLogoPath(out var path))
+            {
+                operationStatus.Text = "The approved Frame Theory watermark is unavailable in this build.";
+                return;
+            }
+
+            RunTimelineAction(() => timeline.SetWatermark(path));
+        };
         var selectWatermark = new Button { Content = "Select watermark" };
+        AutomationProperties.SetName(selectWatermark, "Select custom watermark");
         selectWatermark.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(selectWatermark);
@@ -1394,6 +1407,7 @@ public sealed class MainWindow : Window
             }
         };
         var clearWatermark = new Button { Content = "Clear watermark" };
+        AutomationProperties.SetName(clearWatermark, "Clear watermark");
         clearWatermark.Click += (_, _) => timeline.ClearWatermark();
         var scrollBack = new Button { Content = "Scroll ◀" };
         scrollBack.Click += (_, _) => timeline.ScrollBy(-30);
@@ -1440,7 +1454,7 @@ public sealed class MainWindow : Window
                     projectStatus,
                     CreateFlow(aspectRatio, export, batchExport, cancelExport, retryExport),
                     exportStatus,
-                    CreateFlow(selectWatermark, clearWatermark),
+                    CreateFlow(useApprovedWatermark, selectWatermark, clearWatermark),
                     watermarkStatus,
                     CreateFlow(snap, new TextBlock { Text = "Zoom" }, zoom)
                 }

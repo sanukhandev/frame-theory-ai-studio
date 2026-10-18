@@ -6,7 +6,7 @@
 - Official logo: **only the original logo file provided in Frame Theory project sources** (current source attachment titled `Elegant Frame Theory Monogram.png`). Treat that source as authoritative; never redraw, invent, restyle, vector-trace, letter-substitute or recolor it.
 
 ## Asset availability
-The approved logo exists in project source material, but **the GitHub repository was empty at documentation initialization**. It is **not yet included in this commit**. A maintainer must copy the exact approved bytes to `assets/brand/frame-theory-original.png` after verifying provenance; no reconstruction or stand-in logo. Development UI can use a neutral non-branded placeholder until available. The logo is RGB; do not assert transparent background.
+The approved source attachment has been copied byte-for-byte to `assets/brand/frame-theory-original.png`. Its SHA-256 is `0BD29D37FBCC4C753B8870A65E3A02E23460C1A5C305E53E6CD2D9D2F151F388`; CI and the unit suite reject drift or reparse-point substitution. No reconstruction or stand-in logo is permitted. The logo is RGB; do not assert transparent background.
 
 ## Use
 - Preserve exact image content, aspect ratio, typography and brand colors; only lossless placement/scaling is permitted.
@@ -19,7 +19,7 @@ The approved logo exists in project source material, but **the GitHub repository
 Block *branded* build artifacts until the approved original logo is copied and verified. Lack of logo should not block unbranded editor engine development. Never present a generated image or UI mockup as the verified official logo.
 
 ## Required asset actions
-1. Import exact image source into repository (owner-approved).
-2. Record source file checksum, intended usage rights and approved path in this document.
+1. [x] Import exact image source into repository (owner-approved source attachment).
+2. [x] Record source file checksum and approved path in this document; usage rights still require release-owner confirmation.
 3. Have a reviewer compare pixel appearance and byte fingerprint against source.
 4. Package the original without destructive transformations.

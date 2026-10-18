@@ -19,4 +19,10 @@
     <ProjectReference Include="..\FrameTheory.Photo\FrameTheory.Photo.csproj" />
     <ProjectReference Include="..\FrameTheory.Storage\FrameTheory.Storage.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\..\assets\brand\frame-theory-original.png" Link="assets\brand\frame-theory-original.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

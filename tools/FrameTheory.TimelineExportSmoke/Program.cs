@@ -21,6 +21,10 @@ var importer = new FfmpegMediaImporter(new FfprobeMediaProbe(runner), decoder, r
 var importedSourceA = await importer.ImportAsync(sourceA, CancellationToken.None);
 var importedSourceB = await importer.ImportAsync(sourceB, CancellationToken.None);
 var projectPath = Path.Combine(Path.GetDirectoryName(destination) ?? ".", "timeline-smoke.ftstudio");
+var approvedWatermarkPath = Path.GetFullPath(Path.Combine("assets", "brand", "frame-theory-original.png"));
+var approvedWatermark = File.Exists(approvedWatermarkPath)
+    ? new TimelineWatermark(approvedWatermarkPath, opacity: 0.85f, margin: 1)
+    : null;
 var projectViewModel = new MainWindowViewModel(new WorkspaceCatalog(), new SmokeCapabilityDetector(), importer);
 await projectViewModel.ImportFilesAsync([sourceA.LocalPath, sourceB.LocalPath], CancellationToken.None);
 if (!projectViewModel.TimelineEditor.SelectFirst(TimelineTrackKind.Video))
@@ -154,7 +158,8 @@ var plan = new TimelineVideoRenderPlan(
         ])],
     titles,
     captions,
-    captionStyle
+    captionStyle,
+    watermark: approvedWatermark
     );
 var exporter = new FfmpegTimelineVideoExporter(runner, new FfprobeMediaProbe(runner));
 var receipt = await exporter.ExportAsync(
@@ -164,6 +169,7 @@ var receipt = await exporter.ExportAsync(
     new Progress<ExportProgress>(update => Console.WriteLine($"stage={update.Stage}; fraction={update.Fraction:0.0}")),
     CancellationToken.None);
 Console.WriteLine($"output={receipt.OutputPath}; bytes={receipt.OutputBytes}; kind={receipt.VerifiedMetadata.Kind}; size={receipt.VerifiedMetadata.Width}x{receipt.VerifiedMetadata.Height}; color={receipt.VerifiedMetadata.ColorProfile}");
+Console.WriteLine($"watermark={(approvedWatermark is null ? "none" : "approved")}");
 
 var queuedOutput = Path.Combine(Path.GetDirectoryName(destination) ?? ".", $"{Path.GetFileNameWithoutExtension(destination)}-queue-retry.mp4");
 await using var exportQueue = new ExportQueueService();

@@ -17,6 +17,7 @@ Audit checkpoint: 2026-10-18, latest previously verified green packaging run `39
 - Latest hosted bundle evidence: run `39099847174` passed documentation/schema validation plus Windows, macOS and Linux restore, advisory, build, native-media, formatting, tests, publish, portable archive, installer, support-file, relaunch and checksum jobs. This verifies the optional reviewed-bundle mechanism, not legal redistribution, clean-host production recovery, signing/notarization or V1 completion.
 - Latest clean-`PATH` evidence: run `39100413937` passed bundled media import/audio probing with host FFmpeg removed from `PATH` on Windows, macOS and Linux, alongside support-file packaging, relaunch, uninstall and checksum jobs. This strengthens runtime independence evidence but does not clear legal, clean-host production, signing or V1 gates.
 - Latest provenance evidence: run `39101406586` passed per-OS native-bundle manifest generation and pre-package verification with bounded tool versions, byte lengths and SHA-256 for every staged file, supporting FT-1003 review without closing its legal/redistribution gate.
+- Latest branding evidence: the policy-named source attachment is imported at `assets/brand/frame-theory-original.png`, byte-verified in the unit suite and guarded in CI; hosted branded-output and release-owner rights/visual review remain open.
 
 ## P0 blockers before V1
 
