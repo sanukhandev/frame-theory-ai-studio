@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Current hardening batch checkpoint (2026-10-18):** Full local Release validation passes 226 unit tests and 2 golden tests with 0 failures; repository validation and `git diff --check` also pass. The current batch includes the timeline status binding, package/native-manifest traversal hardening and linked-media import guard. It remains local until the tenth commit is complete and pushed for hosted revalidation.
+
 **Media import boundary checkpoint (2026-10-18):** Waveform extraction now independently rejects reparse-point media paths before invoking FFmpeg, even when a composed or test probe adapter does not enforce the same rule. Focused media-import coverage passes 3/3, the Release build is warning-free through the focused compile, formatting and diff checks pass, and original source bytes remain untouched.
 
 **Package traversal checkpoint (2026-10-18):** `scripts/verify_package.ps1` now rejects a reparse-point package root or directory entry before recursive discovery, then hashes only entries from the fail-closed walk. Native bundle generation and verification also reject linked manifests, linked entries and unexpected subdirectories. PowerShell parsing, a real one-file package checksum smoke, repository validation and `git diff --check` pass; the hosted package-manifest gate now includes a real directory-symlink rejection regression, pending the next hosted run.
