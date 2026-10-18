@@ -8,6 +8,7 @@ Audit checkpoint: 2026-10-18, latest verified green complete matrix run `3911831
 - Latest hosted 50-commit gate: run `39168203239` for commit `742cd38` passed documentation/schema validation plus Ubuntu, Windows and macOS restore/build/test, native media, headless shell/UI automation, formatting, portable archives, installer/DMG/DEB validation, packaged relaunch and checksums. The six partial P0 gates remain open; this is not a V1-complete claim.
 - Current FT-1102 integrity hardening: `MotionFrame` exposes defensive pixel snapshots while preserving a non-allocating internal tracker path; focused motion coverage includes caller-mutation protection. This is local evidence and does not replace manual visual-quality acceptance.
 - Current foundation integrity hardening: `CapabilityReport` snapshots its entries, preserving dependency status after caller-owned collections are changed. Focused Foundation coverage includes the regression; this does not close any manual release gate.
+- Current timeline integrity hardening: `TimelineSeekResult` snapshots synchronized samples, preserving seek results after caller-owned collections are changed. Focused timeline coverage includes the regression; manual view synchronization remains open.
 
 ## Evidence
 

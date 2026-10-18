@@ -206,10 +206,21 @@ public sealed record TimelineSample(
     long? SourceFrame,
     long? SourceSample);
 
-public sealed record TimelineSeekResult(
-    long TimelineFrame,
-    TimeSpan Position,
-    IReadOnlyList<TimelineSample> Samples);
+public sealed record TimelineSeekResult
+{
+    public TimelineSeekResult(long timelineFrame, TimeSpan position, IReadOnlyList<TimelineSample> samples)
+    {
+        TimelineFrame = timelineFrame;
+        Position = position;
+        Samples = Array.AsReadOnly((samples ?? throw new ArgumentNullException(nameof(samples))).ToArray());
+    }
+
+    public long TimelineFrame { get; }
+
+    public TimeSpan Position { get; }
+
+    public IReadOnlyList<TimelineSample> Samples { get; }
+}
 
 public sealed class TimelineGraph
 {

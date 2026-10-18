@@ -71,4 +71,16 @@ public sealed class TimelineTests
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineClip>>(track.Clips).IsReadOnly);
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineTrack>>(graph.Tracks).IsReadOnly);
     }
+
+    [Xunit.Fact]
+    public void SeekResultSnapshotsSamples()
+    {
+        var samples = new List<TimelineSample> { new("video", TimelineTrackKind.Video, MediaId.Parse(new string('f', 64)), 1, null) };
+        var result = new TimelineSeekResult(1, TimeSpan.FromSeconds(1), samples);
+
+        samples.Clear();
+
+        Xunit.Assert.Single(result.Samples);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineSample>>(result.Samples).IsReadOnly);
+    }
 }
