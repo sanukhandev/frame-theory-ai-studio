@@ -723,6 +723,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             try
             {
                 var fullPath = Path.GetFullPath(path);
+                if (LocalPathSecurity.ContainsReparsePoint(fullPath))
+                {
+                    throw new InvalidDataException("Symlinked media imports are not accepted.");
+                }
+
                 var media = await _mediaImporter.ImportAsync(new Uri(fullPath), cancellationToken);
                 if (imported.All(item => item.Id != media.Metadata.Id))
                 {
@@ -749,7 +754,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 TimelineEditor.AddMedia(media.Metadata);
                 TimelineEditor.AddBeatMarkers(media.Metadata.Id, media.WaveformPeaks);
             }
-            catch (Exception exception) when (exception is IOException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException)
+            catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidOperationException or MediaImportException or MediaProbeException or MediaDecodeException)
             {
                 _diagnosticsLog.Record("media-import-failed", exception);
                 failures.Add($"{Path.GetFileName(path)} ({exception.Message})");

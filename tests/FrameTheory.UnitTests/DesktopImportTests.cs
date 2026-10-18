@@ -38,6 +38,41 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task MediaImportRejectsSymlinkBeforeCallingImporter()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-import-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-desktop-import-external-");
+        try
+        {
+            var targetPath = Path.Combine(externalDirectory.FullName, "clip.mp4");
+            var linkedPath = Path.Combine(directory.FullName, "clip.mp4");
+            await File.WriteAllBytesAsync(targetPath, [1, 2, 3]);
+            File.CreateSymbolicLink(linkedPath, targetPath);
+            var importer = new CountingImporter();
+            var viewModel = new MainWindowViewModel(new WorkspaceCatalog(), new StubCapabilityDetector(), importer);
+
+            await viewModel.ImportFilesAsync([linkedPath], CancellationToken.None);
+
+            Xunit.Assert.Equal(0, importer.Calls);
+            Xunit.Assert.Contains("symlink", viewModel.MediaImportStatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task TimelinePreviewDecodesTheCurrentVideoSample()
     {
         var decoder = new StubPreviewDecoder();
@@ -214,6 +249,17 @@ public sealed class DesktopImportTests
     {
         public Task<ImportedMedia> ImportAsync(Uri file, CancellationToken cancellationToken) =>
             throw new MediaProbeException("corrupt input");
+    }
+
+    private sealed class CountingImporter : IMediaImporter
+    {
+        public int Calls { get; private set; }
+
+        public Task<ImportedMedia> ImportAsync(Uri file, CancellationToken cancellationToken)
+        {
+            Calls++;
+            throw new InvalidOperationException("The importer should not receive a redirected path.");
+        }
     }
 
     private sealed class VideoImporter : IMediaImporter

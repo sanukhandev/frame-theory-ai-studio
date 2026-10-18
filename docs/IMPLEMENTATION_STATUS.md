@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Desktop drag/drop boundary checkpoint (2026-10-18):** Main-window media import now rejects reparse-point paths before invoking the importer and reports a user-facing failure. The regression proves a redirected file never reaches a custom importer; focused desktop import coverage passes 11/11, repository validation, formatting, diff checks and the Release Desktop build are green.
+
 **AI workspace hierarchy checkpoint (2026-10-18):** The optional Gemini surface now separates Provider, Consent and analysis scope, Activity, Plan input and revision, Review and apply, and Reusable recipe sections. Existing secure key storage, explicit upload consent, schema validation and transactional actions remain functional; desktop build, headless shell and formatting checks pass. Hosted visual revalidation remains pending.
 
 **Color workspace hierarchy checkpoint (2026-10-18):** The Color workspace now groups reference matching, before/after preview, grade controls and reusable style-library actions, with the real image previews and consent-gated Gemini actions preserved. Desktop build, headless shell coverage and formatting checks pass; hosted visual revalidation remains pending.
