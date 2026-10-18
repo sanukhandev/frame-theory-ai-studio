@@ -67,6 +67,40 @@ public sealed class AiRecipeStoreTests
         }
     }
 
+    [Xunit.Fact]
+    public async Task RecipeStoreRejectsReparsePointFiles()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-ai-recipe-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-ai-recipe-external-");
+        try
+        {
+            var store = new AiRecipeStore();
+            var externalPath = Path.Combine(externalDirectory.FullName, "recipe.ftrecipe.json");
+            await store.SaveAtomicAsync(externalPath, "External", PlanJson("external"), CancellationToken.None);
+            var linkedPath = Path.Combine(directory.FullName, "recipe.ftrecipe.json");
+            File.CreateSymbolicLink(linkedPath, externalPath);
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                store.LoadAsync(linkedPath, CancellationToken.None));
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                store.SaveAtomicAsync(linkedPath, "Changed", PlanJson("changed"), CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
+
     private static string PlanJson(string planId) => $$"""
         {
           "schemaVersion": "1.0",

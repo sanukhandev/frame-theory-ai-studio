@@ -29,6 +29,8 @@ public sealed class AiRecipeStore
             throw new DirectoryNotFoundException(directory);
         }
 
+        EnsureRegularPath(fullPath, directory);
+
         var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
         try
         {
@@ -62,6 +64,9 @@ public sealed class AiRecipeStore
         {
             throw new FileNotFoundException("The AI recipe was not found.", fullPath);
         }
+
+        EnsureRegularPath(fullPath, fileInfo.DirectoryName
+            ?? throw new ArgumentException("A recipe directory is required.", nameof(path)));
 
         if (fileInfo.Length > MaximumRecipeBytes)
         {
@@ -111,6 +116,19 @@ public sealed class AiRecipeStore
         }
 
         return Path.GetFullPath(path);
+    }
+
+    private static void EnsureRegularPath(string fullPath, string directory)
+    {
+        if ((File.GetAttributes(directory) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new InvalidDataException("The AI recipe directory must not be a reparse point.");
+        }
+
+        if (File.Exists(fullPath) && (File.GetAttributes(fullPath) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new InvalidDataException("The AI recipe file must not be a reparse point.");
+        }
     }
 
     private static void TryDelete(string path)
