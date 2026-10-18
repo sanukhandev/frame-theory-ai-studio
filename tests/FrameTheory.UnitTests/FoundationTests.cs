@@ -493,6 +493,33 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Status for the latest local project save and timeline export.",
                     ToolTip.GetTip(timelineActionStatus));
+                timelineSections["Analysis and rough cut section"].IsExpanded = true;
+                timelineSections["Titles and captions section"].IsExpanded = true;
+                Dispatcher.UIThread.RunJobs();
+                var roughCutStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Rough cut status");
+                Xunit.Assert.True(roughCutStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, roughCutStatus.FontSize);
+                Xunit.Assert.Equal("Status of the latest waveform activity rough-cut plan.", ToolTip.GetTip(roughCutStatus));
+                var titleAnimationStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Title animation status");
+                Xunit.Assert.True(titleAnimationStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, titleAnimationStatus.FontSize);
+                Xunit.Assert.Equal("Status of the latest title animation edit.", ToolTip.GetTip(titleAnimationStatus));
+                var captionStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Caption status");
+                Xunit.Assert.True(captionStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, captionStatus.FontSize);
+                Xunit.Assert.Equal("Status of the latest local caption import or transcription.", ToolTip.GetTip(captionStatus));
+                var watermarkStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Watermark status");
+                Xunit.Assert.True(watermarkStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, watermarkStatus.FontSize);
+                Xunit.Assert.Equal("Status of the selected watermark for timeline export.", ToolTip.GetTip(watermarkStatus));
                 Xunit.Assert.False(window.GetVisualDescendants()
                     .OfType<Button>()
                     .Single(control => AutomationProperties.GetName(control) == "Stop timeline preview")

@@ -2927,9 +2927,21 @@ public sealed class MainWindow : Window
         var applyRoughCut = new Button { Content = "Apply reviewed rough cut" };
         AutomationProperties.SetName(applyRoughCut, "Apply reviewed rough cut");
         applyRoughCut.Click += (_, _) => viewModel.ApplyRoughCutPlan();
-        var roughCutStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var roughCutStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(roughCutStatus, "Rough cut status");
-        roughCutStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.RoughCutStatusText)));
+        ToolTip.SetTip(roughCutStatus, "Status of the latest waveform activity rough-cut plan.");
+        roughCutStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.RoughCutStatusText)));
         var snap = new CheckBox { Content = "Snap to clip boundaries" };
         AutomationProperties.SetName(snap, "Snap timeline edits to clip boundaries");
         ToolTip.SetTip(snap, "Keep clip moves, trims and inserts aligned to nearby clip edges.");
@@ -3141,9 +3153,21 @@ public sealed class MainWindow : Window
         var pushTitle = new Button { Content = "Push title in" };
         AutomationProperties.SetName(pushTitle, "Apply push-in animation to last title");
         pushTitle.Click += (_, _) => RunTimelineAction(() => timeline.ApplyAnimationPresetToLastTitle(TimelineAnimationPreset.PushIn));
-        var titleAnimationStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var titleAnimationStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(titleAnimationStatus, "Title animation status");
-        titleAnimationStatus.Bind(TextBlock.TextProperty, new Binding(nameof(TimelineEditorViewModel.TitleAnimationStatus)));
+        ToolTip.SetTip(titleAnimationStatus, "Status of the latest title animation edit.");
+        titleAnimationStatus.Bind(TextBox.TextProperty, new Binding(nameof(TimelineEditorViewModel.TitleAnimationStatus)));
         var importCaptions = new Button { Content = "Import SRT" };
         AutomationProperties.SetName(importCaptions, "Import SRT captions");
         importCaptions.Click += async (_, _) =>
@@ -3224,9 +3248,21 @@ public sealed class MainWindow : Window
         {
             Mode = BindingMode.TwoWay
         });
-        var captionStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var captionStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(captionStatus, "Caption status");
-        captionStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CaptionStatusText)));
+        ToolTip.SetTip(captionStatus, "Status of the latest local caption import or transcription.");
+        captionStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.CaptionStatusText)));
         var transcriptionConsent = new CheckBox { Content = "I approve uploading this exact local audio file or extracted video audio track to Gemini" };
         AutomationProperties.SetName(transcriptionConsent, "Gemini transcription upload consent");
         var transcribeAudio = new Button { Content = "Transcribe approved audio" };
@@ -3567,9 +3603,21 @@ public sealed class MainWindow : Window
         var retryExport = new Button { Content = "Retry last export" };
         AutomationProperties.SetName(retryExport, "Retry last timeline export");
         retryExport.Click += async (_, _) => await viewModel.RetryLastTimelineExportAsync(CancellationToken.None);
-        var watermarkStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var watermarkStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(watermarkStatus, "Watermark status");
-        watermarkStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.WatermarkStatusText"));
+        ToolTip.SetTip(watermarkStatus, "Status of the selected watermark for timeline export.");
+        watermarkStatus.Bind(TextBox.TextProperty, new Binding("TimelineEditor.WatermarkStatusText"));
         var useApprovedWatermark = new Button { Content = "Use Frame Theory watermark" };
         AutomationProperties.SetName(useApprovedWatermark, "Use approved Frame Theory watermark");
         useApprovedWatermark.Click += (_, _) => RunTimelineAction(timeline.SetApprovedWatermark);
