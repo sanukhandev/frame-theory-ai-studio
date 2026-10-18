@@ -1820,6 +1820,7 @@ public sealed class MainWindow : Window
             Mode = BindingMode.TwoWay
         });
         var apiKey = new TextBox { PlaceholderText = "Gemini API key (stored securely)", PasswordChar = '•' };
+        ToolTip.SetTip(apiKey, "Enter a user-provided key; it is stored only in the platform secret store.");
         var status = new TextBox
         {
             IsReadOnly = true,
@@ -1849,12 +1850,16 @@ public sealed class MainWindow : Window
         clear.Click += async (_, _) => await settings.ClearAsync(CancellationToken.None);
         var videoFrames = new CheckBox { Content = "Video frames", IsChecked = true };
         AutomationProperties.SetName(videoFrames, "Gemini video frame scope");
+        ToolTip.SetTip(videoFrames, "Include bounded local video-frame samples in the approved analysis scope.");
         var audioWaveform = new CheckBox { Content = "Audio waveform" };
         AutomationProperties.SetName(audioWaveform, "Gemini audio waveform scope");
+        ToolTip.SetTip(audioWaveform, "Include a bounded local audio waveform sample in the approved analysis scope.");
         var photoPreview = new CheckBox { Content = "Photo preview" };
         AutomationProperties.SetName(photoPreview, "Gemini photo preview scope");
+        ToolTip.SetTip(photoPreview, "Include a bounded local photo preview in the approved analysis scope.");
         var uploadConsent = new CheckBox { Content = "I approve uploading this exact sample scope to Gemini" };
         AutomationProperties.SetName(uploadConsent, "Gemini upload consent");
+        ToolTip.SetTip(uploadConsent, "Required before any selected analysis samples can leave this device.");
         var prepareAnalysis = new Button { Content = "Prepare local analysis samples" };
         AutomationProperties.SetName(prepareAnalysis, "Prepare local Gemini analysis samples");
         ToolTip.SetTip(prepareAnalysis, "Build bounded local samples for the selected media scope before any optional upload.");
@@ -1927,7 +1932,7 @@ public sealed class MainWindow : Window
         _ = settings.LoadAsync(CancellationToken.None);
         var providerSection = CreateInspectorExpander(
             "Provider",
-            CreateSectionContent(model, apiKey, CreateFlow(save, clear), status),
+            CreateSectionContent(CreateLabeledField("Model", model), CreateLabeledField("API key", apiKey), CreateFlow(save, clear), status),
             expanded: true);
         var consentSection = CreateInspectorExpander(
             "Consent and analysis scope",
@@ -2219,7 +2224,7 @@ public sealed class MainWindow : Window
             expanded: true);
         var recipeSection = CreateInspectorExpander(
             "Reusable recipe",
-            CreateSectionContent(CreateFlow(recipeName, saveRecipe, loadRecipe), recipeStatus),
+            CreateSectionContent(CreateFlow(CreateLabeledField("Recipe name", recipeName), saveRecipe, loadRecipe), recipeStatus),
             expanded: false);
         return new Border
         {

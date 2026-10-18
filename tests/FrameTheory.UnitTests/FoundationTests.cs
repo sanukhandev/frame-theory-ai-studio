@@ -1096,6 +1096,12 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Choose the optional Gemini model used for approved analysis requests.",
                     ToolTip.GetTip(geminiModel));
+                Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Model");
+                Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "API key");
+                Xunit.Assert.Equal(
+                    "Required before any selected analysis samples can leave this device.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<CheckBox>().Single(control => AutomationProperties.GetName(control) == "Gemini upload consent")));
+                Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Recipe name");
                 var activitySection = window.GetVisualDescendants()
                     .OfType<Expander>()
                     .Single(control => AutomationProperties.GetName(control) == "Activity section");
