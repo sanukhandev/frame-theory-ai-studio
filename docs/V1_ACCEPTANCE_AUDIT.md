@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Current cache-index increment: canceled atomic cache-index saves preserve the previous file while cleanup failures cannot replace the original cancellation/error; focused recovery coverage remains green. Release and native storage acceptance remain open.
+
 Audit checkpoint: 2026-10-19, latest verified green complete matrix run `39172309590`.
 
 - Latest green hosted responsive-shell revalidation: run `39152462667` for commit `afe2490` passed documentation/schema validation plus Windows, macOS and Linux restore/build/test, native FFmpeg smoke, formatting, headless shell, Windows UI automation, portable archive, Windows installer, macOS DMG, Linux DEB, packaged relaunch and checksum gates. This confirms automated evidence for the responsive editor-shell increment but does not close manual native visual, 1280x800/HiDPI, screen-reader, legal, signing or clean-host release gates.

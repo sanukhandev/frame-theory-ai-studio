@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Cache-index cancellation checkpoint (2026-10-19):** Cache-index temporary-file cleanup no longer masks the original save or cancellation failure, and a canceled replacement save preserves the existing index. Focused recovery coverage passes; the next full release gate remains required before the 50-commit push.
+
 **Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. The exact 50-commit batch was pushed at `acd4e83`; the next local status checkpoint will remain unpushed until another 50 verified commits accumulate.
 
 **Hosted Release gate checkpoint (2026-10-19):** Quality Gates run `39172309590` passed for `acd4e83` across documentation/schema validation, Ubuntu, Windows and macOS restore/build/test, native media, headless shell/UI automation, formatting, portable archives, installer/DMG/DEB validation, relaunch and checksums. The six tracked partial P0 gates remain open because manual visual/HiDPI/screen-reader, legal redistribution, signing/clean-host and final-audit evidence are still required.

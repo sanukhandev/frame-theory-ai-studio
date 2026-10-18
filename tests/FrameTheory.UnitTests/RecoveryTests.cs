@@ -79,6 +79,36 @@ public sealed class RecoveryTests
     }
 
     [Xunit.Fact]
+    public async Task CacheIndexStoreDoesNotReplaceExistingFileWhenCanceled()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-cache-cancel-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "index.json");
+            var store = new JsonCacheIndexStore();
+            var original = new CacheIndex();
+            original.Register("original", "cache/original.bin", 1, DateTimeOffset.UtcNow);
+            await store.SaveAtomicAsync(path, original, CancellationToken.None);
+
+            using var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+            var replacement = new CacheIndex();
+            replacement.Register("replacement", "cache/replacement.bin", 2, DateTimeOffset.UtcNow);
+
+            await Xunit.Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                store.SaveAtomicAsync(path, replacement, cancellation.Token));
+
+            var loaded = await store.LoadAsync(path, CancellationToken.None);
+            Xunit.Assert.True(loaded.TryGet("original", out _));
+            Xunit.Assert.False(loaded.TryGet("replacement", out _));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task CacheIndexStoreRejectsReparsePointFiles()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-cache-boundary-");
