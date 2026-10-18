@@ -3296,6 +3296,7 @@ public sealed class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(slider, label);
+        ToolTip.SetTip(slider, $"Adjust {label} from {minimum:0.00} to {maximum:0.00}.");
         var valueLabel = new TextBlock
         {
             Width = 48,
@@ -3305,6 +3306,7 @@ public sealed class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(valueLabel, $"{label} value");
+        ToolTip.SetTip(valueLabel, $"Current {label} value: {value:0.00}.");
         slider.ValueChanged += (_, args) => setter((float)args.NewValue);
         slider.ValueChanged += (_, args) => valueLabel.Text = args.NewValue.ToString("0.00", CultureInfo.InvariantCulture);
         source.PropertyChanged += (_, args) =>

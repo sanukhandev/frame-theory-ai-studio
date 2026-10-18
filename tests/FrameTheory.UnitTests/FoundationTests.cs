@@ -425,6 +425,11 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Exposure EV value")
                     .Text);
+                Xunit.Assert.Equal(
+                    "Adjust Exposure EV from -8.00 to 8.00.",
+                    ToolTip.GetTip(window.GetVisualDescendants()
+                        .OfType<Slider>()
+                        .Single(control => AutomationProperties.GetName(control) == "Exposure EV")));
                 Xunit.Assert.Null(window.GetVisualDescendants()
                     .OfType<Image>()
                     .Single(control => AutomationProperties.GetName(control) == "Color waveform scope")
