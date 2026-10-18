@@ -565,6 +565,11 @@ public sealed class JsonTranscriptProvider : IProgressiveTranscriptionProvider
             throw new FileNotFoundException("The transcript JSON file was not found.", _transcriptPath);
         }
 
+        if ((File.GetAttributes(_transcriptPath) & FileAttributes.ReparsePoint) != 0)
+        {
+            throw new InvalidDataException("Symlinked transcript files are not accepted.");
+        }
+
         if (new FileInfo(_transcriptPath).Length > MaximumBytes)
         {
             throw new InvalidDataException("The transcript JSON file exceeds the supported size.");

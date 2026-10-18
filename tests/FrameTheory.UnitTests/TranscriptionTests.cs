@@ -88,6 +88,42 @@ public sealed class TranscriptionTests
     }
 
     [Xunit.Fact]
+    public async Task JsonProviderRejectsReparsePointTranscript()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-transcript-link-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "spoken.mp4");
+            var transcriptPath = Path.Combine(directory.FullName, "spoken.transcript.json");
+            var linkedTranscriptPath = Path.Combine(directory.FullName, "linked.transcript.json");
+            await File.WriteAllTextAsync(sourcePath, "media");
+            var source = new Uri(sourcePath);
+            await File.WriteAllTextAsync(transcriptPath, $$"""
+                {
+                  "Source": "{{source.AbsoluteUri}}",
+                  "SourceFingerprint": "{{Fingerprint(sourcePath)}}",
+                  "Words": [{ "Text": "hello", "StartMs": 100, "EndMs": 400 }]
+                }
+                """);
+
+            try
+            {
+                File.CreateSymbolicLink(linkedTranscriptPath, transcriptPath);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or PlatformNotSupportedException)
+            {
+                return;
+            }
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => new JsonTranscriptProvider(linkedTranscriptPath).TranscribeAsync(source, CancellationToken.None));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task JsonProviderReportsProgressAndHonorsCancellation()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-transcript-progress-");
