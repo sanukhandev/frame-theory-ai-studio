@@ -3297,12 +3297,20 @@ public sealed class MainWindow : Window
     {
         var expander = new Expander
         {
-            Header = new TextBlock
+            Header = new Border
             {
-                Text = title.ToUpperInvariant(),
-                FontSize = 10,
-                FontWeight = FontWeight.SemiBold,
-                Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+                Padding = new Thickness(8, 7),
+                MinHeight = 34,
+                CornerRadius = new CornerRadius(4),
+                Background = Brushes.Transparent,
+                Child = new TextBlock
+                {
+                    Text = title.ToUpperInvariant(),
+                    FontSize = 10,
+                    FontWeight = FontWeight.SemiBold,
+                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190)),
+                    VerticalAlignment = VerticalAlignment.Center
+                }
             },
             Content = content,
             IsExpanded = expanded,
