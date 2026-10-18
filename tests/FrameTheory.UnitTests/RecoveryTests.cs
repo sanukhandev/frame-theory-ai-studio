@@ -190,6 +190,11 @@ public sealed class RecoveryTests
             var mediaId = MediaId.Create(new Uri("file:///media/clip.mov"), "sha256:clip");
             Xunit.Assert.Throws<ArgumentException>(() => new MediaReference(mediaId, "../outside/clip.mov", "sha256:clip"));
             Xunit.Assert.Throws<ArgumentException>(() => new CacheIndex().Register("entry", "../outside/cache.bin", 1, DateTimeOffset.UtcNow));
+            Xunit.Assert.Throws<ArgumentException>(() => new CacheIndex().Register(
+                "entry",
+                $" {Path.DirectorySeparatorChar}outside{Path.DirectorySeparatorChar}cache.bin ",
+                1,
+                DateTimeOffset.UtcNow));
             var snapshot = new ProjectSnapshot(
                 "project",
                 new RationalFrameRate(30, 1),

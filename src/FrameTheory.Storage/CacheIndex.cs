@@ -17,7 +17,7 @@ public sealed class CacheIndex
     public void Register(string key, string relativePath, long sizeBytes, DateTimeOffset lastAccessUtc)
     {
         var normalizedPath = relativePath?.Trim().Replace('\\', '/') ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(relativePath) || Path.IsPathRooted(relativePath) ||
+        if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(relativePath) || Path.IsPathRooted(normalizedPath) ||
             normalizedPath == ".." || normalizedPath.StartsWith("../", StringComparison.Ordinal) || normalizedPath.Contains("/../", StringComparison.Ordinal))
         {
             throw new ArgumentException("Cache keys and paths must be non-empty and relative.");
