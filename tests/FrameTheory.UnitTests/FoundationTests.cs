@@ -441,6 +441,12 @@ public sealed class FoundationTests
                         .OfType<TextBox>()
                         .Single(control => AutomationProperties.GetName(control) == "Quick save status")
                         .Text);
+                Xunit.Assert.Equal(
+                    11,
+                    window.GetVisualDescendants()
+                        .OfType<TextBox>()
+                        .Single(control => AutomationProperties.GetName(control) == "Quick save status")
+                        .FontSize);
                 var timelineActionStatus = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline action status");

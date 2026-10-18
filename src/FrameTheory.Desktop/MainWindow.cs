@@ -2209,6 +2209,8 @@ public sealed class MainWindow : Window
         var timelinePreviewStatus = new TextBox
         {
             IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
             TextWrapping = TextWrapping.Wrap,
             Background = Brushes.Transparent,
             BorderBrush = Brushes.Transparent,
@@ -2227,6 +2229,8 @@ public sealed class MainWindow : Window
         var motionAnalysisStatus = new TextBox
         {
             IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
             TextWrapping = TextWrapping.Wrap,
             Background = Brushes.Transparent,
             BorderBrush = Brushes.Transparent,
@@ -3184,6 +3188,8 @@ public sealed class MainWindow : Window
         var quickSaveStatus = new TextBox
         {
             IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
             TextWrapping = TextWrapping.Wrap,
             Background = Brushes.Transparent,
             BorderBrush = Brushes.Transparent,
@@ -3286,6 +3292,8 @@ public sealed class MainWindow : Window
         var quickExportStatus = new TextBox
         {
             IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
             TextWrapping = TextWrapping.Wrap,
             Background = Brushes.Transparent,
             BorderBrush = Brushes.Transparent,
