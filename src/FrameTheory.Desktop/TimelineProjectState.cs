@@ -218,6 +218,8 @@ public sealed class TimelineWatermarkProjectState
 {
     public string SourcePath { get; set; } = string.Empty;
 
+    public bool IsApprovedAsset { get; set; }
+
     public float Opacity { get; set; }
 
     public int Margin { get; set; }

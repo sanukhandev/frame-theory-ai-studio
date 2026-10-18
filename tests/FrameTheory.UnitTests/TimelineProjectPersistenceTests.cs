@@ -78,6 +78,25 @@ public sealed class TimelineProjectPersistenceTests
     }
 
     [Xunit.Fact]
+    public void TimelineStateRoundTripResolvesApprovedWatermarkFromPortableAssetReference()
+    {
+        var editor = new TimelineEditorViewModel();
+        editor.SetApprovedWatermark();
+
+        var state = editor.CaptureProjectState();
+        Xunit.Assert.NotNull(state.Watermark);
+        Xunit.Assert.True(state.Watermark!.IsApprovedAsset);
+        Xunit.Assert.Equal("assets/brand/frame-theory-original.png", state.Watermark.SourcePath);
+
+        var restored = new TimelineEditorViewModel();
+        restored.RestoreProjectState(TimelineProjectStateJson.Deserialize(TimelineProjectStateJson.Serialize(state)));
+
+        Xunit.Assert.Equal(
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "assets/brand/frame-theory-original.png")),
+            restored.Watermark!.SourcePath);
+    }
+
+    [Xunit.Fact]
     public void TimelineStateRoundTripPreservesSpeedRamp()
     {
         var mediaId = MediaId.Parse(new string('e', 64));

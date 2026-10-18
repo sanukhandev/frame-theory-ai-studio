@@ -1381,16 +1381,7 @@ public sealed class MainWindow : Window
         watermarkStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.WatermarkStatusText"));
         var useApprovedWatermark = new Button { Content = "Use Frame Theory watermark" };
         AutomationProperties.SetName(useApprovedWatermark, "Use approved Frame Theory watermark");
-        useApprovedWatermark.Click += (_, _) =>
-        {
-            if (!BrandAssetCatalog.TryGetApprovedLogoPath(out var path))
-            {
-                operationStatus.Text = "The approved Frame Theory watermark is unavailable in this build.";
-                return;
-            }
-
-            RunTimelineAction(() => timeline.SetWatermark(path));
-        };
+        useApprovedWatermark.Click += (_, _) => RunTimelineAction(timeline.SetApprovedWatermark);
         var selectWatermark = new Button { Content = "Select watermark" };
         AutomationProperties.SetName(selectWatermark, "Select custom watermark");
         selectWatermark.Click += async (_, _) =>

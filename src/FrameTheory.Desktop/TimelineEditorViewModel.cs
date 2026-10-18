@@ -379,7 +379,10 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         BeforeAfterStyle = _beforeAfterStyle,
         Watermark = _watermark is null ? null : new TimelineWatermarkProjectState
         {
-            SourcePath = _watermark.SourcePath,
+            SourcePath = BrandAssetCatalog.IsApprovedLogoPath(_watermark.SourcePath)
+                ? BrandAssetCatalog.ApprovedLogoRelativePath
+                : _watermark.SourcePath,
+            IsApprovedAsset = BrandAssetCatalog.IsApprovedLogoPath(_watermark.SourcePath),
             Opacity = _watermark.Opacity,
             Margin = _watermark.Margin
         },
@@ -452,9 +455,12 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
                 word.Text,
                 TimeSpan.FromTicks(word.StartTicks),
                 TimeSpan.FromTicks(word.EndTicks))))).ToArray();
+        var watermarkPath = state.Watermark?.IsApprovedAsset == true && BrandAssetCatalog.TryGetApprovedLogoPath(out var approvedPath)
+            ? approvedPath
+            : state.Watermark?.SourcePath;
         var watermark = state.Watermark is null
             ? null
-            : new TimelineWatermark(state.Watermark.SourcePath, state.Watermark.Opacity, state.Watermark.Margin);
+            : new TimelineWatermark(watermarkPath!, state.Watermark.Opacity, state.Watermark.Margin);
         if (!Enum.IsDefined(state.BeatDetectionMode) ||
             (state.BeforeAfterStyle is { } beforeAfterStyle && !Enum.IsDefined(beforeAfterStyle)) ||
             double.IsNaN(state.FramesPerPixel) || double.IsInfinity(state.FramesPerPixel) || state.FramesPerPixel <= 0)
@@ -624,6 +630,16 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _watermark = new TimelineWatermark(sourcePath);
         OnPropertyChanged(nameof(Watermark));
         OnPropertyChanged(nameof(WatermarkStatusText));
+    }
+
+    public void SetApprovedWatermark()
+    {
+        if (!BrandAssetCatalog.TryGetApprovedLogoPath(out var path))
+        {
+            throw new InvalidOperationException("The approved Frame Theory watermark is unavailable in this build.");
+        }
+
+        SetWatermark(path);
     }
 
     public void ClearWatermark()

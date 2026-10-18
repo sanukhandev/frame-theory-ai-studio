@@ -2,11 +2,11 @@ namespace FrameTheory.Desktop;
 
 internal static class BrandAssetCatalog
 {
-    private static readonly string[] ApprovedLogoSegments = ["assets", "brand", "frame-theory-original.png"];
+    public const string ApprovedLogoRelativePath = "assets/brand/frame-theory-original.png";
 
     public static bool TryGetApprovedLogoPath(out string path)
     {
-        path = Path.Combine([AppContext.BaseDirectory, .. ApprovedLogoSegments]);
+        path = Path.Combine(AppContext.BaseDirectory, ApprovedLogoRelativePath);
         if (!File.Exists(path))
         {
             path = string.Empty;
@@ -34,4 +34,10 @@ internal static class BrandAssetCatalog
 
         return true;
     }
+
+    public static bool IsApprovedLogoPath(string path) =>
+        string.Equals(
+            Path.GetFullPath(path),
+            Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, ApprovedLogoRelativePath)),
+            OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal);
 }
