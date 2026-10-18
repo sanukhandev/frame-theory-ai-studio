@@ -106,19 +106,16 @@ public sealed class JsonProjectRepository : IProjectRepository
 
     private static void EnsureRegularProjectPath(string fullPath, string directory)
     {
-        if (IsReparsePoint(directory))
+        if (LocalPathSecurity.ContainsReparsePoint(directory))
         {
             throw new InvalidDataException("The project directory must not be a reparse point.");
         }
 
-        if (File.Exists(fullPath) && IsReparsePoint(fullPath))
+        if (File.Exists(fullPath) && LocalPathSecurity.ContainsReparsePoint(fullPath))
         {
             throw new InvalidDataException("The project file must not be a reparse point.");
         }
     }
-
-    private static bool IsReparsePoint(string path) =>
-        (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
 
     private static void TryDelete(string path)
     {

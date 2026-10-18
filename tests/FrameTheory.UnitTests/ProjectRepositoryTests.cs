@@ -179,4 +179,38 @@ public sealed class ProjectRepositoryTests
             externalDirectory.Delete(true);
         }
     }
+
+    [Xunit.Fact]
+    public async Task ProjectRepositoryRejectsReparsePointProjectAncestors()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-project-ancestor-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-project-ancestor-external-");
+        try
+        {
+            var linkedRoot = Path.Combine(directory.FullName, "linked");
+            Directory.CreateSymbolicLink(linkedRoot, externalDirectory.FullName);
+            var projectDirectory = Directory.CreateDirectory(Path.Combine(linkedRoot, "nested"));
+            var snapshot = new ProjectSnapshot("project", new RationalFrameRate(24, 1), 640, 480, "sRGB");
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                new JsonProjectRepository().SaveAtomicAsync(
+                    Path.Combine(projectDirectory.FullName, "project.ftstudio"),
+                    snapshot,
+                    CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
 }
