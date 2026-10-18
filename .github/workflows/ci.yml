@@ -264,6 +264,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/frame-theory-dmg"
           hdiutil attach -nobrowse -readonly artifacts/installer/FrameTheoryStudioAI-*.dmg -mountpoint "$RUNNER_TEMP/frame-theory-dmg"
           test -x "$RUNNER_TEMP/frame-theory-dmg/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
+          grep -F '<key>CFBundleShortVersionString</key><string>0.1.1</string>' "$RUNNER_TEMP/frame-theory-dmg/Frame Theory Studio AI.app/Contents/Info.plist"
           pwsh -NoProfile -File ./scripts/smoke_desktop.ps1 -AssemblyPath "$RUNNER_TEMP/frame-theory-dmg/Frame Theory Studio AI.app/Contents/MacOS/FrameTheoryStudio"
           hdiutil detach "$RUNNER_TEMP/frame-theory-dmg"
       - name: Build Linux DEB validation
@@ -273,6 +274,8 @@ jobs:
           chmod +x scripts/package_linux_deb.sh
           scripts/package_linux_deb.sh linux-x64 artifacts/installer 0.1.1
           dpkg-deb --info artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb
+          test "$(dpkg-deb --field artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb Version)" = "0.1.1"
+          test "$(dpkg-deb --field artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb Architecture)" = "amd64"
           dpkg-deb --contents artifacts/installer/frame-theory-studio-ai_0.1.1_amd64.deb | grep -F '/usr/bin/frame-theory-studio-ai'
           deb_directory="$RUNNER_TEMP/frame-theory-deb"
           rm -rf "$deb_directory"
