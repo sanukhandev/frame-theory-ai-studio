@@ -185,6 +185,14 @@ public sealed class DesktopImportTests
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(2, viewModel.TimelineEditor.ScrollFrame);
                 Xunit.Assert.Equal(40, rulerViewport.Offset.X);
+
+                var resetView = window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Reset timeline view");
+                resetView.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(1, viewModel.TimelineEditor.FramesPerPixel);
+                Xunit.Assert.Equal(0, viewModel.TimelineEditor.ScrollFrame);
             }
             finally
             {

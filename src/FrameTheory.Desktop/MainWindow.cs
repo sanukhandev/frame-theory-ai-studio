@@ -2720,6 +2720,14 @@ public sealed class MainWindow : Window
                 zoomValue.Text = $"{timeline.FramesPerPixel:0.00} frames/px";
             }
         };
+        var resetTimelineView = new Button { Content = "Reset view" };
+        AutomationProperties.SetName(resetTimelineView, "Reset timeline view");
+        ToolTip.SetTip(resetTimelineView, "Return the timeline to the default zoom and start position.");
+        resetTimelineView.Click += (_, _) =>
+        {
+            timeline.SetZoom(1);
+            timeline.ScrollBy(-timeline.ScrollFrame);
+        };
         var back = new Button { Content = "◀ Frame" };
         AutomationProperties.SetName(back, "Previous timeline frame");
         back.Click += (_, _) => timeline.Step(-1);
@@ -3391,7 +3399,7 @@ public sealed class MainWindow : Window
                         FontWeight = FontWeight.SemiBold,
                         Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
                     },
-                    CreateFlow(frameReadout, positionReadout),
+                    CreateFlow(frameReadout, positionReadout, resetTimelineView),
                     rulerVisual,
                     playhead,
                     ruler
