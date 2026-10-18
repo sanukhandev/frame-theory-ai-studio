@@ -1086,6 +1086,17 @@ public sealed class MainWindow : Window
         undo.Click += (_, _) => editor.Undo();
         var overlayOpacity = new Slider { Minimum = 0, Maximum = 1, Value = 1, Width = 120 };
         AutomationProperties.SetName(overlayOpacity, "Photo overlay opacity");
+        ToolTip.SetTip(overlayOpacity, "Set the imported overlay opacity from 0% to 100%.");
+        var overlayOpacityValue = new TextBlock
+        {
+            Width = 48,
+            Text = "100%",
+            TextAlignment = TextAlignment.Right,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(172, 181, 196)),
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        AutomationProperties.SetName(overlayOpacityValue, "Photo overlay opacity value");
+        overlayOpacity.ValueChanged += (_, args) => overlayOpacityValue.Text = $"{args.NewValue:P0}";
         var overlayBlend = new ComboBox { ItemsSource = new[] { "Normal", "Multiply", "Screen" }, SelectedIndex = 0, Width = 110 };
         AutomationProperties.SetName(overlayBlend, "Photo overlay blend mode");
         var importOverlay = new Button { Content = "Import overlay" };
@@ -1200,6 +1211,17 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(format, "Photo export format");
         var quality = new Slider { Minimum = 1, Maximum = 100, Value = 95, Width = 140 };
         AutomationProperties.SetName(quality, "Photo export quality");
+        ToolTip.SetTip(quality, "Set JPEG export quality from 1 to 100.");
+        var qualityValue = new TextBlock
+        {
+            Width = 32,
+            Text = "95",
+            TextAlignment = TextAlignment.Right,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(172, 181, 196)),
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        AutomationProperties.SetName(qualityValue, "Photo export quality value");
+        quality.ValueChanged += (_, args) => qualityValue.Text = $"{args.NewValue:0}";
         var socialPreset = new ComboBox { ItemsSource = new[] { "Original", "16:9 landscape", "1:1 square", "9:16 portrait" }, SelectedIndex = 0, Width = 150 };
         AutomationProperties.SetName(socialPreset, "Photo export social dimensions");
         var export = new Button { Content = "Export image" };
@@ -1292,7 +1314,7 @@ public sealed class MainWindow : Window
             expanded: true);
         var photoLayersSection = CreateInspectorExpander(
             "Layers and blend",
-            CreateSectionContent(CreateFlow(importOverlay, clearOverlays, overlayBlend, overlayOpacity)),
+            CreateSectionContent(CreateFlow(importOverlay, clearOverlays, overlayBlend, overlayOpacity, overlayOpacityValue)),
             expanded: false);
         var photoMaskSection = CreateInspectorExpander(
             "Mask and retouch",
@@ -1306,7 +1328,7 @@ public sealed class MainWindow : Window
             expanded: true);
         var photoExportSection = CreateInspectorExpander(
             "Export",
-            CreateSectionContent(CreateFlow(format, quality, socialPreset, export)),
+            CreateSectionContent(CreateFlow(format, quality, qualityValue, socialPreset, export)),
             expanded: true);
         return new Border
         {

@@ -396,6 +396,17 @@ public sealed class FoundationTests
                 Xunit.Assert.False(photoSections["Layers and blend section"].IsExpanded);
                 Xunit.Assert.True(photoSections["Grade section"].IsExpanded);
                 Xunit.Assert.True(photoSections["Export section"].IsExpanded);
+                photoSections["Layers and blend section"].IsExpanded = true;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal("100%", window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => AutomationProperties.GetName(control) == "Photo overlay opacity value")
+                    .Text);
+                Xunit.Assert.Equal("95", window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => AutomationProperties.GetName(control) == "Photo export quality value")
+                    .Text);
+                photoSections["Layers and blend section"].IsExpanded = false;
                 Xunit.Assert.True(window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo preview empty state")
