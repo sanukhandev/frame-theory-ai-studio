@@ -187,6 +187,25 @@ public sealed class TranscriptionTests
     }
 
     [Xunit.Fact]
+    public void WhisperJsonParserRejectsInvalidTimingValuesBeforeMaterialization()
+    {
+        var source = new Uri("file:///spoken.wav");
+
+        Xunit.Assert.Throws<InvalidDataException>(() => WhisperCliJsonParser.Parse(
+            source,
+            "sha256:spoken",
+            """{"segments":[{"words":[{"word":"bad","start":-0.1,"end":0.2}]}]}"""));
+        Xunit.Assert.Throws<InvalidDataException>(() => WhisperCliJsonParser.Parse(
+            source,
+            "sha256:spoken",
+            """{"segments":[{"words":[{"word":"bad","start":"0.1","end":0.2}]}]}"""));
+        Xunit.Assert.Throws<InvalidDataException>(() => WhisperCliJsonParser.Parse(
+            source,
+            "sha256:spoken",
+            """{"segments":[{"words":[{"word":"one","start":0.4,"end":0.8},{"word":"two","start":0.7,"end":1.0}]}]}"""));
+    }
+
+    [Xunit.Fact]
     public void LocalWhisperOptionsRejectMissingOrLinkedFiles()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-local-whisper-");
