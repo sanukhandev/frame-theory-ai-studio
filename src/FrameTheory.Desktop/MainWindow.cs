@@ -1923,12 +1923,21 @@ public sealed class MainWindow : Window
                     VerticalAlignment = VerticalAlignment.Center,
                     TextTrimming = TextTrimming.CharacterEllipsis
                 };
+                var trackAccent = new Border
+                {
+                    Width = 4,
+                    CornerRadius = new CornerRadius(2),
+                    Background = new SolidColorBrush(item.Kind == TimelineTrackKind.Video
+                        ? Avalonia.Media.Color.FromRgb(95, 125, 255)
+                        : Avalonia.Media.Color.FromRgb(235, 161, 82))
+                };
                 var trackGrid = new Grid
                 {
-                    ColumnDefinitions = new ColumnDefinitions("120,*"),
-                    Children = { trackLabel, clips }
+                    ColumnDefinitions = new ColumnDefinitions("4,116,*"),
+                    Children = { trackAccent, trackLabel, clips }
                 };
-                Grid.SetColumn(clips, 1);
+                Grid.SetColumn(trackLabel, 1);
+                Grid.SetColumn(clips, 2);
                 return new Border
                 {
                     MinHeight = 48,
