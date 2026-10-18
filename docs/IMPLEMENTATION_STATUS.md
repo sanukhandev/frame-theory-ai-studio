@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Media-search spacing checkpoint (2026-10-18):** The responsive media search row now keeps a six-pixel gap between search, type-filter and clear controls in both its standard and compact arrangements. Foundation coverage verifies the spacing contract alongside the 1280px/960px row layouts.
+
 **Responsive media-search checkpoint (2026-10-18):** The media-bin search controls now use a single compact row at standard width and switch to full-width search plus a second filter/clear row below the 1120px breakpoint, preventing cramped controls in the 960px shell. Foundation coverage verifies both arrangements; native visual and HiDPI acceptance remains open.
 
 **Windows UI smoke input checkpoint (2026-10-18):** `scripts/smoke_desktop_ui.ps1` now uses a foreground-window `SendInput` implementation with a direct HWND message fallback instead of `System.Windows.Forms.SendKeys`, improving deterministic shortcut delivery on interactive Windows runners. The script parses cleanly and the desktop shell title smoke passes locally; this host still cannot synthesize modifier state, so the full local UI smoke stops at `Ctrl+2` and FT-901 remains a manual gate. Hosted Windows UI automation remains green in run `39155435600`.

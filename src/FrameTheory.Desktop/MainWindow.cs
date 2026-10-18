@@ -1076,6 +1076,7 @@ public sealed class MainWindow : Window
         var mediaSearchRow = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"),
+            ColumnSpacing = 6,
             Children = { mediaSearch, mediaTypeFilter, clearMediaSearch }
         };
         AutomationProperties.SetName(mediaSearchRow, "Media search controls");

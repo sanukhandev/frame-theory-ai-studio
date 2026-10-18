@@ -391,6 +391,7 @@ public sealed class FoundationTests
                 var mediaSearchControls = window.GetVisualDescendants()
                     .OfType<Grid>()
                     .Single(control => AutomationProperties.GetName(control) == "Media search controls");
+                Xunit.Assert.Equal(6, mediaSearchControls.ColumnSpacing);
                 Xunit.Assert.Single(mediaSearchControls.RowDefinitions);
                 Xunit.Assert.Equal(3, mediaSearchControls.ColumnDefinitions.Count);
                 window.Width = 960;
