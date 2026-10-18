@@ -34,6 +34,8 @@
 
 **FT-401 photo-validation checkpoint (2026-10-19):** Social photo export presets and photo viewport validation now report the specific invalid width or height parameter. Focused photo coverage passes 7/7 with format and diff checks clean; the local fix remains unpushed until the next exact 50-commit boundary.
 
+**Domain-validation checkpoint (2026-10-19):** Rational frame rates, media metadata and project snapshots now report the exact invalid denominator, height or canvas-height field at their trust boundaries. Focused domain coverage passes 1/1 with format and diff checks clean; the local fix remains unpushed until the next exact 50-commit boundary.
+
 **Post-rough-cut Release gate checkpoint (2026-10-19):** The local changes pass 277 unit tests and 2 golden tests, build with 0 warnings/errors, pass `dotnet format --verify-no-changes`, repository validation through `py scripts/validate_repository.py` and `git diff --check`. The validator correctly remains blocked by six tracked partial P0 tasks; this is not a V1 completion claim. The local commits remain unpushed until the next exact 50-commit boundary.
 
 **Workspace navigation affordance checkpoint (2026-10-19):** The adaptive shell's Ctrl+1 through Ctrl+4 workspace shortcut hint now has an explicit accessible tooltip explaining each destination. Focused production-shell coverage and format/diff checks pass; native keyboard acceptance remains unverified.
