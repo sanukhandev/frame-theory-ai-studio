@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Caption-permission checkpoint (2026-10-19):** Caption import, verified transcript import, local Whisper and optional Gemini transcription now report permission failures through the Caption workspace status boundary. Focused transcription coverage passes; no caption mutation occurs on failure.
+
 **Gemini-analysis storage checkpoint (2026-10-19):** Credential-store access failures during optional Gemini analysis and reference-grade requests now remain status results without escaping the AI command. Focused analysis coverage passes; offline/manual editing remains available.
 
 **Gemini-revision storage checkpoint (2026-10-19):** Credential-store access failures during optional Gemini revision requests now remain ordinary status results, preserving offline/manual editing instead of escaping the AI workspace command. Focused revision coverage passes.

@@ -1680,7 +1680,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             CaptionStatusText = "Caption import canceled.";
             return false;
         }
-        catch (Exception exception) when (exception is IOException or InvalidDataException or ArgumentException)
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException or ArgumentException)
         {
             _diagnosticsLog.Record("caption-import-failed", exception);
             CaptionStatusText = $"Caption import failed: {exception.Message}";
@@ -1729,7 +1729,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             CaptionStatusText = "Verified transcript import canceled; no caption changes were applied.";
             return false;
         }
-        catch (Exception exception) when (exception is IOException or InvalidDataException or ArgumentException)
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException or ArgumentException)
         {
             _diagnosticsLog.Record("verified-transcript-import-failed", exception);
             CaptionStatusText = $"Verified transcript import failed: {exception.Message}";
@@ -1781,7 +1781,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             CaptionStatusText = "Local Whisper transcription canceled; no caption changes were applied.";
             return false;
         }
-        catch (Exception exception) when (exception is IOException or InvalidDataException or ArgumentException or InvalidOperationException)
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException or ArgumentException or InvalidOperationException)
         {
             _diagnosticsLog.Record("local-whisper-transcription-failed", exception);
             CaptionStatusText = $"Local Whisper transcription failed: {exception.Message}";
@@ -1895,7 +1895,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             CaptionStatusText = "Gemini transcription timed out; no caption changes were applied.";
             return false;
         }
-        catch (Exception exception) when (exception is IOException or InvalidDataException or InvalidOperationException or HttpRequestException)
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException or InvalidOperationException or HttpRequestException)
         {
             _diagnosticsLog.Record("gemini-transcription-failed", exception);
             CaptionStatusText = $"Gemini transcription failed: {exception.Message}";

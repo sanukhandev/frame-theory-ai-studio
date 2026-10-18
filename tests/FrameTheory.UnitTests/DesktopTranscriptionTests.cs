@@ -69,6 +69,29 @@ public sealed class DesktopTranscriptionTests
     }
 
     [Xunit.Fact]
+    public async Task DesktopTranscriptionReportsSecureStoreAccessFailure()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-transcription-store-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "spoken.wav");
+            await File.WriteAllBytesAsync(sourcePath, [1, 2, 3]);
+            var settings = new GeminiSettingsViewModel(new GeminiConfigurationService(new FailingSecretStore()));
+            var viewModel = new MainWindowViewModel(
+                new WorkspaceCatalog(),
+                new TestCapabilityDetector(),
+                geminiSettings: settings);
+
+            Xunit.Assert.False(await viewModel.TranscribeAudioAsync(sourcePath, uploadConsent: true, CancellationToken.None));
+            Xunit.Assert.Contains("transcription failed", viewModel.CaptionStatusText, StringComparison.OrdinalIgnoreCase);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task DesktopTranscriptionRejectsDanglingSourceBeforeUpload()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-desktop-transcription-link-");
@@ -420,6 +443,18 @@ public sealed class DesktopTranscriptionTests
             _secret = null;
             return Task.CompletedTask;
         }
+    }
+
+    private sealed class FailingSecretStore : ISecretStore
+    {
+        public Task StoreAsync(string name, string secret, CancellationToken cancellationToken = default) =>
+            throw new UnauthorizedAccessException("credential store unavailable");
+
+        public Task<string?> ReadAsync(string name, CancellationToken cancellationToken = default) =>
+            throw new UnauthorizedAccessException("credential store unavailable");
+
+        public Task DeleteAsync(string name, CancellationToken cancellationToken = default) =>
+            throw new UnauthorizedAccessException("credential store unavailable");
     }
 
     private sealed class StubHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
