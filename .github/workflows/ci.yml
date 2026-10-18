@@ -81,9 +81,20 @@ jobs:
               brew install ffmpeg || brew upgrade ffmpeg
               ;;
             Windows)
-              choco install ffmpeg --no-progress -y
-              export PATH="/c/ProgramData/chocolatey/bin:$PATH"
-              echo "/c/ProgramData/chocolatey/bin" >> "$GITHUB_PATH"
+              if choco install ffmpeg --no-progress -y; then
+                export PATH="/c/ProgramData/chocolatey/bin:$PATH"
+                echo "/c/ProgramData/chocolatey/bin" >> "$GITHUB_PATH"
+              else
+                winget install --id Gyan.FFmpeg --exact --version 9.0.2 --source winget --scope user --silent --accept-source-agreements --accept-package-agreements
+                ffmpeg_dir="$(pwsh -NoProfile -Command '$candidate = Get-ChildItem "$env:LOCALAPPDATA\\Microsoft\\WinGet\\Packages" -Recurse -Filter ffmpeg.exe -ErrorAction SilentlyContinue | Where-Object FullName -notmatch "Shared" | Select-Object -First 1; if ($candidate) { $candidate.DirectoryName }')"
+                if [ -z "$ffmpeg_dir" ]; then
+                  echo "WinGet installed FFmpeg but its executable path was not found." >&2
+                  exit 1
+                fi
+                ffmpeg_dir="$(cygpath "$ffmpeg_dir")"
+                export PATH="$ffmpeg_dir:$PATH"
+                echo "$ffmpeg_dir" >> "$GITHUB_PATH"
+              fi
               ;;
           esac
           ffmpeg -version
