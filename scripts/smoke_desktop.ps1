@@ -1,6 +1,7 @@
 param(
     [int]$TimeoutSeconds = 20,
-    [string]$AssemblyPath = "src/FrameTheory.Desktop/bin/Release/net10.0/FrameTheory.Desktop.dll"
+    [string]$AssemblyPath = "src/FrameTheory.Desktop/bin/Release/net10.0/FrameTheory.Desktop.dll",
+    [switch]$RequireWindowTitle
 )
 
 $ErrorActionPreference = "Stop"
@@ -22,6 +23,17 @@ $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
 $title = $null
 
 try {
+    if (-not $RequireWindowTitle) {
+        Start-Sleep -Seconds 2
+        $process.Refresh()
+        if ($process.HasExited) {
+            throw "Desktop shell exited during the Unix startup smoke (exit code $($process.ExitCode))."
+        }
+
+        Write-Output "Desktop shell process remained alive: $($process.Id)"
+        return
+    }
+
     while ([DateTime]::UtcNow -lt $deadline) {
         if ($process.HasExited) {
             throw "Desktop shell exited before creating its window (exit code $($process.ExitCode))."
