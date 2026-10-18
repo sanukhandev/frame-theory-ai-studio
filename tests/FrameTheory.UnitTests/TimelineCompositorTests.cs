@@ -27,6 +27,17 @@ public sealed class TimelineCompositorTests
     }
 
     [Xunit.Fact]
+    public void StabilizationSettingsNormalizeTheFullSupportedRadiusRange()
+    {
+        Xunit.Assert.Equal(16, new TimelineStabilizationSettings(1).FfmpegSearchRadius);
+        Xunit.Assert.Equal(16, new TimelineStabilizationSettings(16).FfmpegSearchRadius);
+        Xunit.Assert.Equal(32, new TimelineStabilizationSettings(17).FfmpegSearchRadius);
+        Xunit.Assert.Equal(64, new TimelineStabilizationSettings(64).FfmpegSearchRadius);
+        Xunit.Assert.Equal("searchRadius", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineStabilizationSettings(0)).ParamName);
+        Xunit.Assert.Equal("searchRadius", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineStabilizationSettings(65)).ParamName);
+    }
+
+    [Xunit.Fact]
     public void SpeedRampGraphKeepsVideoAndAudioOnTheSameTimelineDuration()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-speed-ramp-");
