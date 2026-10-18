@@ -221,7 +221,7 @@
 - [x] FT-705 transactional executor for approved grades, clip edits, transitions, titles, captions, keyframes, audio, trusted presets and bounded Reel actions across multiple clips; real two-clip FFmpeg export smoke verified
 - [x] FT-801 editable multi-clip before/after split, wipe and timed-reveal composition with real FFmpeg output; no watermark asset was invented
 - [x] FT-802 real MP4 and Photo social aspect presets for 16:9, 1:1 and 9:16, PNG/JPEG quality export, exact-dimension verification and shared cancellable queue path
-- [~] FT-803 imported user audio, waveform-derived amplitude/energy beat markers, creative title/caption slots and packaged approved-watermark selection; release-owner rights/visual review and hosted branded-output acceptance remain open
+- [x] FT-803 imported user audio, waveform-derived amplitude/energy beat markers, creative title/caption slots and packaged approved-watermark selection; local and hosted branded-output evidence passed, while release-owner rights/visual review remains a separate release gate
 - [x] FT-804 single-worker cancellable background export queue with Video workspace cancellation, retry, in-memory job history and real FFmpeg retry smoke; macOS/Linux interruption acceptance remains unverified
 - [x] Timeline project save/open preserves editable timeline state, reimports relative media and remaps media IDs without mutating the current project on failed open
 - [~] Timeline project missing-media detection, transactional relink and moved-project recovery are implemented and tested; manual cross-platform UI acceptance remains open
@@ -235,7 +235,7 @@
 - [~] FT-1003 dependency inventory, advisory evidence, per-OS native bundle manifests and external FFmpeg/native asset assessment are documented; license/CVE clearance and redistribution approval remain open
 - [x] FT-1004 GitHub Actions verifies Windows/macOS/Linux restore/build/format/test/publish jobs and uploads per-OS SHA-256 manifests; optional signing/notarization is not part of this task claim
 - [~] FT-1005 framework-dependent and opt-in self-contained publishes, checksummed portable archives, and unsigned Windows/macOS/Linux validation installers are available; native media bundling, clean-host release acceptance and signing remain open
-- [~] FT-1006 V1 acceptance audit is recorded with 52 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
+- [~] FT-1006 V1 acceptance audit is recorded with 53 closed implementation issues and explicit remaining P0 blockers; no V1 tag is authorized
 - [x] FT-1103 audio beat detection, source-timed kinetic word captions, proxy pipeline and editable speed-ramp curves are implemented with persistence, UI and native-export smoke evidence; hosted run `39069354787` passed on Windows, macOS and Linux
 - [x] FT-1101 imported photo overlay composition with normal/multiply/screen blending, opacity, clipping, non-destructive undo, persisted brush masks and clone-style retouch, project persistence and hosted export/reopen smoke
 - [~] FT-1102 mask-aware non-destructive photo grading, deterministic color scopes, translation tracking, decoded-frame motion reporting and persisted FFmpeg stabilization are implemented with Photo/Video workspace controls and hosted graph/build/native evidence; visual-quality acceptance remains open
