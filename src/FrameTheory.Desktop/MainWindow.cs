@@ -2105,15 +2105,22 @@ public sealed class MainWindow : Window
                     return new TextBlock { Text = "Unavailable track" };
                 }
 
-                var clips = new WrapPanel { Orientation = Orientation.Horizontal };
+                var maxFrame = item.Clips.Select(clip => clip.StartFrame + clip.DurationFrames).DefaultIfEmpty(timeline.ScrollFrame + 1).Max();
+                var clipCanvas = new Canvas
+                {
+                    Width = Math.Max(320, (maxFrame - timeline.ScrollFrame) / timeline.FramesPerPixel + 24),
+                    Height = 40
+                };
                 foreach (var clip in item.Clips)
                 {
+                    var clipWidth = Math.Max(128, clip.DurationFrames / timeline.FramesPerPixel);
                     var clipButton = new Button
                     {
+                        Width = clipWidth,
                         MinWidth = 128,
+                        Height = 32,
                         HorizontalContentAlignment = HorizontalAlignment.Left,
                         VerticalContentAlignment = VerticalAlignment.Center,
-                        Margin = new Thickness(0, 0, 6, 4),
                         Padding = new Thickness(8, 4),
                         Background = new SolidColorBrush(clip.IsSelected
                             ? Avalonia.Media.Color.FromRgb(49, 67, 111)
@@ -2133,8 +2140,17 @@ public sealed class MainWindow : Window
                     AutomationProperties.SetName(clipButton, $"Select {item.Kind} clip {clip.MediaId}");
                     ToolTip.SetTip(clipButton, $"{item.Kind} clip · frames {clip.StartFrame}–{clip.StartFrame + clip.DurationFrames - 1}");
                     clipButton.Click += (_, _) => timeline.SelectMedia(clip.MediaId, item.Kind);
-                    clips.Children.Add(clipButton);
+                    Canvas.SetLeft(clipButton, Math.Max(0, (clip.StartFrame - timeline.ScrollFrame) / timeline.FramesPerPixel));
+                    Canvas.SetTop(clipButton, 4);
+                    clipCanvas.Children.Add(clipButton);
                 }
+                var clipViewport = new ScrollViewer
+                {
+                    HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                    VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
+                    Content = clipCanvas
+                };
+                AutomationProperties.SetName(clipViewport, $"{item.Kind} timeline clip viewport");
 
                 var trackLabel = new TextBlock
                 {
@@ -2156,10 +2172,10 @@ public sealed class MainWindow : Window
                 var trackGrid = new Grid
                 {
                     ColumnDefinitions = new ColumnDefinitions("4,116,*"),
-                    Children = { trackAccent, trackLabel, clips }
+                    Children = { trackAccent, trackLabel, clipViewport }
                 };
                 Grid.SetColumn(trackLabel, 1);
-                Grid.SetColumn(clips, 2);
+                Grid.SetColumn(clipViewport, 2);
                 var trackLane = new Border
                 {
                     MinHeight = 48,
