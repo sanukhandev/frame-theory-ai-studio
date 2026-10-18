@@ -117,7 +117,7 @@ jobs:
             }
           }
           $manifestVerifier = Get-Content -LiteralPath 'scripts/verify_native_media_manifest.ps1' -Raw
-          foreach ($needle in @('ConvertFrom-Json', 'Get-FileHash', 'ReparsePoint', 'schemaVersion')) {
+          foreach ($needle in @('ConvertFrom-Json', 'Get-FileHash', 'Get-Item -LiteralPath $ManifestPath', 'ReparsePoint', 'schemaVersion')) {
             if ($manifestVerifier -notmatch [regex]::Escape($needle)) {
               throw "Native media manifest verifier is missing required check: $needle"
             }

@@ -12,6 +12,11 @@ if (-not $rootItem.PSIsContainer -or ($rootItem.Attributes -band [IO.FileAttribu
     throw "Native media bundle directory is invalid or linked: $Directory"
 }
 
+$manifestItem = Get-Item -LiteralPath $ManifestPath -Force -ErrorAction Stop
+if ($manifestItem.PSIsContainer -or ($manifestItem.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+    throw "Native media manifest must be a regular, non-linked file: $ManifestPath"
+}
+
 $manifest = Get-Content -LiteralPath $ManifestPath -Raw | ConvertFrom-Json
 if ($manifest.schemaVersion -ne "frame-theory.native-media-manifest.v1") {
     throw "Unsupported native media manifest schema."
