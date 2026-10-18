@@ -1,6 +1,6 @@
 # Implementation Status — Resume Checkpoint
 
-**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 29 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
+**Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. `main` is currently 30 commits ahead of `origin/main`; no hosted revalidation is claimed for the unpushed commits.
 
 **FT-901 photo-inspector grouping checkpoint (2026-10-19):** The Photo mask-and-retouch inspector now presents separate `OVERLAY MASK` and `CLONE RETOUCH` groups, reducing control density without changing edit behavior. Headless production-shell coverage verifies both groups are reachable and the full Release gate passes 271 unit tests and 2 golden tests with a warning-free build, format verification, repository validation and `git diff --check`. Native visual and screen-reader acceptance remains open.
 
@@ -45,6 +45,8 @@
 **FT-901 playback-guidance checkpoint (2026-10-19):** The timeline READY/PLAYING badge now explains its local preview state through the same accessible tooltip path as transport controls. Focused production-shell coverage and formatting verification pass.
 
 **FT-901 relink-guidance checkpoint (2026-10-19):** The timeline relink action now explains its contained-project validation boundary beside the labeled missing-media recovery controls. Focused production-shell coverage and formatting verification pass; source-integrity enforcement is unchanged.
+
+**FT-901 photo-recovery checkpoint (2026-10-19):** Photo project recovery now labels project/replacement paths and explains missing-media selection, safe open/recover and contained relink actions in the inspector. Focused production-shell coverage and formatting verification pass; recovery and source-integrity behavior are unchanged.
 
 **FT-901 workspace-render checkpoint (2026-10-19):** The production Skia-backed headless shell now captures all four Video, Photo, Color and AI workspaces at the compact 960×640 surface after real tab selection. Focused render coverage passes 2/2; the full Release suite passes 271 unit tests and 2 golden tests with format verification, repository validation and `git diff --check` green. This strengthens responsive-render evidence but does not replace native visual or screen-reader review.
 

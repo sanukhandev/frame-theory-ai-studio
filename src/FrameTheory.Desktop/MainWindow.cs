@@ -1237,10 +1237,15 @@ public sealed class MainWindow : Window
     private static Control CreatePhotoRecoveryPanel(MainWindowViewModel viewModel)
     {
         var projectPath = new TextBox { PlaceholderText = "Project path (.ftstudio)" };
+        AutomationProperties.SetName(projectPath, "Photo project path");
+        ToolTip.SetTip(projectPath, "Choose or enter the local photo project path to recover.");
         projectPath.Bind(TextBox.TextProperty, new Binding("PhotoRecovery.ProjectPath") { Mode = BindingMode.TwoWay });
         var replacementPath = new TextBox { PlaceholderText = "Replacement media path" };
+        AutomationProperties.SetName(replacementPath, "Photo replacement media path");
+        ToolTip.SetTip(replacementPath, "Enter a contained replacement path for the selected photo media.");
         var missingList = new ListBox { Height = 90 };
         AutomationProperties.SetName(missingList, "Missing photo media");
+        ToolTip.SetTip(missingList, "Select the missing photo media entry to relink.");
         missingList.Bind(ItemsControl.ItemsSourceProperty, new Binding("PhotoRecovery.MissingMedia"));
         missingList.Bind(SelectingItemsControl.SelectedItemProperty, new Binding("PhotoRecovery.SelectedMissingMedia")
         {
@@ -1263,19 +1268,21 @@ public sealed class MainWindow : Window
         status.Bind(TextBox.TextProperty, new Binding("PhotoRecovery.StatusText"));
         var open = new Button { Content = "Open / recover photo project" };
         AutomationProperties.SetName(open, "Open or recover photo project");
+        ToolTip.SetTip(open, "Open the selected local photo project and recover missing media without mutating the source.");
         open.Click += async (_, _) => await viewModel.PhotoRecovery.OpenProjectAsync(CancellationToken.None);
         var relink = new Button { Content = "Relink selected media" };
         AutomationProperties.SetName(relink, "Relink selected photo media");
+        ToolTip.SetTip(relink, "Validate and relink the selected photo media within the project folder.");
         relink.Click += async (_, _) => await viewModel.PhotoRecovery.RelinkSelectedAsync(replacementPath.Text ?? string.Empty, CancellationToken.None);
         return CreateInspectorExpander(
             "Project recovery and media relink",
             CreateSectionContent(
-                projectPath,
+                CreateLabeledField("Project path", projectPath),
                 open,
                 status,
                 new TextBlock { Text = "Missing media" },
                 missingList,
-                replacementPath,
+                CreateLabeledField("Replacement media", replacementPath),
                 relink),
             expanded: false);
     }

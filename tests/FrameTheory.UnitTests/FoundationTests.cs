@@ -787,6 +787,8 @@ public sealed class FoundationTests
                 Xunit.Assert.False(photoRecoverySection.IsExpanded);
                 photoRecoverySection.IsExpanded = true;
                 Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Contains(photoRecoverySection.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Project path");
+                Xunit.Assert.Contains(photoRecoverySection.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Replacement media");
                 var photoRecoveryStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo recovery status");
