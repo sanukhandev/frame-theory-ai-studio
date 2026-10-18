@@ -413,19 +413,20 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
             return;
         }
 
+        var state = Current;
         try
         {
             PhotoExportReceipt? receipt;
             if (_exportQueue is null)
             {
-                receipt = await _exporter.ExportAsync(Current, destinationPath, new PhotoExportOptions(format, quality, preset), null, cancellationToken);
+                receipt = await _exporter.ExportAsync(state, destinationPath, new PhotoExportOptions(format, quality, preset), null, cancellationToken);
             }
             else
             {
                 receipt = null;
                 var job = _exportQueue.Enqueue(async queueCancellation =>
                 {
-                    var result = await _exporter.ExportAsync(Current, destinationPath, new PhotoExportOptions(format, quality, preset), null, queueCancellation);
+                    var result = await _exporter.ExportAsync(state, destinationPath, new PhotoExportOptions(format, quality, preset), null, queueCancellation);
                     receipt = result;
                     return new ExportReceipt(result.JobId, result.OutputPath, result.OutputBytes, result.VerifiedMetadata);
                 });
