@@ -62,6 +62,10 @@ jobs:
             exit 1
           fi
           echo "$output" | grep -F 'Invalid package version'
+          if grep -Fq "<<'PLIST'" scripts/package_macos_dmg.sh; then
+            echo 'macOS package plist heredoc must expand the validated version.'
+            exit 1
+          fi
       - name: Validate macOS package guards
         shell: bash
         run: |
