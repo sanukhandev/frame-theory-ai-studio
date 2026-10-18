@@ -1277,7 +1277,7 @@ public sealed class MainWindow : Window
         var photoLayersSection = CreateInspectorExpander(
             "Layers and blend",
             CreateSectionContent(CreateFlow(importOverlay, clearOverlays, overlayBlend, overlayOpacity)),
-            expanded: true);
+            expanded: false);
         var photoMaskSection = CreateInspectorExpander(
             "Mask and retouch",
             CreateSectionContent(

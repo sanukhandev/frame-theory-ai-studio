@@ -381,6 +381,12 @@ public sealed class FoundationTests
                     .OfType<Expander>()
                     .Single(control => AutomationProperties.GetName(control) == "Project recovery and media relink section");
                 Xunit.Assert.False(photoRecoverySection.IsExpanded);
+                var photoSections = window.GetVisualDescendants()
+                    .OfType<Expander>()
+                    .ToDictionary(control => AutomationProperties.GetName(control)!, StringComparer.Ordinal);
+                Xunit.Assert.False(photoSections["Layers and blend section"].IsExpanded);
+                Xunit.Assert.True(photoSections["Grade section"].IsExpanded);
+                Xunit.Assert.True(photoSections["Export section"].IsExpanded);
                 Xunit.Assert.True(window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo preview empty state")
