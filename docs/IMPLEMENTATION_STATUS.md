@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**UI automation and workspace affordance batch checkpoint (2026-10-18):** The next ten-commit batch adds hosted smoke coverage for media search/clear, timeline tracks/selection context/operation status, named video/audio timeline lanes, media-card metadata tooltips, timeline navigation/status tooltips and a primary local-image entry action. The full local Release gate passes with 0 warnings/errors, 262 unit tests, 2 golden tests, repository validation, formatting and `git diff --check`; push is ready for hosted revalidation.
+
 **Hosted UI contract extension checkpoint (2026-10-18):** The Windows UI smoke now requires the production media search/clear controls, timeline track surface, selection inspector and operation status in addition to the existing transport/export actions. PowerShell parsing, repository validation and `git diff --check` pass locally; hosted confirmation is deferred to the next exact-ten-commit push.
 
 **Hosted accessible editor validation checkpoint (2026-10-18):** Quality Gates run `39135856203` for pushed commit `4353ad8` is green across documentation/schema, Windows, macOS and Linux restore/build/test, native FFmpeg media smoke, formatting, headless shell, Windows UI Automation, portable archives, Windows installer, macOS DMG, Linux DEB, packaged relaunch and checksums. The run validates the semantic timeline lane accents and keyboard-focused action styling in the production shell. Manual native visual, HiDPI and screen-reader acceptance remains open for FT-901/FT-902/FT-1002.
