@@ -115,4 +115,41 @@ public sealed class RecoveryTests
             externalDirectory.Delete(true);
         }
     }
+
+    [Xunit.Fact]
+    public async Task CanceledRelinkDoesNotChangeTheSnapshot()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-recovery-cancel-");
+        try
+        {
+            var projectPath = Path.Combine(directory.FullName, "project.ftstudio");
+            var replacementPath = Path.Combine(directory.FullName, "replacement.mov");
+            await File.WriteAllTextAsync(replacementPath, "replacement");
+            var mediaId = MediaId.Create(new Uri("file:///media/missing.mov"), "sha256:missing");
+            var snapshot = new ProjectSnapshot(
+                "project",
+                new RationalFrameRate(30, 1),
+                1920,
+                1080,
+                "sRGB",
+                [new MediaReference(mediaId, "media/missing.mov", "sha256:missing")]);
+            using var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+
+            await Xunit.Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
+                new ProjectRecoveryService(new JsonProjectRepository()).RelinkMediaAsync(
+                    projectPath,
+                    snapshot,
+                    mediaId,
+                    replacementPath,
+                    cancellation.Token));
+
+            Xunit.Assert.Equal("media/missing.mov", snapshot.MediaReferences.Single().RelativePath);
+            Xunit.Assert.Equal("sha256:missing", snapshot.MediaReferences.Single().ContentFingerprint);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
 }
