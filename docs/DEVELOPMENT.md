@@ -39,7 +39,7 @@ The Video workspace's **Import verified transcript JSON** action accepts a local
 }
 ```
 
-The source URI must match the selected file and the provider recomputes the source SHA-256 before importing editable verified caption cues. Linked source or sidecar files, mismatched fingerprints, invalid timing and cancellation leave the current timeline unchanged. This is an offline interchange path for a separately licensed local ASR tool; no ASR executable or model is bundled by this repository.
+The source URI must match the selected file and the provider recomputes the source SHA-256 before importing editable verified caption cues. Linked source or sidecar files, mismatched fingerprints, invalid timing and cancellation leave the current timeline unchanged. This is an offline interchange path for a separately licensed local ASR tool; no ASR executable or model is bundled by this repository. Remote transcription also fingerprints the original selected media before and after processing, rejecting returned words if that source changes while derived audio is being sent.
 
 ## Repository target layout
 ```text

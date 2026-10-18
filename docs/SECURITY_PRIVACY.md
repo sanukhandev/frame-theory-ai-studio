@@ -18,6 +18,7 @@ Editing is local. Gemini is an **optional online service** that requires a user-
 - Respect provider media size/duration limits at runtime; bounded retries, cancellation, local extracted-audio cleanup and remote temporary-file deletion for Gemini Files API uploads.
 - Gemini plan inputs reject malformed inline base64, inline images larger than 20 MiB decoded, and text metadata larger than 1 MiB before a request is sent.
 - Gemini response bodies are bounded to 4 MiB before deserialization and oversized responses are reported as malformed provider output.
+- Transcription fingerprints are computed from the selected original media before and after remote processing; a changed source is rejected without applying returned captions.
 - Do not promise data is never retained by the third-party model; link to provider terms and display network/privacy notice.
 - Manual editing, presets, imports, exports and saved projects work offline without API access.
 
