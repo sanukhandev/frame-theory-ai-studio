@@ -613,22 +613,40 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(mediaBin, "Media bin");
         var grid = (Grid)mediaBin.Child;
+        var assetSummary = new TextBlock
+        {
+            FontSize = 10,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        AutomationProperties.SetName(assetSummary, "Imported media summary");
+        assetSummary.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.ImportedMediaSummary)));
         grid.Children.Add(new StackPanel
         {
             Spacing = 6,
             Children =
             {
-                new TextBlock
+                new Grid
                 {
-                    Text = "MEDIA BIN",
-                    FontSize = 10,
-                    FontWeight = FontWeight.SemiBold,
-                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+                    ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+                    Children =
+                    {
+                        new TextBlock
+                        {
+                            Text = "MEDIA BIN",
+                            FontSize = 10,
+                            FontWeight = FontWeight.SemiBold,
+                            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+                        },
+                        assetSummary
+                    }
                 },
                 importedList,
                 importStatus
             }
         });
+        Grid.SetColumn(assetSummary, 1);
         grid.Children.Add(importZone);
         Grid.SetColumn(importZone, 1);
         return mediaBin;

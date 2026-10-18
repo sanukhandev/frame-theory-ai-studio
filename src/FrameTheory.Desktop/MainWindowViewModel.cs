@@ -161,6 +161,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public IReadOnlyList<ImportedMediaViewModel> ImportedMedia { get; private set; } = [];
 
+    public string ImportedMediaSummary => ImportedMedia.Count == 0
+        ? "No assets"
+        : $"{ImportedMedia.Count} asset{(ImportedMedia.Count == 1 ? string.Empty : "s")}";
+
     public byte[]? TimelinePreviewPpm
     {
         get => _timelinePreviewPpm;
@@ -763,6 +767,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         ImportedMedia = imported;
         OnPropertyChanged(nameof(ImportedMedia));
+        OnPropertyChanged(nameof(ImportedMediaSummary));
         MediaImportStatusText = newlyImported == 0 && failures.Count == 0
             ? "No local media files were dropped."
             : $"Imported {newlyImported} file(s); {imported.Count} file(s) available." + (failures.Count == 0 ? string.Empty : $" Failed: {string.Join(", ", failures)}");
