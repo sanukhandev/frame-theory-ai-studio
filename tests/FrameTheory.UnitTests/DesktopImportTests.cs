@@ -101,6 +101,11 @@ public sealed class DesktopImportTests
                 Xunit.Assert.Equal(
                     Avalonia.Media.Color.FromRgb(95, 125, 255),
                     Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(mediaCard.BorderBrush).Color);
+                var selectedClipButton = window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control)?.StartsWith("Select Video clip", StringComparison.Ordinal) == true);
+                Xunit.Assert.Contains("(selected)", Avalonia.Automation.AutomationProperties.GetName(selectedClipButton), StringComparison.Ordinal);
+                Xunit.Assert.Contains("Selected.", ToolTip.GetTip(selectedClipButton) as string, StringComparison.Ordinal);
             }
             finally
             {

@@ -2361,8 +2361,8 @@ public sealed class MainWindow : Window
                             }
                         }
                     };
-                    AutomationProperties.SetName(clipButton, $"Select {item.Kind} clip {clip.MediaId}");
-                    ToolTip.SetTip(clipButton, $"{item.Kind} clip · frames {clip.StartFrame}–{clip.StartFrame + clip.DurationFrames - 1}");
+                    AutomationProperties.SetName(clipButton, $"Select {item.Kind} clip {clip.MediaId}{(clip.IsSelected ? " (selected)" : string.Empty)}");
+                    ToolTip.SetTip(clipButton, $"{item.Kind} clip · frames {clip.StartFrame}–{clip.StartFrame + clip.DurationFrames - 1}{(clip.IsSelected ? " · Selected." : string.Empty)}");
                     clipButton.Click += (_, _) => timeline.SelectMedia(clip.MediaId, item.Kind);
                     Canvas.SetLeft(clipButton, Math.Max(0, (clip.StartFrame - timeline.ScrollFrame) / timeline.FramesPerPixel));
                     Canvas.SetTop(clipButton, 4);
