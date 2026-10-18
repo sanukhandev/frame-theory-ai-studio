@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Color workspace hierarchy checkpoint (2026-10-18):** The Color workspace now groups reference matching, before/after preview, grade controls and reusable style-library actions, with the real image previews and consent-gated Gemini actions preserved. Desktop build, headless shell coverage and formatting checks pass; hosted visual revalidation remains pending.
+
 **Photo workspace hierarchy checkpoint (2026-10-18):** The Photo workspace now leads with a contained canvas surface and labels Project, Layers and blend, Mask and retouch, Grade and Export tool groups. The real import, non-destructive edit, recovery and export handlers remain unchanged; the desktop Release build, headless shell test and formatting checks pass. Hosted visual revalidation remains pending.
 
 **Workspace panel surface checkpoint (2026-10-18):** Photo, Color and AI panels now share the production dark surface, border, radius and spacing language used by the Video workspace, without changing their existing commands, previews, consent controls or automation names. Local Release build, formatting and diff checks are green; hosted UI revalidation is pending the next exact-ten-commit push.

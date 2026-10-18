@@ -1032,6 +1032,17 @@ public sealed class MainWindow : Window
             referenceConsent.IsChecked == true,
             CancellationToken.None);
         applyReference.Click += (_, _) => viewModel.ApplyPendingReferenceGrade();
+        var colorPreviewCard = new Border
+        {
+            Padding = new Thickness(12),
+            CornerRadius = new CornerRadius(8),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(16, 18, 22)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(1),
+            Child = CreateFlow(
+                new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "BEFORE", FontSize = 10, FontWeight = FontWeight.SemiBold }, beforeImage, beforeSummary } },
+                new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "AFTER", FontSize = 10, FontWeight = FontWeight.SemiBold }, afterImage, afterSummary } })
+        };
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
@@ -1045,19 +1056,20 @@ public sealed class MainWindow : Window
                 Spacing = 8,
                 Children =
                 {
-                    new TextBlock { Text = "Color grade inspector", FontWeight = FontWeight.SemiBold },
+                    new TextBlock { Text = "Color grade inspector", FontSize = 14, FontWeight = FontWeight.SemiBold, Foreground = Brushes.White },
                     status,
-                    new TextBlock { Text = "Optional Gemini reference match", FontWeight = FontWeight.SemiBold },
+                    CreateSectionLabel("Reference match"),
                     new TextBlock { Text = "Select a source preview and a reference preview. Upload occurs only after explicit consent; the returned grade is reviewable before applying.", TextWrapping = TextWrapping.Wrap },
                     CreateFlow(referenceSource, referenceTarget),
                     referenceConsent,
                     CreateFlow(analyzeReference, applyReference),
                     referenceStatus,
-                    CreateFlow(
-                        new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "Before" }, beforeImage, beforeSummary } },
-                        new StackPanel { Spacing = 4, Children = { new TextBlock { Text = "After" }, afterImage, afterSummary } }),
+                    CreateSectionLabel("Before and after"),
+                    colorPreviewCard,
                     scopeSummary,
+                    CreateSectionLabel("Grade controls"),
                     controls,
+                    CreateSectionLabel("Style library"),
                     CreateFlow(presetName, savePreset, loadPreset, presetSelection, applyPreset),
                     presetStatus
                 }
