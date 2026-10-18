@@ -369,6 +369,23 @@ public sealed class FoundationTests
                 var selectedMediaChip = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Selected media chip");
+                var mediaHeader = window.GetVisualDescendants()
+                    .OfType<Grid>()
+                    .Single(control => AutomationProperties.GetName(control) == "Media bin header");
+                Xunit.Assert.Single(mediaHeader.RowDefinitions);
+                Xunit.Assert.Equal(3, mediaHeader.ColumnDefinitions.Count);
+                window.Width = 960;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(2, mediaHeader.RowDefinitions.Count);
+                Xunit.Assert.Equal(2, mediaHeader.ColumnDefinitions.Count);
+                Xunit.Assert.Equal(1, Grid.GetRow(selectedMediaChip));
+                Xunit.Assert.Equal(2, Grid.GetColumnSpan(selectedMediaChip));
+                window.Width = 1280;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Single(mediaHeader.RowDefinitions);
+                Xunit.Assert.Equal(3, mediaHeader.ColumnDefinitions.Count);
+                Xunit.Assert.Equal(0, Grid.GetRow(selectedMediaChip));
+                Xunit.Assert.Equal(1, Grid.GetColumnSpan(selectedMediaChip));
                 Xunit.Assert.Equal(new Avalonia.Thickness(7, 3), selectedMediaChip.Padding);
                 Xunit.Assert.Equal(
                     "Current media selection used by the timeline and color workspace.",

@@ -1068,8 +1068,11 @@ public sealed class MainWindow : Window
         var mediaHeader = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"),
+            ColumnSpacing = 6,
+            RowSpacing = 4,
             Children = { mediaTitle, selectedMediaChip, assetSummary }
         };
+        AutomationProperties.SetName(mediaHeader, "Media bin header");
         Grid.SetColumn(selectedMediaChip, 1);
         Grid.SetColumn(assetSummary, 2);
         grid.Children.Add(mediaHeader);
@@ -1093,6 +1096,31 @@ public sealed class MainWindow : Window
         Grid.SetRow(grid.Children[2], 2);
         Grid.SetRow(importStatus, 3);
         Grid.SetRow(importZone, 4);
+        void RefreshMediaHeaderLayout(double width)
+        {
+            var topLevel = TopLevel.GetTopLevel(mediaHeader);
+            var windowWidth = topLevel is Window window && !double.IsNaN(window.Width)
+                ? window.Width
+                : topLevel?.Bounds.Width ?? width;
+            var compact = windowWidth < 1120;
+            mediaHeader.ColumnDefinitions = compact
+                ? new ColumnDefinitions("*,Auto")
+                : new ColumnDefinitions("*,Auto,Auto");
+            mediaHeader.RowDefinitions = compact
+                ? new RowDefinitions("Auto,Auto")
+                : new RowDefinitions("Auto");
+            Grid.SetColumn(mediaTitle, 0);
+            Grid.SetRow(mediaTitle, 0);
+            Grid.SetColumn(selectedMediaChip, compact ? 0 : 1);
+            Grid.SetColumnSpan(selectedMediaChip, compact ? 2 : 1);
+            Grid.SetRow(selectedMediaChip, compact ? 1 : 0);
+            Grid.SetColumn(assetSummary, compact ? 1 : 2);
+            Grid.SetRow(assetSummary, 0);
+        }
+
+        mediaHeader.SizeChanged += (_, args) => RefreshMediaHeaderLayout(args.NewSize.Width);
+        mediaHeader.AttachedToVisualTree += (_, _) => Dispatcher.UIThread.Post(() => RefreshMediaHeaderLayout(mediaHeader.Bounds.Width));
+        RefreshMediaHeaderLayout(mediaHeader.Width);
         void RefreshMediaSearchLayout(double width)
         {
             var topLevel = TopLevel.GetTopLevel(mediaSearchRow);

@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive media-header checkpoint (2026-10-18):** The media-bin header now keeps title, selected asset and asset count aligned in one row at standard width, then moves the selected-media chip to a full-width second row below 1120px. Foundation coverage verifies both arrangements and preserves selection semantics; native visual and HiDPI acceptance remains open.
+
 **Media-search spacing checkpoint (2026-10-18):** The responsive media search row now keeps a six-pixel gap between search, type-filter and clear controls in both its standard and compact arrangements. Foundation coverage verifies the spacing contract alongside the 1280px/960px row layouts.
 
 **Responsive media-search checkpoint (2026-10-18):** The media-bin search controls now use a single compact row at standard width and switch to full-width search plus a second filter/clear row below the 1120px breakpoint, preventing cramped controls in the 960px shell. Foundation coverage verifies both arrangements; native visual and HiDPI acceptance remains open.
