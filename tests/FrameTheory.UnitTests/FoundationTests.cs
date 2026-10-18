@@ -165,6 +165,9 @@ public sealed class FoundationTests
                     .ToArray();
                 Xunit.Assert.Equal(new[] { "Video", "Photo", "Color", "AI" }, navigationLabels);
                 Xunit.Assert.Equal(
+                    "Video: Frame-accurate editing, playback and export.",
+                    ToolTip.GetTip(tabItems[0]));
+                Xunit.Assert.Equal(
                     new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
                     tabItems.Select(AutomationProperties.GetName));
                 var workspaceScrollers = tabItems
