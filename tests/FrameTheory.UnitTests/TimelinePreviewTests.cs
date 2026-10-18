@@ -20,7 +20,7 @@ public sealed class TimelinePreviewTests
             var result = await renderer.RenderFrameAsync(plan, 15, CancellationToken.None);
 
             Xunit.Assert.Equal("P6\n1 1\n255\n\0\0\0"u8.ToArray(), result);
-        Xunit.Assert.Contains("-filter_complex", runner.ArgumentsSeen);
+            Xunit.Assert.Contains("-filter_complex", runner.ArgumentsSeen);
             Xunit.Assert.Contains("anullsink", runner.ArgumentsSeen);
             Xunit.Assert.Contains("-map [outv]", runner.ArgumentsSeen);
             Xunit.Assert.Contains("-ss 0.5", runner.ArgumentsSeen);
@@ -66,9 +66,10 @@ public sealed class TimelinePreviewTests
             await File.WriteAllTextAsync(sourcePath, "source");
             var runner = new FailingProcessRunner();
 
-            await Xunit.Assert.ThrowsAsync<MediaDecodeException>(() => new FfmpegTimelinePreviewRenderer(runner)
+            var exception = await Xunit.Assert.ThrowsAsync<MediaDecodeException>(() => new FfmpegTimelinePreviewRenderer(runner)
                 .RenderFrameAsync(CreatePlan(sourcePath), 0, CancellationToken.None));
 
+            Xunit.Assert.Contains("no diagnostic output", exception.Message, StringComparison.Ordinal);
             Xunit.Assert.NotNull(runner.OutputPath);
             Xunit.Assert.False(File.Exists(runner.OutputPath));
         }
@@ -114,7 +115,7 @@ public sealed class TimelinePreviewTests
         {
             cancellationToken.ThrowIfCancellationRequested();
             OutputPath = arguments[^1];
-            return Task.FromResult(new MediaProcessResult(1, string.Empty, "render failed"));
+            return Task.FromResult(new MediaProcessResult(1, string.Empty, string.Empty));
         }
     }
 }

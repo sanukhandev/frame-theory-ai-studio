@@ -64,7 +64,10 @@ public sealed class FfmpegTimelinePreviewRenderer : ITimelinePreviewRenderer
             var result = await _processRunner.RunAsync("ffmpeg", arguments, cancellationToken);
             if (result.ExitCode != 0 || !File.Exists(outputPath))
             {
-                throw new MediaDecodeException($"FFmpeg could not render timeline frame: {result.StandardError.Trim()}");
+                var diagnostics = string.IsNullOrWhiteSpace(result.StandardError)
+                    ? "no diagnostic output"
+                    : result.StandardError.Trim();
+                throw new MediaDecodeException($"FFmpeg could not render timeline frame: {diagnostics}");
             }
 
             var bytes = await File.ReadAllBytesAsync(outputPath, cancellationToken);
