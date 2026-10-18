@@ -42,6 +42,7 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.ForegroundProperty, foreground),
                 new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70))),
                 new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(1)),
+                new Setter(TemplatedControl.CornerRadiusProperty, new CornerRadius(4)),
                 new Setter(TemplatedControl.PaddingProperty, new Thickness(12, 7)),
                 new Setter(Layoutable.MinHeightProperty, 32d)
             }
@@ -102,6 +103,7 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.BackgroundProperty, input),
                 new Setter(TemplatedControl.ForegroundProperty, foreground),
                 new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70))),
+                new Setter(TemplatedControl.CornerRadiusProperty, new CornerRadius(4)),
                 new Setter(Layoutable.MinHeightProperty, 32d)
             }
         });
@@ -127,6 +129,7 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.BackgroundProperty, input),
                 new Setter(TemplatedControl.ForegroundProperty, foreground),
                 new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70))),
+                new Setter(TemplatedControl.CornerRadiusProperty, new CornerRadius(4)),
                 new Setter(Layoutable.MinHeightProperty, 32d)
             }
         });
@@ -235,7 +238,8 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.BackgroundProperty, surface),
                 new Setter(TemplatedControl.ForegroundProperty, foreground),
                 new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(45, 50, 60))),
-                new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(1))
+                new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(1)),
+                new Setter(TemplatedControl.CornerRadiusProperty, new CornerRadius(6))
             }
         });
         Styles.Add(new Style(selector => selector.OfType<ListBoxItem>())
