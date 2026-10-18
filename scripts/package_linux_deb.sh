@@ -4,6 +4,7 @@ set -eu
 rid="${1:-linux-x64}"
 output="${2:-artifacts/installer}"
 version="${3:-0.1.0}"
+ffmpeg_directory="${4:-}"
 case "$rid" in
   linux-x64) deb_arch="amd64" ;;
   linux-arm64) deb_arch="arm64" ;;
@@ -27,6 +28,20 @@ dotnet publish src/FrameTheory.Desktop/FrameTheory.Desktop.csproj \
   --runtime "$rid" \
   --self-contained true \
   --output "$publish"
+if [ -n "$ffmpeg_directory" ]; then
+  if [ ! -d "$ffmpeg_directory" ]; then
+    printf 'FFmpeg directory does not exist: %s\n' "$ffmpeg_directory" >&2
+    exit 1
+  fi
+  for tool in ffmpeg ffprobe; do
+    if [ ! -f "$ffmpeg_directory/$tool" ]; then
+      printf 'FFmpeg directory must contain %s\n' "$tool" >&2
+      exit 1
+    fi
+    cp "$ffmpeg_directory/$tool" "$publish/$tool"
+    chmod +x "$publish/$tool"
+  done
+fi
 cat > "$root/DEBIAN/control" <<CONTROL
 Package: frame-theory-studio-ai
 Version: $version
