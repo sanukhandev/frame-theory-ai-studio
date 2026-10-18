@@ -40,6 +40,9 @@ def run() -> int:
     ui_smoke = (ROOT / "scripts/smoke_desktop_ui.ps1").read_text(encoding="utf-8")
     assert "960" in ui_smoke and "640" in ui_smoke, "Native UI smoke must retain its scaled-safe minimum bounds"
     assert 'SendWait("^$shortcut")' in ui_smoke and "$expectedTabs.Count" in ui_smoke, "Native UI smoke must exercise every workspace shortcut"
+    assert "Expand-NamedSection" in ui_smoke, "Native UI smoke must open collapsed inspector sections before control checks"
+    for section_name in ["Titles and captions section", "Reference match section", "Activity section"]:
+        assert section_name in ui_smoke, f"Native UI smoke must cover {section_name}"
     sbom = (ROOT / "docs/SBOM.md").read_text(encoding="utf-8")
     assert "Avalonia.Headless" in sbom and "CI fails closed" in sbom, "SBOM must document the headless package and metadata guard"
     solution = (ROOT/"FrameTheory.sln").read_text(encoding="utf-8")
