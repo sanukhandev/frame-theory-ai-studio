@@ -188,7 +188,7 @@ public sealed class FoundationTests
                     new[] { "Video workspace content", "Photo workspace content", "Color workspace content", "AI workspace content" },
                     workspaceScrollers.Select(AutomationProperties.GetName));
                 var activeWorkspaceStatus = window.GetVisualDescendants()
-                    .OfType<TextBlock>()
+                    .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Active workspace status");
                 Xunit.Assert.Equal(viewModel.ActiveWorkspaceStatusText, activeWorkspaceStatus.Text);
                 Xunit.Assert.Equal(
