@@ -241,7 +241,9 @@ public sealed class MainWindow : Window
                 Key.D2 or Key.NumPad2 => EditorShortcut.PhotoWorkspace,
                 Key.D3 or Key.NumPad3 => EditorShortcut.ColorWorkspace,
                 Key.D4 or Key.NumPad4 => EditorShortcut.AiWorkspace,
-                Key.Z => EditorShortcut.UndoAiEdit,
+                Key.Y => EditorShortcut.RedoCurrentEdit,
+                Key.Z when (args.KeyModifiers & KeyModifiers.Shift) != 0 => EditorShortcut.RedoCurrentEdit,
+                Key.Z => EditorShortcut.UndoCurrentEdit,
                 _ => (EditorShortcut?)null
             }
             : viewModel.SelectedWorkspaceIndex == 0

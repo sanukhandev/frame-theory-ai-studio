@@ -370,28 +370,30 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
         NotifyDocumentChanged();
     }
 
-    public void Undo()
+    public bool Undo()
     {
         if (_history?.Undo() != true)
         {
             StatusText = "No photo edit is available to undo.";
-            return;
+            return false;
         }
 
         StatusText = "Undid the last photo edit.";
         NotifyDocumentChanged();
+        return true;
     }
 
-    public void Redo()
+    public bool Redo()
     {
         if (_history?.Redo() != true)
         {
             StatusText = "No photo edit is available to redo.";
-            return;
+            return false;
         }
 
         StatusText = "Redid the last photo edit.";
         NotifyDocumentChanged();
+        return true;
     }
 
     public async Task ExportAsync(

@@ -120,6 +120,8 @@ public sealed class FoundationTests
 
         Xunit.Assert.Equal("AI", viewModel.SelectedWorkspace.Name);
 
+        Xunit.Assert.False(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.RedoCurrentEdit));
+
         viewModel.SelectedWorkspaceIndex = -1;
         viewModel.SelectedWorkspaceIndex = viewModel.Workspaces.Count;
 
@@ -1161,6 +1163,7 @@ public sealed class FoundationTests
         Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.NextFrame));
         Xunit.Assert.Equal(0, viewModel.TimelineEditor.CurrentFrame);
         Xunit.Assert.False(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.UndoAiEdit));
+        Xunit.Assert.False(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.UndoCurrentEdit));
     }
 
     [Xunit.Fact]

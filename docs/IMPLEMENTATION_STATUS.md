@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Keyboard edit-history checkpoint (2026-10-18):** Photo undo/redo now routes through standard `Ctrl/Cmd+Z`, `Ctrl/Cmd+Shift+Z` and `Ctrl/Cmd+Y` shortcuts according to the active workspace, while Video/AI preserve the existing approved-AI undo path. Empty-history calls return explicit status without mutation; Foundation coverage exercises the routing contract.
+
 **Photo redo checkpoint (2026-10-18):** The existing non-destructive photo history now exposes a real `Redo photo edit` action beside undo, preserves the operation stack and reports an explicit empty-redo state. Persistence coverage exercises undo followed by redo before save/reopen, and the adaptive shell exposes the accessible control.
 
 **Responsive inspector-input checkpoint (2026-10-18):** AI revision and recipe inputs now use bounded minimum/maximum widths, and Color reference selectors stretch within a 160–240px bound. The controls retain their existing commands while wrapping cleanly in compact inspector flows; the adaptive-shell contract verifies their geometry and automation names.

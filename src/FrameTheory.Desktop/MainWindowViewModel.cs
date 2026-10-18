@@ -23,7 +23,9 @@ public enum EditorShortcut
     AiWorkspace,
     PreviousFrame,
     NextFrame,
-    UndoAiEdit
+    UndoAiEdit,
+    UndoCurrentEdit,
+    RedoCurrentEdit
 }
 
 public sealed record ImportedMediaViewModel(
@@ -629,6 +631,15 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         return undone;
     }
 
+    public bool UndoCurrentEdit() => SelectedWorkspace.Name switch
+    {
+        "Photo" => PhotoEditor?.Undo() == true,
+        "Video" or "AI" => UndoLastAiEdit(),
+        _ => false
+    };
+
+    public bool RedoCurrentEdit() => SelectedWorkspace.Name == "Photo" && PhotoEditor?.Redo() == true;
+
     public int SelectedWorkspaceIndex
     {
         get => _selectedWorkspaceIndex;
@@ -658,6 +669,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         EditorShortcut.PreviousFrame when SelectedWorkspaceIndex == 0 => MoveTimelineFrame(-1),
         EditorShortcut.NextFrame when SelectedWorkspaceIndex == 0 => MoveTimelineFrame(1),
         EditorShortcut.UndoAiEdit => UndoLastAiEdit(),
+        EditorShortcut.UndoCurrentEdit => UndoCurrentEdit(),
+        EditorShortcut.RedoCurrentEdit => RedoCurrentEdit(),
         _ => false
     };
 
