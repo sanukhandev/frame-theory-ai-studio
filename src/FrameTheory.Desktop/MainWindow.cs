@@ -2223,6 +2223,8 @@ public sealed class MainWindow : Window
                     var clipWidth = Math.Max(128, clip.DurationFrames / timeline.FramesPerPixel);
                     var clipMedia = viewModel.ImportedMedia.FirstOrDefault(media => media.Id?.Value == clip.MediaId);
                     var waveform = CreateWaveformCanvas(clipMedia?.WaveformPeaks, clipWidth - 16, 10);
+                    AutomationProperties.SetName(waveform, $"{item.Kind} waveform for {clip.MediaId}");
+                    ToolTip.SetTip(waveform, "Imported local waveform peaks for this timeline clip.");
                     var clipButton = new Button
                     {
                         Width = clipWidth,
