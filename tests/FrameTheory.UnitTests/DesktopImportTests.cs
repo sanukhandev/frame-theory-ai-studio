@@ -165,6 +165,16 @@ public sealed class DesktopImportTests
                 viewport.Offset = new Avalonia.Vector(30, 0);
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(2, viewModel.TimelineEditor.ScrollFrame);
+
+                viewModel.TimelineEditor.ScrollBy(-2);
+                Dispatcher.UIThread.RunJobs();
+                var rulerViewport = window.GetVisualDescendants()
+                    .OfType<ScrollViewer>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Timeline ruler viewport");
+                rulerViewport.Offset = new Avalonia.Vector(30, 0);
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(2, viewModel.TimelineEditor.ScrollFrame);
+                Xunit.Assert.Equal(40, rulerViewport.Offset.X);
             }
             finally
             {

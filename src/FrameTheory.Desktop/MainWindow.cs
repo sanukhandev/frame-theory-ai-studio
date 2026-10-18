@@ -2230,6 +2230,52 @@ public sealed class MainWindow : Window
         ToolTip.SetTip(ruler, "Current frame and timeline position.");
         ruler.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.RulerText"));
         var rulerCanvas = new Canvas { Width = 640, Height = 30 };
+        var rulerViewport = new ScrollViewer
+        {
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
+            Content = rulerCanvas
+        };
+        AutomationProperties.SetName(rulerViewport, "Timeline ruler viewport");
+        var applyingRulerScroll = false;
+        void AlignRulerViewport()
+        {
+            if (!rulerViewport.IsAttachedToVisualTree())
+            {
+                return;
+            }
+
+            applyingRulerScroll = true;
+            rulerViewport.Offset = new Avalonia.Vector(timeline.ScrollFrame / timeline.FramesPerPixel, 0);
+            applyingRulerScroll = false;
+        }
+
+        void ApplyRulerViewportScroll()
+        {
+            if (applyingRulerScroll || !rulerViewport.IsAttachedToVisualTree())
+            {
+                return;
+            }
+
+            var requestedFrame = Math.Clamp(
+                (long)Math.Round(rulerViewport.Offset.X * timeline.FramesPerPixel, MidpointRounding.AwayFromZero),
+                0,
+                Math.Max(0, timeline.TotalFrames - 1));
+            if (requestedFrame != timeline.ScrollFrame)
+            {
+                timeline.ScrollBy(requestedFrame - timeline.ScrollFrame);
+            }
+        }
+
+        rulerViewport.ScrollChanged += (_, _) => ApplyRulerViewportScroll();
+        rulerViewport.PropertyChanged += (_, args) =>
+        {
+            if (args.Property == ScrollViewer.OffsetProperty)
+            {
+                ApplyRulerViewportScroll();
+            }
+        };
+        rulerViewport.AttachedToVisualTree += (_, _) => Dispatcher.UIThread.Post(AlignRulerViewport);
         var rulerVisual = new Border
         {
             Padding = new Thickness(8, 4),
@@ -2237,12 +2283,7 @@ public sealed class MainWindow : Window
             BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
             BorderThickness = new Thickness(1),
             CornerRadius = new CornerRadius(4),
-            Child = new ScrollViewer
-            {
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-                VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
-                Content = rulerCanvas
-            }
+            Child = rulerViewport
         };
         AutomationProperties.SetName(rulerVisual, "Timeline visual ruler");
         ToolTip.SetTip(rulerVisual, "Click the ruler to seek to an exact timeline frame.");
@@ -2253,6 +2294,7 @@ public sealed class MainWindow : Window
         };
         void RefreshRulerVisual()
         {
+            rulerCanvas.Width = Math.Max(640, timeline.TotalFrames / timeline.FramesPerPixel + 32);
             rulerCanvas.Children.Clear();
             var playheadMark = new Border
             {
@@ -2294,6 +2336,7 @@ public sealed class MainWindow : Window
             if (args.PropertyName is nameof(TimelineEditorViewModel.RulerText) or nameof(TimelineEditorViewModel.ScrollFrame) or nameof(TimelineEditorViewModel.FramesPerPixel) or nameof(TimelineEditorViewModel.TotalFrames))
             {
                 RefreshRulerVisual();
+                AlignRulerViewport();
             }
         };
         var selectionContext = new TextBox
