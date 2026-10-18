@@ -36,6 +36,7 @@ public sealed class MainWindow : Window
         Height = 800;
         MinWidth = 960;
         MinHeight = 640;
+        UseLayoutRounding = true;
         Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(13, 15, 18));
 
         var tabs = new TabControl();

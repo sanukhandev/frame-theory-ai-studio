@@ -150,6 +150,7 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(800, window.Height);
                 Xunit.Assert.Equal(960, window.MinWidth);
                 Xunit.Assert.Equal(640, window.MinHeight);
+                Xunit.Assert.True(window.UseLayoutRounding);
                 Xunit.Assert.Equal("Frame Theory Studio AI", AutomationProperties.GetName(window));
                 Xunit.Assert.Equal("Workspaces", AutomationProperties.GetName(tabs));
                 Xunit.Assert.Equal(Dock.Left, tabs.TabStripPlacement);
