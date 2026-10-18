@@ -1134,6 +1134,9 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Paste a schema v1 plan for local validation; no action is applied before review.",
                     ToolTip.GetTip(aiPlanJson));
+                Xunit.Assert.Equal(
+                    "Discard the current AI proposal and its approval selections without changing the project.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Clear AI proposal")));
                 var planSection = window.GetVisualDescendants()
                     .OfType<Expander>()
                     .Single(control => AutomationProperties.GetName(control) == "Plan input and revision section");
@@ -1150,6 +1153,12 @@ public sealed class FoundationTests
                 Xunit.Assert.True(aiRecipeStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, aiRecipeStatus.FontSize);
                 Xunit.Assert.Equal("Status of local AI recipe save and load operations.", ToolTip.GetTip(aiRecipeStatus));
+                Xunit.Assert.Equal(
+                    "Name the validated local AI recipe before saving it.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBox>().Single(control => AutomationProperties.GetName(control) == "AI recipe name")));
+                Xunit.Assert.Equal(
+                    "Load a local AI recipe for review; it is not applied automatically.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Load AI recipe")));
                 var geminiProviderStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Gemini provider status");

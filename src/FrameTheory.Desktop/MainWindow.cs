@@ -2177,6 +2177,7 @@ public sealed class MainWindow : Window
         undo.Click += (_, _) => viewModel.UndoLastAiEdit();
         var clear = new Button { Content = "Clear proposal" };
         AutomationProperties.SetName(clear, "Clear AI proposal");
+        ToolTip.SetTip(clear, "Discard the current AI proposal and its approval selections without changing the project.");
         clear.Click += (_, _) => viewModel.AiProposal.Clear();
         var recipeName = new TextBox
         {
@@ -2186,8 +2187,10 @@ public sealed class MainWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
         AutomationProperties.SetName(recipeName, "AI recipe name");
+        ToolTip.SetTip(recipeName, "Name the validated local AI recipe before saving it.");
         var saveRecipe = new Button { Content = "Save recipe" };
         AutomationProperties.SetName(saveRecipe, "Save validated AI recipe");
+        ToolTip.SetTip(saveRecipe, "Save the validated allowlisted AI plan as a portable local recipe.");
         saveRecipe.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(saveRecipe);
@@ -2209,6 +2212,7 @@ public sealed class MainWindow : Window
         };
         var loadRecipe = new Button { Content = "Load recipe" };
         AutomationProperties.SetName(loadRecipe, "Load AI recipe");
+        ToolTip.SetTip(loadRecipe, "Load a local AI recipe for review; it is not applied automatically.");
         loadRecipe.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(loadRecipe);
