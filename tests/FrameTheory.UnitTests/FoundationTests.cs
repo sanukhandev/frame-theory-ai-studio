@@ -174,6 +174,11 @@ public sealed class FoundationTests
                         .OfType<Button>()
                         .Single(control => AutomationProperties.GetName(control) == "Refresh capability check")));
                 Xunit.Assert.Equal(
+                    "Local FFmpeg, ffprobe and platform capability status.",
+                    ToolTip.GetTip(window.GetVisualDescendants()
+                        .OfType<TextBlock>()
+                        .Single(control => AutomationProperties.GetName(control) == "Capability status")));
+                Xunit.Assert.Equal(
                     new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
                     tabItems.Select(AutomationProperties.GetName));
                 var workspaceScrollers = tabItems

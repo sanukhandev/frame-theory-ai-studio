@@ -330,6 +330,7 @@ public sealed class MainWindow : Window
         };
         status.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CapabilityStatusText)));
         AutomationProperties.SetName(status, "Capability status");
+        ToolTip.SetTip(status, "Local FFmpeg, ffprobe and platform capability status.");
         var refresh = new Button { Content = "Refresh capabilities", Margin = new Thickness(12, 8, 16, 8) };
         AutomationProperties.SetName(refresh, "Refresh capability check");
         ToolTip.SetTip(refresh, "Recheck local FFmpeg, ffprobe and platform capabilities.");
@@ -344,6 +345,7 @@ public sealed class MainWindow : Window
         };
         diagnostics.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.DiagnosticsStatusText)));
         AutomationProperties.SetName(diagnostics, "Diagnostics status");
+        ToolTip.SetTip(diagnostics, "Local diagnostics log and failure-reporting status.");
         return new Border
         {
             Height = 48,
