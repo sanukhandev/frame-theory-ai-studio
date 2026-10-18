@@ -1491,9 +1491,21 @@ public sealed class MainWindow : Window
             Mode = BindingMode.TwoWay
         });
         var apiKey = new TextBox { PlaceholderText = "Gemini API key (stored securely)", PasswordChar = '•' };
-        var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var status = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(status, "Gemini provider status");
-        status.Bind(TextBlock.TextProperty, new Binding(nameof(GeminiSettingsViewModel.StatusText)));
+        ToolTip.SetTip(status, "Current optional Gemini provider configuration status.");
+        status.Bind(TextBox.TextProperty, new Binding(nameof(GeminiSettingsViewModel.StatusText)));
         var save = new Button { Content = "Store Gemini key" };
         AutomationProperties.SetName(save, "Store Gemini key securely");
         ToolTip.SetTip(save, "Store the Gemini key in the platform secret store; it is never written to the project.");
@@ -1542,9 +1554,21 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(analyzeApprovedSamples, "Analyze approved samples with Gemini");
         ToolTip.SetTip(analyzeApprovedSamples, "Send only the explicitly approved sample scope to Gemini for a structured analysis.");
         analyzeApprovedSamples.Click += async (_, _) => await viewModel.RequestAiAnalysisAsync(CancellationToken.None);
-        var analysisStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var analysisStatus = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(analysisStatus, "Gemini analysis status");
-        analysisStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.AnalysisStatusText)));
+        ToolTip.SetTip(analysisStatus, "Status of the latest bounded Gemini analysis request.");
+        analysisStatus.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.AnalysisStatusText)));
         var usageStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(usageStatus, "Gemini usage status");
         usageStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.GeminiUsageStatusText)));

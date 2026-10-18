@@ -615,6 +615,23 @@ public sealed class FoundationTests
                 Xunit.Assert.True(aiProposalStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, aiProposalStatus.FontSize);
                 Xunit.Assert.Equal("Current AI proposal review and validation status.", ToolTip.GetTip(aiProposalStatus));
+                var geminiProviderStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Gemini provider status");
+                Xunit.Assert.True(geminiProviderStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, geminiProviderStatus.FontSize);
+                Xunit.Assert.Equal("Current optional Gemini provider configuration status.", ToolTip.GetTip(geminiProviderStatus));
+                var activitySection = window.GetVisualDescendants()
+                    .OfType<Expander>()
+                    .Single(control => AutomationProperties.GetName(control) == "Activity section");
+                activitySection.IsExpanded = true;
+                Dispatcher.UIThread.RunJobs();
+                var geminiAnalysisStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Gemini analysis status");
+                Xunit.Assert.True(geminiAnalysisStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, geminiAnalysisStatus.FontSize);
+                Xunit.Assert.Equal("Status of the latest bounded Gemini analysis request.", ToolTip.GetTip(geminiAnalysisStatus));
                 var automationNames = new HashSet<string>(StringComparer.Ordinal);
                 for (var workspaceIndex = 0; workspaceIndex < tabs.Items.Count; workspaceIndex++)
                 {
