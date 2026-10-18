@@ -80,6 +80,10 @@ jobs:
         if: steps.detect.outputs.has_solution == 'true' && runner.os == 'Windows'
         shell: pwsh
         run: ./scripts/smoke_desktop.ps1
+      - name: Launch desktop UI automation smoke
+        if: steps.detect.outputs.has_solution == 'true' && runner.os == 'Windows'
+        shell: pwsh
+        run: ./scripts/smoke_desktop_ui.ps1
       - name: Install FFmpeg for native media smoke
         if: steps.detect.outputs.has_solution == 'true'
         shell: bash
