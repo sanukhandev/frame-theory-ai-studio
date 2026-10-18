@@ -3131,6 +3131,9 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(quickSaveProject, "Quick save timeline project");
         ToolTip.SetTip(quickSaveProject, "Save the current editable timeline project to a portable file.");
         quickSaveProject.Click += async (_, _) => await SaveTimelineProjectFrom(quickSaveProject);
+        var quickSaveStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(quickSaveStatus, "Quick save status");
+        quickSaveStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.TimelineProjectStatusText)));
         var openProject = new Button { Content = "Open timeline project" };
         AutomationProperties.SetName(openProject, "Open timeline project");
         ToolTip.SetTip(openProject, "Open a Frame Theory project and restore its editable timeline.");
@@ -3339,6 +3342,7 @@ public sealed class MainWindow : Window
                     }
                 },
                 CreateFlow(previewCurrentFrame, playTimeline, stopTimeline, quickSaveProject, quickExport),
+                quickSaveStatus,
                 quickExportStatus,
                 usePreviewProxy,
                 analyzeMotion,

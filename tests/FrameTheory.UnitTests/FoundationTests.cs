@@ -405,6 +405,12 @@ public sealed class FoundationTests
                         .OfType<TextBlock>()
                         .Single(control => AutomationProperties.GetName(control) == "Quick export status")
                         .Text);
+                Xunit.Assert.Equal(
+                    viewModel.TimelineProjectStatusText,
+                    window.GetVisualDescendants()
+                        .OfType<TextBlock>()
+                        .Single(control => AutomationProperties.GetName(control) == "Quick save status")
+                        .Text);
                 Xunit.Assert.False(window.GetVisualDescendants()
                     .OfType<Button>()
                     .Single(control => AutomationProperties.GetName(control) == "Stop timeline preview")
