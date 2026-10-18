@@ -558,6 +558,7 @@ public sealed class DesktopImportTests
         Xunit.Assert.Equal(4, viewModel.TimelineEditor.CurrentFrame);
         Xunit.Assert.Equal(12, decoder.Frames.Count);
         Xunit.Assert.Contains("Analyzed 12 frames", viewModel.MotionAnalysisStatusText, StringComparison.Ordinal);
+        Xunit.Assert.Contains("confidence 1", viewModel.MotionAnalysisStatusText, StringComparison.Ordinal);
     }
 
     [Xunit.Fact]

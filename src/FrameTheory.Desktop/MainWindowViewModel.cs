@@ -1011,11 +1011,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             var plan = StabilizationPlanner.Plan(vectors);
             var meanX = vectors.Average(vector => vector.OffsetX);
             var meanY = vectors.Average(vector => vector.OffsetY);
+            var meanConfidence = vectors.Average(vector => vector.Confidence);
             var maxCompensation = plan.Transforms
                 .Select(transform => Math.Max(Math.Abs(transform.OffsetX), Math.Abs(transform.OffsetY)))
                 .DefaultIfEmpty()
                 .Max();
-            MotionAnalysisStatusText = $"Analyzed {frames.Count} frames; mean translation {meanX:0.##},{meanY:0.##}; max compensation {maxCompensation}px.";
+            MotionAnalysisStatusText = $"Analyzed {frames.Count} frames; mean translation {meanX:0.##},{meanY:0.##}; confidence {meanConfidence:0.##}; max compensation {maxCompensation}px.";
             return true;
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
