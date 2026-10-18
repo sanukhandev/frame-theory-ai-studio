@@ -1065,6 +1065,23 @@ public sealed class MainWindow : Window
         Grid.SetColumn(layout.Children[1], 1);
         Grid.SetColumn(editor, 2);
         AutomationProperties.SetName(layout, automationName);
+        ToolTip.SetTip(layout, "Responsive editor layout with a local media rail and workspace inspector.");
+        void RefreshMediaRailWidth(double width)
+        {
+            if (width <= 0)
+            {
+                return;
+            }
+
+            var windowWidth = TopLevel.GetTopLevel(layout)?.Bounds.Width ?? width;
+            var mediaRailWidth = windowWidth < 1120 ? 240 : 300;
+            if (layout.ColumnDefinitions[0].Width.Value != mediaRailWidth)
+            {
+                layout.ColumnDefinitions[0].Width = new GridLength(mediaRailWidth, GridUnitType.Pixel);
+            }
+        }
+
+        layout.SizeChanged += (_, args) => RefreshMediaRailWidth(args.NewSize.Width);
         return layout;
     }
 

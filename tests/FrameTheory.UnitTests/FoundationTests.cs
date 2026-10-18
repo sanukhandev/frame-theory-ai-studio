@@ -242,6 +242,15 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(3, videoEditorLayout.ColumnDefinitions.Count);
                 Xunit.Assert.Equal(300, videoEditorLayout.ColumnDefinitions[0].Width.Value);
                 Xunit.Assert.Equal(1, videoEditorLayout.ColumnDefinitions[1].Width.Value);
+                Xunit.Assert.Equal(
+                    "Responsive editor layout with a local media rail and workspace inspector.",
+                    ToolTip.GetTip(videoEditorLayout));
+                window.Width = 960;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(240, videoEditorLayout.ColumnDefinitions[0].Width.Value);
+                window.Width = 1280;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(300, videoEditorLayout.ColumnDefinitions[0].Width.Value);
                 for (var workspaceIndex = 1; workspaceIndex < tabItems.Length; workspaceIndex++)
                 {
                     tabs.SelectedIndex = workspaceIndex;
@@ -253,6 +262,9 @@ public sealed class FoundationTests
                     Xunit.Assert.Equal(3, editorLayout.ColumnDefinitions.Count);
                     Xunit.Assert.Equal(300, editorLayout.ColumnDefinitions[0].Width.Value);
                     Xunit.Assert.Equal(1, editorLayout.ColumnDefinitions[1].Width.Value);
+                    Xunit.Assert.Equal(
+                        "Responsive editor layout with a local media rail and workspace inspector.",
+                        ToolTip.GetTip(editorLayout));
                 }
                 tabs.SelectedIndex = 0;
                 Dispatcher.UIThread.RunJobs();
