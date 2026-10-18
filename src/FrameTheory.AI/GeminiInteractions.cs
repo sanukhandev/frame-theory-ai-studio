@@ -234,6 +234,7 @@ public interface IGeminiClient
 
 public sealed class GeminiInteractionsClient : IGeminiClient
 {
+    private const int MaximumInlineImageBytes = 20 * 1024 * 1024;
     private static readonly TimeSpan MaximumRetryWait = TimeSpan.FromSeconds(30);
     private static readonly Uri InteractionsEndpoint = new("https://generativelanguage.googleapis.com/v1beta/interactions");
     private readonly HttpClient _httpClient;
@@ -377,7 +378,7 @@ public sealed class GeminiInteractionsClient : IGeminiClient
         if (inputs.Skip(1).Any(input =>
             input.Type == "image"
                 ? !IsValidImageInput(input)
-                : input.Type != "text" || string.IsNullOrWhiteSpace(input.Text) || input.Data is not null || input.Uri is not null))
+                : input.Type != "text" || string.IsNullOrWhiteSpace(input.Text) || input.Text.Length > 1_048_576 || input.Data is not null || input.Uri is not null))
         {
             throw new ArgumentException("A Gemini plan accepts only inline PNGs, validated Gemini-hosted PNG URIs and bounded text metadata.", nameof(inputs));
         }
@@ -399,7 +400,19 @@ public sealed class GeminiInteractionsClient : IGeminiClient
 
         if (!string.IsNullOrWhiteSpace(input.Data) && input.Uri is null)
         {
-            return true;
+            if (input.Data.Length > ((MaximumInlineImageBytes + 2) / 3) * 4)
+            {
+                return false;
+            }
+
+            try
+            {
+                return Convert.FromBase64String(input.Data).LongLength <= MaximumInlineImageBytes;
+            }
+            catch (FormatException)
+            {
+                return false;
+            }
         }
 
         return input.Data is null &&

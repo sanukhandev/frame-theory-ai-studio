@@ -1,5 +1,6 @@
 using System.Net;
 using System.Text;
+using System.Text.Json;
 using FrameTheory.AI;
 using FrameTheory.Application;
 
@@ -149,6 +150,39 @@ public sealed class GeminiInteractionsTests
             new GeminiClientOptions("test-secret", "gemini-2.5-flash", TimeSpan.FromSeconds(5), 3, TimeSpan.Zero))
             .CreateFollowUpAsync("cancel", null, cancellation.Token));
         Xunit.Assert.Equal(GeminiProviderFailureKind.Cancellation, exception.FailureKind);
+        Xunit.Assert.Equal(0, calls);
+    }
+
+    [Xunit.Fact]
+    public async Task PlanInputRejectsMalformedAndOversizedInlineImagesBeforeNetworkUse()
+    {
+        var calls = 0;
+        using var client = new HttpClient(new StubHandler(_ =>
+        {
+            calls++;
+            return Response("{\"id\":\"unused\",\"status\":\"completed\",\"output_text\":\"unused\"}");
+        }));
+        var service = new GeminiInteractionsClient(
+            client,
+            new GeminiClientOptions("test-secret", "gemini-2.5-flash", TimeSpan.FromSeconds(5), 1, TimeSpan.Zero));
+        var schema = JsonDocument.Parse("{}").RootElement.Clone();
+
+        await Xunit.Assert.ThrowsAsync<ArgumentException>(() => service.CreatePlanAsync(
+            [
+                GeminiInteractionInput.CreateText("plan"),
+                new GeminiInteractionInput("image", null, "not-base64", null, "image/png")
+            ],
+            schema,
+            CancellationToken.None));
+
+        await Xunit.Assert.ThrowsAsync<ArgumentException>(() => service.CreatePlanAsync(
+            [
+                GeminiInteractionInput.CreateText("plan"),
+                new GeminiInteractionInput("image", null, new string('A', 28_000_000), null, "image/png")
+            ],
+            schema,
+            CancellationToken.None));
+
         Xunit.Assert.Equal(0, calls);
     }
 
