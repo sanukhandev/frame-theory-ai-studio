@@ -74,7 +74,25 @@ public sealed class AiPlanFormatException : FormatException
     }
 }
 
-public sealed record AiOperationDescriptor(string Type, string TargetKind, string Description, IReadOnlyList<string> Parameters);
+public sealed record AiOperationDescriptor
+{
+    public AiOperationDescriptor(string type, string targetKind, string description, IReadOnlyList<string> parameters)
+    {
+        ArgumentNullException.ThrowIfNull(parameters);
+        Type = type;
+        TargetKind = targetKind;
+        Description = description;
+        Parameters = Array.AsReadOnly(parameters.ToArray());
+    }
+
+    public string Type { get; }
+
+    public string TargetKind { get; }
+
+    public string Description { get; }
+
+    public IReadOnlyList<string> Parameters { get; }
+}
 
 public static class AiOperationCatalog
 {

@@ -34,6 +34,7 @@ public sealed class AiEditPlanTests
         Xunit.Assert.NotEmpty(AiOperationCatalog.Supported);
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<AiOperationDescriptor>>(AiOperationCatalog.Supported).IsReadOnly);
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<GeminiModelOption>>(GeminiModelCatalog.Supported).IsReadOnly);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<string>>(AiOperationCatalog.TryGet("color.adjust", out var descriptor) ? descriptor.Parameters : []).IsReadOnly);
     }
 
     [Xunit.Fact]
