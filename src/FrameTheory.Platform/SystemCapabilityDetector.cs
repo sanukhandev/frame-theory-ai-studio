@@ -68,25 +68,33 @@ public sealed class SystemCapabilityDetector : ICapabilityDetector
                 return new CapabilityStatus(displayName, CapabilityState.Missing, "The process could not be started.");
             }
 
-            var standardOutput = process.StandardOutput.ReadToEndAsync(cancellationToken);
-            var standardError = process.StandardError.ReadToEndAsync(cancellationToken);
-            await process.WaitForExitAsync(cancellationToken);
-            var output = await Task.WhenAll(standardOutput, standardError);
-            if (process.ExitCode != 0)
+            try
             {
-                var detail = output.SelectMany(value => value.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                var standardOutput = process.StandardOutput.ReadToEndAsync(cancellationToken);
+                var standardError = process.StandardError.ReadToEndAsync(cancellationToken);
+                await process.WaitForExitAsync(cancellationToken);
+                var output = await Task.WhenAll(standardOutput, standardError);
+                if (process.ExitCode != 0)
+                {
+                    var detail = output.SelectMany(value => value.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+                        .Select(value => value.Trim())
+                        .FirstOrDefault(value => value.Length > 0);
+                    return new CapabilityStatus(
+                        displayName,
+                        CapabilityState.Unknown,
+                        $"Exited with code {process.ExitCode}." + (detail is null ? string.Empty : $" {detail}"));
+                }
+
+                var version = output.SelectMany(value => value.Split('\n', StringSplitOptions.RemoveEmptyEntries))
                     .Select(value => value.Trim())
                     .FirstOrDefault(value => value.Length > 0);
-                return new CapabilityStatus(
-                    displayName,
-                    CapabilityState.Unknown,
-                    $"Exited with code {process.ExitCode}." + (detail is null ? string.Empty : $" {detail}"));
+                return new CapabilityStatus(displayName, CapabilityState.Available, version ?? "Executable responded.");
             }
-
-            var version = output.SelectMany(value => value.Split('\n', StringSplitOptions.RemoveEmptyEntries))
-                .Select(value => value.Trim())
-                .FirstOrDefault(value => value.Length > 0);
-            return new CapabilityStatus(displayName, CapabilityState.Available, version ?? "Executable responded.");
+            catch (OperationCanceledException)
+            {
+                TryKill(process);
+                throw;
+            }
         }
         catch (System.ComponentModel.Win32Exception)
         {
@@ -124,20 +132,28 @@ public sealed class SystemCapabilityDetector : ICapabilityDetector
                 return new CapabilityStatus("GPU", CapabilityState.Unknown, "The platform GPU adapter probe could not be started; CPU fallback remains active.");
             }
 
-            var standardOutput = process.StandardOutput.ReadToEndAsync(cancellationToken);
-            var standardError = process.StandardError.ReadToEndAsync(cancellationToken);
-            await process.WaitForExitAsync(cancellationToken);
-            var output = await Task.WhenAll(standardOutput, standardError);
-            var detail = SelectGpuDescription(output);
-            if (process.ExitCode != 0)
+            try
             {
-                var failure = FirstOutputLine(output) ?? $"Exited with code {process.ExitCode}.";
-                return new CapabilityStatus("GPU", CapabilityState.Unknown, $"GPU adapter probe failed: {LimitDetail(failure)} CPU fallback remains active.");
-            }
+                var standardOutput = process.StandardOutput.ReadToEndAsync(cancellationToken);
+                var standardError = process.StandardError.ReadToEndAsync(cancellationToken);
+                await process.WaitForExitAsync(cancellationToken);
+                var output = await Task.WhenAll(standardOutput, standardError);
+                var detail = SelectGpuDescription(output);
+                if (process.ExitCode != 0)
+                {
+                    var failure = FirstOutputLine(output) ?? $"Exited with code {process.ExitCode}.";
+                    return new CapabilityStatus("GPU", CapabilityState.Unknown, $"GPU adapter probe failed: {LimitDetail(failure)} CPU fallback remains active.");
+                }
 
-            return detail is null
-                ? new CapabilityStatus("GPU", CapabilityState.Unknown, "The platform GPU adapter probe reported no adapter; CPU fallback remains active.")
-                : new CapabilityStatus("GPU", CapabilityState.Available, LimitDetail(detail));
+                return detail is null
+                    ? new CapabilityStatus("GPU", CapabilityState.Unknown, "The platform GPU adapter probe reported no adapter; CPU fallback remains active.")
+                    : new CapabilityStatus("GPU", CapabilityState.Available, LimitDetail(detail));
+            }
+            catch (OperationCanceledException)
+            {
+                TryKill(process);
+                throw;
+            }
         }
         catch (System.ComponentModel.Win32Exception)
         {
@@ -189,6 +205,23 @@ public sealed class SystemCapabilityDetector : ICapabilityDetector
         .FirstOrDefault(value => value.Length > 0);
 
     private static string LimitDetail(string value) => value.Length <= 512 ? value : value[..512];
+
+    private static void TryKill(Process process)
+    {
+        try
+        {
+            if (!process.HasExited)
+            {
+                process.Kill(entireProcessTree: true);
+            }
+        }
+        catch (InvalidOperationException)
+        {
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+        }
+    }
 
     private static string RequireExecutable(string value, string parameterName) =>
         string.IsNullOrWhiteSpace(value) ? throw new ArgumentException("An executable or probe argument is required.", parameterName) : value.Trim();
