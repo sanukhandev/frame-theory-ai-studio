@@ -832,6 +832,12 @@ public sealed class FoundationTests
                 Xunit.Assert.True(double.IsNaN(photoSocialPreset.Width));
                 Xunit.Assert.Equal(140, photoSocialPreset.MinWidth);
                 Xunit.Assert.Equal(180, photoSocialPreset.MaxWidth);
+                Xunit.Assert.Contains(photoSections["Export section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Format");
+                Xunit.Assert.Contains(photoSections["Export section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "JPEG quality");
+                Xunit.Assert.Contains(photoSections["Export section"].GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Dimensions");
+                Xunit.Assert.Equal(
+                    "Choose the output canvas framing for the photo export.",
+                    ToolTip.GetTip(photoSocialPreset));
                 photoSections["Layers and blend section"].IsExpanded = false;
                 Xunit.Assert.True(window.GetVisualDescendants()
                     .OfType<TextBlock>()

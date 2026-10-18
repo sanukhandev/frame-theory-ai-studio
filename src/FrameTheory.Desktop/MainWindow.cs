@@ -1591,6 +1591,7 @@ public sealed class MainWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
         AutomationProperties.SetName(format, "Photo export format");
+        ToolTip.SetTip(format, "Choose PNG for transparency or JPEG for compact photo output.");
         var quality = new Slider
         {
             Minimum = 1,
@@ -1612,6 +1613,13 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(qualityValue, "Photo export quality value");
         quality.ValueChanged += (_, args) => qualityValue.Text = $"{args.NewValue:0}";
+        var qualityField = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+            ColumnSpacing = 6,
+            Children = { quality, qualityValue }
+        };
+        Grid.SetColumn(qualityValue, 1);
         var socialPreset = new ComboBox
         {
             ItemsSource = new[] { "Original", "16:9 landscape", "1:1 square", "9:16 portrait" },
@@ -1621,6 +1629,7 @@ public sealed class MainWindow : Window
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
         AutomationProperties.SetName(socialPreset, "Photo export social dimensions");
+        ToolTip.SetTip(socialPreset, "Choose the output canvas framing for the photo export.");
         var export = new Button { Content = "Export image" };
         export.Classes.Add("primary");
         AutomationProperties.SetName(export, "Export photo image");
@@ -1761,7 +1770,11 @@ public sealed class MainWindow : Window
             expanded: true);
         var photoExportSection = CreateInspectorExpander(
             "Export",
-            CreateSectionContent(CreateFlow(format, quality, qualityValue, socialPreset, export)),
+            CreateSectionContent(CreateFlow(
+                CreateLabeledField("Format", format),
+                CreateLabeledField("JPEG quality", qualityField),
+                CreateLabeledField("Dimensions", socialPreset),
+                export)),
             expanded: true);
         return new Border
         {
