@@ -35,6 +35,8 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
 
     public PhotoEditState? Current => _history?.Current;
 
+    public byte[]? OriginalPreviewPpm => Current?.Source.PreviewPpm;
+
     public byte[]? PreviewPpm => Current?.RenderPreview();
 
     public string StatusText
@@ -433,6 +435,7 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
     private void NotifyDocumentChanged()
     {
         OnPropertyChanged(nameof(Current));
+        OnPropertyChanged(nameof(OriginalPreviewPpm));
         OnPropertyChanged(nameof(PreviewPpm));
     }
 

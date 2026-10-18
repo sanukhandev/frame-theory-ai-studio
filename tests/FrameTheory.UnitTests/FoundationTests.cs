@@ -326,6 +326,10 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Photo preview empty state")
                     .IsVisible);
+                Xunit.Assert.True(window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => AutomationProperties.GetName(control) == "Photo original preview empty state")
+                    .IsVisible);
                 tabs.SelectedIndex = 2;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.True(window.GetVisualDescendants()
@@ -500,6 +504,8 @@ public sealed class FoundationTests
                     "Missing photo media",
                     "Photo recovery status",
                     "Photo editor status",
+                    "Photo original preview",
+                    "Photo edit preview",
                     "Color grade before summary",
                     "Color grade after summary",
                     "Color scope summary",

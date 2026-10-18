@@ -863,16 +863,15 @@ public sealed class MainWindow : Window
 
     private static Control CreatePhotoEditorPanel(PhotoEditorViewModel editor)
     {
-        var preview = new Image
+        var originalPreview = new Image
         {
-            Width = 320,
-            Height = 180,
+            Height = 160,
             Stretch = Stretch.Uniform,
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center
         };
-        AutomationProperties.SetName(preview, "Photo edit preview");
-        var previewEmptyState = new TextBlock
+        AutomationProperties.SetName(originalPreview, "Photo original preview");
+        var originalEmptyState = new TextBlock
         {
             Text = "Open an image to begin",
             FontSize = 12,
@@ -880,15 +879,36 @@ public sealed class MainWindow : Window
             HorizontalAlignment = HorizontalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center
         };
-        AutomationProperties.SetName(previewEmptyState, "Photo preview empty state");
+        AutomationProperties.SetName(originalEmptyState, "Photo original preview empty state");
+        var editedPreview = new Image
+        {
+            Height = 160,
+            Stretch = Stretch.Uniform,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        AutomationProperties.SetName(editedPreview, "Photo edit preview");
+        var editedEmptyState = new TextBlock
+        {
+            Text = "Open an image to begin",
+            FontSize = 12,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        AutomationProperties.SetName(editedEmptyState, "Photo preview empty state");
         void RefreshPreview()
         {
-            preview.Source = CreateBitmap(editor.PreviewPpm);
-            previewEmptyState.IsVisible = editor.PreviewPpm is null;
+            var originalPpm = editor.OriginalPreviewPpm;
+            var editedPpm = editor.PreviewPpm;
+            originalPreview.Source = CreateBitmap(originalPpm);
+            editedPreview.Source = CreateBitmap(editedPpm);
+            originalEmptyState.IsVisible = originalPpm is null;
+            editedEmptyState.IsVisible = editedPpm is null;
         }
         editor.PropertyChanged += (_, args) =>
         {
-            if (args.PropertyName is nameof(PhotoEditorViewModel.PreviewPpm) or nameof(PhotoEditorViewModel.Current))
+            if (args.PropertyName is nameof(PhotoEditorViewModel.OriginalPreviewPpm) or nameof(PhotoEditorViewModel.PreviewPpm) or nameof(PhotoEditorViewModel.Current))
             {
                 RefreshPreview();
             }
@@ -1130,8 +1150,50 @@ public sealed class MainWindow : Window
             Background = Brushes.Black,
             BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
             BorderThickness = new Thickness(1),
-            Child = new Grid { Children = { previewEmptyState, preview } }
+            Child = new Grid
+            {
+                ColumnDefinitions = new ColumnDefinitions("*,*"),
+                ColumnSpacing = 10,
+                Children =
+                {
+                    new Border
+                    {
+                        Padding = new Thickness(8),
+                        Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
+                        BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+                        BorderThickness = new Thickness(1),
+                        CornerRadius = new CornerRadius(6),
+                        Child = new StackPanel
+                        {
+                            Spacing = 6,
+                            Children =
+                            {
+                                new TextBlock { Text = "Original", FontSize = 11, FontWeight = FontWeight.SemiBold, Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(172, 181, 196)) },
+                                new Grid { Children = { originalEmptyState, originalPreview } }
+                            }
+                        }
+                    },
+                    new Border
+                    {
+                        Padding = new Thickness(8),
+                        Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
+                        BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+                        BorderThickness = new Thickness(1),
+                        CornerRadius = new CornerRadius(6),
+                        Child = new StackPanel
+                        {
+                            Spacing = 6,
+                            Children =
+                            {
+                                new TextBlock { Text = "Edited", FontSize = 11, FontWeight = FontWeight.SemiBold, Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(172, 181, 196)) },
+                                new Grid { Children = { editedEmptyState, editedPreview } }
+                            }
+                        }
+                    }
+                }
+            }
         };
+        Grid.SetColumn(((Grid)photoPreviewCard.Child).Children[1], 1);
         var photoProjectSection = CreateInspectorExpander(
             "Project",
             CreateSectionContent(CreateFlow(open, openProject, saveProject, rotate, undo)),
