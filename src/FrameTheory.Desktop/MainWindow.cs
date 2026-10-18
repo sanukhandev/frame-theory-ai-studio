@@ -1608,12 +1608,15 @@ public sealed class MainWindow : Window
         ToolTip.SetTip(vectorscope, "Chrominance distribution calculated from the graded local preview.");
         void RefreshPreviews()
         {
-            beforeImage.Source = CreateBitmap(inspector.BeforePreviewPpm);
-            afterImage.Source = CreateBitmap(inspector.AfterPreviewPpm);
-            beforeEmptyState.IsVisible = inspector.BeforePreviewPpm is null;
-            afterEmptyState.IsVisible = inspector.AfterPreviewPpm is null;
-            waveformScope.Source = CreateScopeBitmap(inspector.Scopes, vectorscope: false);
-            vectorscope.Source = CreateScopeBitmap(inspector.Scopes, vectorscope: true);
+            var beforePpm = inspector.BeforePreviewPpm;
+            var afterPpm = inspector.AfterPreviewPpm;
+            var scopes = inspector.Scopes;
+            beforeImage.Source = CreateBitmap(beforePpm);
+            afterImage.Source = CreateBitmap(afterPpm);
+            beforeEmptyState.IsVisible = beforePpm is null;
+            afterEmptyState.IsVisible = afterPpm is null;
+            waveformScope.Source = CreateScopeBitmap(scopes, vectorscope: false);
+            vectorscope.Source = CreateScopeBitmap(scopes, vectorscope: true);
         }
 
         inspector.PropertyChanged += (_, _) => RefreshPreviews();
@@ -1965,8 +1968,9 @@ public sealed class MainWindow : Window
         motionAnalysisStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.MotionAnalysisStatusText)));
         void RefreshTimelinePreview()
         {
-            timelinePreview.Source = CreateBitmap(viewModel.TimelinePreviewPpm);
-            timelinePreviewEmptyState.IsVisible = viewModel.TimelinePreviewPpm is null;
+            var previewPpm = viewModel.TimelinePreviewPpm;
+            timelinePreview.Source = CreateBitmap(previewPpm);
+            timelinePreviewEmptyState.IsVisible = previewPpm is null;
         }
         RefreshTimelinePreview();
         viewModel.PropertyChanged += (_, args) =>
