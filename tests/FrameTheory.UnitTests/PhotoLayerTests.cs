@@ -104,6 +104,29 @@ public sealed class PhotoLayerTests
         Xunit.Assert.Single(edited.Layers.Layers[0].MaskStrokes);
     }
 
+    [Xunit.Fact]
+    public void PhotoEditCollectionsExposeImmutableSnapshots()
+    {
+        var document = Document(new Uri("file:///base.png"), [100, 100, 100, 20, 40, 60]);
+        var operation = PhotoEditOperation.Resize(2, 1);
+        var layer = new PhotoAdjustmentLayer("Exposure", new ColorGrade());
+        var layers = new List<PhotoAdjustmentLayer> { layer };
+        var state = new PhotoEditState(
+            document,
+            [operation],
+            new PhotoLayerStack(layers),
+            [new PhotoCompositeLayer(Document(new Uri("file:///overlay.png"), [200, 200, 200, 0, 0, 0]))],
+            [new PhotoRetouchStroke(0, 0, 1, -1, 0, 1)]);
+
+        layers.Clear();
+
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<PhotoEditOperation>>(state.Operations).IsReadOnly);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<PhotoCompositeLayer>>(state.CompositeLayers).IsReadOnly);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<PhotoRetouchStroke>>(state.RetouchStrokes).IsReadOnly);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<PhotoAdjustmentLayer>>(state.Layers.Layers).IsReadOnly);
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<PhotoMaskStroke>>(state.Layers.Layers[0].MaskStrokes).IsReadOnly);
+    }
+
     private static PhotoDocument Document(Uri source, byte[] pixels) => new(
         source,
         new MediaSourceMetadata(MediaId.Create(source, "photo-layer-test"), source, MediaKind.Image, 2, 1, null, 0),

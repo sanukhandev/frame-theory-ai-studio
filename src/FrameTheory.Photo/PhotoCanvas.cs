@@ -250,7 +250,7 @@ public sealed class PhotoCompositeLayer
         OffsetY = offsetY;
         Opacity = opacity;
         BlendMode = blendMode;
-        MaskStrokes = maskStrokes?.ToArray() ?? [];
+        MaskStrokes = Array.AsReadOnly(maskStrokes?.ToArray() ?? []);
     }
 
     public PhotoDocument Source { get; }
@@ -290,10 +290,10 @@ public sealed class PhotoEditState
         IEnumerable<PhotoRetouchStroke>? retouchStrokes = null)
     {
         Source = source ?? throw new ArgumentNullException(nameof(source));
-        _operations = operations?.ToArray() ?? [];
+        _operations = Array.AsReadOnly(operations?.ToArray() ?? []);
         Layers = layers ?? new PhotoLayerStack();
-        CompositeLayers = compositeLayers?.ToArray() ?? [];
-        RetouchStrokes = retouchStrokes?.ToArray() ?? [];
+        CompositeLayers = Array.AsReadOnly(compositeLayers?.ToArray() ?? []);
+        RetouchStrokes = Array.AsReadOnly(retouchStrokes?.ToArray() ?? []);
         if (CompositeLayers.GroupBy(layer => layer.SourceMediaId).Any(group => group.Count() > 1))
         {
             throw new ArgumentException("Composite layer sources must be unique.", nameof(compositeLayers));
@@ -453,7 +453,7 @@ public sealed class PhotoAdjustmentLayer
         Name = name.Trim();
         Grade = grade ?? throw new ArgumentNullException(nameof(grade));
         IsEnabled = isEnabled;
-        MaskStrokes = maskStrokes?.ToArray() ?? [];
+        MaskStrokes = Array.AsReadOnly(maskStrokes?.ToArray() ?? []);
     }
 
     public string Name { get; }
@@ -477,7 +477,7 @@ public sealed class PhotoLayerStack
 
     public PhotoLayerStack(IEnumerable<PhotoAdjustmentLayer>? layers = null)
     {
-        _layers = layers?.ToArray() ?? [];
+        _layers = Array.AsReadOnly(layers?.ToArray() ?? []);
         if (_layers.GroupBy(layer => layer.Name, StringComparer.OrdinalIgnoreCase).Any(group => group.Count() > 1))
         {
             throw new ArgumentException("Adjustment layer names must be unique.", nameof(layers));
