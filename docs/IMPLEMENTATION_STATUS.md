@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Local UIA limitation checkpoint (2026-10-18):** Running `scripts/smoke_desktop_ui.ps1` on this host reaches the native process but Windows `SendKeys` fails with the host message `The operation completed successfully`, indicating no interactive desktop input surface. No local shortcut pass is claimed; hosted Windows remains the authoritative UIA environment for this gate.
+
 **Hosted UI smoke correction checkpoint (2026-10-18):** Run `39130580530` passed documentation, Ubuntu and macOS jobs but Windows UI automation failed because the smoke searched for caption/reference/activity controls while their real inspector sections were collapsed. `scripts/smoke_desktop_ui.ps1` now locates and expands the named Avalonia sections through UI Automation before checking their live controls; local PowerShell parsing and `git diff --check` pass. The correction is unpushed and requires the next exact-ten-commit batch before hosted confirmation.
 
 **Inspector interaction checkpoint (2026-10-18):** The adaptive shell test now expands a real collapsed timeline section, verifies its live motion-analysis action becomes available, collapses it again, and checks all inspector sections' stretch alignment. The exact-ten local UI batch is green: Release build with 0 warnings/errors, 261 unit tests, 2 golden tests, formatting, repository validation and `git diff --check`. This batch is ready for the required hosted push; native visual/HiDPI/screen-reader acceptance remains unverified.
