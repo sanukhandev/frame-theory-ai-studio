@@ -52,6 +52,19 @@ jobs:
             exit 1
           fi
           echo "$output" | grep -F 'Invalid package version'
+      - name: Validate macOS package guards
+        shell: bash
+        run: |
+          if output=$(sh scripts/package_macos_dmg.sh osx-mips artifacts/installer 0.1.1 2>&1); then
+            echo "$output"
+            exit 1
+          fi
+          echo "$output" | grep -F 'Unsupported macOS runtime identifier'
+          if output=$(sh scripts/package_macos_dmg.sh osx-x64 artifacts/installer invalid 2>&1); then
+            echo "$output"
+            exit 1
+          fi
+          echo "$output" | grep -F 'Invalid package version'
       - name: Validate repository docs and schema
         run: python3 scripts/validate_repository.py
 
