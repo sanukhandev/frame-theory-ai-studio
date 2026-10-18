@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Headless;
+using Avalonia.Interactivity;
 using Avalonia.Themes.Fluent;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
@@ -77,6 +78,61 @@ public sealed class DesktopImportTests
                 Dispatcher.UIThread.RunJobs();
 
                 Xunit.Assert.Contains("Selected Video clip", viewModel.TimelineEditor.SelectionContextText, StringComparison.Ordinal);
+            }
+            finally
+            {
+                window.Close();
+            }
+        }, CancellationToken.None);
+    }
+
+    [Xunit.Fact]
+    public async Task MediaBrowserSearchFiltersNoMatchStateAndClearWithImportedAssets()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new BatchImporter());
+
+        await session.Dispatch(() =>
+        {
+            viewModel.ImportFilesAsync(["first.mp4", "second.mp4"], CancellationToken.None).GetAwaiter().GetResult();
+            var window = new MainWindow(viewModel);
+            try
+            {
+                window.Show();
+                var mediaList = window.GetVisualDescendants()
+                    .OfType<ListBox>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Imported media");
+                var search = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Search imported media");
+                var clear = window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Clear media search");
+                var emptyState = window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Media search empty state");
+
+                Xunit.Assert.Equal(2, mediaList.Items.Count);
+                search.Text = "first";
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Single(mediaList.Items);
+                Xunit.Assert.True(clear.IsEnabled);
+                Xunit.Assert.False(emptyState.IsVisible);
+
+                search.Text = "not-found";
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Empty(mediaList.Items);
+                Xunit.Assert.True(clear.IsEnabled);
+                Xunit.Assert.True(emptyState.IsVisible);
+
+                clear.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(2, mediaList.Items.Count);
+                Xunit.Assert.False(clear.IsEnabled);
+                Xunit.Assert.False(emptyState.IsVisible);
             }
             finally
             {
