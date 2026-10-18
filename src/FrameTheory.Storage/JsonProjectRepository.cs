@@ -27,6 +27,8 @@ public sealed class JsonProjectRepository : IProjectRepository
             throw new DirectoryNotFoundException(directory);
         }
 
+        EnsureRegularProjectPath(fullPath, directory);
+
         var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
         try
         {
@@ -60,6 +62,9 @@ public sealed class JsonProjectRepository : IProjectRepository
         {
             throw new FileNotFoundException("The project file was not found.", fullPath);
         }
+
+        EnsureRegularProjectPath(fullPath, fileInfo.DirectoryName
+            ?? throw new ArgumentException("A project directory is required.", nameof(path)));
 
         if (fileInfo.Length > MaximumProjectBytes)
         {
@@ -98,6 +103,22 @@ public sealed class JsonProjectRepository : IProjectRepository
 
         return Path.GetFullPath(path);
     }
+
+    private static void EnsureRegularProjectPath(string fullPath, string directory)
+    {
+        if (IsReparsePoint(directory))
+        {
+            throw new InvalidDataException("The project directory must not be a reparse point.");
+        }
+
+        if (File.Exists(fullPath) && IsReparsePoint(fullPath))
+        {
+            throw new InvalidDataException("The project file must not be a reparse point.");
+        }
+    }
+
+    private static bool IsReparsePoint(string path) =>
+        (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
 
     private static void TryDelete(string path)
     {

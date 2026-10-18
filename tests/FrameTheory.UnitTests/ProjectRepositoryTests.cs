@@ -137,4 +137,46 @@ public sealed class ProjectRepositoryTests
             directory.Delete(true);
         }
     }
+
+    [Xunit.Fact]
+    public async Task ProjectRepositoryRejectsReparsePointProjectPaths()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-project-boundary-");
+        var externalDirectory = Directory.CreateTempSubdirectory("frame-theory-project-external-");
+        try
+        {
+            var projectDirectory = Path.Combine(directory.FullName, "project");
+            Directory.CreateSymbolicLink(projectDirectory, externalDirectory.FullName);
+            var projectPath = Path.Combine(projectDirectory, "project.ftstudio");
+            var snapshot = new ProjectSnapshot("project", new RationalFrameRate(24, 1), 640, 480, "sRGB");
+            var repository = new JsonProjectRepository();
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                repository.SaveAtomicAsync(projectPath, snapshot, CancellationToken.None));
+
+            Directory.Delete(projectDirectory);
+            Directory.CreateDirectory(projectDirectory);
+            var externalProjectPath = Path.Combine(externalDirectory.FullName, "external.ftstudio");
+            await repository.SaveAtomicAsync(externalProjectPath, snapshot, CancellationToken.None);
+            var linkedProjectPath = Path.Combine(projectDirectory, "linked.ftstudio");
+            File.CreateSymbolicLink(linkedProjectPath, externalProjectPath);
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                repository.LoadAsync(linkedProjectPath, CancellationToken.None));
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+        catch (PlatformNotSupportedException)
+        {
+        }
+        catch (IOException)
+        {
+        }
+        finally
+        {
+            directory.Delete(true);
+            externalDirectory.Delete(true);
+        }
+    }
 }
