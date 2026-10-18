@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Current photo-export cleanup increment: temporary cleanup cannot mask the original export failure; existing automated export coverage remains green. Native export acceptance remains open.
+
 - Current cache-index increment: canceled atomic cache-index saves preserve the previous file while cleanup failures cannot replace the original cancellation/error; focused recovery coverage remains green. Release and native storage acceptance remain open.
 
 Audit checkpoint: 2026-10-19, latest verified green complete matrix run `39172309590`.

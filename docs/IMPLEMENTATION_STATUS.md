@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Photo-export cleanup checkpoint (2026-10-19):** Photo export temporary-file cleanup is now best effort, so an encoder, verification or cancellation error remains the user-visible failure even when the operating system denies cleanup. Existing photo export failure coverage remains green.
+
 **Cache-index cancellation checkpoint (2026-10-19):** Cache-index temporary-file cleanup no longer masks the original save or cancellation failure, and a canceled replacement save preserves the existing index. Focused recovery coverage passes; the next full release gate remains required before the 50-commit push.
 
 **Release batching checkpoint (2026-10-19):** Per owner instruction, push only after 50 verified local commits are accumulated to reduce hosted-minute usage. The exact 50-commit batch was pushed at `acd4e83`; the next local status checkpoint will remain unpushed until another 50 verified commits accumulate.

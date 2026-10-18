@@ -252,9 +252,18 @@ public sealed class PhotoExporter
 
     private static void DeleteIfPresent(string path)
     {
-        if (File.Exists(path))
+        try
         {
-            File.Delete(path);
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
         }
     }
 }
