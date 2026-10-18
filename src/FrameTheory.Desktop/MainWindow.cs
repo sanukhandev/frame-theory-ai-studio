@@ -2349,7 +2349,7 @@ public sealed class MainWindow : Window
                                         },
                                         new TextBlock
                                         {
-                                            Text = $"{clip.MediaId[..Math.Min(8, clip.MediaId.Length)]}  {clip.StartFrame}–{clip.StartFrame + clip.DurationFrames - 1}",
+                                            Text = $"{clipMedia?.Name ?? clip.MediaId[..Math.Min(8, clip.MediaId.Length)]}  {clip.StartFrame}–{clip.StartFrame + clip.DurationFrames - 1}",
                                             FontSize = 10,
                                             Foreground = Brushes.White,
                                             TextTrimming = TextTrimming.CharacterEllipsis,

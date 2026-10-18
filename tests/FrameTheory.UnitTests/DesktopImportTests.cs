@@ -84,6 +84,7 @@ public sealed class DesktopImportTests
                     .OfType<Border>()
                     .Single(control => control.Width == 4);
                 Xunit.Assert.Contains("frames 0–29", ToolTip.GetTip(clipButton) as string, StringComparison.Ordinal);
+                Xunit.Assert.Contains("clip.mp4", clipButton.GetVisualDescendants().OfType<TextBlock>().Single().Text, StringComparison.Ordinal);
                 Xunit.Assert.Contains("Video · clip.mp4", ToolTip.GetTip(mediaCard) as string, StringComparison.Ordinal);
                 Xunit.Assert.Equal(124, mediaCard.Width);
                 Xunit.Assert.Equal(110, mediaCard.GetVisualDescendants().OfType<Image>().Single().Width);
