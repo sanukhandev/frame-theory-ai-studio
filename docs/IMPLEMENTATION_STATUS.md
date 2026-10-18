@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Hosted responsive-shell validation checkpoint (2026-10-18):** Quality Gates run `39152462667` for pushed commit `afe2490` passed documentation/schema validation plus Windows, macOS and Linux restore/build/test, native FFmpeg smoke, formatting, headless shell, Windows UI automation, portable archive, Windows installer, macOS DMG, Linux DEB, packaged relaunch and checksum gates. The run validates the responsive project chrome, monitor action rail, fluid monitor/color previews, fluid grade controls, compact header behavior and workspace status density. Manual native visual, 1280x800/HiDPI and screen-reader acceptance remains open; local native SendKeys smoke remains unverified on this host.
+
 **Workspace status-density checkpoint (2026-10-18):** The duplicated active-workspace status readout now caps at 240px beside the workspace title and mode badge, keeping narrow editor headers aligned while retaining the full status in its tooltip and global capability/status bar. The adaptive-shell contract verifies the compact cap; native visual and HiDPI acceptance remains open.
 
 **P0 parser self-check checkpoint (2026-10-18):** Release validation now exercises a synthetic heading/status fixture before checking the repository, covering both `[P0]` and `[P0, depends ...]` epic forms and the partial-blocker rule. The real validator still passes and reports six partial P0 tasks; this protects the release audit from silently undercounting blockers.

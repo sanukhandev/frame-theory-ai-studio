@@ -4,6 +4,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 Audit checkpoint: 2026-10-18, latest verified green complete matrix run `39118310628`.
 
+- Latest green hosted responsive-shell revalidation: run `39152462667` for commit `afe2490` passed documentation/schema validation plus Windows, macOS and Linux restore/build/test, native FFmpeg smoke, formatting, headless shell, Windows UI automation, portable archive, Windows installer, macOS DMG, Linux DEB, packaged relaunch and checksum gates. This confirms automated evidence for the responsive editor-shell increment but does not close manual native visual, 1280x800/HiDPI, screen-reader, legal, signing or clean-host release gates.
+
 ## Evidence
 
 - Latest green hosted path-security revalidation: run `39118310628` for commit `807230f` passed documentation/schema validation, Windows/macOS/Linux restore/build/native-media/format/full-test/headless-shell, publish/archive, installer/DMG/DEB, packaged relaunch and checksum gates. Follow-up run `39119313079` is failed evidence because its new physical-pixel `1280x800` assertion rejected the valid DPI-scaled Windows rectangle `1028x749`; no task is closed from that run.
