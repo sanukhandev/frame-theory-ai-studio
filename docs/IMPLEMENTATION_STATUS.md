@@ -18,6 +18,8 @@
 
 **FT-1102 stabilization-boundary checkpoint (2026-10-19):** FFmpeg search-radius normalization now has explicit coverage for the logical 1, 16, 17 and 64 boundaries plus invalid 0/65 inputs. Focused compositor coverage passes 9/9; the local test change remains unpushed until the next exact 50-commit boundary.
 
+**FT-1102 stabilization-snapshot checkpoint (2026-10-19):** Computed stabilization transforms are now copied into the plan, preventing later caller mutation from changing an already-created edit result. Focused motion coverage passes 6/6 with format and diff checks clean; the local change remains unpushed until the next exact 50-commit boundary.
+
 **Workspace navigation affordance checkpoint (2026-10-19):** The adaptive shell's Ctrl+1 through Ctrl+4 workspace shortcut hint now has an explicit accessible tooltip explaining each destination. Focused production-shell coverage and format/diff checks pass; native keyboard acceptance remains unverified.
 
 **Media import affordance checkpoint (2026-10-19):** The shared media-bin drop surface now explains supported local media, the explicit Import action and the local-only default. Focused production-shell coverage and format/diff checks pass; actual native drag/drop acceptance remains unverified.
