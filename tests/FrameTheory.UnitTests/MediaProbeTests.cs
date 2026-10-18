@@ -54,6 +54,33 @@ public sealed class MediaProbeTests
     }
 
     [Xunit.Fact]
+    public async Task FfprobeAdapterKeepsPositiveSubFrameVideoDurationTimelineSafe()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-probe-subframe-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "clip.mp4");
+            await File.WriteAllTextAsync(path, "synthetic placeholder");
+            var runner = new StubProcessRunner("""
+                {
+                  "streams": [
+                    { "codec_type": "video", "width": 16, "height": 9, "r_frame_rate": "30/1" }
+                  ],
+                  "format": { "duration": "0.001" }
+                }
+                """);
+
+            var metadata = await new FfprobeMediaProbe(runner).ProbeAsync(new Uri(path), CancellationToken.None);
+
+            Xunit.Assert.Equal(1, metadata.DurationFrames);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task FfprobeAdapterRejectsRemoteAndMissingInputs()
     {
         var probe = new FfprobeMediaProbe(new StubProcessRunner("{}"));

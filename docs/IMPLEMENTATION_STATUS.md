@@ -10,6 +10,8 @@
 
 **Media import cancellation checkpoint (2026-10-19):** A canceled multi-file import now publishes the successfully imported prefix to the media bin and timeline instead of leaving view-model state stale after partial work. A regression covers the cancellation boundary; the full local gate passes 315 unit tests and 2 golden tests with format and diff checks clean.
 
+**Media probe duration checkpoint (2026-10-19):** ffprobe fallback frame-count parsing now clamps a positive-duration video to at least one frame when `nb_frames` is unavailable, preventing valid sub-frame-duration metadata from producing an invalid timeline clip. Focused and full validation pass at 316 unit tests and 2 golden tests; zero-duration unknown media remains rejected by downstream timeline validation.
+
 **Core boundary hardening checkpoint (2026-10-19):** `GeminiClientOptions` now honors its optional timeout/retry-delay parameters with bounded two-minute/one-second defaults, and `MediaSourceMetadata` rejects negative durations. Focused Gemini coverage passes 12/12 and focused Foundation coverage passes 25/25; the next full Release gate remains required before the next 50-commit push.
 
 **Export queue integrity checkpoint (2026-10-19):** Export job cancellation now preserves terminal success/failure state under repeated or late cancellation, with synchronized state and completion transitions. The full local Release gate passes 310 unit tests and 2 golden tests, a warning-free build, format verification, repository validation and `git diff --check`; this evidence remains local until the exact 50-commit push boundary.

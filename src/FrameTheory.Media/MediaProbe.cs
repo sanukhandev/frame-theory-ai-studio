@@ -134,7 +134,9 @@ public sealed class FfprobeMediaProbe : IMediaProbe
             return frameCount;
         }
 
-        return frameRate is null || duration == TimeSpan.Zero ? 0 : frameRate.Value.FrameIndexAt(duration);
+        return frameRate is null || duration == TimeSpan.Zero
+            ? 0
+            : Math.Max(1, frameRate.Value.FrameIndexAt(duration));
     }
 
     private static RationalFrameRate? ParseFrameRate(string? value)
