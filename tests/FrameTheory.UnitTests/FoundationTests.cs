@@ -117,6 +117,7 @@ public sealed class FoundationTests
 
             Xunit.Assert.Equal(3, store.LoadSelectedWorkspaceIndex());
             Xunit.Assert.Contains("SelectedWorkspaceIndex", await File.ReadAllTextAsync(path), StringComparison.Ordinal);
+            Xunit.Assert.Empty(Directory.GetFiles(directory.FullName, "*.tmp"));
         }
         finally
         {

@@ -58,9 +58,46 @@ public sealed class FileWorkspaceStateStore : IWorkspaceStateStore
         try
         {
             Directory.CreateDirectory(directory);
-            var temporaryPath = _path + ".tmp";
-            File.WriteAllText(temporaryPath, JsonSerializer.Serialize(new WorkspaceState(index)));
-            File.Move(temporaryPath, _path, true);
+            var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(_path)}.{Guid.NewGuid():N}.tmp");
+            try
+            {
+                using (var stream = new FileStream(temporaryPath, new FileStreamOptions
+                {
+                    Access = FileAccess.Write,
+                    Mode = FileMode.CreateNew,
+                    Share = FileShare.None,
+                    Options = FileOptions.WriteThrough
+                }))
+                using (var writer = new StreamWriter(stream))
+                {
+                    writer.Write(JsonSerializer.Serialize(new WorkspaceState(index)));
+                    writer.Flush();
+                    stream.Flush(flushToDisk: true);
+                }
+
+                File.Move(temporaryPath, _path, true);
+            }
+            finally
+            {
+                TryDelete(temporaryPath);
+            }
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
+        }
+    }
+
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
         }
         catch (IOException)
         {
