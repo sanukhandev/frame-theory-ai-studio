@@ -12,6 +12,10 @@ $manifest = if ([string]::IsNullOrWhiteSpace($ManifestPath)) {
 } else {
     (Resolve-Path -LiteralPath $ManifestPath).Path
 }
+$manifestItem = Get-Item -LiteralPath $manifest
+if ($manifestItem.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+    throw "SHA-256 manifest must not be a reparse point."
+}
 
 $entries = @{}
 foreach ($line in Get-Content -LiteralPath $manifest) {
@@ -50,6 +54,10 @@ foreach ($entry in $entries.GetEnumerator()) {
         throw "Manifest file is missing: $($entry.Key)"
     }
 
+    $candidateItem = Get-Item -LiteralPath $candidate
+    if ($candidateItem.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+        throw "Manifest file must not be a reparse point: $($entry.Key)"
+    }
     $resolvedCandidate = (Resolve-Path -LiteralPath $candidate).Path
     $relativeCandidate = [IO.Path]::GetRelativePath($packageRoot, $resolvedCandidate)
     if ([IO.Path]::IsPathRooted($relativeCandidate) -or
@@ -69,6 +77,11 @@ foreach ($entry in $entries.GetEnumerator()) {
 
 $manifestPath = (Resolve-Path -LiteralPath $manifest).Path
 $actualFiles = @(Get-ChildItem -LiteralPath $packageRoot -File -Recurse | Where-Object FullName -ne $manifestPath)
+foreach ($actualFile in $actualFiles) {
+    if ($actualFile.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+        throw "Package contains a reparse-point file: $($actualFile.FullName)"
+    }
+}
 if ($actualFiles.Count -ne $verified) {
     throw "Manifest covers $verified file(s), but the package contains $($actualFiles.Count) file(s)."
 }
