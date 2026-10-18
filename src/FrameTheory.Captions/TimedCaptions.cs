@@ -47,6 +47,11 @@ public sealed record TimedCaption
             throw new ArgumentOutOfRangeException(nameof(sequence));
         }
 
+        if (!Enum.IsDefined(provenance))
+        {
+            throw new ArgumentOutOfRangeException(nameof(provenance));
+        }
+
         if (string.IsNullOrWhiteSpace(text) || text.Length > 10_000)
         {
             throw new ArgumentException("Caption text must contain between one and 10000 characters.", nameof(text));

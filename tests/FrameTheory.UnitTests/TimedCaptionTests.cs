@@ -55,4 +55,15 @@ public sealed class TimedCaptionTests
                 new TimedCaptionWord("two", TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(1))
             ]));
     }
+
+    [Xunit.Fact]
+    public void UndefinedCaptionProvenanceIsRejected()
+    {
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimedCaption(
+            1,
+            TimeSpan.Zero,
+            TimeSpan.FromSeconds(1),
+            "caption",
+            (CaptionProvenance)99));
+    }
 }
