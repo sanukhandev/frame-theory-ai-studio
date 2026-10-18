@@ -47,13 +47,13 @@ public interface IWorkspaceCatalog
 
 public sealed class WorkspaceCatalog : IWorkspaceCatalog
 {
-    public IReadOnlyList<WorkspaceViewModel> GetWorkspaces() =>
+    public IReadOnlyList<WorkspaceViewModel> GetWorkspaces() => Array.AsReadOnly<WorkspaceViewModel>(
     [
         new("Video", "Frame-accurate editing, playback and export.", "Manual editing remains available offline."),
         new("Photo", "Non-destructive raster editing and image export.", "Local media stays on this device."),
         new("Color", "Shared cinematic grades for images and video.", "Color operations do not require Gemini."),
         new("AI", "Optional Gemini planning with review before apply.", "No key or network is required for manual editing.")
-    ];
+    ]);
 }
 
 public sealed class MainWindowViewModel : INotifyPropertyChanged
@@ -130,7 +130,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ITimelinePreviewRenderer? timelinePreviewRenderer = null,
         IWorkspaceStateStore? workspaceStateStore = null)
     {
-        Workspaces = workspaceCatalog.GetWorkspaces();
+        ArgumentNullException.ThrowIfNull(workspaceCatalog);
+        Workspaces = Array.AsReadOnly((workspaceCatalog.GetWorkspaces() ?? throw new InvalidOperationException("Workspace catalog returned no workspaces.")).ToArray());
         _workspaceStateStore = workspaceStateStore ?? new NoopWorkspaceStateStore();
         var savedWorkspaceIndex = _workspaceStateStore.LoadSelectedWorkspaceIndex();
         _selectedWorkspaceIndex = savedWorkspaceIndex >= 0 && savedWorkspaceIndex < Workspaces.Count

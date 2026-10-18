@@ -16,6 +16,7 @@ Audit checkpoint: 2026-10-18, latest verified green complete matrix run `3911831
 - Current timeline UI integrity hardening: timeline rows and beat markers now expose read-only view-model snapshots, preventing binding mutation outside editor commands. Focused timeline-editor coverage includes the regression; native UI acceptance remains open.
 - Current AI review-state hardening: validated proposal actions now expose a read-only view-model snapshot, preserving review state until explicit approval or clear commands. Focused AI-review coverage includes the regression; native UI acceptance remains open.
 - Current desktop media-state hardening: imported media and missing-media collections now expose read-only view-model snapshots, preserving selection/relink state outside command paths. Focused desktop import coverage includes the regression; native UI acceptance remains open.
+- Current desktop workspace-state hardening: workspace catalog results are snapshotted at the shell boundary, preserving navigation state from caller-owned collection mutation. Focused Foundation coverage includes the regression; native UI acceptance remains open.
 
 ## Evidence
 

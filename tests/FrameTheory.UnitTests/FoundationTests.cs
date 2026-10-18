@@ -115,6 +115,7 @@ public sealed class FoundationTests
             new TestCapabilityDetector());
 
         Xunit.Assert.Equal(new[] { "Video", "Photo", "Color", "AI" }, viewModel.Workspaces.Select(workspace => workspace.Name));
+        Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<FrameTheory.Desktop.WorkspaceViewModel>>(viewModel.Workspaces).IsReadOnly);
         Xunit.Assert.Equal("Video", viewModel.SelectedWorkspace.Name);
 
         viewModel.SelectedWorkspaceIndex = 3;
