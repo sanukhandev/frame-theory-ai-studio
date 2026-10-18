@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Shortcut-discovery checkpoint (2026-10-18):** The production header now exposes the working `Ctrl+1`–`Ctrl+4` workspace shortcuts in a compact, ellipsis-safe hint, with a named accessibility region and headless contract coverage. Rebuilt Release test project, focused shell test, formatting and `git diff --check` pass; native visual/HiDPI review remains unverified.
+
 **Cross-platform link-boundary checkpoint (2026-10-18):** `LocalPathSecurity` now detects both `FileAttributes.ReparsePoint` and .NET link targets, so Unix symlinked media directories are rejected instead of passing the timeline project save boundary. The focused symlink/UI tests pass 2/2, repository validation, formatting and `git diff --check` pass; hosted revalidation is pending.
 
 **UI smoke compatibility checkpoint (2026-10-18):** Restored the established `Open image` automation name after hosted Windows UI smoke correctly detected that the accessibility wording change had broken the existing control contract. Desktop build, rebuilt Foundation shell test, formatting and `git diff --check` pass; hosted smoke revalidation is pending.

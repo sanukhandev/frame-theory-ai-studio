@@ -217,6 +217,7 @@ public sealed class FoundationTests
                     "Import local media",
                     "Capability status",
                     "Diagnostics status",
+                    "Workspace keyboard shortcuts",
                     "Preview current timeline frame",
                     "Save timeline project",
                     "Open timeline project",

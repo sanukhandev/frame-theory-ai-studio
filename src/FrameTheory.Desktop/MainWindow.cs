@@ -90,6 +90,16 @@ public sealed class MainWindow : Window
                 }
             }
         });
+        var shortcutHint = new TextBlock
+        {
+            Text = "Ctrl+1 Video  ·  Ctrl+2 Photo  ·  Ctrl+3 Color  ·  Ctrl+4 AI",
+            FontSize = 10,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            MaxWidth = 360,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        AutomationProperties.SetName(shortcutHint, "Workspace keyboard shortcuts");
 
         var header = new Border
         {
@@ -104,17 +114,26 @@ public sealed class MainWindow : Window
                 Children =
                 {
                     brand,
-                    new Border
+                    new StackPanel
                     {
-                        Padding = new Thickness(10, 5),
-                        CornerRadius = new CornerRadius(5),
-                        Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 44, 42)),
-                        Child = new TextBlock
+                        Orientation = Orientation.Horizontal,
+                        Spacing = 12,
+                        Children =
                         {
-                            Text = "LOCAL MODE  ·  GEMINI OPTIONAL",
-                            FontSize = 10,
-                            FontWeight = FontWeight.SemiBold,
-                            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(148, 218, 188))
+                            shortcutHint,
+                            new Border
+                            {
+                                Padding = new Thickness(10, 5),
+                                CornerRadius = new CornerRadius(5),
+                                Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 44, 42)),
+                                Child = new TextBlock
+                                {
+                                    Text = "LOCAL MODE  ·  GEMINI OPTIONAL",
+                                    FontSize = 10,
+                                    FontWeight = FontWeight.SemiBold,
+                                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(148, 218, 188))
+                                }
+                            }
                         }
                     }
                 }
