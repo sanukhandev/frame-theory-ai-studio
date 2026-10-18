@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Responsive photo-overlay checkpoint (2026-10-18):** Photo Layers and blend controls now give overlay opacity and blend-mode inputs bounded responsive widths, preventing fixed controls from crowding the compact inspector. Foundation coverage verifies stretch alignment, bounds and blend-mode guidance; the change is local and non-destructive.
+
 **Hosted shortcut-smoke regression checkpoint (2026-10-18):** Quality Gates run `39156858822` passed documentation/schema validation and the macOS/Linux restore, build, test, media-smoke, packaging and checksum gates, but Windows UI automation failed at `Ctrl+2` during the custom Win32 `SendInput` helper. The application build and shell smoke passed; commit `65f1d0d` restores the previously hosted-green `System.Windows.Forms.SendKeys` path. The local host also rejects `SendKeys` at `Ctrl+1` with `The operation completed successfully`, so the next exact-ten push must revalidate the full Windows gate before this checkpoint can be considered green. No task is closed from the failed run.
 
 **Responsive recovery-path checkpoint (2026-10-18):** Timeline missing-media recovery now bounds the replacement-path input to 220–360px and lets it stretch within the project inspector, preventing long path placeholders from forcing compact layouts wider. Foundation coverage verifies the geometry and editable recovery control.
