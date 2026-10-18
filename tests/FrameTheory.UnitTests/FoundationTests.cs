@@ -165,6 +165,9 @@ public sealed class FoundationTests
                     Xunit.Assert.Equal(HorizontalAlignment.Stretch, scroller.HorizontalContentAlignment);
                     Xunit.Assert.Equal(VerticalAlignment.Top, scroller.VerticalContentAlignment);
                 });
+                Xunit.Assert.Equal(
+                    new[] { "Video workspace content", "Photo workspace content", "Color workspace content", "AI workspace content" },
+                    workspaceScrollers.Select(AutomationProperties.GetName));
 
                 var performanceStatus = window.GetVisualDescendants()
                     .OfType<TextBox>()
