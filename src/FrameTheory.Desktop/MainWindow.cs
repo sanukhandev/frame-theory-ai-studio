@@ -34,15 +34,22 @@ public sealed class MainWindow : Window
         Height = 800;
         MinWidth = 960;
         MinHeight = 640;
+        Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(13, 15, 18));
 
         var tabs = new TabControl();
         AutomationProperties.SetName(tabs, "Workspaces");
+        tabs.TabStripPlacement = Dock.Left;
+        tabs.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(13, 15, 18));
+        tabs.HorizontalContentAlignment = HorizontalAlignment.Stretch;
+        tabs.VerticalContentAlignment = VerticalAlignment.Stretch;
         foreach (var workspace in viewModel.Workspaces)
         {
             var tab = new TabItem
             {
                 Header = workspace.Name,
-                Content = CreateWorkspaceContent(workspace, viewModel)
+                Content = CreateWorkspaceContent(workspace, viewModel),
+                MinWidth = 152,
+                HorizontalContentAlignment = HorizontalAlignment.Stretch
             };
             AutomationProperties.SetName(tab, $"{workspace.Name} workspace");
             tabs.Items.Add(tab);
@@ -52,36 +59,71 @@ public sealed class MainWindow : Window
             Mode = BindingMode.TwoWay
         });
 
+        var brand = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            Spacing = 12,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        if (CreateApprovedLogo() is { } logo)
+        {
+            brand.Children.Add(logo);
+        }
+        brand.Children.Add(new StackPanel
+        {
+            Spacing = 1,
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = "FRAME THEORY STUDIO AI",
+                    FontSize = 16,
+                    FontWeight = FontWeight.SemiBold,
+                    Foreground = Brushes.White
+                },
+                new TextBlock
+                {
+                    Text = "Offline-first creative editing",
+                    FontSize = 11,
+                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181))
+                }
+            }
+        });
+
         var header = new Border
         {
-            Padding = new Thickness(20, 16),
-            Background = Brushes.Black,
-            Child = new StackPanel
+            Height = 68,
+            Padding = new Thickness(20, 12),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(18, 20, 25)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(0, 0, 0, 1),
+            Child = new Grid
             {
-                Spacing = 4,
+                ColumnDefinitions = new ColumnDefinitions("*,Auto"),
                 Children =
                 {
-                    new TextBlock
+                    brand,
+                    new Border
                     {
-                        Text = "FRAME THEORY STUDIO AI",
-                        FontSize = 20,
-                        FontWeight = FontWeight.SemiBold,
-                        Foreground = Brushes.White
-                    },
-                    new TextBlock
-                    {
-                        Text = "Offline-first creative editing",
-                        Foreground = Brushes.LightGray
-                    },
-                    new TextBlock
-                    {
-                        Text = "Shortcuts: Ctrl/⌘+1–4 workspaces · Left/Right step video frames · Ctrl/⌘+Z undo AI apply",
-                        Foreground = Brushes.LightGray,
-                        TextWrapping = TextWrapping.Wrap
+                        Padding = new Thickness(10, 5),
+                        CornerRadius = new CornerRadius(5),
+                        Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 44, 42)),
+                        Child = new TextBlock
+                        {
+                            Text = "LOCAL MODE  ·  GEMINI OPTIONAL",
+                            FontSize = 10,
+                            FontWeight = FontWeight.SemiBold,
+                            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(148, 218, 188))
+                        }
                     }
                 }
             }
         };
+        Grid.SetColumn(header.Child, 0);
+        if (header.Child is Grid headerGrid)
+        {
+            Grid.SetColumn(headerGrid.Children[1], 1);
+        }
 
         var layout = new Grid
         {
@@ -154,24 +196,39 @@ public sealed class MainWindow : Window
     {
         var status = new TextBlock
         {
-            Margin = new Thickness(16, 8),
-            Foreground = Brushes.LightGray
+            Margin = new Thickness(16, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(186, 193, 207)),
+            TextTrimming = TextTrimming.CharacterEllipsis
         };
         status.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.CapabilityStatusText)));
-        var refresh = new Button { Content = "Refresh capability check", Margin = new Thickness(16, 0, 16, 8) };
+        var refresh = new Button { Content = "Refresh capabilities", Margin = new Thickness(12, 8, 16, 8) };
         AutomationProperties.SetName(refresh, "Refresh capability check");
         refresh.Click += async (_, _) => await viewModel.RefreshCapabilitiesAsync(CancellationToken.None);
         var diagnostics = new TextBlock
         {
-            Margin = new Thickness(16, 0, 16, 8),
-            Foreground = Brushes.Gray,
+            Margin = new Thickness(0, 0, 12, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
             TextWrapping = TextWrapping.Wrap
         };
         diagnostics.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.DiagnosticsStatusText)));
         return new Border
         {
-            Background = Brushes.Black,
-            Child = new StackPanel { Children = { status, refresh, diagnostics } }
+            Height = 48,
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(18, 20, 25)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(0, 1, 0, 0),
+            Child = new Grid
+            {
+                ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"),
+                Children =
+                {
+                    status,
+                    diagnostics,
+                    refresh
+                }
+            }
         };
     }
 
@@ -179,39 +236,78 @@ public sealed class MainWindow : Window
     {
         var importStatus = new TextBlock { TextWrapping = TextWrapping.Wrap };
         importStatus.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.MediaImportStatusText)));
-        var importedList = new ListBox { Height = 140 };
+        var importedList = new ListBox
+        {
+            Height = 132,
+            Margin = new Thickness(0, 8, 0, 0),
+            Padding = new Thickness(4)
+        };
         AutomationProperties.SetName(importedList, "Imported media");
         importedList.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(MainWindowViewModel.ImportedMedia)));
+        var importZone = new Border
+        {
+            Margin = new Thickness(0, 18, 0, 0),
+            Padding = new Thickness(18, 14),
+            MinHeight = 76,
+            CornerRadius = new CornerRadius(8),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 33, 40)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(59, 68, 83)),
+            BorderThickness = new Thickness(1),
+            Child = new StackPanel
+            {
+                Spacing = 3,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = "Drop media to begin",
+                        FontSize = 14,
+                        FontWeight = FontWeight.SemiBold,
+                        Foreground = Brushes.White
+                    },
+                    new TextBlock
+                    {
+                        Text = "Video, photo and audio stay local until you explicitly choose an upload.",
+                        FontSize = 12,
+                        Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+                        TextWrapping = TextWrapping.Wrap
+                    }
+                }
+            }
+        };
         var children = new List<Control>
         {
             new TextBlock
             {
                 Text = workspace.Name,
-                FontSize = 28,
-                FontWeight = FontWeight.SemiBold
+                FontSize = 25,
+                FontWeight = FontWeight.SemiBold,
+                Foreground = Brushes.White
             },
             new TextBlock
             {
                 Text = workspace.Description,
-                FontSize = 16,
+                FontSize = 13,
+                Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
                 TextWrapping = TextWrapping.Wrap
             },
             new Border
             {
-                Margin = new Thickness(0, 12, 0, 0),
-                Padding = new Thickness(12),
-                Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 48, 48)),
+                Margin = new Thickness(0, 16, 0, 0),
+                Padding = new Thickness(12, 10),
+                CornerRadius = new CornerRadius(6),
+                Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(28, 46, 45)),
+                BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(47, 84, 76)),
+                BorderThickness = new Thickness(1),
                 Child = new TextBlock
                 {
                     Text = workspace.OfflineMessage,
+                    FontSize = 12,
+                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(171, 218, 198)),
                     TextWrapping = TextWrapping.Wrap
                 }
             },
-            new TextBlock
-            {
-                Margin = new Thickness(0, 16, 0, 0),
-                Text = "Drop local media files here"
-            },
+            importZone,
             importStatus,
             importedList
         };
@@ -243,10 +339,12 @@ public sealed class MainWindow : Window
         {
             Content = new Border
             {
-                Margin = new Thickness(24),
-                Padding = new Thickness(24),
-                Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(35, 35, 35)),
-                CornerRadius = new CornerRadius(8),
+                Margin = new Thickness(20),
+                Padding = new Thickness(24, 22),
+                Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33)),
+                BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(10),
                 Child = stack
             }
         };
@@ -1543,6 +1641,37 @@ public sealed class MainWindow : Window
         }
 
         return panel;
+    }
+
+    private static Control? CreateApprovedLogo()
+    {
+        if (!BrandAssetCatalog.TryGetApprovedLogoPath(out var path))
+        {
+            return null;
+        }
+
+        try
+        {
+            return new Image
+            {
+                Source = new Bitmap(path),
+                Width = 34,
+                Height = 34,
+                Stretch = Stretch.Uniform
+            };
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return null;
+        }
+        catch (InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     private static Control CreateGradeControl(string label, double minimum, double maximum, float value, Action<float> setter)

@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Production UI shell checkpoint (2026-10-18):** The Avalonia shell now uses the approved logo when available, a compact local-mode brand bar, dark graphite surfaces, a left workspace rail, clearer import drop-zone guidance, stronger card hierarchy and consistent control styling while preserving the functional Video/Photo/Color/AI controls and automation names. The full local Release suite passes 259 unit tests and 2 golden tests; native visual/HiDPI review remains unverified because no native application surface is available in the current computer-use host.
+
 **FFmpeg executable-boundary checkpoint (2026-10-18):** Bundled and environment-selected FFmpeg/ffprobe candidates now ignore reparse-point paths before they can be returned to the process runner. The locator regression covers redirected bundled tools; focused locator coverage and repository policy validation are pending this commit's local gate and hosted revalidation.
 
 **Photo input-boundary checkpoint (2026-10-18):** The Photo workspace now rejects reparse-point image and overlay paths before handing them to the importer, and reports the rejection through the existing status surface instead of escaping the UI. Focused photo persistence coverage passes 8/8, with formatting, repository validation and `git diff --check` green; hosted cross-platform revalidation remains pending at the next exact-ten-commit push.

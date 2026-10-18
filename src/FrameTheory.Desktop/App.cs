@@ -1,5 +1,9 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls.Primitives;
+using Avalonia.Media;
+using Avalonia.Styling;
 using FrameTheory.Application;
 
 namespace FrameTheory.Desktop;
@@ -9,6 +13,71 @@ public sealed class App : Avalonia.Application
     public App()
     {
         Styles.Add(new Avalonia.Themes.Fluent.FluentTheme());
+        AddStudioStyles();
+    }
+
+    private void AddStudioStyles()
+    {
+        var canvas = new SolidColorBrush(Avalonia.Media.Color.FromRgb(13, 15, 18));
+        var surface = new SolidColorBrush(Avalonia.Media.Color.FromRgb(24, 27, 33));
+        var input = new SolidColorBrush(Avalonia.Media.Color.FromRgb(31, 35, 42));
+        var accent = new SolidColorBrush(Avalonia.Media.Color.FromRgb(95, 125, 255));
+        var foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(239, 242, 248));
+
+        Styles.Add(new Style(selector => selector.OfType<Window>())
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, canvas),
+                new Setter(TemplatedControl.ForegroundProperty, foreground)
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<Button>())
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, input),
+                new Setter(TemplatedControl.ForegroundProperty, foreground),
+                new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70))),
+                new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(1)),
+                new Setter(TemplatedControl.PaddingProperty, new Thickness(12, 7))
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<TextBox>())
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, input),
+                new Setter(TemplatedControl.ForegroundProperty, foreground),
+                new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70)))
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<ComboBox>())
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, input),
+                new Setter(TemplatedControl.ForegroundProperty, foreground),
+                new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(53, 59, 70)))
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<ListBox>())
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, surface),
+                new Setter(TemplatedControl.ForegroundProperty, foreground),
+                new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(45, 50, 60))),
+                new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(1))
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<Slider>())
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.ForegroundProperty, accent)
+            }
+        });
     }
 
     public override void OnFrameworkInitializationCompleted()
