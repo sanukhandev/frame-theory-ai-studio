@@ -1958,18 +1958,20 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(afterEmptyState, "Color after preview empty state");
         var waveformScope = new Image
         {
-            Width = 240,
             Height = 128,
-            Stretch = Stretch.Fill,
+            MinWidth = 160,
+            MaxWidth = 240,
+            Stretch = Stretch.Uniform,
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
         AutomationProperties.SetName(waveformScope, "Color waveform scope");
         ToolTip.SetTip(waveformScope, "Luminance distribution calculated from the graded local preview.");
         var vectorscope = new Image
         {
-            Width = 240,
             Height = 128,
-            Stretch = Stretch.Fill,
+            MinWidth = 160,
+            MaxWidth = 240,
+            Stretch = Stretch.Uniform,
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
         AutomationProperties.SetName(vectorscope, "Color vectorscope");

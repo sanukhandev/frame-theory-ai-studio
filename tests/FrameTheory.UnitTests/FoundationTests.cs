@@ -718,6 +718,17 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Inspect the post-grade waveform and vectorscope generated from the local preview.",
                     ToolTip.GetTip(colorScopes));
+                foreach (var scopeName in new[] { "Color waveform scope", "Color vectorscope" })
+                {
+                    var scope = window.GetVisualDescendants()
+                        .OfType<Image>()
+                        .Single(control => AutomationProperties.GetName(control) == scopeName);
+                    Xunit.Assert.True(double.IsNaN(scope.Width));
+                    Xunit.Assert.Equal(160, scope.MinWidth);
+                    Xunit.Assert.Equal(240, scope.MaxWidth);
+                    Xunit.Assert.Equal(Stretch.Uniform, scope.Stretch);
+                    Xunit.Assert.Equal(HorizontalAlignment.Stretch, scope.HorizontalAlignment);
+                }
                 viewModel.ColorInspector.ExposureEV = 1.25f;
                 Dispatcher.UIThread.RunJobs();
                 Xunit.Assert.Equal(1.25, window.GetVisualDescendants()
