@@ -4,6 +4,7 @@ using Avalonia.Headless;
 using Avalonia.Input;
 using Avalonia.Themes.Fluent;
 using Avalonia.Threading;
+using Avalonia.VisualTree;
 using System.Reflection;
 using FrameTheory.Application;
 
@@ -85,6 +86,11 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
                     tabItems.Select(AutomationProperties.GetName));
+
+                var performanceStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline preview performance status");
+                Xunit.Assert.Equal(viewModel.TimelinePerformanceStatusText, performanceStatus.Text);
 
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
