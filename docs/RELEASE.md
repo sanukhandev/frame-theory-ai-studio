@@ -47,7 +47,7 @@ The subsequent native-bundle run `39099250089` reached successful macOS/Linux pa
 
 Run `39100413937` passed the packaged media importer with an empty `PATH` on each OS while explicitly selecting the adjacent bundle. This is runtime-independence evidence, not production clean-host or redistribution approval.
 
-The next validation batch also emits per-OS native-bundle provenance manifests containing tool version output and SHA-256 for every staged file. These artifacts support review but do not authorize redistribution.
+Run `39100943885` also emits per-OS native-bundle provenance manifests containing tool version output and SHA-256 for every staged file. These artifacts support review but do not authorize redistribution.
 
 ## Release blockers
 
