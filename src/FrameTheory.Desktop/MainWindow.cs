@@ -434,12 +434,14 @@ public sealed class MainWindow : Window
         projectPath.Bind(TextBox.TextProperty, new Binding("PhotoRecovery.ProjectPath") { Mode = BindingMode.TwoWay });
         var replacementPath = new TextBox { PlaceholderText = "Replacement media path" };
         var missingList = new ListBox { Height = 90 };
+        AutomationProperties.SetName(missingList, "Missing photo media");
         missingList.Bind(ItemsControl.ItemsSourceProperty, new Binding("PhotoRecovery.MissingMedia"));
         missingList.Bind(SelectingItemsControl.SelectedItemProperty, new Binding("PhotoRecovery.SelectedMissingMedia")
         {
             Mode = BindingMode.TwoWay
         });
         var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(status, "Photo recovery status");
         status.Bind(TextBlock.TextProperty, new Binding("PhotoRecovery.StatusText"));
         var open = new Button { Content = "Open / recover photo project" };
         AutomationProperties.SetName(open, "Open or recover photo project");
@@ -486,6 +488,7 @@ public sealed class MainWindow : Window
             }
         };
         var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        AutomationProperties.SetName(status, "Photo editor status");
         status.Bind(TextBlock.TextProperty, new Binding(nameof(PhotoEditorViewModel.StatusText)));
         var open = new Button { Content = "Open image" };
         AutomationProperties.SetName(open, "Open image");
