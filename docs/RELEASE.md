@@ -47,7 +47,7 @@ The subsequent native-bundle run `39099250089` reached successful macOS/Linux pa
 
 Run `39100413937` passed the packaged media importer with an empty `PATH` on each OS while explicitly selecting the adjacent bundle. This is runtime-independence evidence, not production clean-host or redistribution approval.
 
-Run `39101406586` emits and verifies per-OS native-bundle provenance manifests containing tool version output, byte lengths and SHA-256 for every staged file before packaging. These artifacts support review but do not authorize redistribution.
+Run `39101406586` emits and verifies per-OS native-bundle provenance manifests containing tool version output, byte lengths and SHA-256 for every staged file before packaging. These artifacts support review but do not authorize redistribution. The follow-up macOS cleanup fix in `7a4c394`/`f69db0f` requires a green rerun after the transient `hdiutil detach` failure in `39103650378`.
 
 ## Release blockers
 
