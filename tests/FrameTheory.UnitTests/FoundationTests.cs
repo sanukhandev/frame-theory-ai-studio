@@ -239,6 +239,12 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Timeline tracks");
                 Xunit.Assert.NotNull(timelineTracks.ItemTemplate);
                 Xunit.Assert.Equal(124, timelineTracks.Height);
+                Xunit.Assert.Equal(
+                    "Scrub to an exact timeline frame.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Slider>().Single(control => AutomationProperties.GetName(control) == "Timeline playhead frame")));
+                Xunit.Assert.Equal(
+                    "Current frame and timeline position.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBlock>().Single(control => AutomationProperties.GetName(control) == "Timeline ruler")));
                 var timelineSectionNames = new HashSet<string>(StringComparer.Ordinal)
                 {
                     "Analysis and rough cut section",

@@ -1828,6 +1828,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(usePreviewProxy, "Use bounded timeline preview proxy");
         var playhead = new Slider { Minimum = 0, Maximum = Math.Max(1, timeline.TotalFrames - 1), Value = timeline.CurrentFrame };
         AutomationProperties.SetName(playhead, "Timeline playhead frame");
+        ToolTip.SetTip(playhead, "Scrub to an exact timeline frame.");
         playhead.ValueChanged += (_, args) => timeline.SeekFrame((long)Math.Round(args.NewValue, MidpointRounding.AwayFromZero));
         timeline.PropertyChanged += (_, args) =>
         {
@@ -1845,9 +1846,11 @@ public sealed class MainWindow : Window
         positionStatus.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.CurrentPosition"));
         var ruler = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(ruler, "Timeline ruler");
+        ToolTip.SetTip(ruler, "Current frame and timeline position.");
         ruler.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.RulerText"));
         var selectionContext = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(selectionContext, "Timeline selection context");
+        ToolTip.SetTip(selectionContext, "Selected clip, track and playhead context.");
         selectionContext.Bind(TextBlock.TextProperty, new Binding("TimelineEditor.SelectionContextText"));
         var selectionInspector = new Border
         {
