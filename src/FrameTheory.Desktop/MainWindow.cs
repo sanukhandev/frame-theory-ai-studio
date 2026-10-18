@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Automation;
 using Avalonia.Controls;
+using Avalonia.Controls.Templates;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Input;
@@ -285,7 +286,59 @@ public sealed class MainWindow : Window
         {
             Height = 132,
             Margin = new Thickness(0, 8, 0, 0),
-            Padding = new Thickness(4)
+            Padding = new Thickness(4),
+            ItemTemplate = new FuncDataTemplate<ImportedMediaViewModel>((item, _) =>
+            {
+                if (item is null)
+                {
+                    return new TextBlock { Text = "Unavailable media" };
+                }
+
+                var thumbnail = new Image
+                {
+                    Width = 84,
+                    Height = 48,
+                    Stretch = Stretch.UniformToFill,
+                    Source = CreateBitmap(item.ThumbnailPpm)
+                };
+                AutomationProperties.SetName(thumbnail, $"Thumbnail for {item.Name}");
+                return new Grid
+                {
+                    ColumnDefinitions = new ColumnDefinitions("Auto,*"),
+                    Children =
+                    {
+                        new Border
+                        {
+                            Width = 84,
+                            Height = 48,
+                            Margin = new Thickness(0, 0, 10, 0),
+                            Background = Brushes.Black,
+                            Child = thumbnail
+                        },
+                        new StackPanel
+                        {
+                            Spacing = 2,
+                            VerticalAlignment = VerticalAlignment.Center,
+                            Children =
+                            {
+                                new TextBlock
+                                {
+                                    Text = item.Name,
+                                    FontWeight = FontWeight.SemiBold,
+                                    TextTrimming = TextTrimming.CharacterEllipsis
+                                },
+                                new TextBlock
+                                {
+                                    Text = item.Summary,
+                                    FontSize = 11,
+                                    Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+                                    TextTrimming = TextTrimming.CharacterEllipsis
+                                }
+                            }
+                        }
+                    }
+                };
+            }, supportsRecycling: false)
         };
         AutomationProperties.SetName(importedList, "Imported media");
         importedList.Bind(ItemsControl.ItemsSourceProperty, new Binding(nameof(MainWindowViewModel.ImportedMedia)));
