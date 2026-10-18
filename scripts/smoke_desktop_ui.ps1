@@ -27,6 +27,82 @@ if ([IO.Path]::GetExtension($target) -eq ".dll") {
 
 Add-Type -AssemblyName UIAutomationClient
 Add-Type -AssemblyName UIAutomationTypes
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+
+public static class FrameTheoryKeyboardInput
+{
+    [StructLayout(LayoutKind.Sequential)]
+    private struct KeyboardInput
+    {
+        public ushort VirtualKey;
+        public ushort ScanCode;
+        public uint Flags;
+        public uint Time;
+        public UIntPtr ExtraInfo;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct Input
+    {
+        public uint Type;
+        public KeyboardInput Keyboard;
+    }
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool SetForegroundWindow(IntPtr windowHandle);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern uint SendInput(uint inputCount, Input[] inputs, int inputSize);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool PostMessage(IntPtr windowHandle, uint message, IntPtr wParam, IntPtr lParam);
+
+    public static void SendControlDigit(IntPtr windowHandle, int digit)
+    {
+        if (!SetForegroundWindow(windowHandle))
+        {
+            throw new InvalidOperationException("The desktop window could not be focused for keyboard smoke.");
+        }
+
+        var virtualKey = (ushort)(0x30 + digit);
+        var inputs = new[]
+        {
+            CreateInput(0x11, 0),
+            CreateInput(virtualKey, 0),
+            CreateInput(virtualKey, 0x0002),
+            CreateInput(0x11, 0x0002)
+        };
+        var sent = SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<Input>());
+        if (sent == inputs.Length)
+        {
+            return;
+        }
+
+        const uint keyDown = 0x0100;
+        const uint keyUp = 0x0101;
+        var posted = PostMessage(windowHandle, keyDown, (IntPtr)0x11, IntPtr.Zero)
+            && PostMessage(windowHandle, keyDown, (IntPtr)virtualKey, IntPtr.Zero)
+            && PostMessage(windowHandle, keyUp, (IntPtr)virtualKey, IntPtr.Zero)
+            && PostMessage(windowHandle, keyUp, (IntPtr)0x11, IntPtr.Zero);
+        if (!posted)
+        {
+            throw new InvalidOperationException($"SendInput delivered {sent} of {inputs.Length} inputs and the direct window-message fallback failed.");
+        }
+    }
+
+    private static Input CreateInput(ushort virtualKey, uint flags) => new()
+    {
+        Type = 1,
+        Keyboard = new KeyboardInput
+        {
+            VirtualKey = virtualKey,
+            Flags = flags
+        }
+    };
+}
+"@
 
 $process = Start-Process -FilePath $executable -ArgumentList $arguments -WorkingDirectory (Split-Path $target) -PassThru
 $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
@@ -135,10 +211,9 @@ try {
         throw "Workspace tabs did not match the expected set: $($actualTabs -join ', ')."
     }
 
-    Add-Type -AssemblyName System.Windows.Forms
     for ($shortcut = 1; $shortcut -le $expectedTabs.Count; $shortcut++) {
         $window.SetFocus()
-        [System.Windows.Forms.SendKeys]::SendWait("^$shortcut")
+        [FrameTheoryKeyboardInput]::SendControlDigit([IntPtr]$window.Current.NativeWindowHandle, $shortcut)
         Start-Sleep -Milliseconds 250
         $selectedAfterShortcut = @($tabs | Where-Object {
             $_.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Current.IsSelected

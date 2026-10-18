@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Windows UI smoke input checkpoint (2026-10-18):** `scripts/smoke_desktop_ui.ps1` now uses a foreground-window `SendInput` implementation with a direct HWND message fallback instead of `System.Windows.Forms.SendKeys`, improving deterministic shortcut delivery on interactive Windows runners. The script parses cleanly and the desktop shell title smoke passes locally; this host still cannot synthesize modifier state, so the full local UI smoke stops at `Ctrl+2` and FT-901 remains a manual gate. Hosted Windows UI automation remains green in run `39155435600`.
+
 **Hosted compact-shell validation checkpoint (2026-10-18):** Quality Gates run `39155435600` for pushed commit `3208e9d` passed documentation/schema validation plus Windows, macOS and Linux restore/build/test, native FFmpeg smoke, formatting, headless shell, Windows UI automation, portable archive, installers/DMG/DEB, packaged relaunch and checksums. It validates the responsive media rail, compact workspace frame/footer, offline mode metadata, accessible action discovery and social-export hierarchy. Manual native visual, 1280x800/HiDPI and screen-reader acceptance remains open; no partial GitHub task is closed from automated evidence alone.
 
 **Responsive width-lifecycle checkpoint (2026-10-18):** The media rail now uses the attached top-level window width when available, with a measured-layout fallback, preventing an early startup pass from applying the compact width to the standard shell. Foundation coverage remains green at 960px and 1280px.
