@@ -466,6 +466,14 @@ public sealed class MainWindow : Window
         };
         AutomationProperties.SetName(mediaSearch, "Search imported media");
         ToolTip.SetTip(mediaSearch, "Filter imported media by filename.");
+        var clearMediaSearch = new Button
+        {
+            Content = "Clear",
+            Width = 58,
+            IsEnabled = false
+        };
+        AutomationProperties.SetName(clearMediaSearch, "Clear media search");
+        ToolTip.SetTip(clearMediaSearch, "Clear the media filename filter.");
         var mediaSearchEmptyState = new TextBlock
         {
             Text = "No matching media.",
@@ -483,10 +491,12 @@ public sealed class MainWindow : Window
                 ? viewModel.ImportedMedia
                 : viewModel.ImportedMedia.Where(item => item.Name.Contains(query, StringComparison.OrdinalIgnoreCase)).ToArray();
             importedList.ItemsSource = filtered;
+            clearMediaSearch.IsEnabled = !string.IsNullOrEmpty(query);
             mediaSearchEmptyState.IsVisible = !string.IsNullOrEmpty(query) && filtered.Count == 0;
         }
 
         mediaSearch.TextChanged += (_, _) => RefreshMediaList();
+        clearMediaSearch.Click += (_, _) => mediaSearch.Text = string.Empty;
         viewModel.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName == nameof(MainWindowViewModel.ImportedMedia))
@@ -598,7 +608,7 @@ public sealed class MainWindow : Window
                     TextWrapping = TextWrapping.Wrap
                 }
             },
-            CreateMediaBin(importZone, importStatus, importedList, mediaSearch, mediaSearchEmptyState)
+            CreateMediaBin(importZone, importStatus, importedList, mediaSearch, clearMediaSearch, mediaSearchEmptyState)
         };
         if (workspace.Name == "Photo")
         {
@@ -728,6 +738,7 @@ public sealed class MainWindow : Window
         TextBlock importStatus,
         ListBox importedList,
         TextBox mediaSearch,
+        Button clearMediaSearch,
         TextBlock mediaSearchEmptyState)
     {
         importZone.Margin = new Thickness(0);
@@ -762,7 +773,7 @@ public sealed class MainWindow : Window
             {
                 new Grid
                 {
-                    ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto"),
+                    ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto,Auto"),
                     Children =
                     {
                         new TextBlock
@@ -773,6 +784,7 @@ public sealed class MainWindow : Window
                             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
                         },
                         mediaSearch,
+                        clearMediaSearch,
                         assetSummary
                     }
                 },
@@ -784,7 +796,8 @@ public sealed class MainWindow : Window
             }
         });
         Grid.SetColumn(mediaSearch, 1);
-        Grid.SetColumn(assetSummary, 2);
+        Grid.SetColumn(clearMediaSearch, 2);
+        Grid.SetColumn(assetSummary, 3);
         grid.Children.Add(importZone);
         Grid.SetColumn(importZone, 1);
         return mediaBin;

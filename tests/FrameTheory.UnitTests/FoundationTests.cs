@@ -210,7 +210,7 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Media bin");
                 var mediaBinGrid = Xunit.Assert.IsType<Grid>(mediaBin.Child);
                 Xunit.Assert.Equal(2, mediaBinGrid.ColumnDefinitions.Count);
-                Xunit.Assert.Contains(mediaBin.GetVisualDescendants().OfType<Grid>(), control => control.ColumnDefinitions.Count == 3);
+                Xunit.Assert.Contains(mediaBin.GetVisualDescendants().OfType<Grid>(), control => control.ColumnDefinitions.Count == 4);
                 var importedMediaList = window.GetVisualDescendants()
                     .OfType<ListBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Imported media");
@@ -226,6 +226,10 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Search imported media");
                 Xunit.Assert.Equal(190, mediaSearch.Width);
                 Xunit.Assert.Equal("Filter imported media by filename.", ToolTip.GetTip(mediaSearch));
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Clear media search")
+                    .IsEnabled);
                 Xunit.Assert.False(window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "Media search empty state")
@@ -412,6 +416,7 @@ public sealed class FoundationTests
                     "Workspace keyboard shortcuts",
                     "Media import status",
                     "Search imported media",
+                    "Clear media search",
                     "Media search empty state",
                     "Timeline preview status",
                     "Timeline motion analysis status",
