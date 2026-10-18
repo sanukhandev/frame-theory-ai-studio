@@ -42,6 +42,8 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(tabs, "Workspaces");
         tabs.TabStripPlacement = Dock.Left;
         tabs.Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(13, 15, 18));
+        tabs.BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55));
+        tabs.BorderThickness = new Thickness(0, 0, 1, 0);
         tabs.HorizontalContentAlignment = HorizontalAlignment.Stretch;
         tabs.VerticalContentAlignment = VerticalAlignment.Stretch;
         foreach (var workspace in viewModel.Workspaces)
