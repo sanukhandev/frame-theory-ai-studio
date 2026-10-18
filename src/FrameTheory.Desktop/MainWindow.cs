@@ -1874,6 +1874,7 @@ public sealed class MainWindow : Window
         var panel = new WrapPanel { Orientation = Orientation.Horizontal };
         foreach (var child in children)
         {
+            child.Margin = new Thickness(child.Margin.Left, child.Margin.Top, child.Margin.Right + 6, child.Margin.Bottom + 6);
             panel.Children.Add(child);
         }
 
