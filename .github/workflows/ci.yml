@@ -249,6 +249,10 @@ jobs:
           if ($licenses.Count -eq 0) {
             throw "NuGet license metadata report is empty."
           }
+          $missingLicenseMetadata = @($licenses | Where-Object { -not $_.metadataFound })
+          if ($missingLicenseMetadata.Count -gt 0) {
+            throw "NuGet license metadata is missing for: $($missingLicenseMetadata.id -join ', ')"
+          }
           if (-not ($licenses | Where-Object { $_.id -eq 'Avalonia' -and $_.licenseExpression -eq 'MIT' -and $_.metadataFound })) {
             throw "NuGet license metadata report did not include Avalonia MIT metadata."
           }
