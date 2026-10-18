@@ -609,6 +609,12 @@ public sealed class FoundationTests
                     .OfType<TextBlock>()
                     .Single(control => AutomationProperties.GetName(control) == "AI proposal empty state")
                     .IsVisible);
+                var aiProposalStatus = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "AI proposal status");
+                Xunit.Assert.True(aiProposalStatus.IsReadOnly);
+                Xunit.Assert.Equal(11, aiProposalStatus.FontSize);
+                Xunit.Assert.Equal("Current AI proposal review and validation status.", ToolTip.GetTip(aiProposalStatus));
                 var automationNames = new HashSet<string>(StringComparer.Ordinal);
                 for (var workspaceIndex = 0; workspaceIndex < tabs.Items.Count; workspaceIndex++)
                 {

@@ -1658,9 +1658,21 @@ public sealed class MainWindow : Window
         }
         RefreshActions();
 
-        var status = new TextBlock { TextWrapping = TextWrapping.Wrap };
+        var status = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.Wrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
         AutomationProperties.SetName(status, "AI proposal status");
-        status.Bind(TextBlock.TextProperty, new Binding("AiProposal.StatusText"));
+        ToolTip.SetTip(status, "Current AI proposal review and validation status.");
+        status.Bind(TextBox.TextProperty, new Binding("AiProposal.StatusText"));
         var approvalSummary = new TextBlock { TextWrapping = TextWrapping.Wrap };
         AutomationProperties.SetName(approvalSummary, "AI approval summary");
         approvalSummary.Bind(TextBlock.TextProperty, new Binding("AiProposal.ApprovalSummary"));
