@@ -443,6 +443,11 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Timeline operation status");
                 Xunit.Assert.True(timelineOperationStatus.IsReadOnly);
                 Xunit.Assert.Equal("Validation or edit result for the last timeline action.", ToolTip.GetTip(timelineOperationStatus));
+                Xunit.Assert.Equal(
+                    "Copy selected timeline clip",
+                    ToolTip.GetTip(window.GetVisualDescendants()
+                        .OfType<Button>()
+                        .Single(control => AutomationProperties.GetName(control) == "Copy selected timeline clip")));
                 Xunit.Assert.All(timelineSections.Values, section =>
                 {
                     Xunit.Assert.NotNull(ToolTip.GetTip(section));

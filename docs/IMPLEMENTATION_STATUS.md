@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Accessible action-discovery checkpoint (2026-10-18):** The production shell now gives every named button a fallback tooltip when no feature-specific guidance exists, while preserving explicit tooltips for media, export, AI and editing actions. Foundation coverage verifies the fallback on timeline editing controls; native screen-reader acceptance remains open.
+
 **Responsive media-rail checkpoint (2026-10-18):** The shared Video/Photo/Color/AI workspace layout now reduces its local media rail from 300px to 240px below the 1120px window-width breakpoint, preserving inspector space at the 960px minimum while retaining the full rail on the standard 1280px shell. The layout exposes an accessible tooltip and Foundation coverage verifies both widths; native visual and HiDPI acceptance remains open.
 
 **Hosted responsive editor follow-up checkpoint (2026-10-18):** Quality Gates run `39154109601` for pushed commit `53f9b73` passed documentation/schema validation plus Windows, macOS and Linux restore/build/test, native FFmpeg smoke, formatting, headless shell, Windows UI automation, portable archive, installers/DMG/DEB, packaged relaunch and checksums. It validates responsive Color scopes, Photo previews/export controls, AI/Color inspector inputs, monitor stacking, title input and photo undo/redo shortcuts. Manual native visual, 1280x800/HiDPI and screen-reader acceptance remains open; local native SendKeys smoke remains unverified on this host.

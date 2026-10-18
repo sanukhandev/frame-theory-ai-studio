@@ -277,15 +277,22 @@ public sealed class MainWindow : Window
     {
         foreach (var button in root.GetVisualDescendants().OfType<Button>())
         {
-            if (string.IsNullOrWhiteSpace(AutomationProperties.GetName(button)) && button.Content is not null)
+            var name = AutomationProperties.GetName(button);
+            if (string.IsNullOrWhiteSpace(name) && button.Content is not null)
             {
-                var text = button.Content switch
+                name = button.Content switch
                 {
                     string value => value,
                     TextBlock value => value.Text,
                     _ => null
                 };
-                AutomationProperties.SetName(button, string.IsNullOrWhiteSpace(text) ? "Interactive button" : text);
+                name = string.IsNullOrWhiteSpace(name) ? "Interactive button" : name;
+                AutomationProperties.SetName(button, name);
+            }
+
+            if (ToolTip.GetTip(button) is null && !string.IsNullOrWhiteSpace(name))
+            {
+                ToolTip.SetTip(button, name);
             }
         }
     }
