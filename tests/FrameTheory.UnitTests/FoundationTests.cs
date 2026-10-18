@@ -414,6 +414,12 @@ public sealed class FoundationTests
                 Xunit.Assert.Contains(
                     window.GetVisualDescendants().OfType<Button>(),
                     button => AutomationProperties.GetName(button) == "Export photo image" && button.Classes.Contains("primary"));
+                Xunit.Assert.Equal(
+                    "Save the photo, adjustment layers and media references to a project file.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Save photo project")));
+                Xunit.Assert.Equal(
+                    "Render the current photo edit to the selected image format and dimensions.",
+                    ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Export photo image")));
 
                 viewModel.SelectedWorkspaceIndex = 2;
                 Dispatcher.UIThread.RunJobs();

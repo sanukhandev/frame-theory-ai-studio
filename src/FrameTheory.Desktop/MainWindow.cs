@@ -922,6 +922,7 @@ public sealed class MainWindow : Window
         };
         var openProject = new Button { Content = "Open photo project" };
         AutomationProperties.SetName(openProject, "Open photo project");
+        ToolTip.SetTip(openProject, "Open a portable non-destructive photo project and restore its layers.");
         openProject.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(openProject);
@@ -943,6 +944,7 @@ public sealed class MainWindow : Window
         };
         var saveProject = new Button { Content = "Save photo project" };
         AutomationProperties.SetName(saveProject, "Save photo project");
+        ToolTip.SetTip(saveProject, "Save the photo, adjustment layers and media references to a project file.");
         saveProject.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(saveProject);
@@ -964,9 +966,11 @@ public sealed class MainWindow : Window
         };
         var rotate = new Button { Content = "Rotate 90°" };
         AutomationProperties.SetName(rotate, "Rotate photo 90 degrees clockwise");
+        ToolTip.SetTip(rotate, "Add a non-destructive 90-degree clockwise rotation.");
         rotate.Click += (_, _) => editor.RotateRight();
         var undo = new Button { Content = "Undo photo edit" };
         AutomationProperties.SetName(undo, "Undo last photo edit");
+        ToolTip.SetTip(undo, "Undo the latest non-destructive photo operation.");
         undo.Click += (_, _) => editor.Undo();
         var overlayOpacity = new Slider { Minimum = 0, Maximum = 1, Value = 1, Width = 120 };
         AutomationProperties.SetName(overlayOpacity, "Photo overlay opacity");
@@ -1089,6 +1093,7 @@ public sealed class MainWindow : Window
         var export = new Button { Content = "Export image" };
         export.Classes.Add("primary");
         AutomationProperties.SetName(export, "Export photo image");
+        ToolTip.SetTip(export, "Render the current photo edit to the selected image format and dimensions.");
         export.Click += async (_, _) =>
         {
             var topLevel = TopLevel.GetTopLevel(export);
