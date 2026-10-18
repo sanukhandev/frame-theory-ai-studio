@@ -388,7 +388,29 @@ public sealed class MainWindow : Window
                             Height = 48,
                             Margin = new Thickness(0, 0, 10, 0),
                             Background = Brushes.Black,
-                            Child = thumbnail
+                            Child = new Grid
+                            {
+                                Children =
+                                {
+                                    thumbnail,
+                                    new Border
+                                    {
+                                        Margin = new Thickness(3),
+                                        Padding = new Thickness(3, 1),
+                                        CornerRadius = new CornerRadius(3),
+                                        Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(13, 15, 18)),
+                                        HorizontalAlignment = HorizontalAlignment.Left,
+                                        VerticalAlignment = VerticalAlignment.Bottom,
+                                        Child = new TextBlock
+                                        {
+                                            Text = item.Kind?.ToString().ToUpperInvariant() ?? "MEDIA",
+                                            FontSize = 8,
+                                            FontWeight = FontWeight.SemiBold,
+                                            Foreground = Brushes.White
+                                        }
+                                    }
+                                }
+                            }
                         },
                         new StackPanel
                         {
