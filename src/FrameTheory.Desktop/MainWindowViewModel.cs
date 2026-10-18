@@ -1353,7 +1353,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             AnalysisStatusText = "Local AI analysis preparation canceled; no upload occurred.";
             return false;
         }
-        catch (Exception exception) when (exception is ArgumentException or InvalidDataException or InvalidOperationException or MediaDecodeException)
+        catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException or InvalidDataException or InvalidOperationException or MediaDecodeException)
         {
             _diagnosticsLog.Record("local-analysis-failed", exception);
             AnalysisStatusText = $"Local AI analysis preparation failed: {exception.Message}";

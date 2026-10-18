@@ -17,6 +17,20 @@ public sealed class DesktopAiAnalysisTests
     }
 
     [Xunit.Fact]
+    public async Task LocalAnalysisIoFailureIsReportedWithoutEscapingTheUi()
+    {
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new TestCapabilityDetector(),
+            new ImageImporter(),
+            analysisSampler: new FailingAnalysisSampler());
+        await viewModel.ImportFilesAsync(["photo.png"], CancellationToken.None);
+
+        Xunit.Assert.False(await viewModel.PrepareLocalAnalysisAsync(GeminiAnalysisScope.PhotoPreview, true, CancellationToken.None));
+        Xunit.Assert.Contains("preparation failed", viewModel.AnalysisStatusText, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Xunit.Fact]
     public async Task DesktopAnalysisUploadsApprovedSamplesAndLeavesProposalUnapplied()
     {
         var plan = """
@@ -101,6 +115,15 @@ public sealed class DesktopAiAnalysisTests
             IProgress<LocalAnalysisProgress>? progress,
             CancellationToken cancellationToken) => Task.FromResult(
                 new LocalMediaAnalysisReport([Sample()], request.Scopes, request.UploadConsent, Sample().Payload.Length, "approved"));
+    }
+
+    private sealed class FailingAnalysisSampler : ILocalAnalysisSampler
+    {
+        public Task<LocalMediaAnalysisReport> PrepareAsync(
+            GeminiAnalysisRequest request,
+            IProgress<LocalAnalysisProgress>? progress,
+            CancellationToken cancellationToken) =>
+            throw new IOException("analysis source disappeared");
     }
 
     private static LocalAnalysisSample Sample() => new(
