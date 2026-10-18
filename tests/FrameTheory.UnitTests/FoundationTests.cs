@@ -231,6 +231,14 @@ public sealed class FoundationTests
                     Xunit.Assert.Equal(HorizontalAlignment.Stretch, section.HorizontalContentAlignment);
                     Xunit.Assert.Equal(VerticalAlignment.Top, section.VerticalContentAlignment);
                 });
+                timelineSections["Analysis and rough cut section"].IsExpanded = true;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Contains(
+                    window.GetVisualDescendants().OfType<Button>(),
+                    button => AutomationProperties.GetName(button) == "Analyze timeline motion" && button.IsVisible);
+                timelineSections["Analysis and rough cut section"].IsExpanded = false;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.False(timelineSections["Analysis and rough cut section"].IsExpanded);
                 Xunit.Assert.All(
                     window.GetVisualDescendants()
                         .OfType<ComboBox>()
