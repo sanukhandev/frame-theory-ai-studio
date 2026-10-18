@@ -536,7 +536,7 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(importZone, "Local media import drop zone");
         var children = new List<Control>
         {
-            CreateWorkspaceHeader(workspace),
+            CreateWorkspaceHeader(workspace, viewModel),
             new Border
             {
                 Margin = new Thickness(0, 14, 0, 0),
@@ -598,7 +598,7 @@ public sealed class MainWindow : Window
         return workspaceScrollViewer;
     }
 
-    private static Control CreateWorkspaceHeader(WorkspaceViewModel workspace)
+    private static Control CreateWorkspaceHeader(WorkspaceViewModel workspace, MainWindowViewModel viewModel)
     {
         var modeLabel = workspace.Name == "AI" ? "OPTIONAL AI" : "LOCAL WORKSPACE";
         var modeForeground = workspace.Name == "AI"
@@ -607,6 +607,33 @@ public sealed class MainWindow : Window
         var modeBackground = workspace.Name == "AI"
             ? new SolidColorBrush(Avalonia.Media.Color.FromRgb(43, 34, 61))
             : new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 44, 42));
+        var status = new TextBlock
+        {
+            MaxWidth = 380,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            TextWrapping = TextWrapping.NoWrap
+        };
+        AutomationProperties.SetName(status, "Active workspace status");
+        ToolTip.SetTip(status, "Live save, export, edit or provider status for the active workspace.");
+        status.Bind(TextBlock.TextProperty, new Binding(nameof(MainWindowViewModel.ActiveWorkspaceStatusText)));
+        var mode = new Border
+        {
+            Margin = new Thickness(12, 2, 0, 0),
+            Padding = new Thickness(10, 6),
+            CornerRadius = new CornerRadius(5),
+            Background = modeBackground,
+            VerticalAlignment = VerticalAlignment.Top,
+            Child = new TextBlock
+            {
+                Text = modeLabel,
+                FontSize = 10,
+                FontWeight = FontWeight.SemiBold,
+                Foreground = modeForeground
+            }
+        };
         var header = new Grid
         {
             ColumnDefinitions = new ColumnDefinitions("*,Auto"),
@@ -633,20 +660,11 @@ public sealed class MainWindow : Window
                         }
                     }
                 },
-                new Border
+                new StackPanel
                 {
-                    Margin = new Thickness(12, 2, 0, 0),
-                    Padding = new Thickness(10, 6),
-                    CornerRadius = new CornerRadius(5),
-                    Background = modeBackground,
-                    VerticalAlignment = VerticalAlignment.Top,
-                    Child = new TextBlock
-                    {
-                        Text = modeLabel,
-                        FontSize = 10,
-                        FontWeight = FontWeight.SemiBold,
-                        Foreground = modeForeground
-                    }
+                    Spacing = 3,
+                    HorizontalAlignment = HorizontalAlignment.Right,
+                    Children = { status, mode }
                 }
             }
         };

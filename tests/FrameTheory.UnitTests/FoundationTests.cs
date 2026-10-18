@@ -187,6 +187,21 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     new[] { "Video workspace content", "Photo workspace content", "Color workspace content", "AI workspace content" },
                     workspaceScrollers.Select(AutomationProperties.GetName));
+                var activeWorkspaceStatus = window.GetVisualDescendants()
+                    .OfType<TextBlock>()
+                    .Single(control => AutomationProperties.GetName(control) == "Active workspace status");
+                Xunit.Assert.Equal(viewModel.ActiveWorkspaceStatusText, activeWorkspaceStatus.Text);
+                tabs.SelectedIndex = 1;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(viewModel.ActiveWorkspaceStatusText, activeWorkspaceStatus.Text);
+                tabs.SelectedIndex = 2;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(viewModel.ActiveWorkspaceStatusText, activeWorkspaceStatus.Text);
+                tabs.SelectedIndex = 3;
+                Dispatcher.UIThread.RunJobs();
+                Xunit.Assert.Equal(viewModel.ActiveWorkspaceStatusText, activeWorkspaceStatus.Text);
+                tabs.SelectedIndex = 0;
+                Dispatcher.UIThread.RunJobs();
                 var mediaBin = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Media bin");

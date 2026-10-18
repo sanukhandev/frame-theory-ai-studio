@@ -145,6 +145,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ColorInspector = colorInspector ?? new ColorGradeInspectorViewModel();
         TimelineEditor = timelineEditor ?? new TimelineEditorViewModel();
         GeminiSettings = geminiSettings ?? new GeminiSettingsViewModel(new GeminiConfigurationService(new OperatingSystemSecretStore()));
+        if (PhotoEditor is { } photoEditorViewModel)
+        {
+            photoEditorViewModel.PropertyChanged += (_, _) => OnPropertyChanged(nameof(ActiveWorkspaceStatusText));
+        }
+
+        ColorInspector.PropertyChanged += (_, _) => OnPropertyChanged(nameof(ActiveWorkspaceStatusText));
+        AiProposal.PropertyChanged += (_, _) => OnPropertyChanged(nameof(ActiveWorkspaceStatusText));
         _timelineExporter = timelineExporter;
         _analysisSampler = analysisSampler;
         _timelinePreviewDecoder = timelinePreviewDecoder ?? new FfmpegFrameDecoder(new FfmpegProcessRunner());
@@ -164,6 +171,15 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public string ImportedMediaSummary => ImportedMedia.Count == 0
         ? "No assets"
         : $"{ImportedMedia.Count} asset{(ImportedMedia.Count == 1 ? string.Empty : "s")}";
+
+    public string ActiveWorkspaceStatusText => SelectedWorkspace.Name switch
+    {
+        "Video" => $"Project: {TimelineProjectStatusText} · Export: {TimelineExportStatusText}",
+        "Photo" => PhotoEditor?.StatusText ?? "Photo editor unavailable.",
+        "Color" => ColorInspector.StatusText,
+        "AI" => AiProposal.StatusText,
+        _ => "Workspace ready."
+    };
 
     public byte[]? TimelinePreviewPpm
     {
@@ -217,6 +233,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             _timelineProjectStatusText = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(ActiveWorkspaceStatusText));
         }
     }
 
@@ -605,6 +622,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             _workspaceStateStore.SaveSelectedWorkspaceIndex(value);
             OnPropertyChanged();
             OnPropertyChanged(nameof(SelectedWorkspace));
+            OnPropertyChanged(nameof(ActiveWorkspaceStatusText));
         }
     }
 
@@ -690,6 +708,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             _timelineExportStatusText = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(ActiveWorkspaceStatusText));
         }
     }
 
