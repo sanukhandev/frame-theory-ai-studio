@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Current exact-ten-commit batch checkpoint (2026-10-18):** The native shortcut smoke contract and linked-path regressions pass the full Release gate at 247 unit tests and 2 golden tests with 0 failures; repository validation, PowerShell parsing, formatting and `git diff --check` also pass. This batch is ready to push now; hosted native UI/media/packaging revalidation remains required.
+
 **Gemini parent-link regression checkpoint (2026-10-18):** Interaction-history coverage now proves record/read refuses a log beneath a linked parent directory and never creates the external target. Focused Gemini interaction coverage passes 11/11; formatting and `git diff --check` pass.
 
 **Regular-destination regression checkpoint (2026-10-18):** Foundation coverage verifies that a missing file beneath a normal directory remains accepted for atomic first-time saves while linked and dangling paths are rejected. Focused Foundation coverage passes 20/20; formatting and `git diff --check` pass.
