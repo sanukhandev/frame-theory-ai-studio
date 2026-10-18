@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline workspace hierarchy checkpoint (2026-10-18):** The Video workspace now presents a real preview/action card followed by labeled timeline navigation, analysis, clip editing, motion, audio, captions, project/export and view sections. Existing controls and handlers are unchanged; the Release build and accessible headless shell test pass, with native visual inspection still unverified.
+
 **Production UI shell checkpoint (2026-10-18):** The Avalonia shell now uses the approved logo when available, a compact local-mode brand bar, dark graphite surfaces, a left workspace rail, clearer import drop-zone guidance, stronger card hierarchy and consistent control styling while preserving the functional Video/Photo/Color/AI controls and automation names. The full local Release suite passes 259 unit tests and 2 golden tests; native visual/HiDPI review remains unverified because no native application surface is available in the current computer-use host.
 
 **FFmpeg executable-boundary checkpoint (2026-10-18):** Bundled and environment-selected FFmpeg/ffprobe candidates now ignore reparse-point paths before they can be returned to the process runner. The locator regression covers redirected bundled tools; focused locator coverage and repository policy validation are pending this commit's local gate and hosted revalidation.

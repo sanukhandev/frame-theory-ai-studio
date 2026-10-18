@@ -1583,33 +1583,84 @@ public sealed class MainWindow : Window
         scrollBack.Click += (_, _) => timeline.ScrollBy(-30);
         var scrollForward = new Button { Content = "Scroll ▶" };
         scrollForward.Click += (_, _) => timeline.ScrollBy(30);
+        var previewActions = new StackPanel
+        {
+            Spacing = 8,
+            Children =
+            {
+                new TextBlock
+                {
+                    Text = "Preview",
+                    FontSize = 13,
+                    FontWeight = FontWeight.SemiBold,
+                    Foreground = Brushes.White
+                },
+                CreateFlow(previewCurrentFrame, playTimeline, stopTimeline),
+                usePreviewProxy,
+                analyzeMotion,
+                timelinePreviewStatus,
+                timelinePerformanceStatus,
+                motionAnalysisStatus
+            }
+        };
+        var previewCard = new Border
+        {
+            Padding = new Thickness(12),
+            CornerRadius = new CornerRadius(8),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(16, 18, 22)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(42, 46, 55)),
+            BorderThickness = new Thickness(1),
+            Child = new Grid
+            {
+                ColumnDefinitions = new ColumnDefinitions("2*,*")
+            }
+        };
+        var previewGrid = (Grid)previewCard.Child;
+        previewGrid.Children.Add(new Border
+        {
+            MinHeight = 190,
+            Margin = new Thickness(0, 0, 12, 0),
+            Background = Brushes.Black,
+            Child = timelinePreview
+        });
+        previewGrid.Children.Add(previewActions);
+        Grid.SetColumn(previewActions, 1);
         return new Border
         {
             Margin = new Thickness(0, 16, 0, 0),
-            Padding = new Thickness(12),
-            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 48, 48)),
+            Padding = new Thickness(16),
+            Background = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 32, 39)),
+            BorderBrush = new SolidColorBrush(Avalonia.Media.Color.FromRgb(48, 54, 65)),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(8),
             Child = new StackPanel
             {
                 Spacing = 8,
                 Children =
                 {
-                    new TextBlock { Text = "Frame-accurate timeline", FontWeight = FontWeight.SemiBold },
-                    CreateFlow(timelinePreview, new StackPanel { Spacing = 8, Children = { previewCurrentFrame, playTimeline, stopTimeline, usePreviewProxy, analyzeMotion, timelinePreviewStatus, timelinePerformanceStatus, motionAnalysisStatus } }),
+                    new TextBlock { Text = "Frame-accurate timeline", FontSize = 14, FontWeight = FontWeight.SemiBold, Foreground = Brushes.White },
+                    previewCard,
+                    CreateSectionLabel("Timeline navigation"),
                     CreateFlow(new TextBlock { Text = "Frame" }, frameStatus, new TextBlock { Text = "Position" }, positionStatus),
                     playhead,
                     ruler,
                     selectionContext,
                     tracks,
+                    CreateSectionLabel("Analysis and rough cut"),
                     CreateFlow(beatDetection, beatMarkers),
                     CreateFlow(prepareRoughCut, applyRoughCut),
                     roughCutStatus,
+                    CreateSectionLabel("Clip editing"),
                     CreateFlow(back, forward, select, selectAudio, scrollBack, scrollForward),
                     CreateFlow(copy, paste, split, trim, move, rippleDelete),
                     operationStatus,
+                    CreateSectionLabel("Motion and speed"),
                     CreateFlow(fadeIn, pushIn, clearAnimation),
                     CreateFlow(new TextBlock { Text = "Speed" }, speedRampStart, new TextBlock { Text = "to" }, speedRampEnd, applySpeedRamp, clearSpeedRamp),
                     CreateFlow(new TextBlock { Text = "Stabilization radius" }, stabilizationRadius, applyStabilization, clearStabilization),
+                    CreateSectionLabel("Audio"),
                     CreateFlow(muteAudio, gainAudio, fadeAudio, duckAudio, clearDucking, clearAudio),
+                    CreateSectionLabel("Titles and captions"),
                     CreateFlow(titleText, addTitle, fadeTitle, pushTitle),
                     titleAnimationStatus,
                     CreateFlow(importCaptions, importTranscript, exportCaptions),
@@ -1617,6 +1668,7 @@ public sealed class MainWindow : Window
                     CreateFlow(transcribeAudio, transcribeLocalWhisper, transcriptionConsent),
                     CreateFlow(captionFont),
                     captionStatus,
+                    CreateSectionLabel("Project and export"),
                     CreateFlow(saveProject, openProject),
                     missingTimelineMedia,
                     timelineReplacementPath,
@@ -1626,6 +1678,7 @@ public sealed class MainWindow : Window
                     exportStatus,
                     CreateFlow(useApprovedWatermark, selectWatermark, clearWatermark),
                     watermarkStatus,
+                    CreateSectionLabel("Timeline view"),
                     CreateFlow(snap, new TextBlock { Text = "Zoom" }, zoom)
                 }
             }
@@ -1642,6 +1695,15 @@ public sealed class MainWindow : Window
 
         return panel;
     }
+
+    private static TextBlock CreateSectionLabel(string text) => new()
+    {
+        Margin = new Thickness(0, 12, 0, 0),
+        Text = text.ToUpperInvariant(),
+        FontSize = 10,
+        FontWeight = FontWeight.SemiBold,
+        Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(126, 143, 190))
+    };
 
     private static Control? CreateApprovedLogo()
     {
