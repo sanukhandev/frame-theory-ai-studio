@@ -10,7 +10,7 @@
 ## Packaging targets
 - Windows: portable `.zip` plus `.exe` installer or MSI when build tooling and signing policy confirmed.
 - macOS: architecture-specific `.app` bundle and `.dmg`; assess Apple signing/notarization.
-- Linux: AppImage and/or distro packages with portable native dependency policies.
+- Linux: AppImage and/or distro packages with portable native dependency policies; CI installs and removes the validation DEB and launches both its installed binary and launcher under Xvfb.
 - Never assume a single .NET binary contains FFmpeg, MLT or runtime native plugins.
 
 ## Version policy
