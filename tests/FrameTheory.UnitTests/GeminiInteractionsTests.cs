@@ -9,6 +9,16 @@ namespace FrameTheory.UnitTests;
 public sealed class GeminiInteractionsTests
 {
     [Xunit.Fact]
+    public void ClientOptionsUseSafeDefaultsWhenOptionalValuesAreOmitted()
+    {
+        var options = new GeminiClientOptions("test-secret", "gemini-test");
+
+        Xunit.Assert.Equal(TimeSpan.FromMinutes(2), options.Timeout);
+        Xunit.Assert.Equal(3, options.MaximumAttempts);
+        Xunit.Assert.Equal(TimeSpan.FromSeconds(1), options.RetryDelay);
+    }
+
+    [Xunit.Fact]
     public void RetryDelayUsesBoundedExponentialBackoffAndServerHint()
     {
         Xunit.Assert.Equal(

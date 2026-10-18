@@ -55,7 +55,9 @@ public sealed record GeminiClientOptions
             throw new ArgumentException("A valid Gemini model is required.", nameof(modelId));
         }
 
-        if (timeout is null || timeout <= TimeSpan.Zero || timeout > TimeSpan.FromMinutes(10))
+        var resolvedTimeout = timeout ?? TimeSpan.FromMinutes(2);
+        var resolvedRetryDelay = retryDelay ?? TimeSpan.FromSeconds(1);
+        if (resolvedTimeout <= TimeSpan.Zero || resolvedTimeout > TimeSpan.FromMinutes(10))
         {
             throw new ArgumentOutOfRangeException(nameof(timeout), "Gemini request timeout must be between one millisecond and ten minutes.");
         }
@@ -65,16 +67,16 @@ public sealed record GeminiClientOptions
             throw new ArgumentOutOfRangeException(nameof(maximumAttempts), "Gemini retries are bounded to one through three attempts.");
         }
 
-        if (retryDelay is null || retryDelay < TimeSpan.Zero || retryDelay > TimeSpan.FromSeconds(30))
+        if (resolvedRetryDelay < TimeSpan.Zero || resolvedRetryDelay > TimeSpan.FromSeconds(30))
         {
             throw new ArgumentOutOfRangeException(nameof(retryDelay), "Gemini retry delay must be between zero and thirty seconds.");
         }
 
         ApiKey = apiKey.Trim();
         ModelId = modelId.Trim();
-        Timeout = timeout.Value;
+        Timeout = resolvedTimeout;
         MaximumAttempts = maximumAttempts;
-        RetryDelay = retryDelay.Value;
+        RetryDelay = resolvedRetryDelay;
     }
 
     public string ApiKey { get; }

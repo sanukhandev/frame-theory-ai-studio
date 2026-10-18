@@ -187,6 +187,11 @@ public sealed record MediaSourceMetadata
             throw new ArgumentOutOfRangeException(nameof(durationFrames));
         }
 
+        if (duration < TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(nameof(duration));
+        }
+
         if (orientationDegrees % 90 != 0)
         {
             throw new ArgumentOutOfRangeException(nameof(orientationDegrees));
