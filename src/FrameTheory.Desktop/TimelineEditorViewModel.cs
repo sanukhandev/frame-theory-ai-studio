@@ -668,6 +668,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(BeatMarkersText));
         OnPropertyChanged(nameof(Watermark));
         OnPropertyChanged(nameof(WatermarkStatusText));
+        OnPropertyChanged(nameof(HasTitle));
         OnPropertyChanged(nameof(Captions));
         OnPropertyChanged(nameof(TranscriptSourceFingerprint));
         OnPropertyChanged(nameof(KineticCaptions));
@@ -745,6 +746,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         }
 
         OnPropertyChanged(nameof(TitleAnimationStatus));
+        OnPropertyChanged(nameof(HasTitle));
     }
 
     public void AddCaptionAt(string text, CaptionProvenance provenance, long startFrame, long durationFrames, string fontPath)
@@ -1098,6 +1100,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         SeekFrame(state.CurrentFrame);
         OnPropertyChanged(nameof(Watermark));
         OnPropertyChanged(nameof(WatermarkStatusText));
+        OnPropertyChanged(nameof(HasTitle));
         OnPropertyChanged(nameof(Captions));
         OnPropertyChanged(nameof(KineticCaptions));
         OnPropertyChanged(nameof(TranscriptSourceFingerprint));
@@ -1165,6 +1168,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
         _titles.Add(new TimelineTitle(text, fontPath, CurrentFrame, duration, order: _titles.Count));
         OnPropertyChanged(nameof(TitleAnimationStatus));
+        OnPropertyChanged(nameof(HasTitle));
     }
 
     public void ApplyAnimationPresetToLastTitle(TimelineAnimationPreset preset)
@@ -1205,6 +1209,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
                         $"frame {keyframe.Frame}: opacity {keyframe.Value.Opacity.ToString("0.###", CultureInfo.InvariantCulture)}, scale {keyframe.Value.Scale.ToString("0.###", CultureInfo.InvariantCulture)}, offset {keyframe.Value.OffsetX},{keyframe.Value.OffsetY}"));
         }
     }
+
+    public bool HasTitle => _titles.Count > 0;
 
     public IReadOnlyList<TimedCaption> Captions => _captions;
 

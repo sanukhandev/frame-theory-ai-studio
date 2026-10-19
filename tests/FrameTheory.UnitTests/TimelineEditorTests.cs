@@ -383,6 +383,7 @@ public sealed class TimelineEditorTests
         editor.SeekFrame(10);
         editor.AddTitle("Hook", "C:\\Fonts\\licensed.ttf");
 
+        Xunit.Assert.True(editor.HasTitle);
         var title = editor.BuildRenderPlan(1920, 1080, new Dictionary<MediaId, Uri> { [metadata.Id] = source }).Titles.Single();
         Xunit.Assert.Equal("Hook", title.Text);
         Xunit.Assert.Equal(10, title.TimelineRange.StartFrame);

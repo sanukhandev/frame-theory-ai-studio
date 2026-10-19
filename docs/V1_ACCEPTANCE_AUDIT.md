@@ -1,5 +1,7 @@
 # V1 Acceptance Audit
 
+Machine audit checkpoint: timeline title animation actions now follow actual title presence rather than caption count, with `HasTitle` notifications across title creation, undo and project restore. Focused timeline/shell coverage passes 72 tests; the full local Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native title interaction remains required.
+
 Machine audit checkpoint: photo project recovery now enables relink only after a project with a selected missing media item is loaded and disables it again when no missing item remains. Focused recovery/shell coverage passes 36 tests; the full local Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native relink and clean-host acceptance remains required.
 
 Machine audit checkpoint: the AI proposal workspace now disables blank-plan validation, Gemini revision without a stored key and instruction, and recipe save without a validated named plan; offline recipe loading/local validation remain available and apply/undo retain proposal guards. Focused AI/shell coverage passes 46 tests; the full local Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Live-provider/native accessibility acceptance remains required.

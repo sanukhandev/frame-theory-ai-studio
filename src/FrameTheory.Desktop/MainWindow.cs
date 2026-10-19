@@ -4519,6 +4519,7 @@ public sealed class MainWindow : Window
             var hasVideo = timeline.HasVideoTrack;
             var hasAudio = timeline.HasAudioTrack;
             var hasTimeline = timeline.HasTimelineContent;
+            var hasTitle = timeline.HasTitle;
             beatDetection.IsEnabled = hasAudio;
             prepareRoughCut.IsEnabled = viewModel.CanPrepareRoughCut;
             applyRoughCut.IsEnabled = viewModel.CanApplyRoughCut;
@@ -4528,8 +4529,8 @@ public sealed class MainWindow : Window
             select.IsEnabled = hasVideo;
             selectAudio.IsEnabled = hasAudio;
             addTitle.IsEnabled = hasVideo;
-            fadeTitle.IsEnabled = hasVideo && timeline.Captions.Count > 0;
-            pushTitle.IsEnabled = hasVideo && timeline.Captions.Count > 0;
+            fadeTitle.IsEnabled = hasVideo && hasTitle;
+            pushTitle.IsEnabled = hasVideo && hasTitle;
             exportCaptions.IsEnabled = timeline.Captions.Count > 0;
             kineticCaptions.IsEnabled = timeline.Captions.Count > 0;
             captionFont.IsEnabled = hasVideo;
@@ -4544,6 +4545,7 @@ public sealed class MainWindow : Window
                 or nameof(TimelineEditorViewModel.HasAudioTrack)
                 or nameof(TimelineEditorViewModel.HasTimelineContent)
                 or nameof(TimelineEditorViewModel.TrackRows)
+                or nameof(TimelineEditorViewModel.HasTitle)
                 or nameof(TimelineEditorViewModel.Captions))
             {
                 RefreshTimelineContextAvailability();
