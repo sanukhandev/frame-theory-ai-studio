@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Progress-contract checkpoint: local-analysis and export progress updates reject blank stages and non-finite or out-of-range fractions; focused coverage passes locally. Native progress rendering remains open.
+
 - Cache-size checkpoint: cache-index accounting rejects total-size overflow before mutating entries and keeps eviction totals exact; focused coverage passes locally. Native cache-recovery acceptance remains open.
 
 - Timeline track-kind checkpoint: timeline selection and insertion reject undefined track kinds instead of silently routing them to audio; focused coverage passes locally. Native timeline acceptance remains open.

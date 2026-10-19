@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Progress-contract checkpoint (2026-10-19):** Local-analysis and export progress updates now reject blank stages and non-finite or out-of-range fractions, preventing invalid status values from reaching the UI; focused AI/export coverage passes. Native progress rendering remains open.
+
 **Cache-size checkpoint (2026-10-19):** Cache-index accounting now rejects total-size overflow before mutating entries and keeps eviction totals exact; focused recovery coverage passes. Native cache-recovery acceptance remains open.
 
 **Timeline track-kind checkpoint (2026-10-19):** Timeline selection and insertion now reject undefined track kinds instead of silently treating them as audio; focused timeline coverage passes. Native timeline acceptance remains open.
