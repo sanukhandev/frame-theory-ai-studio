@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**AI-key accessibility checkpoint (2026-10-19):** The secure Gemini API-key textbox now exposes a stable automation name and matching secret-store tooltip in the production panel; focused headless shell coverage passes. Native screen-reader acceptance remains open.
+
 **Scope-size checkpoint (2026-10-19):** Color-scope construction now enforces the same 64M-pixel bound as analysis, preventing `PixelCount` overflow and unbounded inspector allocations; focused scope coverage passes. Native scope acceptance remains open.
 
 **Waveform-input checkpoint (2026-10-19):** Imported media now rejects non-finite or out-of-range waveform peaks before beat detection, rough-cut scoring or AI metadata serialization; focused media-import coverage passes. Native import acceptance remains open.

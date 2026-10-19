@@ -1212,6 +1212,12 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Choose the optional Gemini model used for approved analysis requests.",
                     ToolTip.GetTip(geminiModel));
+                var geminiApiKey = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Gemini API key");
+                Xunit.Assert.Equal(
+                    "Enter a user-provided key; it is stored only in the platform secret store.",
+                    ToolTip.GetTip(geminiApiKey));
                 Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "Model");
                 Xunit.Assert.Contains(window.GetVisualDescendants().OfType<TextBlock>(), control => control.Text == "API key");
                 Xunit.Assert.Equal(
@@ -1428,6 +1434,7 @@ public sealed class FoundationTests
                     "Color style library status",
                     "Reference analysis status",
                     "Gemini provider status",
+                    "Gemini API key",
                     "Gemini video frame scope",
                     "Gemini audio waveform scope",
                     "Gemini photo preview scope",

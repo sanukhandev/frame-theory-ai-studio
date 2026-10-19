@@ -1883,6 +1883,7 @@ public sealed class MainWindow : Window
             Mode = BindingMode.TwoWay
         });
         var apiKey = new TextBox { PlaceholderText = "Gemini API key (stored securely)", PasswordChar = '•' };
+        AutomationProperties.SetName(apiKey, "Gemini API key");
         ToolTip.SetTip(apiKey, "Enter a user-provided key; it is stored only in the platform secret store.");
         var status = new TextBox
         {
