@@ -25,6 +25,9 @@ public sealed class App : Avalonia.Application
         var input = new SolidColorBrush(Avalonia.Media.Color.FromRgb(31, 35, 42));
         var accent = new SolidColorBrush(Avalonia.Media.Color.FromRgb(95, 125, 255));
         var foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(239, 242, 248));
+        var disabledSurface = new SolidColorBrush(Avalonia.Media.Color.FromRgb(29, 33, 40));
+        var disabledBorder = new SolidColorBrush(Avalonia.Media.Color.FromRgb(43, 47, 55));
+        var disabledForeground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(119, 125, 138));
 
         Styles.Add(new Style(selector => selector.OfType<Window>())
         {
@@ -92,8 +95,18 @@ public sealed class App : Avalonia.Application
         {
             Setters =
             {
-                new Setter(TemplatedControl.ForegroundProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(119, 125, 138))),
-                new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(43, 47, 55)))
+                new Setter(TemplatedControl.BackgroundProperty, disabledSurface),
+                new Setter(TemplatedControl.ForegroundProperty, disabledForeground),
+                new Setter(TemplatedControl.BorderBrushProperty, disabledBorder)
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<Button>().Class("primary").Class(":disabled"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, disabledSurface),
+                new Setter(TemplatedControl.ForegroundProperty, disabledForeground),
+                new Setter(TemplatedControl.BorderBrushProperty, disabledBorder)
             }
         });
         Styles.Add(new Style(selector => selector.OfType<TextBox>())
@@ -124,6 +137,15 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.BorderBrushProperty, new SolidColorBrush(Avalonia.Media.Color.FromRgb(79, 91, 113)))
             }
         });
+        Styles.Add(new Style(selector => selector.OfType<TextBox>().Class(":disabled"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, disabledSurface),
+                new Setter(TemplatedControl.ForegroundProperty, disabledForeground),
+                new Setter(TemplatedControl.BorderBrushProperty, disabledBorder)
+            }
+        });
         Styles.Add(new Style(selector => selector.OfType<ComboBox>())
         {
             Setters =
@@ -149,6 +171,15 @@ public sealed class App : Avalonia.Application
             Setters =
             {
                 new Setter(TemplatedControl.BorderBrushProperty, accent)
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<ComboBox>().Class(":disabled"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.BackgroundProperty, disabledSurface),
+                new Setter(TemplatedControl.ForegroundProperty, disabledForeground),
+                new Setter(TemplatedControl.BorderBrushProperty, disabledBorder)
             }
         });
         Styles.Add(new Style(selector => selector.OfType<ComboBoxItem>())
@@ -283,6 +314,13 @@ public sealed class App : Avalonia.Application
                 new Setter(TemplatedControl.ForegroundProperty, accent)
             }
         });
+        Styles.Add(new Style(selector => selector.OfType<Slider>().Class(":disabled"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.ForegroundProperty, disabledForeground)
+            }
+        });
         Styles.Add(new Style(selector => selector.OfType<CheckBox>())
         {
             Setters =
@@ -305,6 +343,13 @@ public sealed class App : Avalonia.Application
             {
                 new Setter(TemplatedControl.BorderBrushProperty, accent),
                 new Setter(TemplatedControl.BorderThicknessProperty, new Thickness(1))
+            }
+        });
+        Styles.Add(new Style(selector => selector.OfType<CheckBox>().Class(":disabled"))
+        {
+            Setters =
+            {
+                new Setter(TemplatedControl.ForegroundProperty, disabledForeground)
             }
         });
     }
