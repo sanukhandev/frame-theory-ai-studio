@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline layer integrity checkpoint (2026-10-19):** Video and audio layer constructors now reject null segment entries before ordering them, preventing corrupted state from surfacing as null-reference failures; focused compositor/audio coverage passes. Native timeline persistence acceptance remains open.
+
 **Timeline keyframe integrity checkpoint (2026-10-19):** Keyframe collections now reject null entries before sorting, converting corrupted input into a clear argument failure instead of a null-reference crash; focused keyframe coverage passes. Native timeline persistence acceptance remains open.
 
 **AI keyframe schema checkpoint (2026-10-19):** AI validation now checks keyframe fields, finite transform bounds, easing values and duplicate frame positions before approval; focused malformed-animation coverage passes. Gemini execution remains allowlisted and six P0 gates remain partial.

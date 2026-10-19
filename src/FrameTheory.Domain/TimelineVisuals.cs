@@ -115,7 +115,13 @@ public sealed record TimelineVideoLayer
         }
 
         ArgumentNullException.ThrowIfNull(segments);
-        var orderedSegments = segments.OrderBy(segment => segment.Clip.TimelineRange.StartFrame).ToArray();
+        var source = segments.ToArray();
+        if (source.Any(segment => segment is null))
+        {
+            throw new ArgumentException("Visual segments cannot contain null entries.", nameof(segments));
+        }
+
+        var orderedSegments = source.OrderBy(segment => segment.Clip.TimelineRange.StartFrame).ToArray();
         for (var index = 0; index < orderedSegments.Length; index++)
         {
             if (index > 0 && orderedSegments[index - 1].Clip.TimelineRange.EndFrameExclusive > orderedSegments[index].Clip.TimelineRange.StartFrame)

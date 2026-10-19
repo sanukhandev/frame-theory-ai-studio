@@ -67,7 +67,13 @@ public sealed record TimelineAudioLayer
         }
 
         ArgumentNullException.ThrowIfNull(segments);
-        var orderedSegments = segments.OrderBy(segment => segment.Clip.TimelineRange.StartFrame).ToArray();
+        var source = segments.ToArray();
+        if (source.Any(segment => segment is null))
+        {
+            throw new ArgumentException("Audio segments cannot contain null entries.", nameof(segments));
+        }
+
+        var orderedSegments = source.OrderBy(segment => segment.Clip.TimelineRange.StartFrame).ToArray();
         for (var index = 1; index < orderedSegments.Length; index++)
         {
             if (orderedSegments[index - 1].Clip.TimelineRange.EndFrameExclusive > orderedSegments[index].Clip.TimelineRange.StartFrame)
