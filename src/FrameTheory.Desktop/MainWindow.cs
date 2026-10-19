@@ -3584,10 +3584,12 @@ public sealed class MainWindow : Window
 
         var undoTimeline = new Button { Content = "Undo" };
         AutomationProperties.SetName(undoTimeline, "Undo timeline edit");
-        ToolTip.SetTip(undoTimeline, "Undo the latest manual timeline edit without changing source media.");
+        ToolTip.SetTip(undoTimeline, "Undo the latest manual or approved AI timeline edit without changing source media.");
         undoTimeline.Click += (_, _) =>
         {
-            operationStatus.Text = timeline.Undo() ? "Undid the last timeline edit." : "Nothing to undo.";
+            operationStatus.Text = timeline.CanUndo
+                ? timeline.Undo() ? "Undid the last timeline edit." : "Nothing to undo."
+                : viewModel.UndoLastAiEdit() ? "Undid the last AI timeline edit." : "Nothing to undo.";
         };
         var redoTimeline = new Button { Content = "Redo" };
         AutomationProperties.SetName(redoTimeline, "Redo timeline edit");
@@ -3598,13 +3600,13 @@ public sealed class MainWindow : Window
         };
         void RefreshTimelineHistoryCommands()
         {
-            undoTimeline.IsEnabled = timeline.CanUndo;
+            undoTimeline.IsEnabled = timeline.CanUndo || timeline.CanUndoAiEdit;
             redoTimeline.IsEnabled = timeline.CanRedo;
         }
 
         timeline.PropertyChanged += (_, args) =>
         {
-            if (args.PropertyName is nameof(TimelineEditorViewModel.CanUndo) or nameof(TimelineEditorViewModel.CanRedo))
+            if (args.PropertyName is nameof(TimelineEditorViewModel.CanUndo) or nameof(TimelineEditorViewModel.CanRedo) or nameof(TimelineEditorViewModel.CanUndoAiEdit))
             {
                 RefreshTimelineHistoryCommands();
             }

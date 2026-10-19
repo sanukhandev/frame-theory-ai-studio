@@ -2,7 +2,7 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
-- Current FT-902 history increment: manual Video actions use transactional timeline snapshots with visible Undo/Redo controls, `Ctrl+Z`/`Ctrl+Y`, failed-action rollback and focused coverage for edit restoration plus UI automation names. Timeline coverage passes 20 tests and Foundation coverage passes 27 tests; native manual view/HiDPI acceptance remains open.
+- Current FT-902 history increment: manual Video actions use transactional timeline snapshots with visible Undo/Redo controls, `Ctrl+Z`/`Ctrl+Y`, failed-action rollback and focused coverage for edit restoration plus UI automation names; reviewed rough cuts retain their existing transactional AI-undo path without duplicate history entries. Timeline coverage passes 20 tests and Foundation coverage passes 27 tests; native manual view/HiDPI acceptance remains open.
 
 - Current FT-901 keyboard increment: Space is an advertised Video-workspace transport shortcut routed through the existing local preview/stop path, with text-entry focus preserved; focused Foundation coverage passes 27 tests. Native visual, HiDPI and screen-reader acceptance remain open.
 
