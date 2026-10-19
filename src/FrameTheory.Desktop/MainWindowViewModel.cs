@@ -344,8 +344,19 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             _selectedMissingTimelineMedia = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(CanRelinkSelectedTimelineMedia));
         }
     }
+
+    public bool CanRelinkSelectedTimelineMedia =>
+        _pendingTimelineProjectPath is not null && _pendingTimelineSnapshot is not null && SelectedMissingTimelineMedia is not null;
+
+    public bool CanCancelTimelineExport => _activeExport is not null || _activeBatchExport is not null;
+
+    public bool CanRetryTimelineExport =>
+        _timelineExporter is not null
+        && _lastTimelineExportRequest is not null
+        && _lastTimelineExport is { State: ExportQueueJobState.Failed or ExportQueueJobState.Canceled };
 
     public bool IsTimelinePreviewPlaying
     {
@@ -1741,6 +1752,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             using var batchCancellation = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             _activeBatchExport = batchCancellation;
+            OnPropertyChanged(nameof(CanCancelTimelineExport));
             var receipts = await new TimelineBatchExporter(_timelineExporter).ExportAsync(
                 targets,
                 new Progress<TimelineBatchExportProgress>(update =>
@@ -1763,6 +1775,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         finally
         {
             _activeBatchExport = null;
+            OnPropertyChanged(nameof(CanCancelTimelineExport));
         }
     }
 
@@ -1801,6 +1814,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 : _exportQueue.Retry(retryOf);
             _lastTimelineExport = job;
             _activeExport = job;
+            OnPropertyChanged(nameof(CanCancelTimelineExport));
+            OnPropertyChanged(nameof(CanRetryTimelineExport));
             TimelineExportStatusText = $"Queued export {job.Id:N}.";
             using var cancellationRegistration = cancellationToken.Register(job.Cancel);
             var receipt = await job.Completion.WaitAsync(cancellationToken);
@@ -1821,6 +1836,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         finally
         {
             _activeExport = null;
+            OnPropertyChanged(nameof(CanCancelTimelineExport));
+            OnPropertyChanged(nameof(CanRetryTimelineExport));
         }
     }
 
@@ -2128,6 +2145,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             .ToArray());
         SelectedMissingTimelineMedia = MissingTimelineMedia.FirstOrDefault();
         OnPropertyChanged(nameof(MissingTimelineMedia));
+        OnPropertyChanged(nameof(CanRelinkSelectedTimelineMedia));
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>

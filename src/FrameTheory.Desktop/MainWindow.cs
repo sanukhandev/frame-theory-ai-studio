@@ -4320,6 +4320,23 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(retryExport, "Retry last timeline export");
         ToolTip.SetTip(retryExport, "Retry the most recent local timeline export using its saved settings.");
         retryExport.Click += async (_, _) => await viewModel.RetryLastTimelineExportAsync(CancellationToken.None);
+        void RefreshProjectActionAvailability()
+        {
+            cancelExport.IsEnabled = viewModel.CanCancelTimelineExport;
+            retryExport.IsEnabled = viewModel.CanRetryTimelineExport;
+            relinkTimelineMedia.IsEnabled = viewModel.CanRelinkSelectedTimelineMedia;
+        }
+
+        viewModel.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(MainWindowViewModel.CanCancelTimelineExport)
+                or nameof(MainWindowViewModel.CanRetryTimelineExport)
+                or nameof(MainWindowViewModel.CanRelinkSelectedTimelineMedia))
+            {
+                RefreshProjectActionAvailability();
+            }
+        };
+        RefreshProjectActionAvailability();
         var watermarkStatus = new TextBox
         {
             IsReadOnly = true,

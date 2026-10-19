@@ -584,6 +584,18 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Validate and relink the selected media within the current project folder.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Relink selected timeline media")));
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Relink selected timeline media")
+                    .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Cancel timeline export")
+                    .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Retry last timeline export")
+                    .IsEnabled);
                 var rulerPlayhead = window.GetVisualDescendants()
                     .OfType<Border>()
                     .Single(control => AutomationProperties.GetName(control) == "Timeline ruler playhead");
