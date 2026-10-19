@@ -6,6 +6,12 @@ namespace FrameTheory.UnitTests;
 public sealed class MediaProbeTests
 {
     [Xunit.Fact]
+    public void FfprobeAdapterRequiresProcessRunner()
+    {
+        Xunit.Assert.Throws<ArgumentNullException>(() => new FfprobeMediaProbe(null!));
+    }
+
+    [Xunit.Fact]
     public async Task FfprobeAdapterRejectsUnsupportedTemporalMetadataClearly()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-probe-invalid-");

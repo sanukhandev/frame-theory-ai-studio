@@ -47,8 +47,8 @@ public sealed class PhotoImporter
 
     public PhotoImporter(IMediaProbe probe, IPreviewFrameDecoder decoder)
     {
-        _probe = probe;
-        _decoder = decoder;
+        _probe = probe ?? throw new ArgumentNullException(nameof(probe));
+        _decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
     }
 
     public async Task<PhotoDocument> ImportAsync(Uri file, CancellationToken cancellationToken)

@@ -28,7 +28,7 @@ public sealed class FfprobeMediaProbe : IMediaProbe
 
     public FfprobeMediaProbe(IMediaProcessRunner processRunner, string executable = "ffprobe")
     {
-        _processRunner = processRunner;
+        _processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
         _executable = executable;
     }
 

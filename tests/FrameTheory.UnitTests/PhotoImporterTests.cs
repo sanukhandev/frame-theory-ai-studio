@@ -7,6 +7,13 @@ namespace FrameTheory.UnitTests;
 public sealed class PhotoImporterTests
 {
     [Xunit.Fact]
+    public void PhotoImporterRequiresMediaServices()
+    {
+        Xunit.Assert.Throws<ArgumentNullException>(() => new PhotoImporter(null!, new StubDecoder()));
+        Xunit.Assert.Throws<ArgumentNullException>(() => new PhotoImporter(new StubProbe(null!), null!));
+    }
+
+    [Xunit.Fact]
     public async Task ImporterProbesImageAndDecodesRealPreviewContract()
     {
         var id = MediaId.Parse(new string('1', 64));

@@ -7,6 +7,13 @@ namespace FrameTheory.UnitTests;
 public sealed class MediaExportTests
 {
     [Xunit.Fact]
+    public void MediaExporterRequiresMediaServices()
+    {
+        Xunit.Assert.Throws<ArgumentNullException>(() => new FfmpegMediaExporter(null!, new StubProbe(null!)));
+        Xunit.Assert.Throws<ArgumentNullException>(() => new FfmpegMediaExporter(new StubProcessRunner(), null!));
+    }
+
+    [Xunit.Fact]
     public void ExportPresetReportsTheInvalidDimension()
     {
         var frameRate = new RationalFrameRate(30, 1);

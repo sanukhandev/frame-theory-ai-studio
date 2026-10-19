@@ -90,8 +90,8 @@ public sealed class PhotoExporter
 
     public PhotoExporter(IMediaProcessRunner processRunner, IMediaProbe probe)
     {
-        _processRunner = processRunner;
-        _probe = probe;
+        _processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
+        _probe = probe ?? throw new ArgumentNullException(nameof(probe));
     }
 
     public async Task<PhotoExportReceipt> ExportAsync(

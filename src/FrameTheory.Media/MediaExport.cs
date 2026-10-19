@@ -63,8 +63,8 @@ public sealed class FfmpegMediaExporter : IMediaExporter
 
     public FfmpegMediaExporter(IMediaProcessRunner processRunner, IMediaProbe probe)
     {
-        _processRunner = processRunner;
-        _probe = probe;
+        _processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
+        _probe = probe ?? throw new ArgumentNullException(nameof(probe));
     }
 
     public async Task<ExportReceipt> ExportAsync(

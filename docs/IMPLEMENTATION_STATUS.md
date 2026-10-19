@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Media adapter dependency checkpoint (2026-10-19):** Photo import/export, FFmpeg export, and ffprobe adapters now reject missing injected services during composition; focused constructor coverage passes. Native media-engine acceptance remains open.
+
 **Photo dimension boundary checkpoint (2026-10-19):** Photo documents now reject zero-dimension image metadata before canvas fit/zoom calculations can produce invalid coordinates; focused canvas coverage passes. Native photo rendering acceptance remains open.
 
 **Photo recovery dependency checkpoint (2026-10-19):** Photo recovery now rejects missing repository or recovery services at construction instead of failing during open/relink; focused view-model coverage passes. Photo recovery acceptance remains open.
