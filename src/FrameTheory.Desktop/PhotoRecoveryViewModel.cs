@@ -22,8 +22,8 @@ public sealed class PhotoRecoveryViewModel : INotifyPropertyChanged
 
     public PhotoRecoveryViewModel(ProjectRecoveryService recovery, IProjectRepository repository)
     {
-        _recovery = recovery;
-        _repository = repository;
+        _recovery = recovery ?? throw new ArgumentNullException(nameof(recovery));
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
     }
 
     public string ProjectPath

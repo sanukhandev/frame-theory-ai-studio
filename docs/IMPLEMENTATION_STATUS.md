@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Photo recovery dependency checkpoint (2026-10-19):** Photo recovery now rejects missing repository or recovery services at construction instead of failing during open/relink; focused view-model coverage passes. Photo recovery acceptance remains open.
+
 **Media metadata boundary checkpoint (2026-10-19):** Unsupported `ffprobe` frame rates now produce a stable media-probe error, while negative or out-of-range durations normalize safely instead of leaking overflow exceptions; synthetic malformed-metadata coverage passes. Native codec acceptance remains open.
 
 **Recovery dependency validation checkpoint (2026-10-19):** Project recovery now rejects a missing JSON repository at construction instead of deferring the failure to the first autosave operation; focused recovery coverage passes. Storage relink acceptance remains open.

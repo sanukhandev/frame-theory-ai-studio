@@ -7,6 +7,15 @@ namespace FrameTheory.UnitTests;
 public sealed class PhotoRecoveryViewModelTests
 {
     [Xunit.Fact]
+    public void PhotoRecoveryRequiresStorageServices()
+    {
+        var repository = new JsonProjectRepository();
+
+        Xunit.Assert.Throws<ArgumentNullException>(() => new PhotoRecoveryViewModel(null!, repository));
+        Xunit.Assert.Throws<ArgumentNullException>(() => new PhotoRecoveryViewModel(new ProjectRecoveryService(repository), null!));
+    }
+
+    [Xunit.Fact]
     public async Task PhotoRecoveryShowsMissingMediaAndPersistsRelinkWithoutChangingReplacement()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-photo-recovery-");
