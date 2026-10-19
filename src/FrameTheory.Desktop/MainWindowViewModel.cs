@@ -126,6 +126,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private readonly IPreviewFrameDecoder _timelinePreviewDecoder;
     private readonly ITimelinePreviewRenderer? _timelinePreviewRenderer;
     private readonly FfmpegPreviewProxyService? _timelinePreviewProxy;
+    private readonly object _timelinePreviewGate = new();
     private readonly JsonProjectRepository _timelineProjectRepository = new();
     private readonly ProjectRecoveryService _timelineProjectRecovery;
     private int _videoWidth;
@@ -1006,19 +1007,18 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public async Task<bool> PreviewCurrentTimelineFrameAsync(CancellationToken cancellationToken)
     {
-        var requestId = Interlocked.Increment(ref _timelinePreviewRequestId);
+        long requestId;
+        lock (_timelinePreviewGate)
+        {
+            requestId = ++_timelinePreviewRequestId;
+        }
+
         var seek = TimelineEditor.SeekFrame(TimelineEditor.CurrentFrame);
         var sample = seek.Samples.FirstOrDefault(item => item.TrackKind == TimelineTrackKind.Video && item.SourceFrame is not null);
         if (sample is null || sample.SourceFrame is not long sourceFrame ||
             !_mediaSources.TryGetValue(sample.MediaId, out var source) || !_analysisAssets.TryGetValue(sample.MediaId, out var media))
         {
-            if (!IsCurrentTimelinePreviewRequest(requestId))
-            {
-                return false;
-            }
-
-            TimelinePreviewStatusText = "Import a video and place the playhead over a video clip first.";
-            TimelinePreviewPpm = null;
+            TryPublishTimelinePreview(requestId, null, "Import a video and place the playhead over a video clip first.");
             return false;
         }
 
@@ -1031,12 +1031,14 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             {
                 if (_timelinePreviewProxy is null)
                 {
-                    TimelinePreviewStatusText = "Preview proxy support is unavailable in this host.";
-                    TimelinePreviewPpm = null;
+                    TryPublishTimelinePreview(requestId, null, "Preview proxy support is unavailable in this host.");
                     return false;
                 }
 
-                TimelinePreviewStatusText = $"Preparing preview proxy for {Path.GetFileName(source.LocalPath)}...";
+                if (!TryPublishTimelinePreviewStatus(requestId, $"Preparing preview proxy for {Path.GetFileName(source.LocalPath)}..."))
+                {
+                    return false;
+                }
                 var proxy = await _timelinePreviewProxy.CreateAsync(
                     source,
                     media.Metadata.Id.Value,
@@ -1054,9 +1056,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             var timelinePreviewRenderer = _timelinePreviewRenderer;
             var usesTimelineCompositor = timelinePreviewRenderer is not null && !UseTimelinePreviewProxy && !ShowTimelineSourcePreview;
-            TimelinePreviewStatusText = usesTimelineCompositor
-                ? $"Rendering timeline frame {TimelineEditor.CurrentFrame} with compositor..."
-                : $"Decoding frame {sourceFrame}{proxyDescription}...";
+            if (!TryPublishTimelinePreviewStatus(requestId, usesTimelineCompositor
+                    ? $"Rendering timeline frame {TimelineEditor.CurrentFrame} with compositor..."
+                    : $"Decoding frame {sourceFrame}{proxyDescription}..."))
+            {
+                return false;
+            }
+
             var decodeStarted = Stopwatch.GetTimestamp();
             var previewPpm = usesTimelineCompositor
                 ? await timelinePreviewRenderer!.RenderFrameAsync(
@@ -1073,40 +1079,74 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 return false;
             }
 
-            TimelinePreviewPpm = previewPpm;
-            RecordTimelinePreviewPerformance(Stopwatch.GetElapsedTime(decodeStarted).TotalMilliseconds);
             var modeDescription = usesTimelineCompositor
                 ? " using timeline compositor"
                 : ShowTimelineSourcePreview
                     ? $" using original source frame{proxyDescription}"
                     : proxyDescription;
-            TimelinePreviewStatusText = $"Previewed frame {sourceFrame} from {Path.GetFileName(source.LocalPath)}{modeDescription}.";
-            return true;
+            return TryPublishTimelinePreview(
+                requestId,
+                previewPpm,
+                $"Previewed frame {sourceFrame} from {Path.GetFileName(source.LocalPath)}{modeDescription}.",
+                Stopwatch.GetElapsedTime(decodeStarted).TotalMilliseconds);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            if (IsCurrentTimelinePreviewRequest(requestId))
-            {
-                TimelinePreviewStatusText = "Timeline preview canceled.";
-            }
-
+            TryPublishTimelinePreviewStatus(requestId, "Timeline preview canceled.");
             return false;
         }
         catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException or InvalidDataException or InvalidOperationException or MediaDecodeException or MediaExportException or PreviewProxyException)
         {
-            if (IsCurrentTimelinePreviewRequest(requestId))
+            if (TryPublishTimelinePreview(requestId, null, $"Timeline preview failed: {exception.Message}"))
             {
                 _diagnosticsLog.Record("timeline-preview-failed", exception);
-                TimelinePreviewStatusText = $"Timeline preview failed: {exception.Message}";
-                TimelinePreviewPpm = null;
             }
 
             return false;
         }
     }
 
-    private bool IsCurrentTimelinePreviewRequest(long requestId) =>
-        requestId == Volatile.Read(ref _timelinePreviewRequestId);
+    private bool IsCurrentTimelinePreviewRequest(long requestId)
+    {
+        lock (_timelinePreviewGate)
+        {
+            return requestId == _timelinePreviewRequestId;
+        }
+    }
+
+    private bool TryPublishTimelinePreviewStatus(long requestId, string status)
+    {
+        lock (_timelinePreviewGate)
+        {
+            if (requestId != _timelinePreviewRequestId)
+            {
+                return false;
+            }
+
+            TimelinePreviewStatusText = status;
+            return true;
+        }
+    }
+
+    private bool TryPublishTimelinePreview(long requestId, byte[]? previewPpm, string status, double? decodeMilliseconds = null)
+    {
+        lock (_timelinePreviewGate)
+        {
+            if (requestId != _timelinePreviewRequestId)
+            {
+                return false;
+            }
+
+            TimelinePreviewPpm = previewPpm;
+            if (decodeMilliseconds is double elapsed)
+            {
+                RecordTimelinePreviewPerformance(elapsed);
+            }
+
+            TimelinePreviewStatusText = status;
+            return true;
+        }
+    }
 
     public async Task<bool> PlayTimelinePreviewAsync(CancellationToken cancellationToken)
     {

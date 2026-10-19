@@ -1,5 +1,7 @@
 # V1 Acceptance Audit
 
+Machine audit checkpoint: preview status, pixels and performance telemetry now publish atomically against the latest preview generation, preventing late decode results from leaving a mismatched monitor readout. Focused race coverage passes 4 tests; native seek-stress acceptance remains required.
+
 Machine audit checkpoint: timeline inspector actions now follow the selected track kind, disabling destructive clip controls without a selection and enabling only video or audio-compatible operations after selection. Focused UI/domain coverage passes 27 tests; native interaction and visual acceptance remain required.
 
 Machine audit checkpoint: empty Video workspaces now disable both bounded-proxy and original-source comparison controls until a real video track exists; production-shell coverage verifies the guard. Native visual acceptance remains required.
