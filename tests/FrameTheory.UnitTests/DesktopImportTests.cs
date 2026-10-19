@@ -729,6 +729,25 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task TimelineSeekRefreshesAnActivePreview()
+    {
+        var decoder = new StubPreviewDecoder();
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new VideoImporter(),
+            timelinePreviewDecoder: decoder);
+
+        await viewModel.ImportFilesAsync(["preview-seek.mp4"], CancellationToken.None);
+        viewModel.ShowTimelineSourcePreview = true;
+        viewModel.TimelineEditor.SeekFrame(4);
+        viewModel.RefreshTimelinePreviewAfterSeek();
+
+        Xunit.Assert.Equal(4, decoder.FrameIndex);
+        Xunit.Assert.Contains(4L, decoder.Frames);
+    }
+
+    [Xunit.Fact]
     public void TimelinePreviewModesCannotRemainContradictory()
     {
         var viewModel = new MainWindowViewModel(

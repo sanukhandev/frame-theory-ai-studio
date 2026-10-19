@@ -813,7 +813,18 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private bool SeekTimelineFrame(long frame)
     {
         TimelineEditor.SeekFrame(frame);
+        RefreshTimelinePreviewAfterSeek();
         return true;
+    }
+
+    public void RefreshTimelinePreviewAfterSeek()
+    {
+        if (IsTimelinePreviewPlaying || (!ShowTimelineSourcePreview && TimelinePreviewPpm is null))
+        {
+            return;
+        }
+
+        _ = PreviewCurrentTimelineFrameAsync(CancellationToken.None);
     }
 
     private bool ToggleTimelinePreview()

@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline seek-sync checkpoint (2026-10-19):** Manual playhead, ruler and frame-step navigation now refreshes an existing timeline preview (or an enabled source comparison) through the local decoder/compositor path, preventing stale monitor pixels after a seek. Focused seek/preview coverage passes; native interaction acceptance remains open.
+
 **Timeline keyboard-stop checkpoint (2026-10-19):** Escape now routes through the Video workspace shortcut contract to cancel active local timeline preview playback; the blocking-decoder regression verifies cancellation and the header advertises the shortcut. Focused playback and shell coverage passes; native keyboard acceptance remains open.
 
 **Timeline preview-mode checkpoint (2026-10-19):** Bounded proxy preview and original-source comparison are now mutually exclusive through the view-model property contract, preventing status text from claiming source pixels while decoding a proxy. Focused desktop coverage passes; the full local Release gate remains required before the next 50-commit push. Native preview acceptance remains open.

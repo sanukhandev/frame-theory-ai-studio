@@ -3036,7 +3036,11 @@ public sealed class MainWindow : Window
         var playhead = new Slider { Minimum = 0, Maximum = Math.Max(1, timeline.TotalFrames - 1), Value = timeline.CurrentFrame };
         AutomationProperties.SetName(playhead, "Timeline playhead frame");
         ToolTip.SetTip(playhead, "Scrub to an exact timeline frame.");
-        playhead.ValueChanged += (_, args) => timeline.SeekFrame((long)Math.Round(args.NewValue, MidpointRounding.AwayFromZero));
+        playhead.ValueChanged += (_, args) =>
+        {
+            timeline.SeekFrame((long)Math.Round(args.NewValue, MidpointRounding.AwayFromZero));
+            viewModel.RefreshTimelinePreviewAfterSeek();
+        };
         timeline.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName == nameof(TimelineEditorViewModel.TrackRows))
@@ -3196,6 +3200,7 @@ public sealed class MainWindow : Window
         rulerCanvas.PointerPressed += (_, args) =>
         {
             timeline.ScrubPixels(Math.Max(0, args.GetPosition(rulerCanvas).X));
+            viewModel.RefreshTimelinePreviewAfterSeek();
             args.Handled = true;
         };
         void RefreshRulerVisual()
@@ -3557,11 +3562,19 @@ public sealed class MainWindow : Window
         var back = new Button { Content = "◀ Frame" };
         AutomationProperties.SetName(back, "Previous timeline frame");
         ToolTip.SetTip(back, "Move the playhead back by one exact timeline frame.");
-        back.Click += (_, _) => timeline.Step(-1);
+        back.Click += (_, _) =>
+        {
+            timeline.Step(-1);
+            viewModel.RefreshTimelinePreviewAfterSeek();
+        };
         var forward = new Button { Content = "Frame ▶" };
         AutomationProperties.SetName(forward, "Next timeline frame");
         ToolTip.SetTip(forward, "Move the playhead forward by one exact timeline frame.");
-        forward.Click += (_, _) => timeline.Step(1);
+        forward.Click += (_, _) =>
+        {
+            timeline.Step(1);
+            viewModel.RefreshTimelinePreviewAfterSeek();
+        };
         var select = new Button { Content = "Select at playhead" };
         AutomationProperties.SetName(select, "Select video clip at playhead");
         ToolTip.SetTip(select, "Select the video clip under the current playhead position.");

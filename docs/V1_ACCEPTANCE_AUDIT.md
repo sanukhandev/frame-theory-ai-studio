@@ -1,5 +1,7 @@
 # V1 Acceptance Audit
 
+Machine audit checkpoint: manual Video playhead, ruler and frame-step navigation now requests a fresh local preview when a monitor preview is active or source comparison is enabled, keeping the monitor synchronized with the selected frame. Focused coverage passes; native interaction acceptance remains required.
+
 Machine audit checkpoint: Escape now cancels active local timeline preview playback through the same shortcut path advertised by the production shell; blocking-decoder and shell tooltip coverage pass. Native keyboard acceptance remains required.
 
 Machine audit checkpoint: timeline preview proxy and original-source comparison are mutually exclusive at the view-model boundary, so preview status cannot describe a different pixel source than the decoder used. Focused coverage is added; native preview acceptance remains required.
