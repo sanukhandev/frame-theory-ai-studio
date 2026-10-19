@@ -714,6 +714,10 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Pixel source used by the next local timeline preview.",
                     ToolTip.GetTip(previewMode));
+                var usePreviewProxy = window.GetVisualDescendants()
+                    .OfType<CheckBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Use bounded timeline preview proxy");
+                Xunit.Assert.False(usePreviewProxy.IsEnabled);
                 var outputLabel = window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => control.Text == "OUTPUT");

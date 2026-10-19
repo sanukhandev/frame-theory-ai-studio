@@ -3031,6 +3031,7 @@ public sealed class MainWindow : Window
         });
         AutomationProperties.SetName(showSourcePreview, "Show original timeline source frame");
         ToolTip.SetTip(showSourcePreview, "Compare the uncomposited source frame with the rendered timeline preview without changing the project.");
+        usePreviewProxy.IsEnabled = timeline.TrackRows.Any(row => row.Kind == TimelineTrackKind.Video);
         showSourcePreview.IsEnabled = timeline.TrackRows.Any(row => row.Kind == TimelineTrackKind.Video);
         showSourcePreview.Click += async (_, _) => await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None);
         var previewMode = new TextBox
@@ -3060,6 +3061,7 @@ public sealed class MainWindow : Window
         {
             if (args.PropertyName == nameof(TimelineEditorViewModel.TrackRows))
             {
+                usePreviewProxy.IsEnabled = timeline.TrackRows.Any(row => row.Kind == TimelineTrackKind.Video);
                 showSourcePreview.IsEnabled = timeline.TrackRows.Any(row => row.Kind == TimelineTrackKind.Video);
             }
             if (args.PropertyName is nameof(TimelineEditorViewModel.TotalFrames) or nameof(TimelineEditorViewModel.CurrentFrame))
