@@ -77,6 +77,10 @@ public sealed class FfprobeMediaProbe : IMediaProbe
         {
             throw new MediaProbeException("ffprobe returned malformed JSON.", exception);
         }
+        catch (ArgumentException exception)
+        {
+            throw new MediaProbeException("ffprobe returned unsupported media metadata.", exception);
+        }
     }
 
     private static MediaSourceMetadata ParseMetadata(Uri sourceUri, JsonElement root, string fingerprint)
@@ -137,6 +141,11 @@ public sealed class FfprobeMediaProbe : IMediaProbe
         }
 
         var ticks = decimal.Round(seconds * TimeSpan.TicksPerSecond, 0, MidpointRounding.AwayFromZero);
+        if (ticks < 0 || ticks > TimeSpan.MaxValue.Ticks)
+        {
+            return TimeSpan.Zero;
+        }
+
         return TimeSpan.FromTicks(decimal.ToInt64(ticks));
     }
 
@@ -163,7 +172,8 @@ public sealed class FfprobeMediaProbe : IMediaProbe
         var parts = value.Split('/');
         return parts.Length == 2 &&
             int.TryParse(parts[0], NumberStyles.Integer, CultureInfo.InvariantCulture, out var numerator) &&
-            int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var denominator)
+            int.TryParse(parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var denominator) &&
+            numerator > 0 && denominator > 0
             ? new RationalFrameRate(numerator, denominator)
             : null;
     }

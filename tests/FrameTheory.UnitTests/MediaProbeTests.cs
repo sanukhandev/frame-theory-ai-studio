@@ -6,6 +6,32 @@ namespace FrameTheory.UnitTests;
 public sealed class MediaProbeTests
 {
     [Xunit.Fact]
+    public async Task FfprobeAdapterRejectsUnsupportedTemporalMetadataClearly()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-probe-invalid-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "clip.mp4");
+            await File.WriteAllTextAsync(path, "synthetic placeholder");
+            var runner = new StubProcessRunner("""
+                {
+                  "streams": [{ "codec_type": "video", "width": 16, "height": 9, "r_frame_rate": "0/30", "nb_frames": "30" }],
+                  "format": { "duration": "-1" }
+                }
+                """);
+
+            var exception = await Xunit.Assert.ThrowsAsync<MediaProbeException>(() =>
+                new FfprobeMediaProbe(runner).ProbeAsync(new Uri(path), CancellationToken.None));
+
+            Xunit.Assert.Contains("unsupported media metadata", exception.Message, StringComparison.Ordinal);
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task FfprobeAdapterParsesVideoAudioOrientationAndColorMetadata()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-probe-");

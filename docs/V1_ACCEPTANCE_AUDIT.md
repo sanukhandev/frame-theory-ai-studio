@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Current media increment: unsupported `ffprobe` frame-rate metadata is reported as a stable probe error and invalid duration values cannot overflow the parser; synthetic malformed-metadata coverage remains green. Native codec acceptance remains open.
+
 - Current storage increment: project recovery rejects a missing JSON repository at construction instead of deferring the failure to autosave; focused recovery coverage remains green. Native storage/relink acceptance remains open.
 
 - Current FT-901 composition increment: desktop shell construction rejects a missing capability detector at startup instead of deferring the failure to asynchronous refresh; focused constructor coverage remains green. Native workspace acceptance remains open.
