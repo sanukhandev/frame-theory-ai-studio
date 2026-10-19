@@ -4,6 +4,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Current FT-901/FT-902 navigation increment: Home/End seek through the Video transport path and post-snap clamping keeps the playhead inside the valid frame range; focused Foundation coverage passes 29 tests and timeline coverage passes 21 tests. Native keyboard, visual and HiDPI acceptance remain open.
 
+- Current FT-901 startup increment: workspace-state read failures now fall back to Video and record diagnostics, complementing write-failure handling; focused startup coverage remains green. Native workspace acceptance remains open.
+
 - Current FT-205/FT-404 export increment: media and photo source/destination overwrite guards now follow platform case semantics, with Linux case-variant output coverage while same-path protection remains active. Native export acceptance remains open.
 
 - Current FT-1105 export increment: batch-export destination uniqueness now follows platform case semantics, with Linux case-variant coverage; approved brand-kit assets and native batch acceptance remain open.

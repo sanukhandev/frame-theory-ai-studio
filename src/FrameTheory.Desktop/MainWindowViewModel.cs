@@ -167,12 +167,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ArgumentNullException.ThrowIfNull(workspaceCatalog);
         Workspaces = Array.AsReadOnly((workspaceCatalog.GetWorkspaces() ?? throw new InvalidOperationException("Workspace catalog returned no workspaces.")).ToArray());
         _workspaceStateStore = workspaceStateStore ?? new NoopWorkspaceStateStore();
-        var savedWorkspaceIndex = _workspaceStateStore.LoadSelectedWorkspaceIndex();
+        _diagnosticsLog = diagnosticsLog ?? new FileDiagnosticsLog();
+        var savedWorkspaceIndex = 0;
+        try
+        {
+            savedWorkspaceIndex = _workspaceStateStore.LoadSelectedWorkspaceIndex();
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException)
+        {
+            _diagnosticsLog.Record("workspace-state-load-failed", exception);
+        }
+
         _selectedWorkspaceIndex = savedWorkspaceIndex >= 0 && savedWorkspaceIndex < Workspaces.Count
             ? savedWorkspaceIndex
             : 0;
         _capabilityDetector = capabilityDetector;
-        _diagnosticsLog = diagnosticsLog ?? new FileDiagnosticsLog();
         _transcriptionHttpClient = transcriptionHttpClient ?? new HttpClient { Timeout = TimeSpan.FromMinutes(5) };
         _audioSourcePreparer = audioSourcePreparer ?? new FfmpegAudioSourcePreparer(new FfmpegProcessRunner());
         _geminiInteractionHistory = geminiInteractionHistory ?? new FileGeminiInteractionHistory();

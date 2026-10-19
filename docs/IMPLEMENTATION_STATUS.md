@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Workspace startup resilience checkpoint (2026-10-19):** A workspace-state read failure now falls back to Video and records diagnostics instead of preventing shell construction; focused startup coverage complements the existing write-failure regression. Native workspace acceptance remains open.
+
 **Case-sensitive export checkpoint (2026-10-19):** Media and photo overwrite guards now use Windows-only case folding, allowing distinct case-variant output names on Linux without weakening same-path protection; focused exporter coverage includes both paths. Native export acceptance remains open.
 
 **Batch export path checkpoint (2026-10-19):** Social batch-export destination uniqueness now follows platform path semantics, allowing case-variant filenames on Linux while retaining Windows case-insensitive protection; a Linux regression covers the distinction. Native batch export acceptance remains open.

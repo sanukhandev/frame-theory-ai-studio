@@ -1778,6 +1778,20 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public void WorkspaceStateReadFailureDoesNotInterruptStartup()
+    {
+        var diagnostics = new RecordingDiagnostics();
+        var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
+            new FrameTheory.Desktop.WorkspaceCatalog(),
+            new TestCapabilityDetector(),
+            diagnosticsLog: diagnostics,
+            workspaceStateStore: new ThrowingWorkspaceStateReadStore());
+
+        Xunit.Assert.Equal("Video", viewModel.SelectedWorkspace.Name);
+        Xunit.Assert.Equal("workspace-state-load-failed", diagnostics.EventName);
+    }
+
+    [Xunit.Fact]
     public async Task FileWorkspaceStateStoreRoundTripsAtomically()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-workspace-state-");
@@ -2026,6 +2040,15 @@ public sealed class FoundationTests
         public int LoadSelectedWorkspaceIndex() => 0;
 
         public void SaveSelectedWorkspaceIndex(int index) => throw new IOException("synthetic workspace state failure");
+    }
+
+    private sealed class ThrowingWorkspaceStateReadStore : FrameTheory.Desktop.IWorkspaceStateStore
+    {
+        public int LoadSelectedWorkspaceIndex() => throw new IOException("synthetic workspace state read failure");
+
+        public void SaveSelectedWorkspaceIndex(int index)
+        {
+        }
     }
 
     private sealed class ThrowingCapabilityDetector : ICapabilityDetector
