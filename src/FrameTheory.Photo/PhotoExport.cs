@@ -14,6 +14,11 @@ public sealed record SocialPhotoExportPreset
 {
     public SocialPhotoExportPreset(SocialAspectRatio aspectRatio, int width, int height)
     {
+        if (!Enum.IsDefined(aspectRatio))
+        {
+            throw new ArgumentOutOfRangeException(nameof(aspectRatio));
+        }
+
         if (width <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(width));

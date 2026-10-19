@@ -38,6 +38,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Media-kind checkpoint: media metadata rejects undefined media kinds before dimension and timing interpretation; focused domain coverage passes locally. Native import acceptance remains open.
 
+- Social preset checkpoint: video and photo social presets reject undefined aspect ratios and non-positive dimensions at construction; focused export-preset coverage passes locally. Native social export acceptance remains open.
+
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
 - Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.
