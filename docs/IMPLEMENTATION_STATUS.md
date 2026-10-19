@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Cache-size checkpoint (2026-10-19):** Cache-index accounting now rejects total-size overflow before mutating entries and keeps eviction totals exact; focused recovery coverage passes. Native cache-recovery acceptance remains open.
+
 **Timeline track-kind checkpoint (2026-10-19):** Timeline selection and insertion now reject undefined track kinds instead of silently treating them as audio; focused timeline coverage passes. Native timeline acceptance remains open.
 
 **AI-key accessibility checkpoint (2026-10-19):** The secure Gemini API-key textbox now exposes a stable automation name and matching secret-store tooltip in the production panel; focused headless shell coverage passes. Native screen-reader acceptance remains open.
