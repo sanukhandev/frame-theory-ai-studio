@@ -363,6 +363,22 @@ public sealed class GeminiInteractionsTests
             CancellationToken.None));
 
         await Xunit.Assert.ThrowsAsync<ArgumentException>(() => service.CreatePlanAsync(
+            [
+                new GeminiInteractionInput("text", "plan", "unexpected", null, "image/png"),
+                GeminiInteractionInput.CreateText("metadata")
+            ],
+            schema,
+            CancellationToken.None));
+
+        await Xunit.Assert.ThrowsAsync<ArgumentException>(() => service.CreatePlanAsync(
+            [
+                GeminiInteractionInput.CreateText("plan"),
+                new GeminiInteractionInput("image", "unexpected", Convert.ToBase64String([1]), null, "image/png")
+            ],
+            schema,
+            CancellationToken.None));
+
+        await Xunit.Assert.ThrowsAsync<ArgumentException>(() => service.CreatePlanAsync(
             [null!], schema, CancellationToken.None));
 
         Xunit.Assert.Equal(0, calls);

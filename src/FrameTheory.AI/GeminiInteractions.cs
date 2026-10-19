@@ -435,7 +435,14 @@ public sealed class GeminiInteractionsClient : IGeminiClient
         }
 
         var prompt = inputs.Count > 0 ? inputs[0].Text : null;
-        if (inputs.Count is < 2 or > 64 || inputs[0].Type != "text" || string.IsNullOrWhiteSpace(prompt) || prompt?.Length > 32_000)
+        var promptInput = inputs.Count > 0 ? inputs[0] : null;
+        if (inputs.Count is < 2 or > 64 ||
+            promptInput?.Type != "text" ||
+            string.IsNullOrWhiteSpace(prompt) ||
+            prompt?.Length > 32_000 ||
+            promptInput.Data is not null ||
+            promptInput.Uri is not null ||
+            promptInput.MimeType is not null)
         {
             throw new ArgumentException("A Gemini plan requires one prompt of at most 32,000 characters and one to sixty-three bounded media inputs.", nameof(inputs));
         }
@@ -443,7 +450,7 @@ public sealed class GeminiInteractionsClient : IGeminiClient
         if (inputs.Skip(1).Any(input =>
             input.Type == "image"
                 ? !IsValidImageInput(input)
-                : input.Type != "text" || string.IsNullOrWhiteSpace(input.Text) || input.Text.Length > 1_048_576 || input.Data is not null || input.Uri is not null))
+                : input.Type != "text" || string.IsNullOrWhiteSpace(input.Text) || input.Text.Length > 1_048_576 || input.Data is not null || input.Uri is not null || input.MimeType is not null))
         {
             throw new ArgumentException("A Gemini plan accepts only inline PNGs, validated Gemini-hosted PNG URIs and bounded text metadata.", nameof(inputs));
         }
@@ -458,7 +465,7 @@ public sealed class GeminiInteractionsClient : IGeminiClient
 
     private static bool IsValidImageInput(GeminiInteractionInput input)
     {
-        if (input.MimeType != "image/png")
+        if (input.Text is not null || input.MimeType != "image/png")
         {
             return false;
         }
