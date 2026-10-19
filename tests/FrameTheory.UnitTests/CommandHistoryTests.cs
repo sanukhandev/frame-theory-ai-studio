@@ -18,6 +18,13 @@ public sealed class CommandHistoryTests
     }
 
     [Xunit.Fact]
+    public void CanvasCommandsRejectInvalidDimensions()
+    {
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new SetCanvasCommand(0, 10));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new SetCanvasCommand(10, 0));
+    }
+
+    [Xunit.Fact]
     public void NamedGroupUndoRedoRestoresExactProjectSnapshots()
     {
         var sourceUri = new Uri("file:///media/clip.mov");

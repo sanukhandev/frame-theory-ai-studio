@@ -28,6 +28,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Command-group checkpoint: grouped edit commands reject null members before transactional execution; focused command-history coverage passes locally. Native command workflow acceptance remains open.
 
+- Canvas-command checkpoint: canvas edit commands reject non-positive dimensions before entering undo history; focused command-history coverage passes locally. Native canvas workflow acceptance remains open.
+
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
 - Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.

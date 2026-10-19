@@ -11,7 +11,21 @@ public interface IEditCommand
 
 public sealed class SetCanvasCommand : IEditCommand
 {
-    public SetCanvasCommand(int width, int height) => (Width, Height) = (width, height);
+    public SetCanvasCommand(int width, int height)
+    {
+        if (width <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width));
+        }
+
+        if (height <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(height));
+        }
+
+        Width = width;
+        Height = height;
+    }
 
     public int Width { get; }
 

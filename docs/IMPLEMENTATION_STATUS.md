@@ -26,6 +26,8 @@
 
 **Command-group checkpoint (2026-10-19):** Edit command groups now reject null members before transactional execution; focused command-history coverage passes. Native command workflow acceptance remains open.
 
+**Canvas-command checkpoint (2026-10-19):** Canvas edit commands now reject non-positive dimensions before entering undo history; focused command-history coverage passes. Native canvas workflow acceptance remains open.
+
 **Audio-preparation dependency checkpoint (2026-10-19):** Audio source preparation now rejects a missing media process runner at construction instead of failing during extraction; focused audio coverage passes. Native audio acceptance remains open.
 
 **Media-import dependency checkpoint (2026-10-19):** FFmpeg media importers now reject missing probe, preview-decoder and process-runner services at construction; focused import coverage passes. Native import acceptance remains open.
