@@ -125,6 +125,20 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void TimelineCaptionRangeRejectsFrameAdditionOverflow()
+    {
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(Metadata(new Uri("file:///caption-overflow.mp4"), "caption-overflow", 90, hasAudio: false));
+
+        Xunit.Assert.Throws<OverflowException>(() => editor.AddCaptionAt(
+            "Overflow",
+            CaptionProvenance.AuthoredCaption,
+            long.MaxValue,
+            1,
+            "font.ttf"));
+    }
+
+    [Xunit.Fact]
     public void FailedTimelineManualEditRollsBackWithoutCreatingHistory()
     {
         var editor = new TimelineEditorViewModel();

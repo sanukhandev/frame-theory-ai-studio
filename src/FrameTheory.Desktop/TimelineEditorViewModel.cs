@@ -734,7 +734,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public void AddCaptionAt(string text, CaptionProvenance provenance, long startFrame, long durationFrames, string fontPath)
     {
-        if (startFrame < 0 || durationFrames <= 0 || startFrame + durationFrames > TotalFrames)
+        if (startFrame < 0 || durationFrames <= 0 || checked(startFrame + durationFrames) > TotalFrames)
         {
             throw new ArgumentOutOfRangeException(nameof(startFrame));
         }

@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline caption bounds checkpoint (2026-10-19):** Caption range validation now uses checked frame arithmetic, preventing large frame inputs from wrapping into an apparently valid range; focused timeline coverage passes. Native caption acceptance remains open.
+
 **LUT parser boundary checkpoint (2026-10-19):** 3D LUT parsing now rejects duplicate size and domain directives instead of silently redefining structural state; focused LUT coverage passes. LUT legal/format acceptance remains open.
 
 **Photo raster parser checkpoint (2026-10-19):** PPM numeric parsing is now culture-invariant and duplicate PAM header fields fail as `InvalidDataException` instead of leaking dictionary exceptions; focused alpha/parser coverage passes. Native photo export acceptance remains open.
