@@ -49,4 +49,11 @@ public sealed class CubeLutTests
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => CubeLut.Identity(66));
         Xunit.Assert.Throws<FormatException>(() => CubeLut.Parse("LUT_3D_SIZE 2\nDOMAIN_MIN 0 0 1\nDOMAIN_MAX 1 1 0" + Environment.NewLine + string.Join(Environment.NewLine, Enumerable.Repeat("0 0 0", 8))));
     }
+
+    [Xunit.Fact]
+    public void ParserRejectsDuplicateStructuralDirectives()
+    {
+        Xunit.Assert.Throws<FormatException>(() => CubeLut.Parse("LUT_3D_SIZE 2\nLUT_3D_SIZE 2"));
+        Xunit.Assert.Throws<FormatException>(() => CubeLut.Parse("LUT_3D_SIZE 2\nDOMAIN_MIN 0 0 0\nDOMAIN_MIN 0 0 0"));
+    }
 }

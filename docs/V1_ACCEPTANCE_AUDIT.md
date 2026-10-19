@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Current LUT increment: duplicate 3D-size and domain directives are rejected rather than silently redefining LUT structure; focused parser coverage remains green. LUT legal/format acceptance remains open.
+
 - Current raster-parser increment: PPM dimensions use invariant parsing and duplicate PAM header fields produce `InvalidDataException`; focused alpha/parser coverage remains green. Native photo export acceptance remains open.
 
 - Current media composition increment: photo import/export, FFmpeg export and ffprobe adapters fail fast on missing injected services; focused constructor coverage remains green. Native media-engine acceptance remains open.

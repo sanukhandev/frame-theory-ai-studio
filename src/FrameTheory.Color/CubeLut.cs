@@ -66,6 +66,8 @@ public sealed class CubeLut
         var values = new List<RgbColor>();
         var domainMin = new RgbColor(0, 0, 0);
         var domainMax = new RgbColor(1, 1, 1);
+        var hasDomainMin = false;
+        var hasDomainMax = false;
         foreach (var rawLine in text.Split('\n'))
         {
             var line = rawLine.Trim();
@@ -80,9 +82,9 @@ public sealed class CubeLut
                 case "TITLE":
                     continue;
                 case "LUT_3D_SIZE":
-                    if (tokens.Length != 2 || !int.TryParse(tokens[1], NumberStyles.None, CultureInfo.InvariantCulture, out var parsedSize))
+                    if (size is not null || tokens.Length != 2 || !int.TryParse(tokens[1], NumberStyles.None, CultureInfo.InvariantCulture, out var parsedSize))
                     {
-                        throw new FormatException("LUT_3D_SIZE must contain one integer.");
+                        throw new FormatException("LUT_3D_SIZE must appear once and contain one integer.");
                     }
 
                     ValidateSize(parsedSize);
@@ -91,10 +93,22 @@ public sealed class CubeLut
                 case "LUT_1D_SIZE":
                     throw new FormatException("One-dimensional LUTs are not supported.");
                 case "DOMAIN_MIN":
+                    if (hasDomainMin)
+                    {
+                        throw new FormatException("DOMAIN_MIN must appear at most once.");
+                    }
+
                     domainMin = ParseColor(tokens, "DOMAIN_MIN");
+                    hasDomainMin = true;
                     break;
                 case "DOMAIN_MAX":
+                    if (hasDomainMax)
+                    {
+                        throw new FormatException("DOMAIN_MAX must appear at most once.");
+                    }
+
                     domainMax = ParseColor(tokens, "DOMAIN_MAX");
+                    hasDomainMax = true;
                     break;
                 default:
                     if (tokens.Length != 3 || size is null)
