@@ -83,6 +83,12 @@ public sealed record TimelineVideoRenderPlan
             throw new ArgumentException("Render-plan layers must reference media present in the source map.", nameof(sources));
         }
 
+        if (videoLayers.SelectMany(layer => layer.Segments).Any(segment => segment.Clip.TimelineRange.EndFrameExclusive > durationFrames) ||
+            audioLayerArray.SelectMany(layer => layer.Segments).Any(segment => segment.Clip.TimelineRange.EndFrameExclusive > durationFrames))
+        {
+            throw new ArgumentOutOfRangeException(nameof(durationFrames), "Render-plan clips must fit within the requested duration.");
+        }
+
         var titleArray = (titles ?? []).ToArray();
         if (titleArray.Any(title => title is null))
         {
@@ -93,6 +99,12 @@ public sealed record TimelineVideoRenderPlan
         if (captionArray.Any(caption => caption is null))
         {
             throw new ArgumentException("Render-plan captions cannot contain null entries.", nameof(captions));
+        }
+
+        var duration = frameRate.TimeAtFrame(durationFrames);
+        if (titleArray.Any(title => title.TimelineRange.EndFrameExclusive > durationFrames) || captionArray.Any(caption => caption.End > duration))
+        {
+            throw new ArgumentOutOfRangeException(nameof(durationFrames), "Render-plan titles and captions must fit within the requested duration.");
         }
 
         var gradeMap = new Dictionary<MediaId, ColorGrade>();

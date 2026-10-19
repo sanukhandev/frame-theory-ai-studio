@@ -120,6 +120,15 @@ public sealed class TimelineCompositorTests
             new Dictionary<MediaId, Uri>(),
             [new TimelineVideoLayer("video", 0, [new TimelineVideoSegment(
                 TimelineClip.Video(mediaId, 0, 30, 0, 30, frameRate))])]));
+        var boundedSource = new Dictionary<MediaId, Uri> { [mediaId] = new("file:///clip.mp4") };
+        Xunit.Assert.Equal("durationFrames", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineVideoRenderPlan(
+            frameRate,
+            16,
+            8,
+            30,
+            boundedSource,
+            [new TimelineVideoLayer("video", 0, [new TimelineVideoSegment(
+                TimelineClip.Video(mediaId, 0, 31, 0, 31, frameRate))])])).ParamName);
     }
 
     [Xunit.Fact]
