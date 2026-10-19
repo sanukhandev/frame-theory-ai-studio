@@ -21,6 +21,11 @@ public sealed class ColorScopeData
             throw new ArgumentOutOfRangeException(nameof(height));
         }
 
+        if ((long)width * height > 64 * 1024 * 1024)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), "Scope dimensions exceed the bounded analysis size.");
+        }
+
         ValidateBins(redHistogram, 256, nameof(redHistogram));
         ValidateBins(greenHistogram, 256, nameof(greenHistogram));
         ValidateBins(blueHistogram, 256, nameof(blueHistogram));

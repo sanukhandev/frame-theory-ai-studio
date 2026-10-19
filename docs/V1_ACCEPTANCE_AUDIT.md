@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Scope-size checkpoint: color-scope construction enforces the same 64M-pixel bound as analysis, preventing `PixelCount` overflow and unbounded inspector allocations; focused coverage passes locally. Native scope acceptance remains open.
+
 - Waveform-input checkpoint: imported media rejects non-finite or out-of-range waveform peaks before beat detection, rough-cut scoring or AI metadata serialization; focused coverage passes locally. Native import acceptance remains open.
 
 - Motion-plan checkpoint: stabilization plans reject null transforms before motion data reaches compositor generation; focused coverage passes locally. Manual stabilization quality acceptance remains open.

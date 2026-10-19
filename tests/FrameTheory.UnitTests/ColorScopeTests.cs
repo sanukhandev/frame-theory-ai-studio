@@ -34,6 +34,7 @@ public sealed class ColorScopeTests
         var bins = new int[256];
         var scopeBins = new int[64 * 64];
         Xunit.Assert.Equal("height", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ColorScopeData(1, 0, bins, bins, bins, scopeBins, scopeBins)).ParamName);
+        Xunit.Assert.Equal("width", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ColorScopeData(64 * 1024 * 1024, 2, bins, bins, bins, scopeBins, scopeBins)).ParamName);
     }
 
     [Xunit.Fact]

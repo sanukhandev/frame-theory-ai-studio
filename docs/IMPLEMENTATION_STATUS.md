@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Scope-size checkpoint (2026-10-19):** Color-scope construction now enforces the same 64M-pixel bound as analysis, preventing `PixelCount` overflow and unbounded inspector allocations; focused scope coverage passes. Native scope acceptance remains open.
+
 **Waveform-input checkpoint (2026-10-19):** Imported media now rejects non-finite or out-of-range waveform peaks before beat detection, rough-cut scoring or AI metadata serialization; focused media-import coverage passes. Native import acceptance remains open.
 
 **Motion-plan checkpoint (2026-10-19):** Stabilization plans now reject null transforms before motion data reaches compositor generation; focused motion coverage passes. Manual stabilization quality acceptance remains open.
