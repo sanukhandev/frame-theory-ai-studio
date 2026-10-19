@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline seek-boundary checkpoint (2026-10-19):** Video Home/End shortcuts now seek through the existing transport path, and post-snap clamping prevents a clip’s exclusive end boundary from becoming an invalid current frame. Foundation coverage passes 29 tests and timeline coverage passes 21 tests; native keyboard/HiDPI acceptance remains open.
+
 **Timeline undo/redo checkpoint (2026-10-19):** Video workspace manual edits now run through the existing full timeline snapshot transaction boundary, with visible Undo/Redo controls, `Ctrl+Z`/`Ctrl+Y` routing, rollback on failed operations, and coverage for captions, watermark changes and inspector actions; reviewed rough cuts retain their existing transactional AI-undo path without duplicate history entries. Timeline-focused coverage passes 20 tests and Foundation UI/shortcut coverage passes 28 tests; the full local Release gate passes 355 unit tests, 2 golden tests, a warning-free build, format verification and repository validation. Native manual acceptance remains open.
 
 **Timeline transport shortcut checkpoint (2026-10-19):** Video workspace Space-key handling now starts or stops the existing local timeline preview path, while text inputs remain protected; the shell advertises the shortcut beside existing workspace and undo keys. Focused Foundation coverage passes 27 tests; native keyboard and HiDPI acceptance remains open.

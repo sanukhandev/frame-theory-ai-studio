@@ -57,6 +57,18 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void TimelineSeekClampsAfterBoundarySnapping()
+    {
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(Metadata(new Uri("file:///seek-end.mp4"), "seek-end", 90, hasAudio: false));
+
+        var result = editor.SeekFrame(editor.TotalFrames - 1);
+
+        Xunit.Assert.Equal(editor.TotalFrames - 1, result.TimelineFrame);
+        Xunit.Assert.Equal(editor.TotalFrames - 1, editor.CurrentFrame);
+    }
+
+    [Xunit.Fact]
     public void TimelineRulerRemainsBoundedForDenseHiDpiViewport()
     {
         var editor = new TimelineEditorViewModel();

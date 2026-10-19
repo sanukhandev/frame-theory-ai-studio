@@ -12,6 +12,7 @@ using System.Reflection;
 using FrameTheory.AI;
 using FrameTheory.Application;
 using FrameTheory.Domain;
+using FrameTheory.Media;
 
 namespace FrameTheory.UnitTests;
 
@@ -262,7 +263,7 @@ public sealed class FoundationTests
                     new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
                     tabItems.Select(AutomationProperties.GetName));
                 Xunit.Assert.Equal(
-                    "Use Ctrl+1 through Ctrl+4 for workspaces, Space to play or stop the Video timeline, and Ctrl+Z to undo.",
+                    "Use Ctrl+1 through Ctrl+4 for workspaces, Space to play or stop, Home/End to seek the Video timeline, and Ctrl+Z to undo.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBlock>().Single(control => AutomationProperties.GetName(control) == "Workspace keyboard shortcuts")));
                 var activeIndicators = window.GetVisualDescendants()
                     .OfType<Border>()
@@ -1669,6 +1670,31 @@ public sealed class FoundationTests
         Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.ToggleTimelinePreview));
         Xunit.Assert.Contains("Import a video", viewModel.TimelinePreviewStatusText, StringComparison.Ordinal);
         Xunit.Assert.False(viewModel.IsTimelinePreviewPlaying);
+    }
+
+    [Xunit.Fact]
+    public void HomeAndEndShortcutsSeekTheVideoTimeline()
+    {
+        var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
+            new FrameTheory.Desktop.WorkspaceCatalog(),
+            new TestCapabilityDetector());
+        var source = new Uri("file:///seek-shortcuts.mp4");
+        viewModel.TimelineEditor.AddMedia(new MediaSourceMetadata(
+            MediaId.Create(source, "seek-shortcuts"),
+            source,
+            MediaKind.Video,
+            1920,
+            1080,
+            new RationalFrameRate(30, 1),
+            90,
+            TimeSpan.FromSeconds(3),
+            hasAudio: false));
+        viewModel.TimelineEditor.SeekFrame(40);
+
+        Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.FirstTimelineFrame));
+        Xunit.Assert.Equal(0, viewModel.TimelineEditor.CurrentFrame);
+        Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.LastTimelineFrame));
+        Xunit.Assert.Equal(viewModel.TimelineEditor.TotalFrames - 1, viewModel.TimelineEditor.CurrentFrame);
     }
 
     [Xunit.Fact]

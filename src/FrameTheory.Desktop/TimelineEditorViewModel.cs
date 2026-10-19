@@ -1432,7 +1432,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public TimelineSeekResult SeekFrame(long frame)
     {
-        var target = SnapFrame(Math.Clamp(frame, 0, Math.Max(0, TotalFrames - 1)));
+        var target = Math.Clamp(SnapFrame(Math.Clamp(frame, 0, Math.Max(0, TotalFrames - 1))), 0, Math.Max(0, TotalFrames - 1));
         var result = _transport.Seek(target);
         OnPropertyChanged(nameof(CurrentFrame));
         OnPropertyChanged(nameof(CurrentPosition));

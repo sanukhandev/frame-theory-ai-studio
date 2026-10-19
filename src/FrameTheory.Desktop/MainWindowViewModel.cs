@@ -24,6 +24,8 @@ public enum EditorShortcut
     PreviousFrame,
     NextFrame,
     ToggleTimelinePreview,
+    FirstTimelineFrame,
+    LastTimelineFrame,
     UndoAiEdit,
     UndoCurrentEdit,
     RedoCurrentEdit
@@ -735,6 +737,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         EditorShortcut.PreviousFrame when SelectedWorkspaceIndex == 0 => MoveTimelineFrame(-1),
         EditorShortcut.NextFrame when SelectedWorkspaceIndex == 0 => MoveTimelineFrame(1),
         EditorShortcut.ToggleTimelinePreview when SelectedWorkspaceIndex == 0 => ToggleTimelinePreview(),
+        EditorShortcut.FirstTimelineFrame when SelectedWorkspaceIndex == 0 => SeekTimelineFrame(0),
+        EditorShortcut.LastTimelineFrame when SelectedWorkspaceIndex == 0 => SeekTimelineFrame(TimelineEditor.TotalFrames - 1),
         EditorShortcut.UndoAiEdit => UndoLastAiEdit(),
         EditorShortcut.UndoCurrentEdit => UndoCurrentEdit(),
         EditorShortcut.RedoCurrentEdit => RedoCurrentEdit(),
@@ -765,6 +769,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private bool MoveTimelineFrame(int delta)
     {
         TimelineEditor.Step(delta);
+        return true;
+    }
+
+    private bool SeekTimelineFrame(long frame)
+    {
+        TimelineEditor.SeekFrame(frame);
         return true;
     }
 

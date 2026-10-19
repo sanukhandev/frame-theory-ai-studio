@@ -148,7 +148,7 @@ public sealed class MainWindow : Window
         });
         var shortcutHint = new TextBlock
         {
-            Text = "Ctrl+1–4 Workspaces  ·  Space Play/stop  ·  Ctrl+Z Undo",
+            Text = "Ctrl+1–4 Workspaces  ·  Space Play/stop  ·  Home/End Seek  ·  Ctrl+Z Undo",
             FontSize = 10,
             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
             TextTrimming = TextTrimming.CharacterEllipsis,
@@ -156,7 +156,7 @@ public sealed class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(shortcutHint, "Workspace keyboard shortcuts");
-        ToolTip.SetTip(shortcutHint, "Use Ctrl+1 through Ctrl+4 for workspaces, Space to play or stop the Video timeline, and Ctrl+Z to undo.");
+        ToolTip.SetTip(shortcutHint, "Use Ctrl+1 through Ctrl+4 for workspaces, Space to play or stop, Home/End to seek the Video timeline, and Ctrl+Z to undo.");
         var projectTitle = new TextBlock
         {
             FontSize = 12,
@@ -289,6 +289,8 @@ public sealed class MainWindow : Window
                 ? args.Key switch
                 {
                     Key.Space => EditorShortcut.ToggleTimelinePreview,
+                    Key.Home => EditorShortcut.FirstTimelineFrame,
+                    Key.End => EditorShortcut.LastTimelineFrame,
                     Key.Left => EditorShortcut.PreviousFrame,
                     Key.Right => EditorShortcut.NextFrame,
                     _ => (EditorShortcut?)null
