@@ -16,6 +16,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Current render-grade increment: render plans reject null grades and default media IDs before immutable storage; focused compositor coverage remains green. Native color-export acceptance remains open.
 
+- Current AI-plan increment: edit plans reject null actions before validation, approval or execution; focused AI-plan coverage remains green. Gemini/network acceptance remains open.
+
 - Current render-plan increment: null layers and invalid source-map IDs/URIs fail at plan construction instead of during filter-graph building; focused compositor coverage remains green. Native export acceptance remains open.
 
 - Current media-metadata increment: image/video records require positive dimensions while audio remains dimensionless; focused domain coverage and the local 380-unit/2-golden gate remain green. Native media-probe acceptance remains open.

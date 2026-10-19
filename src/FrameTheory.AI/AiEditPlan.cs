@@ -51,6 +51,11 @@ public sealed record AiEditPlan
         IReadOnlyList<AiEditAction> actions)
     {
         ArgumentNullException.ThrowIfNull(actions);
+        if (actions.Any(action => action is null))
+        {
+            throw new ArgumentException("Edit plans cannot contain null actions.", nameof(actions));
+        }
+
         SchemaVersion = schemaVersion;
         PlanId = planId;
         ProjectId = projectId;

@@ -6,6 +6,12 @@ namespace FrameTheory.UnitTests;
 public sealed class AiEditPlanTests
 {
     [Xunit.Fact]
+    public void EditPlansRejectNullActions()
+    {
+        Xunit.Assert.Throws<ArgumentException>(() => new AiEditPlan("1.0", "plan-1", "project-1", "test", [null!]));
+    }
+
+    [Xunit.Fact]
     public void ParserAndValidatorAcceptAValidAllowlistedPlan()
     {
         var plan = AiEditPlanParser.Parse("""
