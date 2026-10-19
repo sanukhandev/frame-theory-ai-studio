@@ -57,7 +57,7 @@ public sealed class CubeLut
     public static CubeLut Parse(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
-        if (text.Length > MaximumTextBytes)
+        if (Encoding.UTF8.GetByteCount(text) > MaximumTextBytes)
         {
             throw new FormatException("The LUT text exceeds the supported size limit.");
         }

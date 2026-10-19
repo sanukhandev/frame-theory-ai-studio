@@ -56,4 +56,12 @@ public sealed class CubeLutTests
         Xunit.Assert.Throws<FormatException>(() => CubeLut.Parse("LUT_3D_SIZE 2\nLUT_3D_SIZE 2"));
         Xunit.Assert.Throws<FormatException>(() => CubeLut.Parse("LUT_3D_SIZE 2\nDOMAIN_MIN 0 0 0\nDOMAIN_MIN 0 0 0"));
     }
+
+    [Xunit.Fact]
+    public void ParserBoundsEncodedUtf8SizeForUnicodeInput()
+    {
+        var oversized = new string('\u0800', 22 * 1024 * 1024);
+
+        Xunit.Assert.Throws<FormatException>(() => CubeLut.Parse(oversized));
+    }
 }
