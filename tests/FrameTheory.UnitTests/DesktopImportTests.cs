@@ -178,6 +178,42 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task TimelineStepControlRefreshesTheProductionMonitor()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
+        var decoder = new StubPreviewDecoder();
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new VideoImporter(),
+            timelinePreviewDecoder: decoder);
+        await session.Dispatch(() =>
+        {
+            viewModel.ImportFilesAsync(["step-preview.mp4"], CancellationToken.None).GetAwaiter().GetResult();
+            viewModel.ShowTimelineSourcePreview = true;
+            viewModel.TimelineEditor.SnapEnabled = false;
+            var window = new MainWindow(viewModel);
+            try
+            {
+                window.Show();
+                var nextFrame = window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => Avalonia.Automation.AutomationProperties.GetName(control) == "Next timeline frame");
+
+                nextFrame.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                Dispatcher.UIThread.RunJobs();
+
+                Xunit.Assert.Equal(1, decoder.FrameIndex);
+                Xunit.Assert.Contains("frame 1", viewModel.TimelinePreviewStatusText, StringComparison.Ordinal);
+            }
+            finally
+            {
+                window.Close();
+            }
+        }, CancellationToken.None);
+    }
+
+    [Xunit.Fact]
     public async Task SelectingTimelineClipSynchronizesMediaBinSelection()
     {
         using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));

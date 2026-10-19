@@ -1,5 +1,7 @@
 # V1 Acceptance Audit
 
+Machine audit checkpoint: the production-shell `Next timeline frame` control is now covered end-to-end in headless Avalonia: click, seek, local decode and updated preview status. Native interaction acceptance remains required.
+
 Machine audit checkpoint: a monotonic preview-request generation now rejects stale out-of-order decoder/compositor results, preserving newest-frame monitor parity during rapid seeking. Deterministic coverage passes; native seek stress acceptance remains required.
 
 Machine audit checkpoint: successful manual timeline edits, reviewed rough-cut application, undo and redo now trigger the existing local preview refresh path, preserving monitor parity with editable timeline state. Native edit/preview acceptance remains required.
