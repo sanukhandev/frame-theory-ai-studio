@@ -174,6 +174,11 @@ public sealed class TimelineTrack
             throw new ArgumentException("A track ID is required.", nameof(id));
         }
 
+        if (!Enum.IsDefined(kind))
+        {
+            throw new ArgumentOutOfRangeException(nameof(kind));
+        }
+
         ArgumentNullException.ThrowIfNull(clips);
         var source = clips.ToArray();
         if (source.Any(clip => clip is null))

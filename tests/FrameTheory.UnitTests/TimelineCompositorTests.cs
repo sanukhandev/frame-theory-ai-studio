@@ -35,6 +35,7 @@ public sealed class TimelineCompositorTests
         var translated = new TimelineVideoTransform(offsetX: -2, offsetY: -3);
         Xunit.Assert.Equal((-2, -3), (translated.OffsetX, translated.OffsetY));
         Xunit.Assert.Throws<ArgumentException>(() => new TimelineVideoLayer("video-1", 0, [null!]));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineTrack("invalid", (TimelineTrackKind)99, []));
     }
 
     [Xunit.Fact]
