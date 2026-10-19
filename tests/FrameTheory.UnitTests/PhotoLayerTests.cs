@@ -64,6 +64,7 @@ public sealed class PhotoLayerTests
     public void PhotoOperationsRejectUndefinedKinds()
     {
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new PhotoEditOperation((PhotoEditOperationKind)99, 0, 0, 0, 0));
+        Xunit.Assert.Throws<ArgumentException>(() => new PhotoAdjustmentLayer("invalid", new ColorGrade(), maskStrokes: [null!]));
     }
 
     [Xunit.Fact]

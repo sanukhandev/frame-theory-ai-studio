@@ -488,7 +488,13 @@ public sealed class PhotoAdjustmentLayer
         Name = name.Trim();
         Grade = grade ?? throw new ArgumentNullException(nameof(grade));
         IsEnabled = isEnabled;
-        MaskStrokes = Array.AsReadOnly(maskStrokes?.ToArray() ?? []);
+        var strokes = maskStrokes?.ToArray() ?? [];
+        if (strokes.Any(stroke => stroke is null))
+        {
+            throw new ArgumentException("Adjustment masks cannot contain null strokes.", nameof(maskStrokes));
+        }
+
+        MaskStrokes = Array.AsReadOnly(strokes);
     }
 
     public string Name { get; }
