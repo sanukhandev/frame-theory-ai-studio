@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Process cancellation checkpoint (2026-10-19):** FFmpeg and local Whisper cancellation cleanup now ignores platform kill failures, preserving the original cancellation result instead of leaking a secondary termination exception. Existing media/caption cancellation coverage remains green; native interruption acceptance remains open.
+
 **Timeline beat-mode persistence checkpoint (2026-10-19):** Project and transactional timeline restores now notify the bound `BeatDetectionMode` property after loading its persisted value, keeping the waveform-analysis selector synchronized; round-trip coverage passes. Native timeline UI acceptance remains open.
 
 **Timeline scroll persistence checkpoint (2026-10-19):** Reopened timeline projects now restore `ScrollFrame` through its notifying property setter, keeping the bound timeline viewport synchronized with the persisted horizontal position; round-trip coverage passes. Native reopen/visual acceptance remains open.

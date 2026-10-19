@@ -64,6 +64,12 @@ public sealed class FfmpegProcessRunner : IMediaProcessRunner
             catch (InvalidOperationException)
             {
             }
+            catch (System.ComponentModel.Win32Exception)
+            {
+            }
+            catch (NotSupportedException)
+            {
+            }
 
             throw;
         }

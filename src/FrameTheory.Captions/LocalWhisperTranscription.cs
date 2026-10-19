@@ -213,6 +213,12 @@ public sealed class WhisperCliTranscriptionProvider : IProgressiveTranscriptionP
         catch (InvalidOperationException)
         {
         }
+        catch (Win32Exception)
+        {
+        }
+        catch (NotSupportedException)
+        {
+        }
     }
 }
 
