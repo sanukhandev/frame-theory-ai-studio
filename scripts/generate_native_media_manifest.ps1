@@ -34,6 +34,10 @@ if ($files.Count -eq 0) {
 }
 
 function Get-RequiredTool([string]$name) {
+    if ([string]::IsNullOrWhiteSpace($name) -or [IO.Path]::GetFileName($name) -ne $name) {
+        throw "Native media bundle tool name must be a file name: $name."
+    }
+
     $path = Join-Path $rootPath $name
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
         throw "Native media bundle must contain $name."
