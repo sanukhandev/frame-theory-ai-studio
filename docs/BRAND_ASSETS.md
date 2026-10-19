@@ -1,14 +1,17 @@
 # Frame Theory Official Brand Assets and Identity Policy
 
 ## Authoritative source
+
 - Brand: **Frame Theory**.
 - Instagram: **@frametheoryvisuals.ai** — never the superseded handle.
 - Official logo: **only the original logo file provided in Frame Theory project sources** (current source attachment titled `Elegant Frame Theory Monogram.png`). Treat that source as authoritative; never redraw, invent, restyle, vector-trace, letter-substitute or recolor it.
 
 ## Asset availability
+
 The approved source attachment has been copied byte-for-byte to `assets/brand/frame-theory-original.png`. Its SHA-256 is `0BD29D37FBCC4C753B8870A65E3A02E23460C1A5C305E53E6CD2D9D2F151F388`; CI, the unit suite and the runtime watermark resolver reject drift or reparse-point substitution. No reconstruction or stand-in logo is permitted. The logo is RGB; do not assert transparent background.
 
 ## Use
+
 - Preserve exact image content, aspect ratio, typography and brand colors; only lossless placement/scaling is permitted.
 - Do not apply shadows, filters, blur, gradients or decorations unless project owner specifically approves.
 - Use approved logo for splash screen, app icon, about dialog and social branding only after rights/size requirements are verified. An operating-system icon may need a logo-safe layout; obtain explicit approval before modifying the asset or padding it.
@@ -16,9 +19,11 @@ The approved source attachment has been copied byte-for-byte to `assets/brand/fr
 - Test actual compiled assets for byte identity or digest against approved original.
 
 ## Releasing
-Block *branded* build artifacts until the approved original logo is copied and verified. Lack of logo should not block unbranded editor engine development. Never present a generated image or UI mockup as the verified official logo.
+
+Block _branded_ build artifacts until the approved original logo is copied and verified. Lack of logo should not block unbranded editor engine development. Never present a generated image or UI mockup as the verified official logo.
 
 ## Required asset actions
+
 1. [x] Import exact image source into repository (owner-approved source attachment).
 2. [x] Record source file checksum and approved path in this document; usage rights still require release-owner confirmation.
 3. Have a reviewer compare pixel appearance and byte fingerprint against source.

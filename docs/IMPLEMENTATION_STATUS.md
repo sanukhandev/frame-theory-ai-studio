@@ -1237,6 +1237,7 @@
 **Current status: PACKAGING MATRIX AND CI ARTIFACTS PARTIAL (2026-10-17).** FT-001 through FT-005, FT-006, FT-101 through FT-105, FT-201 through FT-205, FT-301 through FT-306, FT-401 through FT-405, FT-501 through FT-506, FT-601, FT-603 through FT-605, and FT-701 through FT-704 are implemented and verified on Windows x64 with .NET SDK 10.0.100 plus hosted native-media evidence for FT-006. FT-602 now also has real local Whisper spoken-fixture evidence through the production adapter; the optional live Gemini transcription path remains unverified. FT-705 executes approved grade, clip, transition, title, caption, keyframe, audio, trusted-preset and Reel operations transactionally; FT-801 provides split, wipe and timed-reveal output across multiple video clips. FT-802 provides real 16:9, 1:1 and 9:16 MP4 presets plus Photo workspace PNG/JPEG import, non-destructive rotate/undo, preview and quality-controlled export; FT-803 adds imported user audio, amplitude/energy waveform-derived editable beat markers and explicit validated watermark selection; FT-804 adds a single-worker cancellable export queue and Video workspace cancel control; FT-706 exposes undo for the last AI transaction plus bounded exponential provider retries, timeout/rate-limit handling and redacted usage history. FT-901 adds keyboard workspace/frame shortcuts, scroll-safe dense workspace layout, automation names for key controls and bounded dense/HiDPI ruler evidence. FT-902 surfaces synchronized selected-clip/playhead context, a real FFmpeg-decoded current-frame preview action and AI approval counts/status in the Video and AI panels; manual workspace acceptance remains open. FT-903 records real cold/warm frame-seek timing, working-set bytes, bounded cache metrics, repeatable p50/p95 seek and decode-throughput output, cancellation/cache policy and an optional content-fingerprint-keyed disk proxy; interactive proxy UI acceptance remains open. FT-904 adds local secret-redacting diagnostics, unhandled-failure capture, stdout/stderr dependency probing, nonzero-exit unknown-state reporting, actionable missing FFmpeg/ffprobe guidance and visible log location. FT-1001 adds an explicit source SHA-256 preservation assertion to the core unit/integration/golden gate. FT-1002 maps all UC-01..UC-06 to executable Windows smoke/test evidence and records the interactive/platform limits. FT-1003 records the actual restored NuGet/native dependency inventory and external FFmpeg redistribution blockers in `docs/SBOM.md`. FT-1004 extends the Windows/macOS/Linux CI matrix with desktop publish/test artifacts and SHA-256 manifests. FT-1005 provides reproducible framework-dependent and opt-in self-contained publish scripts, checksummed archives, unsigned installers and a hosted reviewed native-bundle mechanism; clean-host production recovery, legal redistribution, signing and notarization remain open. Approved watermark release rights remain open. FT-006 uses the tested deterministic FFmpeg timeline path; MLT was not adopted, and interactive GUI parity is a separate gate. This is not a release.
 
 ## Completed
+
 - [x] Product README and Codex agent operating contract
 - [x] PRD, architecture and color/media/AI boundaries
 - [x] Epics, tasks, test plan, release and privacy documentation
@@ -1310,6 +1311,7 @@
 - [x] FT-405 photo project autosave recovery, missing-media relink and corrupt-input UI status paths
 
 ## Next tasks
+
 1. Exercise timeline playback/save/open/relink through the Avalonia UI on Windows, macOS and Linux, including moved-project recovery. The 2026-10-18 CUA inventory still exposes browsers but no native Windows app surface, so this manual gate remains unverified rather than claimed complete.
 2. Obtain approved live Gemini provider evidence only if the optional remote transcription path is intended for release; the offline local Whisper path is now accepted with a real Windows fixture.
 3. Finish manual/cross-platform FT-901, FT-902 and FT-1002 acceptance; resolve the external FT-1003/FT-1005/FT-1006 release gates. FT-1001 and FT-1004 hosted quality evidence is green.
@@ -1322,6 +1324,7 @@
 **FT-602 local engine execution record (2026-10-18):** Commits `6e9be76`, `24e929b`, `bbc4c22`, `b05ccd5`, `785af80`, `f1cd3a2` and `0ad1132` add the solution smoke tool, ADR, dependency/development/release documentation, repository guard and malformed-timing coverage. `dotnet build FrameTheory.sln --configuration Release --no-restore` passed with 0 warnings/errors; the full Release suite passed 222 unit tests and 2 golden tests; the focused transcription suite passed 25 tests; `dotnet format --verify-no-changes`, repository validation and `git diff --check` passed. The real Windows smoke used a separately installed `openai-whisper` 20250625 CLI, official `tiny.en` model and synthesized speech, returning seven timed words with source fingerprint preservation. No engine, model, fixture or user key entered Git. Next: push this ten-commit batch, verify hosted build, then close FT-602 if the remote evidence remains green; live Gemini transcription remains optional.
 
 ## Latest execution record
+
 ```text
 Date/time: 2026-10-18
 Task / Epic: FT-1005 / E10 cross-platform portable package relaunch
@@ -1342,6 +1345,7 @@ Next unblocked task: Continue clean-host/package acceptance on target hardware w
 **FT-1102 execution record (2026-10-18):** Git SHAs `bfe29b9`, `519208d`, `5891f36`, `53175ff` and `b9add3b`. Focused timeline tests passed 16/16, motion UI passed 7/7 and photo grading/persistence passed 11/11; the full solution passed 183 unit and 2 golden tests; the smoke tool built with zero warnings and formatting verification passed. Hosted run `39079254370` passed documentation, restore, advisory, build, native-media, format, tests, publish and checksum jobs on Windows, macOS and Linux. The hosted native smoke saved/reopened a stabilized project and produced a real exported MP4 through the normalized FFmpeg filter path. No user media, API key or binary entered Git. Next: complete manual visual-quality review or continue remaining P0 manual/external release gates without claiming FT-1102 complete.
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-18
 Task / Epic: FT-602 / FT-1104 / Gemini Files API trust boundary
@@ -1356,6 +1360,7 @@ Next unblocked task: Continue remaining manual/platform and external-input gates
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-18
 Task / Epic: FT-402 / photo source integrity
@@ -1370,6 +1375,7 @@ Next unblocked task: Continue the native-media journey matrix while manual UI an
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-18
 Task / Epic: FT-402 / native photo project smoke
@@ -1384,6 +1390,7 @@ Next unblocked task: Continue the native-media journey matrix while manual UI an
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-18
 Task / Epic: FT-402 / editable photo project persistence
@@ -1398,6 +1405,7 @@ Next unblocked task: Exercise photo and timeline project recovery through the na
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-903 / Video workspace preview proxy wiring
@@ -1412,6 +1420,7 @@ Next unblocked task: Push and verify the proxy UI wiring on Windows, macOS and L
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-902 / cancellable timeline playback
@@ -1426,6 +1435,7 @@ Next unblocked task: Exercise playback and project recovery through the native A
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-102 / project timeline persistence
@@ -1440,6 +1450,7 @@ Next unblocked task: Exercise manual save/open and missing-media recovery when a
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-102 / atomic timeline restore safety
@@ -1454,6 +1465,7 @@ Next unblocked task: Continue manual/platform and external-input gates without c
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-1002 / native project save-open journey
@@ -1468,6 +1480,7 @@ Next unblocked task: Exercise the same project journey through the native Avalon
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-006 / FT-1002 native Windows media smoke
@@ -1482,6 +1495,7 @@ Next unblocked task: Continue external-input and manual/platform release gates w
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-902 / E09 timeline preview
@@ -1496,6 +1510,7 @@ Next unblocked task: Continue manual/cross-platform UX evidence and release gate
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-904 / E09 failure and dependency UX
@@ -1510,6 +1525,7 @@ Next unblocked task: Continue manual/cross-platform FT-901..FT-904 and release g
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-903 / E09 preview proxy path
@@ -1524,6 +1540,7 @@ Next unblocked task: Continue FT-602 live provider evidence and FT-901..FT-904 /
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-1002 / E10 photo journey smoke
@@ -1538,6 +1555,7 @@ Next unblocked task: Continue FT-602 live provider evidence and FT-901..FT-904 /
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-1003 / E10 dependency evidence
@@ -1552,6 +1570,7 @@ Next unblocked task: Continue FT-602 live provider evidence and FT-901..FT-904 /
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-006 / E00 timeline engine spike
@@ -1566,6 +1585,7 @@ Next unblocked task: Continue FT-602 live provider evidence and FT-901..FT-904 /
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-1005 / E10 packaging validation
@@ -1580,6 +1600,7 @@ Next unblocked task: Continue FT-901..FT-904 manual acceptance and FT-1002..FT-1
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-602 / E06 transcription provider
@@ -1594,6 +1615,7 @@ Next unblocked task: Obtain approved live Gemini spoken-fixture evidence when av
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-1003 / E10 supply-chain evidence
@@ -1608,6 +1630,7 @@ Next unblocked task: Continue FT-1003 dependency/license evidence and FT-1005 pa
 ```
 
 ## Previous execution record
+
 ```text
 Date/time: 2026-10-17
 Task / Epic: FT-602 / FT-903 / FT-904
@@ -1622,6 +1645,7 @@ Next unblocked task: Continue FT-602 live provider evidence and FT-901..FT-904 /
 ```
 
 ## Task execution record template
+
 ```text
 Date/time:
 Task / Epic:
@@ -1636,7 +1660,9 @@ Next unblocked task:
 ```
 
 ## Release verification status
+
 Windows: FT-001/FT-002/FT-003/FT-004/FT-005/FT-006/FT-101/FT-102/FT-103/FT-104/FT-105/FT-201/FT-202/FT-203/FT-204/FT-205/FT-301/FT-302/FT-303/FT-304/FT-305/FT-306/FT-401/FT-402/FT-403/FT-404/FT-405/FT-501/FT-502/FT-503/FT-504/FT-505/FT-506/FT-601/FT-603/FT-604/FT-605/FT-701/FT-702/FT-703/FT-704/FT-705/FT-801/FT-802/FT-803/FT-804 and FT-706 undo paths built/tested; FT-1001 core suite and FT-1004 hosted CI artifacts verified; FT-602 live provider fixture and FT-706 live provider scope remain partial; packaged UI remains unverified for production. macOS: hosted CI restore/build/test/publish, native FFmpeg/media smoke, deterministic timeline export, approved branded watermark assertion and corrected DMG detach cleanup verified by run 39104297945; interactive desktop acceptance remains unverified. Linux: hosted CI restore/build/test/publish, native FFmpeg/media smoke, deterministic timeline export and approved branded watermark assertion verified by run 39104297945; interactive desktop acceptance remains unverified. Gemini provider: headless adapter contract tested; no live key/media upload run. Logo: approved source is committed at `assets/brand/frame-theory-original.png` and hash-verified; release-owner rights/visual review remains open. MLT: not adopted. Release native media: not approved or bundled.
 
 ## Honest reporting
+
 Codex should not mark a task complete for a mock UI, TODO, downloaded asset, simulated exporter, docs-only passing CI, or speculative integration. If execution is interrupted, preserve status and resume from first unblocked task on next run.

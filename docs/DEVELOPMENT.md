@@ -1,12 +1,14 @@
 # Local Development and Contributor Setup
 
 ## Prerequisites
+
 - Git and a supported .NET SDK (select current supported SDK/target in first implementation commit and pin via `global.json`).
 - C# IDE: free VS Code + C# extension or other compatible IDE.
 - FFmpeg/ffprobe available on PATH for development; bundle only after legal/native packaging review.
 - Per-OS supported Avalonia/native dependencies, build tools and optional OS secure-store integration.
 
 ## Start
+
 ```bash
 git clone https://github.com/sanukhandev/frame-theory-ai-studio.git
 cd frame-theory-ai-studio
@@ -24,20 +26,20 @@ dotnet tools/FrameTheory.MediaImportSmoke/bin/Release/net10.0/FrameTheory.MediaI
 dotnet tools/FrameTheory.PhotoImportSmoke/bin/Release/net10.0/FrameTheory.PhotoImportSmoke.dll <image-path>
 dotnet tools/FrameTheory.PhotoExportSmoke/bin/Release/net10.0/FrameTheory.PhotoExportSmoke.dll <image-path> <output-path> [png|jpeg]
 ```
+
 For a video fixture, the media-import smoke also extracts its first audio track through the transcription preparer, probes the owned temporary WAV, and deletes it on completion.
 The solution targets .NET 10. The desktop shell uses Avalonia 12.1.2 with code-only controls and the Fluent theme; media tasks beginning with FT-003/FT-006 still require FFmpeg/ffprobe.
 The Foundation test filter includes the production `MainWindow` under the test-only Avalonia headless platform. It verifies adaptive bounds, two-way workspace selection, accessibility names and `Ctrl+1..4` input without claiming native rendering, HiDPI hardware or manual macOS/Linux acceptance.
 
 ## Offline verified transcript import
+
 The Video workspace's **Import verified transcript JSON** action accepts a local audio/video source followed by a JSON sidecar with this shape:
 
 ```json
 {
   "Source": "file:///absolute/path/to/source.wav",
   "SourceFingerprint": "sha256:<lowercase-source-sha256>",
-  "Words": [
-    { "Text": "hello", "StartMs": 100, "EndMs": 400 }
-  ]
+  "Words": [{ "Text": "hello", "StartMs": 100, "EndMs": 400 }]
 }
 ```
 
@@ -54,6 +56,7 @@ dotnet run --project tools/FrameTheory.LocalWhisperSmoke/FrameTheory.LocalWhispe
 On 2026-10-18 Windows x64, this command ran `openai-whisper` 20250625 with the `tiny.en` model against a locally synthesized spoken fixture and produced seven source-timed words with a preserved `sha256:` fingerprint. The executable, model, FFmpeg helper and audio fixture remained outside the repository; this is validation evidence, not a bundled runtime or redistribution approval.
 
 ## Repository target layout
+
 ```text
 src/
   FrameTheory.Desktop/
@@ -80,9 +83,11 @@ packaging/windows|macos|linux/
 ```
 
 ## Secrets
+
 Never put Gemini keys in environment sample files with real values, source code, git history or log output. Runtime app uses secure OS credential storage. For isolated CI, use a fake HTTP adapter to test schema without live API. Real integration testing requires explicit user key and costs acknowledgement.
 
 ## Sample tests to build
+
 ```bash
 dotnet test --filter FullyQualifiedName~Domain
 dotnet test --filter FullyQualifiedName~Color
@@ -92,4 +97,5 @@ dotnet test --filter FullyQualifiedName~AI
 ```
 
 ## Change control
+
 Update docs/IMPLEMENTATION_STATUS.md after each work slice; use issue IDs FT-xxx in commit messages; add ADR for module/library changes. Do not assert cross-platform success without testing OS-specific native functionality.

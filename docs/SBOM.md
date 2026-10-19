@@ -8,17 +8,17 @@ Each CI runner also generates `artifacts/sbom/nuget-packages.json` with the comp
 
 ## Direct packages
 
-| Package | Resolved version | Use | Release status |
-|---|---:|---|---|
-| Avalonia | 12.1.2 | Cross-platform desktop controls | MIT metadata recorded; attribution still required |
-| Avalonia.Desktop | 12.1.2 | Desktop platform integration | Include platform-specific native assets only after package review |
-| Avalonia.Headless | 12.1.2 | Test-only production-window/control-tree coverage | Test-only; not redistributed |
-| Avalonia.Skia | 12.1.2 | Desktop renderer and test-only rendered-frame/HiDPI smoke | MIT metadata recorded; renderer/native assets remain part of release review |
-| Avalonia.Themes.Fluent | 12.1.2 | UI theme | MIT metadata recorded; attribution still required |
-| Microsoft.CodeAnalysis.NetAnalyzers | 10.0.402 | Build analyzers | Development-only; not redistributed |
-| Microsoft.NET.Test.Sdk | 17.13.0 | Test runner | Test-only; not redistributed |
-| xunit | 2.9.3 | Unit/golden tests | Test-only; not redistributed |
-| xunit.runner.visualstudio | 2.8.2 | Test runner adapter | Test-only; not redistributed |
+| Package                             | Resolved version | Use                                                       | Release status                                                              |
+| ----------------------------------- | ---------------: | --------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Avalonia                            |           12.1.2 | Cross-platform desktop controls                           | MIT metadata recorded; attribution still required                           |
+| Avalonia.Desktop                    |           12.1.2 | Desktop platform integration                              | Include platform-specific native assets only after package review           |
+| Avalonia.Headless                   |           12.1.2 | Test-only production-window/control-tree coverage         | Test-only; not redistributed                                                |
+| Avalonia.Skia                       |           12.1.2 | Desktop renderer and test-only rendered-frame/HiDPI smoke | MIT metadata recorded; renderer/native assets remain part of release review |
+| Avalonia.Themes.Fluent              |           12.1.2 | UI theme                                                  | MIT metadata recorded; attribution still required                           |
+| Microsoft.CodeAnalysis.NetAnalyzers |         10.0.402 | Build analyzers                                           | Development-only; not redistributed                                         |
+| Microsoft.NET.Test.Sdk              |          17.13.0 | Test runner                                               | Test-only; not redistributed                                                |
+| xunit                               |            2.9.3 | Unit/golden tests                                         | Test-only; not redistributed                                                |
+| xunit.runner.visualstudio           |            2.8.2 | Test runner adapter                                       | Test-only; not redistributed                                                |
 
 ## Important transitive/native inventory
 

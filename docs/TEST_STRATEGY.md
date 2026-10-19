@@ -1,6 +1,7 @@
 # Quality Engineering & Acceptance Strategy
 
 ## Test pyramid
+
 1. **Unit:** pure Domain frame math, clip ranges, undo/redo, schema parse+semantic validation, color transformations, LUT parsing, subtitle timecodes, project migrations.
 2. **Integration:** real ffprobe decode, media composite render, project save/reload, native host and subprocess failure/retry, Gemini mocked HTTP against real deserializer, OS secure-store adapters, the production `FrameTheory.LocalWhisperSmoke` against a separately installed engine/model and spoken fixture, and the CI native-media smoke that generates distinct H.264/AAC fixtures then verifies import, extracted audio, repeated exact-frame seeks, two-video/two-audio timeline export, queue retry, approved AI export and Reel export.
 3. **Golden:** synthetic color wedges, known LUTs, moving timecode counters, mixed-rate source video, title/captions/transition composite and expected pixel/frame/audio results.
@@ -8,13 +9,15 @@
 5. **Release:** dependency/license matrix, package/install/uninstall, explicit package-version and architecture metadata assertions, runtime-specific installer naming, macOS plist lint/identity/version validation, Linux DEB install/remove smoke, bundled FFmpeg/ffprobe presence with adjacent support files and clean-`PATH` runtime-resolution smoke, verified per-file native-bundle provenance manifests, checksum-manifest valid/escape coverage, keychain, OS/CPU compatibility, code signing where possible, smoke on real hardware.
 
 ## Required golden fixtures (generated locally, licensed)
+
 - 3s 30fps color bars and 24fps second source; one variable-rate fixture; landscape+portrait rotations.
 - 1 kHz tone/beeps and spoken permissively generated sample with known timestamp text; silence and music clip.
 - PNG sRGB with alpha, ICC-tagged JPEG test chart, 17/33 LUT identity and warm look.
 - 2x track overlays, wipes, fades, animated title/caption, before/after reveal source.
-Use FFmpeg lavfi generators where useful; keep recorded scripts and expected checksums.
+  Use FFmpeg lavfi generators where useful; keep recorded scripts and expected checksums.
 
 ## Must-pass acceptance assertions
+
 - `save(load(save(project)))` matches canonical snapshot; schema version migration tested.
 - Undo(AI apply plan) exactly restores prior snapshot; failed 3rd action rolls back 1st and 2nd.
 - Invalid AI targets/actions/values produce no changes and clear errors.
@@ -29,12 +32,15 @@ Use FFmpeg lavfi generators where useful; keep recorded scripts and expected che
 - Local transcription acceptance must include a real engine invocation with source-timed words and a preserved source fingerprint; `WhisperCliJsonParser` tests alone are insufficient.
 
 ## Security abuse tests
+
 Prompt injection embedded in subtitles, unexpected JSON keys, path traversal in media references, package checksum sibling escapes and unlisted nested files, huge frames/LUTs, negative/overflow durations, symlink redirects, hostile file names, model retry storms, cache eviction and OS secret-store failure.
 
 ## Platform matrix
+
 Windows 11 x64, macOS Apple Silicon + Intel if available, Linux Ubuntu x64 baseline; track exact OS versions / hardware / driver / native binaries. CI native-media smoke is evidence for host codec/process behavior, not a substitute for GUI smoke. Mark untested environments unverified.
 
 ## Gates
+
 - Every commit: formatting/analyzers + unit + integration tests executable on runner.
 - Each vertical slice: fixture rendering with decode/metadata validation; report provenance.
 - Pre-release: all P0 stories functional, security/license review, executable UI smoke, install/relaunch/recover, accessibility review and package checksum.

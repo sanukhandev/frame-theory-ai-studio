@@ -475,11 +475,11 @@ Audit checkpoint: 2026-10-19, latest verified green complete matrix run `3917230
 
 ## P0 blockers before V1
 
-| Area | Open task(s) | Reason V1 cannot be tagged |
-|---|---|---|
-| Gemini production loop | FT-706 live gate | Desktop revision validation, retries, usage and redacted history are implemented; live provider-to-plan execution remains unverified |
-| Creator Reel/export | FT-803 | Multi-clip Reel, social photo dimensions, queue retry and approved branded watermark export are verified; release-owner rights/visual review and manual 9:16 acceptance remain outside the implementation task |
-| UX/performance/reliability | FT-901..FT-902 manual gate | FT-903 telemetry/proxy and FT-904 diagnostics implementation acceptance passes; interactive/manual GUI and long-session sign-off remain open |
-| QA/release | FT-1002, FT-1003, FT-1005, FT-1006 | Manual journeys, license/CVE clearance, native media redistribution, clean-host relaunch/recovery, signing/notarization and final audit remain open; unsigned installer validation, FT-1001 and FT-1004 are verified |
+| Area                       | Open task(s)                       | Reason V1 cannot be tagged                                                                                                                                                                                           |
+| -------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gemini production loop     | FT-706 live gate                   | Desktop revision validation, retries, usage and redacted history are implemented; live provider-to-plan execution remains unverified                                                                                 |
+| Creator Reel/export        | FT-803                             | Multi-clip Reel, social photo dimensions, queue retry and approved branded watermark export are verified; release-owner rights/visual review and manual 9:16 acceptance remain outside the implementation task       |
+| UX/performance/reliability | FT-901..FT-902 manual gate         | FT-903 telemetry/proxy and FT-904 diagnostics implementation acceptance passes; interactive/manual GUI and long-session sign-off remain open                                                                         |
+| QA/release                 | FT-1002, FT-1003, FT-1005, FT-1006 | Manual journeys, license/CVE clearance, native media redistribution, clean-host relaunch/recovery, signing/notarization and final audit remain open; unsigned installer validation, FT-1001 and FT-1004 are verified |
 
 P1/P2 issues are intentionally not part of a V1 completion claim. V1 remains **not complete** until the P0 blockers above have executable evidence.

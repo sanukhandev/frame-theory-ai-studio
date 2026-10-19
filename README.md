@@ -2,7 +2,7 @@
 
 **Imagine it. Direct it. Edit it.**
 
-An open-development, offline-first **desktop creative studio** for **video editing, image editing, and universal cinematic color grading**. A user-supplied **Google Gemini API key** enables an AI Creative Director that proposes *structured, reversible edits* and, when authorized, applies them to the real timeline and image layers.
+An open-development, offline-first **desktop creative studio** for **video editing, image editing, and universal cinematic color grading**. A user-supplied **Google Gemini API key** enables an AI Creative Director that proposes _structured, reversible edits_ and, when authorized, applies them to the real timeline and image layers.
 
 > **Status: working implementation, not a V1 release.** The offline editor, non-destructive project persistence, FFmpeg media path, color/photo workflows, source-timed local Whisper captions, AI approval executor, social batch export, approved branded watermark export and validated AI recipes have hosted or recorded Windows evidence. Manual UI acceptance, live Gemini validation, branded-output rights/review, licensing/native redistribution, installers/signing and final V1 gates remain open. See [implementation status](docs/IMPLEMENTATION_STATUS.md) and [the acceptance audit](docs/V1_ACCEPTANCE_AUDIT.md); do not present planned or unverified features as shipped.
 
@@ -17,16 +17,16 @@ An open-development, offline-first **desktop creative studio** for **video editi
 
 ## Planned technology
 
-| Layer | Proposed implementation |
-|---|---|
-| Desktop shell | C# / .NET + Avalonia UI; MVVM |
-| Project and command model | Shared .NET libraries; versioned JSON, SQLite indexes/cache when useful |
-| Multitrack media | FFmpeg/ffprobe; evaluate MLT through a versioned adapter before adoption |
-| Photo rendering | SkiaSharp or ImageSharp after licensing/performance review |
-| Common grading | Color-managed normalized parameter graph; image/video adapters; .cube LUTs |
-| AI planning | Gemini via user-owned key; schema-constrained JSON; explicit upload consent |
-| Optional local AI | Whisper-compatible captions; separately installable inference modules |
-| Verification | Unit, integration, export golden tests, UI smoke tests, cross-platform CI |
+| Layer                     | Proposed implementation                                                     |
+| ------------------------- | --------------------------------------------------------------------------- |
+| Desktop shell             | C# / .NET + Avalonia UI; MVVM                                               |
+| Project and command model | Shared .NET libraries; versioned JSON, SQLite indexes/cache when useful     |
+| Multitrack media          | FFmpeg/ffprobe; evaluate MLT through a versioned adapter before adoption    |
+| Photo rendering           | SkiaSharp or ImageSharp after licensing/performance review                  |
+| Common grading            | Color-managed normalized parameter graph; image/video adapters; .cube LUTs  |
+| AI planning               | Gemini via user-owned key; schema-constrained JSON; explicit upload consent |
+| Optional local AI         | Whisper-compatible captions; separately installable inference modules       |
+| Verification              | Unit, integration, export golden tests, UI smoke tests, cross-platform CI   |
 
 These are design choices to validate in working spikes, not promises about completed integrations. Select supported dependency versions at implementation time and document platform licensing.
 
@@ -54,22 +54,22 @@ For review evidence, `scripts/generate_native_media_manifest.ps1` records the st
 
 ## Documentation
 
-| Document | Purpose |
-|---|---|
-| [AGENTS.md](AGENTS.md) | Non-negotiable Codex execution rules |
-| [Product spec](docs/PRODUCT_REQUIREMENTS.md) | Scope, user journeys, P0/P1/P2 and acceptance |
-| [Architecture](docs/ARCHITECTURE.md) | Modules, dependencies, boundaries, data flow |
-| [AI edit contract](docs/AI_EDIT_PLAN.md) | Schema, approvals, executor, undo and safety |
-| [Color pipeline](docs/COLOR_PIPELINE.md) | Color correctness and LUT interoperability |
-| [Timeline and media](docs/MEDIA_ENGINE.md) | Deterministic timeline, preview and export |
-| [UX](docs/UX_DESIGN.md) | Desktop workspaces and interaction conventions |
-| [Security](docs/SECURITY_PRIVACY.md) | API keys, consent, isolation, threat model |
-| [Epics and tasks](docs/EPICS_AND_TASKS.md) | Dependency-aware backlog and definitions of done |
-| [Roadmap](docs/ROADMAP.md) | Incremental releases and acceptance gates |
-| [Test strategy](docs/TEST_STRATEGY.md) | Quality gates and reproducible fixtures |
-| [Codex prompt](docs/CODEX_MASTER_PROMPT.md) | Copy-ready implementation directive |
-| [Licenses](docs/DEPENDENCIES_AND_LICENSES.md) | Dependency reviews and distribution restrictions |
-| [Brand](docs/BRAND_ASSETS.md) | Source-only logo policy and official Instagram handle |
+| Document                                      | Purpose                                               |
+| --------------------------------------------- | ----------------------------------------------------- |
+| [AGENTS.md](AGENTS.md)                        | Non-negotiable Codex execution rules                  |
+| [Product spec](docs/PRODUCT_REQUIREMENTS.md)  | Scope, user journeys, P0/P1/P2 and acceptance         |
+| [Architecture](docs/ARCHITECTURE.md)          | Modules, dependencies, boundaries, data flow          |
+| [AI edit contract](docs/AI_EDIT_PLAN.md)      | Schema, approvals, executor, undo and safety          |
+| [Color pipeline](docs/COLOR_PIPELINE.md)      | Color correctness and LUT interoperability            |
+| [Timeline and media](docs/MEDIA_ENGINE.md)    | Deterministic timeline, preview and export            |
+| [UX](docs/UX_DESIGN.md)                       | Desktop workspaces and interaction conventions        |
+| [Security](docs/SECURITY_PRIVACY.md)          | API keys, consent, isolation, threat model            |
+| [Epics and tasks](docs/EPICS_AND_TASKS.md)    | Dependency-aware backlog and definitions of done      |
+| [Roadmap](docs/ROADMAP.md)                    | Incremental releases and acceptance gates             |
+| [Test strategy](docs/TEST_STRATEGY.md)        | Quality gates and reproducible fixtures               |
+| [Codex prompt](docs/CODEX_MASTER_PROMPT.md)   | Copy-ready implementation directive                   |
+| [Licenses](docs/DEPENDENCIES_AND_LICENSES.md) | Dependency reviews and distribution restrictions      |
+| [Brand](docs/BRAND_ASSETS.md)                 | Source-only logo policy and official Instagram handle |
 
 ## Brand
 

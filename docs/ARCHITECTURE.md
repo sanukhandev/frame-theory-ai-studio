@@ -1,6 +1,7 @@
 # Architecture and Module Contracts
 
 ## Target topology
+
 ```text
 FrameTheory.Desktop (Avalonia/MVVM)
   ├─ FrameTheory.Application (use cases, DI, orchestration)
@@ -17,6 +18,7 @@ tools/ ... fixture creators and QA scripts
 ```
 
 ## Architectural constraints
+
 - `Domain` is pure and headless: no Avalonia, FFmpeg process creation, HTTP, filesystem or native libraries.
 - `Application` coordinates injected interfaces; UI never calls FFmpeg/HTTP directly.
 - `Media` owns frame/time conventions, process invocation, audio routing, cancellation, probe metadata and output receipts.
@@ -26,6 +28,7 @@ tools/ ... fixture creators and QA scripts
 - `Platform` abstracts secure secrets, FFmpeg executable discovery, available GPU backend and OS-specific packaging.
 
 ## Ownership and interfaces (illustrative C#)
+
 ```csharp
 public interface IMediaProbe { Task<MediaInfo> ProbeAsync(Uri file, CancellationToken ct); }
 public interface IPreviewRenderer { Task<FrameBuffer> RenderFrameAsync(ProjectSnapshot project, FrameIndex frame, CancellationToken ct); }
@@ -36,26 +39,32 @@ public interface IAiPlanner { Task<AiPlanResult> PlanAsync(AiRequest request, Ca
 public interface IAiPlanExecutor { PlanValidation Validate(AiEditPlan plan, ProjectSnapshot project); CommandResult ApplyTransactional(AiEditPlan plan, ProjectSnapshot project); }
 public interface ISecretStore { Task StoreAsync(string name, string secret); Task<string?> ReadAsync(string name); Task DeleteAsync(string name); }
 ```
+
 Types are contract sketches; update documentation when finalized, not secretly diverge.
 
 ## Primary data model
+
 `ProjectSnapshot`: schemaVersion, id, frameRate rational, canvas dimensions, color working space, media refs (stable id, fingerprint, relative/absolute relink hint), ordered tracks, clips (in/out integer frames, start frame, layer/z-order), effects, grade graph, titles/captions, keyframes, audio mix, undo checkpoint pointer.
 
 Photos share the project container but use `PhotoDocument`: canvas, asset refs, layer tree, adjustments, masks, transform, export profile.
 
 ## Rendering strategy
+
 Select/verify a real playback integration early. FFmpeg is not itself a ready interactive NLE timeline; investigate MLT for graph orchestration and native hosting. Build a spike measuring frame seek, track mix, 1080p frame latency, color LUT, crossfade, crash handling and ARM64 packaging. If MLT bindings fail, implement a tested adapter with FFmpeg preview/proxy + a deterministic compositor; do not promise full parity without proof.
 
 **One canonical command/effect representation** drives preview and export. Avoid separate divergent effect pipelines; where different engines are required, maintain conformance tests.
 
 ## Failure containment
+
 - Render/export in cancellable workers; supervise native subprocess crashes and timeouts.
 - Atomic output writes; never replace originals; checksum source media after destructive-looking operations.
 - Bounded caches with disk quota and eviction; project references remain valid if cache is deleted.
 - Feature detection drives UI; unsupported features disabled with explanation, not silently skipped.
 
 ## Dependency graph / critical path
+
 Foundation -> project+time model -> probe/playback spike -> color graph -> photo+video edit command execution -> saving/export -> AI plan validation+transaction -> UX refinement -> packaging/test. Parallelize captions, docs, platform wrappers only after stable contracts.
 
 ## Architectural decision process
+
 Write an ADR under docs/adr/ before replacing major libraries, changing schema, adding a cloud dependency or introducing license-restricted artifacts. Capture alternatives, benchmarks and rollback strategy.
