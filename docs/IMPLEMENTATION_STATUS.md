@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Title-placement checkpoint (2026-10-19):** Timeline titles now reject undefined placement values before drawtext coordinate generation; focused title-contract coverage passes. Native caption/title acceptance remains open.
+
 **Reveal-style checkpoint (2026-10-19):** Timeline render plans now reject undefined before/after reveal styles before compositor dispatch; focused render-plan coverage passes. Native reel acceptance remains open.
 
 **Decoder dependency checkpoint (2026-10-19):** `FfmpegFrameDecoder` now rejects a missing media process runner at construction; focused decoder coverage passes. Native preview acceptance remains open.

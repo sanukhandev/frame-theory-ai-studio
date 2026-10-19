@@ -46,6 +46,11 @@ public sealed record TimelineTitle
             throw new ArgumentOutOfRangeException(nameof(fontSize));
         }
 
+        if (!Enum.IsDefined(placement))
+        {
+            throw new ArgumentOutOfRangeException(nameof(placement));
+        }
+
         Text = text;
         FontPath = fontPath;
         TimelineRange = new FrameRange(startFrame, durationFrames);

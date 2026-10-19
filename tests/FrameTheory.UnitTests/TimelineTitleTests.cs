@@ -12,6 +12,12 @@ public sealed class TimelineTitleTests
         Xunit.Assert.Throws<ArgumentException>(() => new TimelineTitle("Title", string.Empty, 0, 30));
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineTitle("Title", "font.ttf", 0, 30, fontSize: 5000));
         Xunit.Assert.Equal("durationFrames", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineTitle("Title", "font.ttf", 0, 0)).ParamName);
+        Xunit.Assert.Equal("placement", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineTitle(
+            "Title",
+            "font.ttf",
+            0,
+            30,
+            placement: (TimelineTitlePlacement)99)).ParamName);
     }
 
     [Xunit.Fact]
