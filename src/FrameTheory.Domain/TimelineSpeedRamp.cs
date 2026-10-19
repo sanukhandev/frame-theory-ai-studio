@@ -29,6 +29,11 @@ public sealed class TimelineSpeedRamp
     {
         ArgumentNullException.ThrowIfNull(points);
         var orderedPoints = points.ToArray();
+        if (orderedPoints.Any(point => point is null))
+        {
+            throw new ArgumentException("Speed-ramp points cannot contain null entries.", nameof(points));
+        }
+
         if (orderedPoints.Length < 2 || orderedPoints.Zip(orderedPoints.Skip(1)).Any(pair => pair.First.Frame >= pair.Second.Frame))
         {
             throw new ArgumentException("A speed ramp requires at least two strictly increasing points.", nameof(points));

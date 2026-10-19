@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline domain collection checkpoint (2026-10-19):** Timeline tracks, graphs and speed ramps now reject null entries before ordering or dereferencing; focused domain validation coverage passes. Native timeline persistence acceptance remains open.
+
 **Timeline layer integrity checkpoint (2026-10-19):** Video and audio layer constructors now reject null segment entries before ordering them, preventing corrupted state from surfacing as null-reference failures; focused compositor/audio coverage passes. Native timeline persistence acceptance remains open.
 
 **Timeline keyframe integrity checkpoint (2026-10-19):** Keyframe collections now reject null entries before sorting, converting corrupted input into a clear argument failure instead of a null-reference crash; focused keyframe coverage passes. Native timeline persistence acceptance remains open.

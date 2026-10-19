@@ -170,7 +170,13 @@ public sealed class TimelineTrack
         }
 
         ArgumentNullException.ThrowIfNull(clips);
-        var orderedClips = clips.OrderBy(clip => clip.TimelineRange.StartFrame).ToArray();
+        var source = clips.ToArray();
+        if (source.Any(clip => clip is null))
+        {
+            throw new ArgumentException("Track clips cannot contain null entries.", nameof(clips));
+        }
+
+        var orderedClips = source.OrderBy(clip => clip.TimelineRange.StartFrame).ToArray();
         if (orderedClips.Any(clip => kind == TimelineTrackKind.Video ? !clip.IsVideo : !clip.IsAudio))
         {
             throw new ArgumentException("Track clips must match the track kind.", nameof(clips));
@@ -235,6 +241,11 @@ public sealed class TimelineGraph
     {
         ArgumentNullException.ThrowIfNull(tracks);
         var timelineTracks = tracks.ToArray();
+        if (timelineTracks.Any(track => track is null))
+        {
+            throw new ArgumentException("A timeline graph cannot contain null tracks.", nameof(tracks));
+        }
+
         if (timelineTracks.GroupBy(track => track.Id, StringComparer.OrdinalIgnoreCase).Any(group => group.Count() > 1))
         {
             throw new ArgumentException("Track IDs must be unique.", nameof(tracks));
