@@ -26,7 +26,7 @@ public sealed class SetCanvasCommand : IEditCommand
 
 public sealed class AddMediaReferenceCommand : IEditCommand
 {
-    public AddMediaReferenceCommand(MediaReference mediaReference) => MediaReference = mediaReference;
+    public AddMediaReferenceCommand(MediaReference mediaReference) => MediaReference = mediaReference ?? throw new ArgumentNullException(nameof(mediaReference));
 
     public MediaReference MediaReference { get; }
 
@@ -60,7 +60,7 @@ public sealed class SetColorPresetCommand : IEditCommand
 
 public sealed class RemoveMediaReferenceCommand : IEditCommand
 {
-    public RemoveMediaReferenceCommand(MediaReference mediaReference) => MediaReference = mediaReference;
+    public RemoveMediaReferenceCommand(MediaReference mediaReference) => MediaReference = mediaReference ?? throw new ArgumentNullException(nameof(mediaReference));
 
     public MediaReference MediaReference { get; }
 

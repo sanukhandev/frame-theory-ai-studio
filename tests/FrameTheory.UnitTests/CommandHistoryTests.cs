@@ -5,6 +5,13 @@ namespace FrameTheory.UnitTests;
 public sealed class CommandHistoryTests
 {
     [Xunit.Fact]
+    public void MediaReferenceCommandsRejectNullReferences()
+    {
+        Xunit.Assert.Throws<ArgumentNullException>(() => new AddMediaReferenceCommand(null!));
+        Xunit.Assert.Throws<ArgumentNullException>(() => new RemoveMediaReferenceCommand(null!));
+    }
+
+    [Xunit.Fact]
     public void NamedGroupUndoRedoRestoresExactProjectSnapshots()
     {
         var sourceUri = new Uri("file:///media/clip.mov");

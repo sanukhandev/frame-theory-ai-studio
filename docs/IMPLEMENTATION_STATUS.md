@@ -22,6 +22,8 @@
 
 **Timeline transform checkpoint (2026-10-19):** Video transforms now permit signed X/Y offsets so pan-up and pan-left keyframes are representable; focused timeline contract coverage passes. Native transform preview acceptance remains open.
 
+**Edit-command checkpoint (2026-10-19):** Media-reference add/remove commands now reject null references at construction instead of failing during transactional apply/undo; focused command-history coverage passes. Native command workflow acceptance remains open.
+
 **Audio-preparation dependency checkpoint (2026-10-19):** Audio source preparation now rejects a missing media process runner at construction instead of failing during extraction; focused audio coverage passes. Native audio acceptance remains open.
 
 **Media-import dependency checkpoint (2026-10-19):** FFmpeg media importers now reject missing probe, preview-decoder and process-runner services at construction; focused import coverage passes. Native import acceptance remains open.
