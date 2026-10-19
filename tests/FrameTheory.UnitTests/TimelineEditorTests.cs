@@ -82,6 +82,18 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void TimelineScrollClampsExtremeFrameDeltas()
+    {
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(Metadata(new Uri("file:///scroll-boundary.mp4"), "scroll-boundary", 90, hasAudio: false));
+
+        editor.ScrollBy(long.MaxValue);
+        Xunit.Assert.Equal(editor.TotalFrames - 1, editor.ScrollFrame);
+        editor.ScrollBy(long.MinValue);
+        Xunit.Assert.Equal(0, editor.ScrollFrame);
+    }
+
+    [Xunit.Fact]
     public void TimelineEditorSupportsCopyPasteSplitTrimRippleDeleteAndOverlapProtection()
     {
         var mediaId = MediaId.Parse(new string('d', 64));

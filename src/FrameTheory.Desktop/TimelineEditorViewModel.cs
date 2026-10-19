@@ -1487,7 +1487,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         FramesPerPixel = Math.Clamp(framesPerPixel, 0.05, 100);
     }
 
-    public void ScrollBy(long frameDelta) => ScrollFrame = Math.Clamp(ScrollFrame + frameDelta, 0, Math.Max(0, TotalFrames - 1));
+    public void ScrollBy(long frameDelta) => ScrollFrame = Math.Clamp(AddClamped(ScrollFrame, frameDelta), 0, Math.Max(0, TotalFrames - 1));
 
     public IReadOnlyList<TimelineRulerTick> BuildRulerTicks(double viewportPixels)
     {
@@ -1516,9 +1516,30 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         var boundaries = _graph.Tracks
             .SelectMany(track => track.Clips)
             .SelectMany(clip => new[] { clip.TimelineRange.StartFrame, clip.TimelineRange.EndFrameExclusive })
-            .OrderBy(boundary => Math.Abs(boundary - frame))
+            .OrderBy(boundary => Distance(boundary, frame))
             .FirstOrDefault(frame);
-        return Math.Abs(boundaries - frame) <= 2 ? boundaries : frame;
+        return Distance(boundaries, frame) <= 2 ? boundaries : frame;
+    }
+
+    private static long AddClamped(long value, long delta)
+    {
+        if (delta > 0 && value > long.MaxValue - delta)
+        {
+            return long.MaxValue;
+        }
+
+        if (delta < 0 && value < long.MinValue - delta)
+        {
+            return long.MinValue;
+        }
+
+        return value + delta;
+    }
+
+    private static Int128 Distance(long left, long right)
+    {
+        var difference = (Int128)left - right;
+        return difference < 0 ? -difference : difference;
     }
 
     private void Refresh()

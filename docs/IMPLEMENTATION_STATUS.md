@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline numeric-boundary checkpoint (2026-10-19):** Timeline scroll deltas now clamp instead of wrapping, and snap-distance ordering uses `Int128` so extreme frame positions cannot overflow; focused timeline coverage passes. Native transport acceptance remains open.
+
 **Timeline caption bounds checkpoint (2026-10-19):** Caption range validation now uses checked frame arithmetic, preventing large frame inputs from wrapping into an apparently valid range; focused timeline coverage passes. Native caption acceptance remains open.
 
 **LUT parser boundary checkpoint (2026-10-19):** 3D LUT parsing now rejects duplicate size and domain directives instead of silently redefining structural state; focused LUT coverage passes. LUT legal/format acceptance remains open.
