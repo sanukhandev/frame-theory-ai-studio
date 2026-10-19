@@ -271,7 +271,7 @@ public sealed class FoundationTests
                     new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
                     tabItems.Select(AutomationProperties.GetName));
                 Xunit.Assert.Equal(
-                    "Use Ctrl+1 through Ctrl+4 for workspaces, Space to play or stop, Home/End to seek the Video timeline, Ctrl+Z to undo, and Ctrl+Shift+Z to redo.",
+                    "Use Ctrl+1 through Ctrl+4 for workspaces, Space to play or stop, Escape to stop preview playback, Home/End to seek the Video timeline, Ctrl+Z to undo, and Ctrl+Shift+Z to redo.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBlock>().Single(control => AutomationProperties.GetName(control) == "Workspace keyboard shortcuts")));
                 var activeIndicators = window.GetVisualDescendants()
                     .OfType<Border>()

@@ -1,5 +1,7 @@
 # V1 Acceptance Audit
 
+Machine audit checkpoint: Escape now cancels active local timeline preview playback through the same shortcut path advertised by the production shell; blocking-decoder and shell tooltip coverage pass. Native keyboard acceptance remains required.
+
 Machine audit checkpoint: timeline preview proxy and original-source comparison are mutually exclusive at the view-model boundary, so preview status cannot describe a different pixel source than the decoder used. Focused coverage is added; native preview acceptance remains required.
 
 Machine audit checkpoint: the source-preview UX follow-up now refreshes the current frame on toggle and disables original-source comparison until a video track exists. Focused shell/source-preview coverage passes 2/2; the full local Release gate passes 422 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native visual and cross-platform manual acceptance remain required.

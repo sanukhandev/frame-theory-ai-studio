@@ -824,6 +824,25 @@ public sealed class DesktopImportTests
         Xunit.Assert.True(viewModel.TimelineEditor.SnapEnabled);
     }
 
+    [Xunit.Fact]
+    public async Task TimelinePlaybackCanBeStoppedWithKeyboardShortcut()
+    {
+        var decoder = new BlockingPreviewDecoder();
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new ShortVideoImporter(),
+            timelinePreviewDecoder: decoder);
+
+        await viewModel.ImportFilesAsync(["playback-shortcut.mp4"], CancellationToken.None);
+        var playback = viewModel.PlayTimelinePreviewAsync(CancellationToken.None);
+        await decoder.Started.Task;
+
+        Xunit.Assert.True(viewModel.HandleShortcut(EditorShortcut.StopTimelinePreview));
+        Xunit.Assert.False(await playback);
+        Xunit.Assert.False(viewModel.IsTimelinePreviewPlaying);
+    }
+
     private sealed class StubCapabilityDetector : ICapabilityDetector
     {
         public Task<CapabilityReport> DetectAsync(CancellationToken cancellationToken) => Task.FromResult(

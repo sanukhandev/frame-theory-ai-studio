@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline keyboard-stop checkpoint (2026-10-19):** Escape now routes through the Video workspace shortcut contract to cancel active local timeline preview playback; the blocking-decoder regression verifies cancellation and the header advertises the shortcut. Focused playback and shell coverage passes; native keyboard acceptance remains open.
+
 **Timeline preview-mode checkpoint (2026-10-19):** Bounded proxy preview and original-source comparison are now mutually exclusive through the view-model property contract, preventing status text from claiming source pixels while decoding a proxy. Focused desktop coverage passes; the full local Release gate remains required before the next 50-commit push. Native preview acceptance remains open.
 
 **Timeline source-preview UX checkpoint (2026-10-19):** The original-source comparison toggle now refreshes the current monitor frame immediately when clicked and remains disabled until a video track exists; focused shell/source-preview coverage passes 2/2. The full local Release gate passes 422 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native visual and cross-platform manual acceptance remain open.
