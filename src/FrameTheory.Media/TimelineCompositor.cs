@@ -74,6 +74,15 @@ public sealed record TimelineVideoRenderPlan
             throw new ArgumentException("Render-plan audio layers cannot contain null entries.", nameof(audioLayers));
         }
 
+        var referencedMediaIds = videoLayers
+            .SelectMany(layer => layer.Segments)
+            .Select(segment => segment.Clip.MediaId)
+            .Concat(audioLayerArray.SelectMany(layer => layer.Segments).Select(segment => segment.Clip.MediaId));
+        if (referencedMediaIds.Any(mediaId => !sourceMap.ContainsKey(mediaId)))
+        {
+            throw new ArgumentException("Render-plan layers must reference media present in the source map.", nameof(sources));
+        }
+
         var titleArray = (titles ?? []).ToArray();
         if (titleArray.Any(title => title is null))
         {

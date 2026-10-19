@@ -112,6 +112,14 @@ public sealed class TimelineCompositorTests
             sources,
             [],
             colorGrades: new Dictionary<MediaId, ColorGrade> { [default] = null! }));
+        Xunit.Assert.Throws<ArgumentException>(() => new TimelineVideoRenderPlan(
+            frameRate,
+            16,
+            8,
+            30,
+            new Dictionary<MediaId, Uri>(),
+            [new TimelineVideoLayer("video", 0, [new TimelineVideoSegment(
+                TimelineClip.Video(mediaId, 0, 30, 0, 30, frameRate))])]));
     }
 
     [Xunit.Fact]
