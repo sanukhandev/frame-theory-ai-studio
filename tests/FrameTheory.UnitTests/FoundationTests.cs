@@ -699,6 +699,13 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Play timeline preview");
                 Xunit.Assert.False(playTimeline.IsEnabled);
                 Xunit.Assert.Equal("Play timeline", playTimeline.Content);
+                var showSourcePreview = window.GetVisualDescendants()
+                    .OfType<CheckBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Show original timeline source frame");
+                Xunit.Assert.False(showSourcePreview.IsEnabled);
+                Xunit.Assert.Equal(
+                    "Compare the uncomposited source frame with the rendered timeline preview without changing the project.",
+                    ToolTip.GetTip(showSourcePreview));
                 var outputLabel = window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => control.Text == "OUTPUT");

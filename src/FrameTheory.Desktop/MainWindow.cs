@@ -3030,12 +3030,18 @@ public sealed class MainWindow : Window
         });
         AutomationProperties.SetName(showSourcePreview, "Show original timeline source frame");
         ToolTip.SetTip(showSourcePreview, "Compare the uncomposited source frame with the rendered timeline preview without changing the project.");
+        showSourcePreview.IsEnabled = timeline.TrackRows.Any(row => row.Kind == TimelineTrackKind.Video);
+        showSourcePreview.Click += async (_, _) => await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None);
         var playhead = new Slider { Minimum = 0, Maximum = Math.Max(1, timeline.TotalFrames - 1), Value = timeline.CurrentFrame };
         AutomationProperties.SetName(playhead, "Timeline playhead frame");
         ToolTip.SetTip(playhead, "Scrub to an exact timeline frame.");
         playhead.ValueChanged += (_, args) => timeline.SeekFrame((long)Math.Round(args.NewValue, MidpointRounding.AwayFromZero));
         timeline.PropertyChanged += (_, args) =>
         {
+            if (args.PropertyName == nameof(TimelineEditorViewModel.TrackRows))
+            {
+                showSourcePreview.IsEnabled = timeline.TrackRows.Any(row => row.Kind == TimelineTrackKind.Video);
+            }
             if (args.PropertyName is nameof(TimelineEditorViewModel.TotalFrames) or nameof(TimelineEditorViewModel.CurrentFrame))
             {
                 playhead.Maximum = Math.Max(1, timeline.TotalFrames - 1);

@@ -1,5 +1,7 @@
 # V1 Acceptance Audit
 
+Machine audit checkpoint: the source-preview UX follow-up now refreshes the current frame on toggle and disables original-source comparison until a video track exists. Focused shell/source-preview coverage passes 2/2; the full local Release gate passes 422 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native visual and cross-platform manual acceptance remain required.
+
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
 - Current FT-902 source-preview increment: the Video monitor can switch between the rendered timeline compositor and the original decoded source frame without changing editable project state; focused coverage and the full 422-unit/2-golden local Release gate pass. Manual native visual, HiDPI and cross-platform review remain required.
