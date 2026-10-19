@@ -20,6 +20,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Recovery path checkpoint: project recovery rejects blank project and replacement paths before autosave, relink or containment normalization; focused coverage passes locally. Native recovery workflow acceptance remains open.
 
+- Project frame-rate checkpoint: project snapshots reject an uninitialized frame rate before persistence or timeline use; focused domain coverage passes locally. Native project reopen acceptance remains open.
+
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
 - Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.

@@ -59,6 +59,11 @@ public sealed record ProjectSnapshot
             throw new ArgumentException("A project ID is required.", nameof(projectId));
         }
 
+        if (!frameRate.IsValid)
+        {
+            throw new ArgumentException("A valid project frame rate is required.", nameof(frameRate));
+        }
+
         if (canvasWidth <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(canvasWidth), "Canvas dimensions must be positive.");
