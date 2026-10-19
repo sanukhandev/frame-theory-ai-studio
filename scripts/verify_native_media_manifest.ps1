@@ -7,6 +7,19 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+function Get-ToolVersion([string]$path) {
+    $version = (& $path -version 2>&1 | Out-String).Trim()
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($version)) {
+        throw "Native media tool did not return version output: $path."
+    }
+
+    if ($version.Length -gt 8192) {
+        return $version.Substring(0, 8192)
+    }
+
+    return $version
+}
+
 $rootItem = Get-Item -LiteralPath $Directory -ErrorAction Stop
 if (-not $rootItem.PSIsContainer -or ($rootItem.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
     throw "Native media bundle directory is invalid or linked: $Directory"
@@ -65,6 +78,9 @@ foreach ($toolName in @("ffmpeg", "ffprobe")) {
     $toolHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $toolPath).Hash.ToLowerInvariant()
     if ($toolHash -ne $tool.sha256) {
         throw "Native media manifest tool hash mismatch: $($tool.name)."
+    }
+    if ((Get-ToolVersion $toolPath) -ne $tool.version) {
+        throw "Native media manifest tool version mismatch: $($tool.name)."
     }
 }
 

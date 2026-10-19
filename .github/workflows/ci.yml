@@ -117,7 +117,7 @@ jobs:
             }
           }
           $manifestVerifier = Get-Content -LiteralPath 'scripts/verify_native_media_manifest.ps1' -Raw
-          foreach ($needle in @('ConvertFrom-Json', 'Get-FileHash', 'Get-Item -LiteralPath $ManifestPath', 'Get-ChildItem -LiteralPath $rootItem.FullName -Force', 'ReparsePoint', 'schemaVersion')) {
+          foreach ($needle in @('ConvertFrom-Json', 'Get-FileHash', 'Get-ToolVersion', 'Get-Item -LiteralPath $ManifestPath', 'Get-ChildItem -LiteralPath $rootItem.FullName -Force', 'ReparsePoint', 'schemaVersion')) {
             if ($manifestVerifier -notmatch [regex]::Escape($needle)) {
               throw "Native media manifest verifier is missing required check: $needle"
             }
@@ -409,6 +409,14 @@ jobs:
           Set-Content -LiteralPath (Join-Path $bundleDirectory "frame-theory-native-support.test") -Value "support-file"
           ./scripts/generate_native_media_manifest.ps1 -Directory $bundleDirectory -OutputPath artifacts/sbom/native-bundle-windows.json -FfmpegName ffmpeg.exe -FfprobeName ffprobe.exe
           ./scripts/verify_native_media_manifest.ps1 -Directory $bundleDirectory -ManifestPath artifacts/sbom/native-bundle-windows.json
+          $tamperedManifest = Join-Path $env:RUNNER_TEMP "native-bundle-windows-tampered.json"
+          $manifest = Get-Content -LiteralPath artifacts/sbom/native-bundle-windows.json -Raw | ConvertFrom-Json
+          $manifest.tools.ffmpeg.version = "$($manifest.tools.ffmpeg.version) tampered"
+          $manifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $tamperedManifest
+          $tamperedOutput = & ./scripts/verify_native_media_manifest.ps1 -Directory $bundleDirectory -ManifestPath $tamperedManifest 2>&1
+          if ($LASTEXITCODE -eq 0 -or (($tamperedOutput -join "`n") -notmatch 'tool version mismatch')) {
+            throw "Native media manifest verifier accepted tampered tool version provenance."
+          }
           ./scripts/package_windows.ps1 -OutputDirectory artifacts/installer -PublishDirectory artifacts/installer-publish -Version 0.1.1 -FfmpegDirectory $bundleDirectory
           $installer = Join-Path (Resolve-Path artifacts/installer).Path "FrameTheoryStudioAI-win-x64.exe"
           $installDirectory = Join-Path $env:RUNNER_TEMP "frame-theory-installed"

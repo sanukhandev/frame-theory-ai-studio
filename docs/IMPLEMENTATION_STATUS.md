@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Native manifest provenance checkpoint (2026-10-19):** Native FFmpeg/ffprobe manifest verification now re-runs each staged tool and rejects tampered version output in addition to hash and size mismatches; the Windows hosted validation path includes the regression. Local fake-tool generation, verification and tampered-version rejection pass. FT-1003 remains open for legal/license, CVE, codec and redistribution approval.
+
 **Timeline seek-boundary checkpoint (2026-10-19):** Video Home/End shortcuts now seek through the existing transport path, and post-snap clamping prevents a clip’s exclusive end boundary from becoming an invalid current frame. Foundation coverage passes 29 tests and timeline coverage passes 21 tests; native keyboard/HiDPI acceptance remains open.
 
 **Timeline undo/redo checkpoint (2026-10-19):** Video workspace manual edits now run through the existing full timeline snapshot transaction boundary, with visible Undo/Redo controls, `Ctrl+Z`/`Ctrl+Y` routing, rollback on failed operations, and coverage for captions, watermark changes and inspector actions; reviewed rough cuts retain their existing transactional AI-undo path without duplicate history entries. Timeline-focused coverage passes 20 tests and Foundation UI/shortcut coverage passes 28 tests; the full local Release gate passes 355 unit tests, 2 golden tests, a warning-free build, format verification and repository validation. Native manual acceptance remains open.
