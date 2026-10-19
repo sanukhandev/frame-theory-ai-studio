@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline beat-mode persistence checkpoint (2026-10-19):** Project and transactional timeline restores now notify the bound `BeatDetectionMode` property after loading its persisted value, keeping the waveform-analysis selector synchronized; round-trip coverage passes. Native timeline UI acceptance remains open.
+
 **Timeline scroll persistence checkpoint (2026-10-19):** Reopened timeline projects now restore `ScrollFrame` through its notifying property setter, keeping the bound timeline viewport synchronized with the persisted horizontal position; round-trip coverage passes. Native reopen/visual acceptance remains open.
 
 **Native bundle packaging checkpoint (2026-10-19):** Windows, macOS and Linux package scripts now fail closed on nested native-bundle directories instead of silently omitting them; existing linked-entry and required-tool guards remain active. Shell syntax and focused packaging guard validation remain required before hosted release evidence.

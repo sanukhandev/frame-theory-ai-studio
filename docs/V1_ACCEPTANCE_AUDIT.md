@@ -4,6 +4,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Current FT-901/FT-902 navigation increment: Home/End seek through the Video transport path and post-snap clamping keeps the playhead inside the valid frame range; focused Foundation coverage passes 29 tests and timeline coverage passes 21 tests. Native keyboard, visual and HiDPI acceptance remain open.
 
+- Current FT-902 persistence increment: project and transactional restores notify the persisted `BeatDetectionMode`, keeping the bound waveform-analysis selector synchronized; round-trip coverage remains green. Native timeline UI acceptance remains open.
+
 - Current FT-902 persistence increment: timeline reopen restores the saved horizontal `ScrollFrame` through its notifying property path, with round-trip coverage. Native visual/reopen acceptance remains open.
 
 - Current FT-1005 packaging increment: all per-OS native-bundle packagers reject nested directories rather than silently omitting support files; linked-entry and required-tool guards remain active. Hosted packaging revalidation is still required.

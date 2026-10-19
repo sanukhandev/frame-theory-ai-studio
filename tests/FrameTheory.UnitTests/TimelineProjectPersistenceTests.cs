@@ -27,6 +27,7 @@ public sealed class TimelineProjectPersistenceTests
         editor.SelectFirst(TimelineTrackKind.Video);
         editor.ApplyStaticTransformToSelected(1.2, 3, 4, 0);
         editor.ApplyColorGradeToMedia(originalId.Value, new ColorGrade(exposureEV: 1, saturation: 0.25f));
+        editor.BeatDetectionMode = BeatDetectionMode.EnergyOnsets;
         editor.AddTitleAt("Opening", "licensed-font.ttf", 0, 10, TimelineAnimationPreset.FadeIn);
         editor.AddCaptionAt("Verified caption", CaptionProvenance.AuthoredCaption, 2, 5, "licensed-font.ttf");
         editor.ApplyBeforeAfterStyle(TimelineRevealStyle.Wipe);
@@ -42,6 +43,7 @@ public sealed class TimelineProjectPersistenceTests
         Xunit.Assert.Equal(30, restored.TotalFrames);
         Xunit.Assert.Equal(5, restored.CurrentFrame);
         Xunit.Assert.Equal(10, restored.ScrollFrame);
+        Xunit.Assert.Equal(BeatDetectionMode.EnergyOnsets, restored.BeatDetectionMode);
         Xunit.Assert.Equal(remappedId.Value, restored.TrackRows.Single(row => row.Kind == TimelineTrackKind.Video).Clips.Single().MediaId);
         Xunit.Assert.Equal("Verified caption", restored.Captions.Single().Text);
         Xunit.Assert.Equal(TimelineRevealStyle.Wipe, restored.CaptureProjectState().BeforeAfterStyle);

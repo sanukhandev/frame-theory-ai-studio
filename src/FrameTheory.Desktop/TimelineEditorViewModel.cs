@@ -656,6 +656,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(Captions));
         OnPropertyChanged(nameof(TranscriptSourceFingerprint));
         OnPropertyChanged(nameof(KineticCaptions));
+        OnPropertyChanged(nameof(BeatDetectionMode));
     }
 
     public void ApplyBeforeAfterStyle(TimelineRevealStyle style)
@@ -1085,6 +1086,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(Captions));
         OnPropertyChanged(nameof(KineticCaptions));
         OnPropertyChanged(nameof(TranscriptSourceFingerprint));
+        OnPropertyChanged(nameof(BeatDetectionMode));
         OnPropertyChanged(nameof(BeatMarkers));
         OnPropertyChanged(nameof(BeatMarkersText));
     }
