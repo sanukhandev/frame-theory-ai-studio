@@ -7,7 +7,10 @@ public sealed class ProjectRecoveryService
 {
     private readonly JsonProjectRepository _repository;
 
-    public ProjectRecoveryService(JsonProjectRepository repository) => _repository = repository;
+    public ProjectRecoveryService(JsonProjectRepository repository)
+    {
+        _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+    }
 
     public async Task SaveAutosaveAsync(string projectPath, ProjectSnapshot snapshot, CancellationToken cancellationToken)
     {

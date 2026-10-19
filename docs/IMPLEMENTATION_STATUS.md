@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Recovery dependency validation checkpoint (2026-10-19):** Project recovery now rejects a missing JSON repository at construction instead of deferring the failure to the first autosave operation; focused recovery coverage passes. Storage relink acceptance remains open.
+
 **Workspace dependency validation checkpoint (2026-10-19):** Desktop shell construction now rejects a missing capability detector at the composition boundary instead of failing later during an asynchronous refresh; focused constructor coverage passes. Native workspace acceptance remains open.
 
 **Workspace startup resilience checkpoint (2026-10-19):** A workspace-state read failure now falls back to Video and records diagnostics instead of preventing shell construction; focused startup coverage complements the existing write-failure regression. Native workspace acceptance remains open.

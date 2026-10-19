@@ -6,6 +6,12 @@ namespace FrameTheory.UnitTests;
 public sealed class RecoveryTests
 {
     [Xunit.Fact]
+    public void RecoveryRequiresProjectRepository()
+    {
+        Xunit.Assert.Throws<ArgumentNullException>(() => new ProjectRecoveryService(null!));
+    }
+
+    [Xunit.Fact]
     public async Task AutosaveRecoveryAndRelinkDoNotChangeTheOriginalSource()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-recovery-");
