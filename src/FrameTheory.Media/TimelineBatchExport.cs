@@ -32,11 +32,31 @@ public sealed record TimelineBatchExportTarget
     public ExportPreset Preset { get; }
 }
 
-public sealed record TimelineBatchExportProgress(
-    string TargetName,
-    int CompletedTargets,
-    int TotalTargets,
-    ExportProgress Progress);
+public sealed record TimelineBatchExportProgress
+{
+    public TimelineBatchExportProgress(string targetName, int completedTargets, int totalTargets, ExportProgress progress)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(targetName);
+        ArgumentNullException.ThrowIfNull(progress);
+        if (totalTargets <= 0 || completedTargets < 0 || completedTargets > totalTargets)
+        {
+            throw new ArgumentOutOfRangeException(nameof(completedTargets));
+        }
+
+        TargetName = targetName.Trim();
+        CompletedTargets = completedTargets;
+        TotalTargets = totalTargets;
+        Progress = progress;
+    }
+
+    public string TargetName { get; }
+
+    public int CompletedTargets { get; }
+
+    public int TotalTargets { get; }
+
+    public ExportProgress Progress { get; }
+}
 
 public sealed class TimelineBatchExporter
 {

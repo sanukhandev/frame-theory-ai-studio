@@ -6,6 +6,21 @@ namespace FrameTheory.UnitTests;
 public sealed class TimelineBatchExportTests
 {
     [Xunit.Fact]
+    public void BatchExportProgressRejectsImpossibleCounts()
+    {
+        var progress = new ExportProgress("Encoding", 0.5);
+
+        Xunit.Assert.Throws<ArgumentException>(() => new TimelineBatchExportProgress(" ", 0, 1, progress));
+        Xunit.Assert.Throws<ArgumentNullException>(() => new TimelineBatchExportProgress("Target", 0, 1, null!));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineBatchExportProgress("Target", -1, 1, progress));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineBatchExportProgress("Target", 2, 1, progress));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineBatchExportProgress("Target", 0, 0, progress));
+
+        var valid = new TimelineBatchExportProgress(" Target ", 1, 2, progress);
+        Xunit.Assert.Equal("Target", valid.TargetName);
+    }
+
+    [Xunit.Fact]
     public async Task BatchExportsTargetsInOrderAndReportsCompletion()
     {
         var exporter = new RecordingTimelineExporter();
