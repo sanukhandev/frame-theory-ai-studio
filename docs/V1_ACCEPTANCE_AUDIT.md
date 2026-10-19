@@ -58,6 +58,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - AI request checkpoint: Gemini analysis requests reject null assets and unsupported scope flags before local sampling; focused analysis coverage passes locally. Gemini acceptance remains open.
 
+- Reference-analysis checkpoint: Gemini reference-grade requests reject null visual samples before provider payload construction; focused reference-analysis coverage passes locally. Gemini acceptance remains open.
+
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
 - Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.

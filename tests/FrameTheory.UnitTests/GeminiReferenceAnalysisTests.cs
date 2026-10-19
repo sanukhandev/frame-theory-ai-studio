@@ -68,6 +68,13 @@ public sealed class GeminiReferenceAnalysisTests
     }
 
     [Xunit.Fact]
+    public void ReferenceRequestRejectsNullSamples()
+    {
+        Xunit.Assert.Throws<ArgumentException>(() => new GeminiReferenceAnalysisRequest(
+            [null!], [Sample()], uploadConsent: true));
+    }
+
+    [Xunit.Fact]
     public async Task ReferenceAnalysisUploadsOnlyWithConsentAndReturnsEditableGrade()
     {
         var requests = new List<HttpRequestMessage>();

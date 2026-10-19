@@ -33,6 +33,11 @@ public sealed class GeminiReferenceAnalysisRequest
         IReadOnlyList<LocalAnalysisSample> samples,
         string parameterName)
     {
+        if (samples.Any(sample => sample is null))
+        {
+            throw new ArgumentException("Visual sample collections cannot contain null entries.", parameterName);
+        }
+
         var visual = samples
             .Where(sample => string.Equals(sample.SampleKind, "video-frame-ppm", StringComparison.Ordinal) ||
                 string.Equals(sample.SampleKind, "photo-preview-ppm", StringComparison.Ordinal))
