@@ -61,6 +61,7 @@ public sealed class DesktopAiAnalysisTests
 
         await viewModel.ImportFilesAsync(["photo.png"], CancellationToken.None);
         Xunit.Assert.True(await viewModel.PrepareLocalAnalysisAsync(GeminiAnalysisScope.PhotoPreview, true, CancellationToken.None));
+        Xunit.Assert.True(viewModel.CanRequestAiAnalysis);
         Xunit.Assert.True(await viewModel.RequestAiAnalysisAsync(CancellationToken.None));
 
         Xunit.Assert.Single(viewModel.AiProposal.Actions);
@@ -87,6 +88,7 @@ public sealed class DesktopAiAnalysisTests
 
         await viewModel.ImportFilesAsync(["photo.png"], CancellationToken.None);
         Xunit.Assert.True(await viewModel.PrepareLocalAnalysisAsync(GeminiAnalysisScope.PhotoPreview, true, CancellationToken.None));
+        Xunit.Assert.False(viewModel.CanRequestAiAnalysis);
         Xunit.Assert.False(await viewModel.RequestAiAnalysisAsync(CancellationToken.None));
         Xunit.Assert.Contains("analysis failed", viewModel.AnalysisStatusText, StringComparison.OrdinalIgnoreCase);
     }

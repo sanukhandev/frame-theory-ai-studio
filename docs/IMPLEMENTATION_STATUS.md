@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Gemini key-state checkpoint (2026-10-19):** Gemini sample submission now enables only when the local analysis report is explicitly consented and a key is present in secure storage; secure-store changes refresh the action state. Focused AI/shell coverage passes 38 tests; the full Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Live-provider acceptance remains open.
+
 **Video navigation-state checkpoint (2026-10-19):** Timeline navigation, zoom, snap and output-framing controls now disable until the Video workspace contains real timeline content; media import/open actions remain available. Focused Foundation coverage passes 33 tests; the full Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native keyboard/visual acceptance remains open.
 
 **Photo layer-action checkpoint (2026-10-19):** Photo clear, mask, retouch and grade-mask controls now require the corresponding editable layer state; a loaded base photo alone no longer advertises unavailable layer actions. Focused photo/shell coverage passes 48 tests; the full Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native photo interaction remains open.

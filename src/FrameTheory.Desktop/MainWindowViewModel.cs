@@ -216,6 +216,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
         };
         GeminiSettings = geminiSettings ?? new GeminiSettingsViewModel(new GeminiConfigurationService(new OperatingSystemSecretStore()));
+        GeminiSettings.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(GeminiSettingsViewModel.HasStoredApiKey))
+            {
+                OnPropertyChanged(nameof(CanRequestAiAnalysis));
+            }
+        };
         if (PhotoEditor is { } photoEditorViewModel)
         {
             photoEditorViewModel.PropertyChanged += (_, _) => OnPropertyChanged(nameof(ActiveWorkspaceStatusText));
@@ -535,7 +542,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public bool CanPrepareLocalAnalysis => _analysisSampler is not null && _analysisAssets.Count > 0;
 
-    public bool CanRequestAiAnalysis => LastLocalAnalysisReport?.UploadConsent == true;
+    public bool CanRequestAiAnalysis => GeminiSettings.HasStoredApiKey && LastLocalAnalysisReport?.UploadConsent == true;
 
     public bool CanAnalyzeColorReference => ImportedMedia.Count(item => item.ThumbnailPpm is not null) >= 2;
 
