@@ -10,6 +10,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Proxy cache-path checkpoint: preview proxy construction rejects a blank cache directory instead of using the process working directory; focused coverage passes locally. Native proxy acceptance remains open.
 
+- Video export destination checkpoint: media export rejects a blank destination before path normalization or FFmpeg work; focused coverage passes locally. Native export acceptance remains open.
+
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
 - Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.

@@ -8,6 +8,8 @@
 
 **Proxy cache-path checkpoint (2026-10-19):** Preview proxy construction now rejects a blank cache directory instead of resolving it to the process working directory; focused proxy coverage passes. Native proxy acceptance remains open.
 
+**Video export destination checkpoint (2026-10-19):** Media export now rejects a blank destination before path normalization or FFmpeg work; focused export coverage passes. Native export acceptance remains open.
+
 **Audio-preparation dependency checkpoint (2026-10-19):** Audio source preparation now rejects a missing media process runner at construction instead of failing during extraction; focused audio coverage passes. Native audio acceptance remains open.
 
 **Media-import dependency checkpoint (2026-10-19):** FFmpeg media importers now reject missing probe, preview-decoder and process-runner services at construction; focused import coverage passes. Native import acceptance remains open.

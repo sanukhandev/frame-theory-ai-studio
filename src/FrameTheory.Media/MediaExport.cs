@@ -86,6 +86,11 @@ public sealed class FfmpegMediaExporter : IMediaExporter
             throw new MediaExportException("Only local file URIs can be exported.");
         }
 
+        if (string.IsNullOrWhiteSpace(destinationPath))
+        {
+            throw new ArgumentException("An export destination is required.", nameof(destinationPath));
+        }
+
         var sourcePath = Path.GetFullPath(source.LocalPath);
         EnsureNotReparsePoint(sourcePath, "Source media");
         if (!File.Exists(sourcePath))

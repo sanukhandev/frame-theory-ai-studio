@@ -24,6 +24,25 @@ public sealed class MediaExportTests
     }
 
     [Xunit.Fact]
+    public async Task ExportRejectsBlankDestinationPath()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-export-path-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            await File.WriteAllTextAsync(sourcePath, "source");
+            var exporter = new FfmpegMediaExporter(new StubProcessRunner(), new StubProbe(Metadata(new Uri(sourcePath), true)));
+
+            await Xunit.Assert.ThrowsAsync<ArgumentException>(() => exporter.ExportAsync(
+                new Uri(sourcePath), " ", new ExportPreset(8, 4, new RationalFrameRate(30, 1)), null, CancellationToken.None));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task ExportVerifiesStreamsAndAtomicallyReplacesDestination()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-export-");
