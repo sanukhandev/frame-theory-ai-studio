@@ -5,6 +5,13 @@ namespace FrameTheory.UnitTests;
 public sealed class TimelineKeyframeTests
 {
     [Xunit.Fact]
+    public void KeyframesRejectUndefinedEasingValues()
+    {
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineTransformKeyframe(
+            0, new TimelineVideoTransform(), (TimelineEasing)99));
+    }
+
+    [Xunit.Fact]
     public void EvaluatesInterpolatedTransformsWithEasingAndClampsBounds()
     {
         var animation = new TimelineTransformKeyframes([

@@ -34,6 +34,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Transition enum checkpoint: video segments reject undefined transition kinds before filter-graph construction; focused timeline contract coverage passes locally. Native transition acceptance remains open.
 
+- Keyframe easing checkpoint: transform keyframes reject undefined easing values before interpolation or FFmpeg expression generation; focused keyframe coverage passes locally. Native animation acceptance remains open.
+
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
 - Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.

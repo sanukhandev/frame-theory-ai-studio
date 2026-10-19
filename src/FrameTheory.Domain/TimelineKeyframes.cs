@@ -28,6 +28,11 @@ public sealed record TimelineTransformKeyframe
         }
 
         ArgumentNullException.ThrowIfNull(value);
+        if (!Enum.IsDefined(easing))
+        {
+            throw new ArgumentOutOfRangeException(nameof(easing));
+        }
+
         Frame = frame;
         Value = value;
         Easing = easing;
