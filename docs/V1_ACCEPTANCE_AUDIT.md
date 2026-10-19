@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Waveform-input checkpoint: PCM waveform extraction rejects odd-byte output before sample decoding; focused coverage passes locally. Native audio import acceptance remains open.
+
 - Waveform checkpoint: PCM waveform peak extraction clamps signed 16-bit amplitudes to the `[0,1]` contract; focused coverage passes locally. Native audio import acceptance remains open.
 
 - Workspace-state checkpoint: workspace selection state rejects files larger than 1 KB before JSON allocation; focused coverage passes locally. Native startup acceptance remains open.

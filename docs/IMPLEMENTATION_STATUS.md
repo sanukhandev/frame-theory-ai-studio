@@ -1,12 +1,14 @@
 # Implementation Status — Resume Checkpoint
 
+**Waveform-input checkpoint (2026-10-19):** PCM waveform extraction now rejects odd-byte output before sample decoding, preventing malformed FFmpeg output from silently producing empty peaks; focused media-import coverage passes. Native audio import acceptance remains open.
+
 **Waveform checkpoint (2026-10-19):** PCM waveform peak extraction now clamps signed 16-bit amplitudes to the `[0,1]` contract, so full-scale negative samples no longer make valid audio imports fail; focused media-import coverage passes. Native audio import acceptance remains open.
 
 **Workspace-state checkpoint (2026-10-19):** Workspace selection state now rejects files larger than 1 KB before JSON allocation, keeping corrupted local startup state bounded; focused desktop coverage passes. Native startup acceptance remains open.
 
 **Cache-index save checkpoint (2026-10-19):** Cache-index serialization now enforces the 5 MB bound before creating a temporary file, preventing index saves that cannot be reopened; focused recovery coverage passes. Native cache recovery acceptance remains open.
 
-**Paused resume checkpoint (2026-10-19):** Work is currently at 47 local commits ahead of `origin/main`; no push was made because the configured batch threshold is exactly 50 commits. The project-save fix is `e05f9d8`, the cache-index fix is `340ae8b`, the workspace-state fix is `3a57a38`, the waveform fix is `60bbf0a`, `ProjectRepositoryTests` passed 8/8, `RecoveryTests` passed 15/15, focused workspace-state coverage passed 3/3, focused media-import coverage passed 8/8, and formatting passed after resume. Continue the persistence-boundary audit, keeping the six tracked P0 gates open and pushing only at exactly 50 commits.
+**Paused resume checkpoint (2026-10-19):** Work is currently at 49 local commits ahead of `origin/main`; no push was made because the configured batch threshold is exactly 50 commits. The project-save fix is `e05f9d8`, the cache-index fix is `340ae8b`, the workspace-state fix is `3a57a38`, the waveform fixes are `60bbf0a` and `0c45583`, `ProjectRepositoryTests` passed 8/8, `RecoveryTests` passed 15/15, focused workspace-state coverage passed 3/3, focused media-import coverage passed 9/9, and formatting passed after resume. Run the full release validation, then push exactly 50 commits while keeping the six tracked P0 gates open.
 
 **Project-save checkpoint (2026-10-19):** Project serialization now enforces the 10 MB UTF-8 bound before creating a temporary file, preventing saves that cannot be reopened; focused project persistence coverage passes. Native project save/reopen acceptance remains open.
 
