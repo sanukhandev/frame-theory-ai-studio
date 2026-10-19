@@ -4,6 +4,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Current FT-901/FT-902 navigation increment: Home/End seek through the Video transport path and post-snap clamping keeps the playhead inside the valid frame range; focused Foundation coverage passes 29 tests and timeline coverage passes 21 tests. Native keyboard, visual and HiDPI acceptance remain open.
 
+- Current FT-901 shortcut increment: the shell advertises the existing `Ctrl+Shift+Z` redo route beside `Ctrl+Z` undo, preserving text-input protection. Focused Foundation UI/shortcut coverage remains green; native keyboard acceptance remains open.
+
 - Current FT-1003 provenance increment: native-media manifest verification now re-runs bundled FFmpeg/ffprobe and rejects tampered version output as well as hash/size mismatches; the Windows hosted path includes the regression. Local fake-tool generation and tampered-manifest rejection pass. Legal/license, CVE, codec and redistribution approval remain open.
 
 - Current FT-902 history increment: manual Video actions use transactional timeline snapshots with visible Undo/Redo controls, `Ctrl+Z`/`Ctrl+Y`, failed-action rollback and focused coverage for edit restoration plus UI automation names; reviewed rough cuts retain their existing transactional AI-undo path without duplicate history entries. Timeline coverage passes 20 tests and Foundation coverage passes 28 tests; the full local Release gate passes 355 unit tests, 2 golden tests, a warning-free build, format verification and repository validation. Native manual view/HiDPI acceptance remains open.

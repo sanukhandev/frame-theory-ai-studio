@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Editor shortcut polish checkpoint (2026-10-19):** The production shell now advertises both `Ctrl+Z` undo and CapCut-style `Ctrl+Shift+Z` redo alongside the existing `Ctrl+Y` route; the existing text-input protection remains unchanged. Foundation shortcut/UI coverage remains green. Native keyboard acceptance remains open.
+
 **Native manifest provenance checkpoint (2026-10-19):** Native FFmpeg/ffprobe manifest verification now re-runs each staged tool and rejects tampered version output in addition to hash and size mismatches; the Windows hosted validation path includes the regression. Local fake-tool generation, verification and tampered-version rejection pass. FT-1003 remains open for legal/license, CVE, codec and redistribution approval.
 
 **Timeline seek-boundary checkpoint (2026-10-19):** Video Home/End shortcuts now seek through the existing transport path, and post-snap clamping prevents a clip’s exclusive end boundary from becoming an invalid current frame. Foundation coverage passes 29 tests and timeline coverage passes 21 tests; native keyboard/HiDPI acceptance remains open.
