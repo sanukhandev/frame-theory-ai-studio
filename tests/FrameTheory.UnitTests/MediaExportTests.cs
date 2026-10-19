@@ -111,7 +111,7 @@ public sealed class MediaExportTests
             var receipt = await exporter.ExportAsync(
                 new Uri(sourcePath),
                 destinationPath,
-                new ExportPreset(8, 4, new RationalFrameRate(30, 1)),
+                new ExportPreset(8, 4, new RationalFrameRate(30, 1), includeAudio: false),
                 null,
                 CancellationToken.None);
 

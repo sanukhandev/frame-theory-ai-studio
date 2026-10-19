@@ -4,6 +4,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
+- Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.
+
 - Current timing increment: default `0/0` frame rates fail at metadata, timeline, render-plan and export-preset boundaries; focused domain/media coverage remains green. Native timing/export acceptance remains open.
 
 - Current preset increment: preset saves reject null collection entries before serialization; focused color-preset persistence coverage remains green. Native preset workflow acceptance remains open.

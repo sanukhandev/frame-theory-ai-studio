@@ -103,7 +103,7 @@ public sealed class PhotoExportTests
             var sourcePath = Path.Combine(directory.FullName, "source.png");
             var destinationPath = Path.Combine(directory.FullName, "SOURCE.jpg");
             await File.WriteAllTextAsync(sourcePath, "source");
-            var exporter = new PhotoExporter(new StubProcessRunner(), new StubProbe(new Uri(destinationPath)));
+            var exporter = new PhotoExporter(new StubProcessRunner(), new StubProbe(new Uri(destinationPath), 1, 1));
 
             var receipt = await exporter.ExportAsync(
                 new PhotoEditState(Document(new Uri(sourcePath))),

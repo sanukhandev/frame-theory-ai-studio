@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Hosted Linux fixture checkpoint (2026-10-19):** Case-variant output tests now specify the metadata they require—video export disables audio when the stub has no audio, and photo export probes the document's `1×1` dimensions. Local focused coverage passes; hosted Linux rerun is required.
+
 **50-commit release checkpoint (2026-10-19):** Full local gate passes after aligning the photo-document dimension test with the stricter visual metadata guard: Release build has 0 warnings/0 errors, 383 unit tests pass, 2 golden tests pass, `dotnet format --verify-no-changes` passes, repository validation passes, and `git diff --check` is clean. Hosted/native UI, packaging and real-media export evidence remain tracked separately; six P0 gates remain partial.
 
 **AI plan integrity checkpoint (2026-10-19):** Programmatically constructed edit plans now reject null actions before schema validation, approval or execution; focused AI-plan coverage passes. Gemini/network acceptance remains open.
