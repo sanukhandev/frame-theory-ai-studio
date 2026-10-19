@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Native manifest path checkpoint (2026-10-19):** Native-media manifest verification now requires `ffmpeg` and `ffprobe` names to match exact staged-file records, preventing a manifest path from resolving outside the bundle; Windows hosted validation adds a traversal regression beside version-tampering coverage. FT-1003 remains open for legal/license, CVE, codec and redistribution approval.
+
 **Editor shortcut polish checkpoint (2026-10-19):** The production shell now advertises both `Ctrl+Z` undo and CapCut-style `Ctrl+Shift+Z` redo alongside the existing `Ctrl+Y` route; the existing text-input protection remains unchanged. Foundation shortcut/UI coverage remains green. Native keyboard acceptance remains open.
 
 **Native manifest provenance checkpoint (2026-10-19):** Native FFmpeg/ffprobe manifest verification now re-runs each staged tool and rejects tampered version output in addition to hash and size mismatches; the Windows hosted validation path includes the regression. Local fake-tool generation, verification and tampered-version rejection pass. FT-1003 remains open for legal/license, CVE, codec and redistribution approval.

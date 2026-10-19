@@ -71,6 +71,9 @@ foreach ($toolName in @("ffmpeg", "ffprobe")) {
     if ($null -eq $tool -or [string]::IsNullOrWhiteSpace($tool.name) -or [string]::IsNullOrWhiteSpace($tool.sha256) -or [string]::IsNullOrWhiteSpace($tool.version)) {
         throw "Native media manifest is missing tool provenance: $toolName."
     }
+    if (-not ($records | Where-Object { $_.name -ceq $tool.name })) {
+        throw "Native media manifest tool is not a staged bundle file: $($tool.name)."
+    }
     $toolPath = Join-Path $rootItem.FullName $tool.name
     if (-not (Test-Path -LiteralPath $toolPath -PathType Leaf)) {
         throw "Native media manifest tool is missing from the bundle: $($tool.name)."

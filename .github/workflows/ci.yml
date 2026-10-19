@@ -417,6 +417,14 @@ jobs:
           if ($LASTEXITCODE -eq 0 -or (($tamperedOutput -join "`n") -notmatch 'tool version mismatch')) {
             throw "Native media manifest verifier accepted tampered tool version provenance."
           }
+          $traversalManifest = Join-Path $env:RUNNER_TEMP "native-bundle-windows-traversal.json"
+          $manifest = Get-Content -LiteralPath artifacts/sbom/native-bundle-windows.json -Raw | ConvertFrom-Json
+          $manifest.tools.ffmpeg.name = "..\ffmpeg.exe"
+          $manifest | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $traversalManifest
+          $traversalOutput = & ./scripts/verify_native_media_manifest.ps1 -Directory $bundleDirectory -ManifestPath $traversalManifest 2>&1
+          if ($LASTEXITCODE -eq 0 -or (($traversalOutput -join "`n") -notmatch 'not a staged bundle file')) {
+            throw "Native media manifest verifier accepted a tool path outside the staged bundle."
+          }
           ./scripts/package_windows.ps1 -OutputDirectory artifacts/installer -PublishDirectory artifacts/installer-publish -Version 0.1.1 -FfmpegDirectory $bundleDirectory
           $installer = Join-Path (Resolve-Path artifacts/installer).Path "FrameTheoryStudioAI-win-x64.exe"
           $installDirectory = Join-Path $env:RUNNER_TEMP "frame-theory-installed"
