@@ -119,7 +119,8 @@ public sealed class PhotoExporter
 
         EnsureNotReparsePoint(outputDirectory, "Photo export directory");
 
-        if (string.Equals(sourcePath, outputPath, StringComparison.OrdinalIgnoreCase))
+        var pathComparison = OperatingSystem.IsWindows() ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+        if (string.Equals(sourcePath, outputPath, pathComparison))
         {
             throw new PhotoExportException("The export destination cannot replace the source photo.");
         }

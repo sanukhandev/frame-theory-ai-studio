@@ -83,6 +83,40 @@ public sealed class MediaExportTests
     }
 
     [Xunit.Fact]
+    public async Task LinuxExportAllowsCaseVariantOutputName()
+    {
+        if (!OperatingSystem.IsLinux())
+        {
+            return;
+        }
+
+        var directory = Directory.CreateTempSubdirectory("frame-theory-export-case-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            var destinationPath = Path.Combine(directory.FullName, "SOURCE.mp4");
+            await File.WriteAllTextAsync(sourcePath, "source");
+            var exporter = new FfmpegMediaExporter(
+                new StubProcessRunner(),
+                new StubProbe(Metadata(new Uri(destinationPath), hasAudio: false)));
+
+            var receipt = await exporter.ExportAsync(
+                new Uri(sourcePath),
+                destinationPath,
+                new ExportPreset(8, 4, new RationalFrameRate(30, 1)),
+                null,
+                CancellationToken.None);
+
+            Xunit.Assert.Equal(destinationPath, receipt.OutputPath);
+            Xunit.Assert.Equal("source", await File.ReadAllTextAsync(sourcePath));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task ExportRejectsSymlinkedDestinationDirectory()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-export-boundary-");

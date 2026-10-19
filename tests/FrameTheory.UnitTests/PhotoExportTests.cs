@@ -83,6 +83,38 @@ public sealed class PhotoExportTests
     }
 
     [Xunit.Fact]
+    public async Task LinuxPhotoExportAllowsCaseVariantOutputName()
+    {
+        if (!OperatingSystem.IsLinux())
+        {
+            return;
+        }
+
+        var directory = Directory.CreateTempSubdirectory("frame-theory-photo-export-case-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.png");
+            var destinationPath = Path.Combine(directory.FullName, "SOURCE.jpg");
+            await File.WriteAllTextAsync(sourcePath, "source");
+            var exporter = new PhotoExporter(new StubProcessRunner(), new StubProbe(new Uri(destinationPath)));
+
+            var receipt = await exporter.ExportAsync(
+                new PhotoEditState(Document(new Uri(sourcePath))),
+                destinationPath,
+                new PhotoExportOptions(PhotoExportFormat.Jpeg),
+                null,
+                CancellationToken.None);
+
+            Xunit.Assert.Equal(destinationPath, receipt.OutputPath);
+            Xunit.Assert.Equal("source", await File.ReadAllTextAsync(sourcePath));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task SocialPhotoExportCropsToExactPresetDimensions()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-photo-social-export-");
