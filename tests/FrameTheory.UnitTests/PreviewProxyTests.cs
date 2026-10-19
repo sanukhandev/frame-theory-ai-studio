@@ -11,6 +11,12 @@ public sealed class PreviewProxyTests
     }
 
     [Xunit.Fact]
+    public void PreviewProxyRequiresCacheDirectory()
+    {
+        Xunit.Assert.Throws<ArgumentException>(() => new FfmpegPreviewProxyService(new StubProcessRunner(), " "));
+    }
+
+    [Xunit.Fact]
     public async Task CreatesAndReusesBoundedProxy()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-proxy-");

@@ -6,6 +6,8 @@
 
 **Probe executable checkpoint (2026-10-19):** `FfprobeMediaProbe` now rejects a blank executable name at construction instead of failing later in process launch; focused probe coverage passes. Native probe acceptance remains open.
 
+**Proxy cache-path checkpoint (2026-10-19):** Preview proxy construction now rejects a blank cache directory instead of resolving it to the process working directory; focused proxy coverage passes. Native proxy acceptance remains open.
+
 **Audio-preparation dependency checkpoint (2026-10-19):** Audio source preparation now rejects a missing media process runner at construction instead of failing during extraction; focused audio coverage passes. Native audio acceptance remains open.
 
 **Media-import dependency checkpoint (2026-10-19):** FFmpeg media importers now reject missing probe, preview-decoder and process-runner services at construction; focused import coverage passes. Native import acceptance remains open.

@@ -26,6 +26,11 @@ public sealed class FfmpegPreviewProxyService
         long maximumCacheBytes = 512L * 1024 * 1024)
     {
         ArgumentNullException.ThrowIfNull(processRunner);
+        if (string.IsNullOrWhiteSpace(cacheDirectory))
+        {
+            throw new ArgumentException("A preview cache directory is required.", nameof(cacheDirectory));
+        }
+
         _processRunner = processRunner;
         _cacheDirectory = Path.GetFullPath(cacheDirectory);
         _maximumCacheBytes = maximumCacheBytes;
