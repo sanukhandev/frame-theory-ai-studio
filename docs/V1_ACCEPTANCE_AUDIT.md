@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Hosted release-gate checkpoint: Quality Gates run `39198275961` passed documentation/schema validation plus Windows, Linux and macOS restore/build/test, native media smoke, formatting, headless shell/UI automation, portable archives, installer/DMG/DEB validation, packaged relaunch and checksums for commit `1d2799d`. The six tracked P0 gates remain open because manual visual/HiDPI/screen-reader, legal redistribution, signing/clean-host and final-audit evidence are still required.
+
 - Waveform-input checkpoint: PCM waveform extraction rejects odd-byte output before sample decoding; focused coverage passes locally. Native audio import acceptance remains open.
 
 - Waveform checkpoint: PCM waveform peak extraction clamps signed 16-bit amplitudes to the `[0,1]` contract; focused coverage passes locally. Native audio import acceptance remains open.
@@ -54,7 +56,7 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Motion-plan checkpoint: stabilization plans reject null transforms before motion data reaches compositor generation; focused coverage passes locally. Manual stabilization quality acceptance remains open.
 
-- Recovery containment checkpoint: contained recovery paths reject blank project-directory and relative-media inputs consistently on Unix-like platforms; hosted Linux/macOS recovery-test failure is fixed locally and focused coverage is pending rerun.
+- Recovery containment checkpoint: contained recovery paths reject blank project-directory and relative-media inputs consistently on Unix-like platforms; hosted Linux/macOS recovery coverage passed in run `39198275961` and focused coverage remains green.
 
 - AI history checkpoint: Gemini usage-history reads cap requested entries at 1000 to keep local diagnostics memory-bounded; focused coverage passes locally. Live provider acceptance remains open.
 
