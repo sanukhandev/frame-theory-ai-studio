@@ -748,6 +748,35 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task TimelinePreviewKeepsTheNewestOutOfOrderDecode()
+    {
+        var decoder = new OutOfOrderPreviewDecoder();
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new VideoImporter(),
+            timelinePreviewDecoder: decoder);
+
+        await viewModel.ImportFilesAsync(["preview-order.mp4"], CancellationToken.None);
+        viewModel.ShowTimelineSourcePreview = true;
+        viewModel.TimelineEditor.SnapEnabled = false;
+        viewModel.TimelineEditor.SeekFrame(4);
+        var older = viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None);
+        viewModel.TimelineEditor.SeekFrame(5);
+        var newer = viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None);
+
+        var newerPpm = "P6\n1 1\n255\n\0\x01\0"u8.ToArray();
+        var olderPpm = "P6\n1 1\n255\n\x01\0\0"u8.ToArray();
+        decoder.Pending[5].SetResult(newerPpm);
+        Xunit.Assert.True(await newer);
+        decoder.Pending[4].SetResult(olderPpm);
+        Xunit.Assert.False(await older);
+
+        Xunit.Assert.Equal(newerPpm, viewModel.TimelinePreviewPpm);
+        Xunit.Assert.Contains("frame 5", viewModel.TimelinePreviewStatusText, StringComparison.Ordinal);
+    }
+
+    [Xunit.Fact]
     public void TimelinePreviewModesCannotRemainContradictory()
     {
         var viewModel = new MainWindowViewModel(
@@ -1052,6 +1081,18 @@ public sealed class DesktopImportTests
             FrameIndex = frameIndex;
             Frames.Add(frameIndex);
             return Task.FromResult("P6\n1 1\n255\n\0\0\0"u8.ToArray());
+        }
+    }
+
+    private sealed class OutOfOrderPreviewDecoder : IPreviewFrameDecoder
+    {
+        public Dictionary<long, TaskCompletionSource<byte[]>> Pending { get; } = [];
+
+        public Task<byte[]> DecodeFrameAsync(Uri file, RationalFrameRate frameRate, long frameIndex, CancellationToken cancellationToken)
+        {
+            var completion = new TaskCompletionSource<byte[]>(TaskCreationOptions.RunContinuationsAsynchronously);
+            Pending[frameIndex] = completion;
+            return completion.Task.WaitAsync(cancellationToken);
         }
     }
 

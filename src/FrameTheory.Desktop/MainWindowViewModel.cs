@@ -142,6 +142,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private bool _isTimelinePreviewPlaying;
     private bool _useTimelinePreviewProxy;
     private bool _showTimelineSourcePreview;
+    private long _timelinePreviewRequestId;
     private readonly Queue<double> _timelineDecodeMilliseconds = [];
     private string _timelinePerformanceStatusText = "No timeline performance samples recorded.";
 
@@ -997,11 +998,17 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public async Task<bool> PreviewCurrentTimelineFrameAsync(CancellationToken cancellationToken)
     {
+        var requestId = Interlocked.Increment(ref _timelinePreviewRequestId);
         var seek = TimelineEditor.SeekFrame(TimelineEditor.CurrentFrame);
         var sample = seek.Samples.FirstOrDefault(item => item.TrackKind == TimelineTrackKind.Video && item.SourceFrame is not null);
         if (sample is null || sample.SourceFrame is not long sourceFrame ||
             !_mediaSources.TryGetValue(sample.MediaId, out var source) || !_analysisAssets.TryGetValue(sample.MediaId, out var media))
         {
+            if (!IsCurrentTimelinePreviewRequest(requestId))
+            {
+                return false;
+            }
+
             TimelinePreviewStatusText = "Import a video and place the playhead over a video clip first.";
             TimelinePreviewPpm = null;
             return false;
@@ -1032,13 +1039,18 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 proxyDescription = proxy.Reused ? " using cached preview proxy" : " using preview proxy";
             }
 
+            if (!IsCurrentTimelinePreviewRequest(requestId))
+            {
+                return false;
+            }
+
             var timelinePreviewRenderer = _timelinePreviewRenderer;
             var usesTimelineCompositor = timelinePreviewRenderer is not null && !UseTimelinePreviewProxy && !ShowTimelineSourcePreview;
             TimelinePreviewStatusText = usesTimelineCompositor
                 ? $"Rendering timeline frame {TimelineEditor.CurrentFrame} with compositor..."
                 : $"Decoding frame {sourceFrame}{proxyDescription}...";
             var decodeStarted = Stopwatch.GetTimestamp();
-            TimelinePreviewPpm = usesTimelineCompositor
+            var previewPpm = usesTimelineCompositor
                 ? await timelinePreviewRenderer!.RenderFrameAsync(
                     TimelineEditor.BuildRenderPlan(_videoWidth, _videoHeight, _mediaSources),
                     TimelineEditor.CurrentFrame,
@@ -1048,6 +1060,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                     media.Metadata.FrameRate ?? new RationalFrameRate(30, 1),
                     sourceFrame,
                     cancellationToken);
+            if (!IsCurrentTimelinePreviewRequest(requestId))
+            {
+                return false;
+            }
+
+            TimelinePreviewPpm = previewPpm;
             RecordTimelinePreviewPerformance(Stopwatch.GetElapsedTime(decodeStarted).TotalMilliseconds);
             var modeDescription = usesTimelineCompositor
                 ? " using timeline compositor"
@@ -1059,17 +1077,28 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            TimelinePreviewStatusText = "Timeline preview canceled.";
+            if (IsCurrentTimelinePreviewRequest(requestId))
+            {
+                TimelinePreviewStatusText = "Timeline preview canceled.";
+            }
+
             return false;
         }
         catch (Exception exception) when (exception is ArgumentException or IOException or UnauthorizedAccessException or InvalidDataException or InvalidOperationException or MediaDecodeException or MediaExportException or PreviewProxyException)
         {
-            _diagnosticsLog.Record("timeline-preview-failed", exception);
-            TimelinePreviewStatusText = $"Timeline preview failed: {exception.Message}";
-            TimelinePreviewPpm = null;
+            if (IsCurrentTimelinePreviewRequest(requestId))
+            {
+                _diagnosticsLog.Record("timeline-preview-failed", exception);
+                TimelinePreviewStatusText = $"Timeline preview failed: {exception.Message}";
+                TimelinePreviewPpm = null;
+            }
+
             return false;
         }
     }
+
+    private bool IsCurrentTimelinePreviewRequest(long requestId) =>
+        requestId == Volatile.Read(ref _timelinePreviewRequestId);
 
     public async Task<bool> PlayTimelinePreviewAsync(CancellationToken cancellationToken)
     {
