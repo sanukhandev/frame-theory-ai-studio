@@ -76,6 +76,10 @@ public sealed class RecoveryTests
         var directory = Directory.CreateTempSubdirectory("frame-theory-cache-");
         try
         {
+            var emptyPathStore = new JsonCacheIndexStore();
+            await Xunit.Assert.ThrowsAsync<ArgumentException>(() => emptyPathStore.SaveAtomicAsync(" ", new CacheIndex(), CancellationToken.None));
+            await Xunit.Assert.ThrowsAsync<ArgumentException>(() => emptyPathStore.LoadAsync(" ", CancellationToken.None));
+
             var index = new CacheIndex();
             var older = DateTimeOffset.UtcNow.AddMinutes(-2);
             index.Register("old", "cache/old.bin", 8, older);

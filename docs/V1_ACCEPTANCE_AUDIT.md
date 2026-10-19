@@ -16,6 +16,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Preset path checkpoint: color preset save/load rejects blank paths before working-directory normalization; focused coverage passes locally. Native preset workflow acceptance remains open.
 
+- Cache-index path checkpoint: cache-index save/load rejects blank paths before working-directory file operations; focused coverage passes locally. Native cache recovery acceptance remains open.
+
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
 - Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.
