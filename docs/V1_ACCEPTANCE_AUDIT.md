@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Current timing increment: default `0/0` frame rates fail at metadata, timeline, render-plan and export-preset boundaries; focused domain/media coverage remains green. Native timing/export acceptance remains open.
+
 - Current render-plan increment: null layers and invalid source-map IDs/URIs fail at plan construction instead of during filter-graph building; focused compositor coverage remains green. Native export acceptance remains open.
 
 - Current media-metadata increment: image/video records require positive dimensions while audio remains dimensionless; focused domain coverage and the local 380-unit/2-golden gate remain green. Native media-probe acceptance remains open.

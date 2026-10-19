@@ -39,6 +39,11 @@ public sealed record TimelineVideoRenderPlan
             throw new ArgumentOutOfRangeException(nameof(durationFrames));
         }
 
+        if (!frameRate.IsValid)
+        {
+            throw new ArgumentException("A valid render-plan frame rate is required.", nameof(frameRate));
+        }
+
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(layers);
         var sourceMap = new Dictionary<MediaId, Uri>();

@@ -2003,6 +2003,8 @@ public sealed class FoundationTests
         Xunit.Assert.Throws<ArgumentException>(() => FrameTheory.Domain.MediaId.Create(new Uri("file:///media/clip.mov"), ""));
         Xunit.Assert.Throws<ArgumentException>(() => new FrameTheory.Domain.MediaSourceMetadata(
             firstId, source, FrameTheory.Domain.MediaKind.Video, 1920, 1080, null, 30));
+        Xunit.Assert.Throws<ArgumentException>(() => new FrameTheory.Domain.MediaSourceMetadata(
+            firstId, source, FrameTheory.Domain.MediaKind.Video, 1920, 1080, new RationalFrameRate(), 30));
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new FrameTheory.Domain.MediaSourceMetadata(
             firstId, source, FrameTheory.Domain.MediaKind.Video, 1920, 1080, new RationalFrameRate(30, 1), 0));
         Xunit.Assert.Equal("height", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new FrameTheory.Domain.MediaSourceMetadata(

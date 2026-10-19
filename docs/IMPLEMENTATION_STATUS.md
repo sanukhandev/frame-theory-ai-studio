@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Frame-rate validity checkpoint (2026-10-19):** Default `0/0` frame rates now fail at shared metadata, timeline graph/clip, render-plan and export-preset boundaries instead of surfacing as late divide-by-zero timing failures; focused domain/media coverage passes. Native timing/export acceptance remains open.
+
 **Render-plan boundary checkpoint (2026-10-19):** Timeline render plans now reject null layers and invalid media-ID/URI source entries before filter-graph construction; focused compositor coverage passes. Native export acceptance remains open.
 
 **Visual metadata dimension checkpoint (2026-10-19):** Image and video metadata now require positive dimensions while audio metadata may remain dimensionless; focused domain coverage and the full local gate pass. Native media-probe acceptance remains open.

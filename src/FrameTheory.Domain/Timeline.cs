@@ -58,6 +58,11 @@ public sealed record TimelineClip
             throw new ArgumentException("A video frame rate or audio sample rate is required.");
         }
 
+        if (sourceFrameRate is { IsValid: false })
+        {
+            throw new ArgumentException("The source frame rate is not initialized.", nameof(sourceFrameRate));
+        }
+
         if (sourceFrameRate is not null && audioSampleRate > 0)
         {
             throw new ArgumentException("A clip cannot define both video and audio timing.");
@@ -239,6 +244,11 @@ public sealed class TimelineGraph
 {
     public TimelineGraph(RationalFrameRate projectFrameRate, IEnumerable<TimelineTrack> tracks)
     {
+        if (!projectFrameRate.IsValid)
+        {
+            throw new ArgumentException("A valid project frame rate is required.", nameof(projectFrameRate));
+        }
+
         ArgumentNullException.ThrowIfNull(tracks);
         var timelineTracks = tracks.ToArray();
         if (timelineTracks.Any(track => track is null))

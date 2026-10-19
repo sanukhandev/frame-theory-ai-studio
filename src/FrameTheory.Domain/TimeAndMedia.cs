@@ -26,8 +26,11 @@ public readonly record struct RationalFrameRate
 
     public int Denominator { get; }
 
+    public bool IsValid => Numerator > 0 && Denominator > 0;
+
     public long FrameIndexAt(TimeSpan position)
     {
+        EnsureValid();
         if (position < TimeSpan.Zero)
         {
             throw new ArgumentOutOfRangeException(nameof(position), "Frame positions cannot be negative.");
@@ -46,6 +49,7 @@ public readonly record struct RationalFrameRate
 
     public TimeSpan TimeAtFrame(long frameIndex)
     {
+        EnsureValid();
         if (frameIndex < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(frameIndex), "Frame positions cannot be negative.");
@@ -63,6 +67,14 @@ public readonly record struct RationalFrameRate
     }
 
     public override string ToString() => $"{Numerator}/{Denominator}";
+
+    private void EnsureValid()
+    {
+        if (!IsValid)
+        {
+            throw new InvalidOperationException("The frame rate is not initialized.");
+        }
+    }
 
     private static int GreatestCommonDivisor(int left, int right)
     {
@@ -207,7 +219,7 @@ public sealed record MediaSourceMetadata
             throw new ArgumentOutOfRangeException(nameof(orientationDegrees));
         }
 
-        if (kind == MediaKind.Video && frameRate is null)
+        if (kind == MediaKind.Video && (frameRate is null || !frameRate.Value.IsValid))
         {
             throw new ArgumentException("Video metadata requires a frame rate.", nameof(frameRate));
         }

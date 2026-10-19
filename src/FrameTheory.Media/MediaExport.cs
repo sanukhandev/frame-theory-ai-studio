@@ -16,6 +16,11 @@ public sealed class ExportPreset
             throw new ArgumentOutOfRangeException(nameof(height));
         }
 
+        if (!frameRate.IsValid)
+        {
+            throw new ArgumentException("A valid export frame rate is required.", nameof(frameRate));
+        }
+
         Width = width;
         Height = height;
         FrameRate = frameRate;

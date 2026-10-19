@@ -20,6 +20,7 @@ public sealed class MediaExportTests
 
         Xunit.Assert.Equal("width", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ExportPreset(0, 4, frameRate)).ParamName);
         Xunit.Assert.Equal("height", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ExportPreset(8, 0, frameRate)).ParamName);
+        Xunit.Assert.Throws<ArgumentException>(() => new ExportPreset(8, 4, default));
     }
 
     [Xunit.Fact]
