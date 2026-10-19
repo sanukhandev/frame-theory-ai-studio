@@ -120,6 +120,28 @@ public sealed class RecoveryTests
     }
 
     [Xunit.Fact]
+    public async Task CacheIndexStoreRejectsSerializedPayloadsThatCannotReopen()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-cache-size-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "index.json");
+            var index = new CacheIndex();
+            index.Register(new string('k', 5 * 1024 * 1024), "cache/item.bin", 1, DateTimeOffset.UtcNow);
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                new JsonCacheIndexStore().SaveAtomicAsync(path, index, CancellationToken.None));
+
+            Xunit.Assert.False(File.Exists(path));
+            Xunit.Assert.Empty(directory.EnumerateFiles("*.tmp"));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public void CacheIndexRejectsTotalSizeOverflowWithoutMutatingEntries()
     {
         var index = new CacheIndex();

@@ -83,6 +83,12 @@ public sealed class JsonCacheIndexStore
         var directory = Path.GetDirectoryName(fullPath) ?? throw new ArgumentException("A cache directory is required.", nameof(path));
         Directory.CreateDirectory(directory);
         EnsureRegularPath(fullPath, directory);
+        var payload = JsonSerializer.SerializeToUtf8Bytes(index.Entries, JsonOptions);
+        if (payload.LongLength > MaximumIndexBytes)
+        {
+            throw new InvalidDataException("The cache index exceeds the supported size limit.");
+        }
+
         var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
         try
         {
@@ -94,7 +100,7 @@ public sealed class JsonCacheIndexStore
                 Options = FileOptions.Asynchronous | FileOptions.WriteThrough
             }))
             {
-                await JsonSerializer.SerializeAsync(stream, index.Entries, JsonOptions, cancellationToken);
+                await stream.WriteAsync(payload, cancellationToken);
                 await stream.FlushAsync(cancellationToken);
                 stream.Flush(flushToDisk: true);
             }
