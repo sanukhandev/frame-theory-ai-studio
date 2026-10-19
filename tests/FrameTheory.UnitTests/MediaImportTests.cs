@@ -6,6 +6,14 @@ namespace FrameTheory.UnitTests;
 public sealed class MediaImportTests
 {
     [Xunit.Fact]
+    public void MediaImporterRequiresMediaServices()
+    {
+        Xunit.Assert.Throws<ArgumentNullException>(() => new FfmpegMediaImporter(null!, new StubDecoder(), new StubProcessRunner()));
+        Xunit.Assert.Throws<ArgumentNullException>(() => new FfmpegMediaImporter(new StubProbe(null!), null!, new StubProcessRunner()));
+        Xunit.Assert.Throws<ArgumentNullException>(() => new FfmpegMediaImporter(new StubProbe(null!), new StubDecoder(), null!));
+    }
+
+    [Xunit.Fact]
     public void ImportedMediaExposesImmutableAnalysisSnapshots()
     {
         var metadata = new MediaSourceMetadata(

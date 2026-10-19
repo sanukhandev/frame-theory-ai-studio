@@ -46,9 +46,9 @@ public sealed class FfmpegMediaImporter : IMediaImporter
 
     public FfmpegMediaImporter(IMediaProbe probe, IPreviewFrameDecoder decoder, IMediaProcessRunner processRunner)
     {
-        _probe = probe;
-        _decoder = decoder;
-        _processRunner = processRunner;
+        _probe = probe ?? throw new ArgumentNullException(nameof(probe));
+        _decoder = decoder ?? throw new ArgumentNullException(nameof(decoder));
+        _processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
     }
 
     public async Task<ImportedMedia> ImportAsync(Uri file, CancellationToken cancellationToken)

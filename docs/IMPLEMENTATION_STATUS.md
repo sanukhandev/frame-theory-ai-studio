@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Media-import dependency checkpoint (2026-10-19):** FFmpeg media importers now reject missing probe, preview-decoder and process-runner services at construction; focused import coverage passes. Native import acceptance remains open.
+
 **Windows CI manifest checkpoint (2026-10-19):** Native-bundle tamper and traversal smoke assertions now validate PowerShell rejection text through `try/catch` rather than relying on `$LASTEXITCODE`, which is not updated consistently for script `throw` failures. Hosted Windows rerun is required.
 
 **Hosted Linux fixture checkpoint (2026-10-19):** Case-variant output tests now specify the metadata they require—video export disables audio when the stub has no audio, and photo export probes the document's `1×1` dimensions. Local focused coverage passes; hosted Linux rerun is required.
