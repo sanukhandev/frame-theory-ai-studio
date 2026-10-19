@@ -72,6 +72,8 @@
 
 **Timeline-seek checkpoint (2026-10-19):** Timeline seek results now reject null samples before transport consumers read the immutable snapshot; focused timeline coverage passes. Native timeline preview acceptance remains open.
 
+**Audio-fade checkpoint (2026-10-19):** Audio segments now reject combined fade-in/fade-out ranges longer than the segment before filter-graph construction; focused audio-timeline coverage passes. Native audio acceptance remains open.
+
 **Audio-preparation dependency checkpoint (2026-10-19):** Audio source preparation now rejects a missing media process runner at construction instead of failing during extraction; focused audio coverage passes. Native audio acceptance remains open.
 
 **Media-import dependency checkpoint (2026-10-19):** FFmpeg media importers now reject missing probe, preview-decoder and process-runner services at construction; focused import coverage passes. Native import acceptance remains open.

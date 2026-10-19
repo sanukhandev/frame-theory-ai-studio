@@ -31,6 +31,11 @@ public sealed record TimelineAudioSegment
             throw new ArgumentOutOfRangeException(nameof(fadeOutFrames));
         }
 
+        if (fadeInFrames > clip.TimelineRange.Length - fadeOutFrames)
+        {
+            throw new ArgumentException("Audio fade-in and fade-out ranges cannot exceed the segment duration.", nameof(fadeOutFrames));
+        }
+
         if (double.IsNaN(duckingDb) || double.IsInfinity(duckingDb) || duckingDb is < 0 or > 60)
         {
             throw new ArgumentOutOfRangeException(nameof(duckingDb));
