@@ -189,6 +189,11 @@ public sealed record MediaSourceMetadata
             throw new ArgumentException("A valid media ID is required.", nameof(id));
         }
 
+        if (!Enum.IsDefined(kind))
+        {
+            throw new ArgumentOutOfRangeException(nameof(kind));
+        }
+
         if (width < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(width), "Media dimensions cannot be negative.");
