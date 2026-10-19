@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Photo-state input checkpoint (2026-10-19):** Portable photo edit-state loading now enforces its 1 MB limit against UTF-8 encoded bytes, preventing Unicode payloads from bypassing persistence bounds; focused photo persistence coverage passes. Native photo reopen acceptance remains open.
+
 **LUT-input checkpoint (2026-10-19):** `.cube` parsing now enforces the 64 MB limit against UTF-8 encoded bytes rather than UTF-16 character count, preventing oversized Unicode payloads from bypassing the parser guard; focused LUT coverage passes. Native LUT workflow acceptance remains open.
 
 **Render-duration checkpoint (2026-10-19):** Timeline render plans now reject clips, titles or captions that extend beyond the requested duration, preventing out-of-range filter stages and export drift; focused compositor coverage passes. Native export acceptance remains open.

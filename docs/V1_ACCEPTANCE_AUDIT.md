@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Photo-state input checkpoint: portable photo edit-state loading enforces its 1 MB limit against UTF-8 encoded bytes, preventing Unicode payloads from bypassing persistence bounds; focused coverage passes locally. Native photo reopen acceptance remains open.
+
 - LUT-input checkpoint: `.cube` parsing enforces the 64 MB limit against UTF-8 encoded bytes rather than UTF-16 character count; focused coverage passes locally. Native LUT workflow acceptance remains open.
 
 - Render-duration checkpoint: timeline render plans reject clips, titles or captions beyond the requested duration, preventing out-of-range filter stages and export drift; focused coverage passes locally. Native export acceptance remains open.
