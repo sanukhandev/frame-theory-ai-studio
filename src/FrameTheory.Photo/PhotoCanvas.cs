@@ -16,6 +16,11 @@ public sealed record PhotoDocument
             throw new ArgumentException("A photo document requires image metadata.", nameof(metadata));
         }
 
+        if (metadata.Width <= 0 || metadata.Height <= 0)
+        {
+            throw new ArgumentException("A photo document requires positive image dimensions.", nameof(metadata));
+        }
+
         if (previewPpm.Length == 0)
         {
             throw new ArgumentException("A decoded photo preview is required.", nameof(previewPpm));
