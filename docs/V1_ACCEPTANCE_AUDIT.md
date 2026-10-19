@@ -72,6 +72,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Photo-state checkpoint: photo edit-state restoration rejects null operations, composite layers and retouch strokes before render traversal; focused photo-layer coverage passes locally. Native photo editing acceptance remains open.
 
+- Timeline-seek checkpoint: timeline seek results reject null samples before transport consumers read the immutable snapshot; focused timeline coverage passes locally. Native timeline preview acceptance remains open.
+
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
 - Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.

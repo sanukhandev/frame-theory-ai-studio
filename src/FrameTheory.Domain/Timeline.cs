@@ -228,7 +228,13 @@ public sealed record TimelineSeekResult
     {
         this.TimelineFrame = TimelineFrame;
         this.Position = Position;
-        this.Samples = Array.AsReadOnly((Samples ?? throw new ArgumentNullException(nameof(Samples))).ToArray());
+        ArgumentNullException.ThrowIfNull(Samples);
+        if (Samples.Any(sample => sample is null))
+        {
+            throw new ArgumentException("Timeline seek results cannot contain null samples.", nameof(Samples));
+        }
+
+        this.Samples = Array.AsReadOnly(Samples.ToArray());
     }
 
     public long TimelineFrame { get; }

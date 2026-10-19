@@ -86,5 +86,6 @@ public sealed class TimelineTests
 
         Xunit.Assert.Single(result.Samples);
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineSample>>(result.Samples).IsReadOnly);
+        Xunit.Assert.Throws<ArgumentException>(() => new TimelineSeekResult(1, TimeSpan.Zero, [null!]));
     }
 }
