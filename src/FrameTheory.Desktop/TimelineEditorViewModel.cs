@@ -1317,6 +1317,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     public void InsertClip(TimelineTrackKind kind, TimelineClip clip)
     {
         ArgumentNullException.ThrowIfNull(clip);
+        _ = TrackId(kind);
         var video = _videoClips.ToArray();
         var audio = _audioClips.ToArray();
         if (kind == TimelineTrackKind.Video)
@@ -1616,7 +1617,12 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         return clip is null ? null : (track!.Kind, clip);
     }
 
-    private IReadOnlyList<TimelineClip> Clips(TimelineTrackKind kind) => kind == TimelineTrackKind.Video ? _videoClips : _audioClips;
+    private IReadOnlyList<TimelineClip> Clips(TimelineTrackKind kind) => kind switch
+    {
+        TimelineTrackKind.Video => _videoClips,
+        TimelineTrackKind.Audio => _audioClips,
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "The timeline track kind is invalid.")
+    };
 
     private void ReplaceSelected(TimelineTrackKind kind, TimelineClip replacement)
     {
@@ -1804,7 +1810,12 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private static TimelineSpeedRamp TranslateSpeedRamp(TimelineSpeedRamp speedRamp, long frameOffset) =>
         new(speedRamp.Points.Select(point => new TimelineSpeedPoint(checked(point.Frame + frameOffset), point.Speed)));
 
-    private static string TrackId(TimelineTrackKind kind) => kind == TimelineTrackKind.Video ? "Video 1" : "Audio 1";
+    private static string TrackId(TimelineTrackKind kind) => kind switch
+    {
+        TimelineTrackKind.Video => "Video 1",
+        TimelineTrackKind.Audio => "Audio 1",
+        _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "The timeline track kind is invalid.")
+    };
 }
 
 internal sealed record TimelineTransitionSettings(TimelineTransitionKind Kind, long DurationFrames);

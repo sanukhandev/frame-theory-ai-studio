@@ -29,6 +29,19 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void TimelineEditorRejectsUndefinedTrackKindsInsteadOfSelectingAudio()
+    {
+        var editor = new TimelineEditorViewModel();
+        var media = Metadata(new Uri("file:///track-kind.mp4"), "track-kind", 30, hasAudio: false);
+        editor.AddMedia(media);
+
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => editor.SelectMedia(media.Id.Value, (TimelineTrackKind)99));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => editor.InsertClip(
+            (TimelineTrackKind)99,
+            TimelineClip.Video(media.Id, 0, 30, 0, 30, new RationalFrameRate(30, 1))));
+    }
+
+    [Xunit.Fact]
     public void TimelineEditorSnapsZoomsScrollsAndRejectsInvalidRulerRequests()
     {
         var editor = new TimelineEditorViewModel();
