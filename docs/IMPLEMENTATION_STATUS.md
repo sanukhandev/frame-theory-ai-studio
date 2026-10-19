@@ -12,6 +12,8 @@
 
 **Photo export destination checkpoint (2026-10-19):** Photo export now rejects a blank destination before source/path normalization or FFmpeg work; focused photo-export coverage passes. Native photo-export acceptance remains open.
 
+**Preset path checkpoint (2026-10-19):** Color preset save/load now rejects blank paths before normalizing them to the working directory; focused preset persistence coverage passes. Native preset workflow acceptance remains open.
+
 **Audio-preparation dependency checkpoint (2026-10-19):** Audio source preparation now rejects a missing media process runner at construction instead of failing during extraction; focused audio coverage passes. Native audio acceptance remains open.
 
 **Media-import dependency checkpoint (2026-10-19):** FFmpeg media importers now reject missing probe, preview-decoder and process-runner services at construction; focused import coverage passes. Native import acceptance remains open.

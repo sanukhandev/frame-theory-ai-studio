@@ -48,6 +48,7 @@ public sealed class JsonColorPresetStore
     public async Task SaveAtomicAsync(string path, IEnumerable<ColorPreset> presets, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(presets);
+        EnsurePath(path);
         var presetArray = presets.ToArray();
         if (presetArray.Any(preset => preset is null))
         {
@@ -98,6 +99,7 @@ public sealed class JsonColorPresetStore
 
     public async Task<IReadOnlyList<ColorPreset>> LoadAsync(string path, CancellationToken cancellationToken)
     {
+        EnsurePath(path);
         var fullPath = Path.GetFullPath(path);
         var directory = Path.GetDirectoryName(fullPath)
             ?? throw new ArgumentException("A preset directory is required.", nameof(path));
@@ -156,6 +158,14 @@ public sealed class JsonColorPresetStore
         if (LocalPathSecurity.ContainsReparsePoint(fullPath))
         {
             throw new InvalidDataException("The preset file must not be a reparse point.");
+        }
+    }
+
+    private static void EnsurePath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            throw new ArgumentException("A preset file path is required.", nameof(path));
         }
     }
 
