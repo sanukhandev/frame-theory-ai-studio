@@ -78,6 +78,15 @@ public sealed class GeminiInteractionsTests
     }
 
     [Xunit.Fact]
+    public void FileHistoryBoundsReadRequests()
+    {
+        var history = new FileGeminiInteractionHistory(Path.Combine(Path.GetTempPath(), "frame-theory-history-bounds.jsonl"));
+
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => history.ReadRecent(0));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => history.ReadRecent(1001));
+    }
+
+    [Xunit.Fact]
     public void FileHistoryTrimsOversizedLogsToRecentRecords()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-gemini-history-limit-");

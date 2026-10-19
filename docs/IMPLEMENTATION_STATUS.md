@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**AI history checkpoint (2026-10-19):** Gemini usage-history reads now cap requested entries at 1000 to keep local diagnostics memory-bounded; focused history coverage passes. Live provider acceptance remains open.
+
 **AI input checkpoint (2026-10-19):** Gemini interaction factories now reject missing text, empty inline images, and incomplete image URI metadata before request construction; focused AI coverage passes. Live provider acceptance remains open.
 
 **Clip-sampling checkpoint (2026-10-19):** Timeline video and audio clip sampling now rejects an uninitialized project frame rate before source arithmetic; focused timeline coverage passes. Native playback acceptance remains open.

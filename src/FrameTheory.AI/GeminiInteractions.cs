@@ -175,6 +175,7 @@ public interface IGeminiInteractionHistoryReader
 public sealed class FileGeminiInteractionHistory : IGeminiInteractionHistory, IGeminiInteractionHistoryReader
 {
     private const long MaximumLogBytes = 1024 * 1024;
+    private const int MaximumReadEntries = 1000;
     private const int MaximumRetainedRecordsAfterTrim = 100;
     private readonly object _sync = new();
 
@@ -221,9 +222,9 @@ public sealed class FileGeminiInteractionHistory : IGeminiInteractionHistory, IG
 
     public IReadOnlyList<GeminiInteractionRecord> ReadRecent(int maximumEntries = 20)
     {
-        if (maximumEntries < 1)
+        if (maximumEntries is < 1 or > MaximumReadEntries)
         {
-            throw new ArgumentOutOfRangeException(nameof(maximumEntries));
+            throw new ArgumentOutOfRangeException(nameof(maximumEntries), $"History reads are bounded to one through {MaximumReadEntries} entries.");
         }
 
         try
