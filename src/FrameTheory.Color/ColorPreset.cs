@@ -69,6 +69,14 @@ public sealed class JsonColorPresetStore
 
         EnsureRegularPath(fullPath, directory);
 
+        var payload = JsonSerializer.SerializeToUtf8Bytes(
+            new PresetFile(presetArray.Select(PresetDto.FromPreset).ToArray()),
+            JsonOptions);
+        if (payload.LongLength > MaximumPresetBytes)
+        {
+            throw new InvalidDataException("The preset file exceeds the supported size limit.");
+        }
+
         var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
         try
         {
@@ -80,7 +88,7 @@ public sealed class JsonColorPresetStore
                 Options = FileOptions.Asynchronous | FileOptions.WriteThrough
             }))
             {
-                await JsonSerializer.SerializeAsync(stream, new PresetFile(presetArray.Select(PresetDto.FromPreset).ToArray()), JsonOptions, cancellationToken);
+                await stream.WriteAsync(payload, cancellationToken);
                 await stream.FlushAsync(cancellationToken);
                 stream.Flush(flushToDisk: true);
             }
@@ -90,10 +98,7 @@ public sealed class JsonColorPresetStore
         }
         finally
         {
-            if (File.Exists(temporaryPath))
-            {
-                File.Delete(temporaryPath);
-            }
+            TryDelete(temporaryPath);
         }
     }
 
@@ -166,6 +171,23 @@ public sealed class JsonColorPresetStore
         if (string.IsNullOrWhiteSpace(path))
         {
             throw new ArgumentException("A preset file path is required.", nameof(path));
+        }
+    }
+
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+        catch (IOException)
+        {
+        }
+        catch (UnauthorizedAccessException)
+        {
         }
     }
 

@@ -59,6 +59,27 @@ public sealed class ColorPresetTests
     }
 
     [Xunit.Fact]
+    public async Task PresetStoreRejectsSerializedPayloadsThatCannotReopen()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-presets-size-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "presets.json");
+            var preset = new ColorPreset(new string('p', 5 * 1024 * 1024), new ColorGrade());
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                new JsonColorPresetStore().SaveAtomicAsync(path, [preset], CancellationToken.None));
+
+            Xunit.Assert.False(File.Exists(path));
+            Xunit.Assert.Empty(directory.EnumerateFiles("*.tmp"));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task PresetStoreRejectsReparsePointFiles()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-presets-boundary-");
