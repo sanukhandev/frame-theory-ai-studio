@@ -1311,6 +1311,17 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(relink, "Relink selected photo media");
         ToolTip.SetTip(relink, "Validate and relink the selected photo media within the project folder.");
         relink.Click += async (_, _) => await viewModel.PhotoRecovery.RelinkSelectedAsync(replacementPath.Text ?? string.Empty, CancellationToken.None);
+        void RefreshPhotoRecoveryActions() => relink.IsEnabled = viewModel.PhotoRecovery.CanRelink;
+        viewModel.PhotoRecovery.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(PhotoRecoveryViewModel.CanRelink)
+                or nameof(PhotoRecoveryViewModel.MissingMedia)
+                or nameof(PhotoRecoveryViewModel.SelectedMissingMedia))
+            {
+                RefreshPhotoRecoveryActions();
+            }
+        };
+        RefreshPhotoRecoveryActions();
         return CreateInspectorExpander(
             "Project recovery and media relink",
             CreateSectionContent(

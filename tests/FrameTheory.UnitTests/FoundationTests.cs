@@ -901,6 +901,10 @@ public sealed class FoundationTests
                 Xunit.Assert.True(photoRecoveryStatus.IsReadOnly);
                 Xunit.Assert.Equal(11, photoRecoveryStatus.FontSize);
                 Xunit.Assert.Equal("Current local photo project recovery and relink status.", ToolTip.GetTip(photoRecoveryStatus));
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Relink selected photo media")
+                    .IsEnabled);
                 photoRecoverySection.IsExpanded = false;
                 var photoSections = window.GetVisualDescendants()
                     .OfType<Expander>()

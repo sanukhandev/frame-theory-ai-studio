@@ -58,6 +58,8 @@ public sealed class PhotoRecoveryViewModel : INotifyPropertyChanged
 
     public IReadOnlyList<MissingMediaViewModel> MissingMedia { get; private set; } = [];
 
+    public bool CanRelink => _snapshot is not null && SelectedMissingMedia is not null;
+
     public MissingMediaViewModel? SelectedMissingMedia
     {
         get => _selectedMissingMedia;
@@ -70,6 +72,7 @@ public sealed class PhotoRecoveryViewModel : INotifyPropertyChanged
 
             _selectedMissingMedia = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(CanRelink));
         }
     }
 
@@ -132,6 +135,7 @@ public sealed class PhotoRecoveryViewModel : INotifyPropertyChanged
             .ToArray());
         SelectedMissingMedia = MissingMedia.FirstOrDefault();
         OnPropertyChanged(nameof(MissingMedia));
+        OnPropertyChanged(nameof(CanRelink));
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null) =>
