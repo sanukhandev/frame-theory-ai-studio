@@ -1293,6 +1293,17 @@ public sealed class FoundationTests
                     }
 
                     Dispatcher.UIThread.RunJobs();
+                    if (workspaceIndex == 3)
+                    {
+                        Xunit.Assert.False(window.GetVisualDescendants()
+                            .OfType<Button>()
+                            .Single(control => AutomationProperties.GetName(control) == "Prepare local Gemini analysis samples")
+                            .IsEnabled);
+                        Xunit.Assert.False(window.GetVisualDescendants()
+                            .OfType<Button>()
+                            .Single(control => AutomationProperties.GetName(control) == "Analyze approved samples with Gemini")
+                            .IsEnabled);
+                    }
                     automationNames.UnionWith(window.GetVisualDescendants()
                         .OfType<Control>()
                         .Select(AutomationProperties.GetName)

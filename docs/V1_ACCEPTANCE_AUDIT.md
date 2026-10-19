@@ -1,5 +1,7 @@
 # V1 Acceptance Audit
 
+Machine audit checkpoint: optional Gemini actions now expose honest prerequisites in the UI: local sample preparation requires imported analyzable media and provider submission requires a consented prepared report. Focused shell coverage and the full local Release gate pass; live-provider/manual acceptance remains required.
+
 Machine audit checkpoint: project recovery and export controls now reflect observable state: relink requires a selected missing reference, cancel requires an active export, and retry requires a failed/canceled export job. Focused shell coverage and the full local Release gate pass; native recovery/queue acceptance remains required.
 
 Machine audit checkpoint: preview status, pixels and performance telemetry now publish atomically against the latest preview generation, preventing late decode results from leaving a mismatched monitor readout. Focused race coverage passes 4 tests; native seek-stress acceptance remains required.

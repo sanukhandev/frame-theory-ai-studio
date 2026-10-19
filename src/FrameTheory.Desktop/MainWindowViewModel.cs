@@ -519,6 +519,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public LocalMediaAnalysisReport? LastLocalAnalysisReport { get; private set; }
 
+    public bool CanPrepareLocalAnalysis => _analysisSampler is not null && _analysisAssets.Count > 0;
+
+    public bool CanRequestAiAnalysis => LastLocalAnalysisReport?.UploadConsent == true;
+
     public RoughCutPlan? LastRoughCutPlan { get; private set; }
 
     public string RoughCutStatusText
@@ -1004,6 +1008,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             ImportedMedia = Array.AsReadOnly(imported.ToArray());
             OnPropertyChanged(nameof(ImportedMedia));
             OnPropertyChanged(nameof(ImportedMediaSummary));
+            OnPropertyChanged(nameof(CanPrepareLocalAnalysis));
             MediaImportStatusText = $"Media import canceled; imported {newlyImported} file(s); {imported.Count} file(s) available.";
             return;
         }
@@ -1011,6 +1016,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         ImportedMedia = Array.AsReadOnly(imported.ToArray());
         OnPropertyChanged(nameof(ImportedMedia));
         OnPropertyChanged(nameof(ImportedMediaSummary));
+        OnPropertyChanged(nameof(CanPrepareLocalAnalysis));
         MediaImportStatusText = newlyImported == 0 && failures.Count == 0
             ? "No local media files were dropped."
             : $"Imported {newlyImported} file(s); {imported.Count} file(s) available." + (failures.Count == 0 ? string.Empty : $" Failed: {string.Join(", ", failures)}");
@@ -1442,6 +1448,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             LastLocalAnalysisReport = null;
             OnPropertyChanged(nameof(LastLocalAnalysisReport));
+            OnPropertyChanged(nameof(CanPrepareLocalAnalysis));
+            OnPropertyChanged(nameof(CanRequestAiAnalysis));
             TimelinePreviewPpm = null;
             TimelinePreviewStatusText = "Project reopened; preview a current timeline frame to decode it.";
             MediaImportStatusText = $"Reopened {imported.Count} project media file(s).";
@@ -1533,6 +1541,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 new Progress<LocalAnalysisProgress>(update => AnalysisStatusText = $"{update.Stage} ({update.Fraction:P0})"),
                 cancellationToken);
             OnPropertyChanged(nameof(LastLocalAnalysisReport));
+            OnPropertyChanged(nameof(CanRequestAiAnalysis));
             AnalysisStatusText = LastLocalAnalysisReport.Disclosure;
             return true;
         }

@@ -1994,6 +1994,21 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(activityLog, "Gemini activity log");
         ToolTip.SetTip(activityLog, "Review the latest optional Gemini request and validation activity.");
         activityLog.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.GeminiActivityLogText)));
+        void RefreshAnalysisActions()
+        {
+            prepareAnalysis.IsEnabled = viewModel.CanPrepareLocalAnalysis;
+            analyzeApprovedSamples.IsEnabled = viewModel.CanRequestAiAnalysis;
+        }
+
+        viewModel.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(MainWindowViewModel.CanPrepareLocalAnalysis)
+                or nameof(MainWindowViewModel.CanRequestAiAnalysis))
+            {
+                RefreshAnalysisActions();
+            }
+        };
+        RefreshAnalysisActions();
         _ = settings.LoadAsync(CancellationToken.None);
         var providerSection = CreateInspectorExpander(
             "Provider",

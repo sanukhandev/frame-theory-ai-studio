@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Gemini action-availability checkpoint (2026-10-19):** The optional Gemini workspace now disables local sample preparation until analyzable media exists and disables provider submission until a consented local analysis report is ready. Focused production-shell coverage and the full Release gate pass 428 unit tests and 2 golden tests; live-provider/manual acceptance remains open.
+
 **Timeline project-action checkpoint (2026-10-19):** The Video project rail now enables `Relink`, `Cancel export` and `Retry last export` only when the view model has the corresponding missing-media or export-queue state. Focused production-shell coverage and the full Release gate pass 428 unit tests and 2 golden tests; native queue/recovery acceptance remains open.
 
 **Timeline preview publication checkpoint (2026-10-19):** Preview status, decoded pixels and performance samples now publish under one generation gate, so a stale request cannot partially overwrite the monitor readout after a newer seek. Focused preview-race coverage passes 4 tests; the full Release gate and native stress acceptance remain required.
