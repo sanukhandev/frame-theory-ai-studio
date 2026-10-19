@@ -17,6 +17,8 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
 
     public ColorGrade Grade => _grade;
 
+    public bool HasSource => _source is not null;
+
     public byte[]? BeforePreviewPpm => _source?.ToPpm();
 
     public byte[]? AfterPreviewPpm => _source?.Apply(ColorGraph.ForSrgb(), _grade, _lut).ToPpm();
@@ -222,6 +224,7 @@ public sealed class ColorGradeInspectorViewModel : INotifyPropertyChanged
     private void NotifyPreviewChanged()
     {
         OnPropertyChanged(nameof(Grade));
+        OnPropertyChanged(nameof(HasSource));
         OnPropertyChanged(nameof(ExposureEV));
         OnPropertyChanged(nameof(Contrast));
         OnPropertyChanged(nameof(Saturation));

@@ -1423,6 +1423,18 @@ public sealed class FoundationTests
                     .OfType<Button>()
                     .Single(control => AutomationProperties.GetName(control) == "Apply reviewed reference grade")
                     .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<StackPanel>()
+                    .Single(control => AutomationProperties.GetName(control) == "Color grade controls")
+                    .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Apply loaded color style")
+                    .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<ComboBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Reference source preview")
+                    .IsEnabled);
                 Xunit.Assert.Equal(
                     "Apply the selected reusable style to the local color preview.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Apply loaded color style")));

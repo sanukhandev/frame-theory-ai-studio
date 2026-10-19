@@ -10,7 +10,9 @@ public sealed class ColorInspectorTests
     {
         byte[] source = [.. "P6\n2 1\n255\n"u8, 32, 64, 128, 200, 100, 40];
         var inspector = new ColorGradeInspectorViewModel();
+        Xunit.Assert.False(inspector.HasSource);
         inspector.SetSource(source);
+        Xunit.Assert.True(inspector.HasSource);
         var before = inspector.BeforePreviewPpm;
 
         inspector.ExposureEV = 1;

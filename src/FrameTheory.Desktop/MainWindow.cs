@@ -2519,6 +2519,7 @@ public sealed class MainWindow : Window
         ToolTip.SetTip(status, "Current local color grade and preview status.");
         status.Bind(TextBox.TextProperty, new Binding("ColorInspector.StatusText"));
         var controls = new StackPanel { Spacing = 4 };
+        AutomationProperties.SetName(controls, "Color grade controls");
         controls.Children.Add(CreateGradeControl("Exposure EV", -8, 8, inspector.ExposureEV, value => inspector.ExposureEV = value, inspector, nameof(ColorGradeInspectorViewModel.ExposureEV), () => inspector.ExposureEV));
         controls.Children.Add(CreateGradeControl("Contrast", -1, 1, inspector.Contrast, value => inspector.Contrast = value, inspector, nameof(ColorGradeInspectorViewModel.Contrast), () => inspector.Contrast));
         controls.Children.Add(CreateGradeControl("Saturation", -1, 1, inspector.Saturation, value => inspector.Saturation = value, inspector, nameof(ColorGradeInspectorViewModel.Saturation), () => inspector.Saturation));
@@ -2779,7 +2780,26 @@ public sealed class MainWindow : Window
         {
             analyzeReference.IsEnabled = viewModel.CanAnalyzeColorReference;
             applyReference.IsEnabled = viewModel.CanApplyPendingReferenceGrade;
+            referenceSource.IsEnabled = viewModel.CanAnalyzeColorReference;
+            referenceTarget.IsEnabled = viewModel.CanAnalyzeColorReference;
+            referenceConsent.IsEnabled = viewModel.CanAnalyzeColorReference;
         }
+
+        void RefreshColorActionAvailability()
+        {
+            controls.IsEnabled = inspector.HasSource;
+            applyPreset.IsEnabled = inspector.HasSource && presetSelection.SelectedItem is ColorPreset;
+            RefreshReferenceActions();
+        }
+
+        presetSelection.SelectionChanged += (_, _) => RefreshColorActionAvailability();
+        inspector.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(ColorGradeInspectorViewModel.HasSource))
+            {
+                RefreshColorActionAvailability();
+            }
+        };
 
         viewModel.PropertyChanged += (_, args) =>
         {
@@ -2789,7 +2809,7 @@ public sealed class MainWindow : Window
                 RefreshReferenceActions();
             }
         };
-        RefreshReferenceActions();
+        RefreshColorActionAvailability();
         var beforePane = new Border
         {
             MinWidth = 160,
