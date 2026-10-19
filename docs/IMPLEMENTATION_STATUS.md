@@ -80,6 +80,8 @@
 
 **Preview frame-rate checkpoint (2026-10-19):** Frame decoding now rejects an uninitialized preview frame rate before filesystem or FFmpeg work; focused decoder coverage passes. Native preview acceptance remains open.
 
+**Process-argument checkpoint (2026-10-19):** FFmpeg process execution now rejects null argument entries before `ProcessStartInfo` construction; focused runner coverage passes. Native codec execution acceptance remains open.
+
 **Audio-preparation dependency checkpoint (2026-10-19):** Audio source preparation now rejects a missing media process runner at construction instead of failing during extraction; focused audio coverage passes. Native audio acceptance remains open.
 
 **Media-import dependency checkpoint (2026-10-19):** FFmpeg media importers now reject missing probe, preview-decoder and process-runner services at construction; focused import coverage passes. Native import acceptance remains open.

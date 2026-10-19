@@ -1976,6 +1976,7 @@ public sealed class FoundationTests
         var runner = new FrameTheory.Media.FfmpegProcessRunner();
         await Xunit.Assert.ThrowsAsync<ArgumentException>(() => runner.RunAsync(" ", [], CancellationToken.None));
         await Xunit.Assert.ThrowsAsync<ArgumentNullException>(() => runner.RunAsync("dotnet", null!, CancellationToken.None));
+        await Xunit.Assert.ThrowsAsync<ArgumentException>(() => runner.RunAsync("dotnet", [null!], CancellationToken.None));
     }
 
     [Xunit.Fact]

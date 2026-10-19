@@ -18,6 +18,11 @@ public sealed class FfmpegProcessRunner : IMediaProcessRunner
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(executable);
         ArgumentNullException.ThrowIfNull(arguments);
+        if (arguments.Any(argument => argument is null))
+        {
+            throw new ArgumentException("Media process arguments cannot contain null entries.", nameof(arguments));
+        }
+
         executable = FfmpegExecutableLocator.Resolve(executable);
         using var process = new Process
         {
