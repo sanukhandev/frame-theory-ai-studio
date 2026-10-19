@@ -20,7 +20,7 @@ public static class PhotoProjectStateJson
     public static string Serialize(PhotoEditState state)
     {
         ArgumentNullException.ThrowIfNull(state);
-        return JsonSerializer.Serialize(new PhotoProjectState
+        var json = JsonSerializer.Serialize(new PhotoProjectState
         {
             SourceMediaId = state.Source.Metadata.Id.Value,
             Operations = state.Operations.Select(operation => new PhotoOperationProjectState
@@ -73,6 +73,12 @@ public static class PhotoProjectStateJson
                 Strength = stroke.Strength
             }).ToList()
         }, Options);
+        if (System.Text.Encoding.UTF8.GetByteCount(json) > MaximumBytes)
+        {
+            throw new InvalidDataException("The photo edit state exceeds the supported size limit.");
+        }
+
+        return json;
     }
 
     public static PhotoEditState Deserialize(

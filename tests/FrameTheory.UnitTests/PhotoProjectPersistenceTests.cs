@@ -118,6 +118,16 @@ public sealed class PhotoProjectPersistenceTests
     }
 
     [Xunit.Fact]
+    public void PhotoProjectStateSerializationRejectsStatesThatCannotReopen()
+    {
+        var source = Document(new Uri("file:///photo.png"));
+        var state = new PhotoEditState(source).WithLayers(new PhotoLayerStack([
+            new PhotoAdjustmentLayer(new string('x', 1_100_000), new ColorGrade())]));
+
+        Xunit.Assert.Throws<InvalidDataException>(() => PhotoProjectStateJson.Serialize(state));
+    }
+
+    [Xunit.Fact]
     public async Task PhotoProjectOpenFailureLeavesCurrentPhotoLoaded()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-photo-project-");
