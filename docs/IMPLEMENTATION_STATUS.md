@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Reveal-style checkpoint (2026-10-19):** Timeline render plans now reject undefined before/after reveal styles before compositor dispatch; focused render-plan coverage passes. Native reel acceptance remains open.
+
 **Decoder dependency checkpoint (2026-10-19):** `FfmpegFrameDecoder` now rejects a missing media process runner at construction; focused decoder coverage passes. Native preview acceptance remains open.
 
 **Preview-proxy dependency checkpoint (2026-10-19):** `FfmpegPreviewProxyService` now rejects a missing media process runner at construction; focused proxy coverage passes. Native proxy acceptance remains open.

@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Reveal-style checkpoint: timeline render plans reject undefined before/after reveal styles before compositor dispatch; focused coverage passes locally. Native reel acceptance remains open.
+
 - Decoder dependency checkpoint: `FfmpegFrameDecoder` rejects a missing process runner at construction; focused coverage passes locally. Native preview acceptance remains open.
 
 - Preview-proxy dependency checkpoint: `FfmpegPreviewProxyService` rejects a missing process runner at construction; focused coverage passes locally. Native proxy acceptance remains open.

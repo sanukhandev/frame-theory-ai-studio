@@ -44,6 +44,11 @@ public sealed record TimelineVideoRenderPlan
             throw new ArgumentException("A valid render-plan frame rate is required.", nameof(frameRate));
         }
 
+        if (beforeAfterStyle is { } revealStyle && !Enum.IsDefined(revealStyle))
+        {
+            throw new ArgumentOutOfRangeException(nameof(beforeAfterStyle));
+        }
+
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(layers);
         var sourceMap = new Dictionary<MediaId, Uri>();

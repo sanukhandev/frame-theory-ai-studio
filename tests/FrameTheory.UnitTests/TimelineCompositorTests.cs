@@ -60,6 +60,14 @@ public sealed class TimelineCompositorTests
 
         Xunit.Assert.Equal("height", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineVideoRenderPlan(frameRate, 16, 0, 30, sources, layers)).ParamName);
         Xunit.Assert.Equal("durationFrames", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineVideoRenderPlan(frameRate, 16, 8, 0, sources, layers)).ParamName);
+        Xunit.Assert.Equal("beforeAfterStyle", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineVideoRenderPlan(
+            frameRate,
+            16,
+            8,
+            30,
+            sources,
+            layers,
+            beforeAfterStyle: (TimelineRevealStyle)99)).ParamName);
     }
 
     [Xunit.Fact]
