@@ -397,6 +397,11 @@ public sealed class GeminiInteractionsClient : IGeminiClient
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(inputs);
+        if (inputs.Any(input => input is null))
+        {
+            throw new ArgumentException("A Gemini plan cannot contain null inputs.", nameof(inputs));
+        }
+
         var prompt = inputs.Count > 0 ? inputs[0].Text : null;
         if (inputs.Count is < 2 or > 64 || inputs[0].Type != "text" || string.IsNullOrWhiteSpace(prompt) || prompt?.Length > 32_000)
         {

@@ -342,6 +342,9 @@ public sealed class GeminiInteractionsTests
             schema,
             CancellationToken.None));
 
+        await Xunit.Assert.ThrowsAsync<ArgumentException>(() => service.CreatePlanAsync(
+            [null!], schema, CancellationToken.None));
+
         Xunit.Assert.Equal(0, calls);
     }
 
