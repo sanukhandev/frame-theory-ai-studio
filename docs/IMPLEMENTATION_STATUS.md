@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**AI-recipe save checkpoint (2026-10-19):** AI recipe serialization now enforces the 1 MB UTF-8 bound before creating a temporary file, preventing saves that cannot be reopened; focused recipe persistence coverage passes. Native AI recipe acceptance remains open.
+
 **Photo-state save checkpoint (2026-10-19):** Photo edit-state serialization now applies the same 1 MB UTF-8 bound as deserialization, preventing saves that cannot be reopened; focused photo persistence coverage passes. Native photo save/reopen acceptance remains open.
 
 **Photo-state input checkpoint (2026-10-19):** Portable photo edit-state loading now enforces its 1 MB limit against UTF-8 encoded bytes, preventing Unicode payloads from bypassing persistence bounds; focused photo persistence coverage passes. Native photo reopen acceptance remains open.
