@@ -61,6 +61,12 @@ public sealed class PhotoLayerTests
     }
 
     [Xunit.Fact]
+    public void PhotoOperationsRejectUndefinedKinds()
+    {
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new PhotoEditOperation((PhotoEditOperationKind)99, 0, 0, 0, 0));
+    }
+
+    [Xunit.Fact]
     public void CompositeLayerSurvivesSubsequentEditOperations()
     {
         var baseDocument = Document(new Uri("file:///base.png"), [100, 100, 100, 20, 40, 60]);

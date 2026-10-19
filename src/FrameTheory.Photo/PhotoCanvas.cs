@@ -156,8 +156,32 @@ public enum PhotoEditOperationKind
     Resize
 }
 
-public sealed record PhotoEditOperation(PhotoEditOperationKind Kind, int First, int Second, int Third, int Fourth)
+public sealed record PhotoEditOperation
 {
+    public PhotoEditOperation(PhotoEditOperationKind kind, int first, int second, int third, int fourth)
+    {
+        if (!Enum.IsDefined(kind))
+        {
+            throw new ArgumentOutOfRangeException(nameof(kind));
+        }
+
+        Kind = kind;
+        First = first;
+        Second = second;
+        Third = third;
+        Fourth = fourth;
+    }
+
+    public PhotoEditOperationKind Kind { get; }
+
+    public int First { get; }
+
+    public int Second { get; }
+
+    public int Third { get; }
+
+    public int Fourth { get; }
+
     public static PhotoEditOperation Crop(int x, int y, int width, int height) => new(PhotoEditOperationKind.Crop, x, y, width, height);
 
     public static PhotoEditOperation Rotate(int degrees) => new(PhotoEditOperationKind.Rotate, degrees, 0, 0, 0);
