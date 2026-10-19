@@ -49,10 +49,31 @@ public sealed record LocalAnalysisSample
         TimeSpan? timestamp,
         byte[] payload)
     {
+        ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(payload);
+        if (!source.IsFile)
+        {
+            throw new ArgumentException("Analysis samples must use local file URIs.", nameof(source));
+        }
+
+        if (!Enum.IsDefined(kind))
+        {
+            throw new ArgumentOutOfRangeException(nameof(kind));
+        }
+
+        if (string.IsNullOrWhiteSpace(sampleKind) || sampleKind.Length > 64)
+        {
+            throw new ArgumentException("A bounded analysis sample kind is required.", nameof(sampleKind));
+        }
+
+        if (frameIndex < 0 || timestamp < TimeSpan.Zero || payload.Length == 0)
+        {
+            throw new ArgumentException("Analysis sample timing and payload must be non-negative and non-empty.");
+        }
+
         Source = source;
         Kind = kind;
-        SampleKind = sampleKind;
+        SampleKind = sampleKind.Trim();
         FrameIndex = frameIndex;
         Timestamp = timestamp;
         _payload = payload.ToArray();
@@ -81,11 +102,23 @@ public sealed record LocalMediaAnalysisReport
         string Disclosure)
     {
         ArgumentNullException.ThrowIfNull(Samples);
-        this.Samples = Array.AsReadOnly(Samples.ToArray());
+        var sampleSnapshot = Samples.ToArray();
+        if (sampleSnapshot.Any(sample => sample is null))
+        {
+            throw new ArgumentException("Analysis reports cannot contain null samples.", nameof(Samples));
+        }
+
+        const GeminiAnalysisScope supportedScopes = GeminiAnalysisScope.VideoFrames | GeminiAnalysisScope.AudioWaveform | GeminiAnalysisScope.PhotoPreview;
+        if (Scopes == GeminiAnalysisScope.None || (Scopes & ~supportedScopes) != 0 || EstimatedUploadBytes < 0 || string.IsNullOrWhiteSpace(Disclosure))
+        {
+            throw new ArgumentException("Analysis reports require a valid scope, non-negative byte estimate and disclosure.");
+        }
+
+        this.Samples = Array.AsReadOnly(sampleSnapshot);
         this.Scopes = Scopes;
         this.UploadConsent = UploadConsent;
         this.EstimatedUploadBytes = EstimatedUploadBytes;
-        this.Disclosure = Disclosure;
+        this.Disclosure = Disclosure.Trim();
     }
 
     public IReadOnlyList<LocalAnalysisSample> Samples { get; }

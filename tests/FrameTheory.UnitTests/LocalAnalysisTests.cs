@@ -77,6 +77,19 @@ public sealed class LocalAnalysisTests
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<ImportedMedia>>(request.Assets).IsReadOnly);
     }
 
+    [Xunit.Fact]
+    public void AnalysisContractsRejectMalformedSampleMetadata()
+    {
+        Xunit.Assert.Throws<ArgumentException>(() => new LocalAnalysisSample(
+            new Uri("https://example.test/sample.ppm"), MediaKind.Image, "photo-preview-ppm", 0, TimeSpan.Zero, [1]));
+        Xunit.Assert.Throws<ArgumentException>(() => new LocalAnalysisSample(
+            new Uri("file:///sample.ppm"), MediaKind.Image, " ", 0, TimeSpan.Zero, [1]));
+        var sample = new LocalAnalysisSample(new Uri("file:///sample.ppm"), MediaKind.Image, "photo-preview-ppm", 0, TimeSpan.Zero, [1]);
+        Xunit.Assert.Throws<ArgumentException>(() => new LocalMediaAnalysisReport([null!], GeminiAnalysisScope.PhotoPreview, false, 1, "local"));
+        Xunit.Assert.Throws<ArgumentException>(() => new LocalMediaAnalysisReport([sample], GeminiAnalysisScope.None, false, 1, "local"));
+        Xunit.Assert.Throws<ArgumentException>(() => new LocalMediaAnalysisReport([sample], GeminiAnalysisScope.PhotoPreview, false, -1, "local"));
+    }
+
     private static ImportedMedia Imported(
         Uri source,
         MediaKind kind,
