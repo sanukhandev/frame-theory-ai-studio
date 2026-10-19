@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**AI input-shape checkpoint (2026-10-19):** Gemini plan requests now require a pure text prompt, reject text/image field smuggling, and continue to block malformed media before network use; focused interaction coverage passes. Live provider acceptance remains open.
+
 **AI text-input checkpoint (2026-10-19):** Gemini interaction text inputs now reject whitespace-only content before provider request construction; focused interaction coverage passes. Live provider acceptance remains open.
 
 **Progress-contract checkpoint (2026-10-19):** Local-analysis and export progress updates now reject blank stages and non-finite or out-of-range fractions, preventing invalid status values from reaching the UI; focused AI/export coverage passes. Native progress rendering remains open.
