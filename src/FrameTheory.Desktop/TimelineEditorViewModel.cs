@@ -164,6 +164,12 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public IReadOnlyList<TimelineTrackRowViewModel> TrackRows { get; private set; } = [];
 
+    public bool HasVideoTrack => _videoClips.Count > 0;
+
+    public bool HasAudioTrack => _audioClips.Count > 0;
+
+    public bool HasTimelineContent => HasVideoTrack || HasAudioTrack;
+
     public IReadOnlyList<long> BeatMarkers => _beatMarkerView;
 
     public BeatDetectionMode BeatDetectionMode
@@ -1595,6 +1601,9 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
                     _selectedClipStart == clip.TimelineRange.StartFrame)).ToArray())))
             .ToArray());
         OnPropertyChanged(nameof(TrackRows));
+        OnPropertyChanged(nameof(HasVideoTrack));
+        OnPropertyChanged(nameof(HasAudioTrack));
+        OnPropertyChanged(nameof(HasTimelineContent));
         OnPropertyChanged(nameof(SelectionContextText));
         OnPropertyChanged(nameof(SelectedMediaId));
         OnPropertyChanged(nameof(SelectedTrackKind));

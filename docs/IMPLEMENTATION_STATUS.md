@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Video empty-state checkpoint (2026-10-19):** The Video workspace now disables transport, selection, rough-cut, title, caption-export, caption-font and watermark actions until the required timeline/media state exists; rough-cut apply is consumed after application and invalidated by timeline changes. Focused timeline/shell coverage passes 90 tests; the full Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native visual/keyboard acceptance remains open.
+
 **Photo editor-action checkpoint (2026-10-19):** The Photo workspace now disables source-dependent project, layer, mask, retouch, grade and export controls until a photo is actually loaded, while import/open actions remain available and undo/redo continue to follow edit history. Focused desktop coverage passes 79 tests; the full Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native visual/HiDPI and screen-reader acceptance remains open.
 
 **Color reference-action checkpoint (2026-10-19):** The Color workspace now enables reference analysis only when two local visual previews exist and enables grade application only while a reviewed grade is pending; starting a replacement request clears any stale pending grade. Focused color/reference coverage and the full Release gate pass 428 unit tests and 2 golden tests; live-provider/manual acceptance remains open.

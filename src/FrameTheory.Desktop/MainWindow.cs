@@ -4458,6 +4458,49 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(clearWatermark, "Clear watermark");
         ToolTip.SetTip(clearWatermark, "Remove the watermark from the current timeline export settings.");
         clearWatermark.Click += (_, _) => RunTimelineAction(timeline.ClearWatermark);
+        void RefreshTimelineContextAvailability()
+        {
+            var hasVideo = timeline.HasVideoTrack;
+            var hasAudio = timeline.HasAudioTrack;
+            var hasTimeline = timeline.HasTimelineContent;
+            beatDetection.IsEnabled = hasAudio;
+            prepareRoughCut.IsEnabled = viewModel.CanPrepareRoughCut;
+            applyRoughCut.IsEnabled = viewModel.CanApplyRoughCut;
+            back.IsEnabled = hasTimeline;
+            forward.IsEnabled = hasTimeline;
+            playhead.IsEnabled = hasTimeline;
+            select.IsEnabled = hasVideo;
+            selectAudio.IsEnabled = hasAudio;
+            addTitle.IsEnabled = hasVideo;
+            fadeTitle.IsEnabled = hasVideo && timeline.Captions.Count > 0;
+            pushTitle.IsEnabled = hasVideo && timeline.Captions.Count > 0;
+            exportCaptions.IsEnabled = timeline.Captions.Count > 0;
+            kineticCaptions.IsEnabled = timeline.Captions.Count > 0;
+            captionFont.IsEnabled = hasVideo;
+            useApprovedWatermark.IsEnabled = hasVideo;
+            selectWatermark.IsEnabled = hasVideo;
+            clearWatermark.IsEnabled = hasVideo;
+        }
+
+        timeline.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(TimelineEditorViewModel.HasVideoTrack)
+                or nameof(TimelineEditorViewModel.HasAudioTrack)
+                or nameof(TimelineEditorViewModel.HasTimelineContent)
+                or nameof(TimelineEditorViewModel.TrackRows)
+                or nameof(TimelineEditorViewModel.Captions))
+            {
+                RefreshTimelineContextAvailability();
+            }
+        };
+        viewModel.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(MainWindowViewModel.CanPrepareRoughCut) or nameof(MainWindowViewModel.CanApplyRoughCut))
+            {
+                RefreshTimelineContextAvailability();
+            }
+        };
+        RefreshTimelineContextAvailability();
         void RefreshClipActionAvailability()
         {
             var hasSelection = timeline.HasSelectedClip;

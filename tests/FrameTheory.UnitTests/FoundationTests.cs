@@ -711,6 +711,25 @@ public sealed class FoundationTests
                     .Single(control => AutomationProperties.GetName(control) == "Play timeline preview");
                 Xunit.Assert.False(playTimeline.IsEnabled);
                 Xunit.Assert.Equal("Play timeline", playTimeline.Content);
+                foreach (var emptyTimelineActionName in new[]
+                {
+                    "Previous timeline frame",
+                    "Next timeline frame",
+                    "Select video clip at playhead",
+                    "Select audio clip at playhead",
+                    "Plan waveform activity rough cut",
+                    "Apply reviewed rough cut",
+                    "Add timeline title",
+                    "Export SRT captions",
+                    "Choose caption font",
+                    "Use approved Frame Theory watermark",
+                    "Select custom watermark",
+                    "Clear watermark"
+                })
+                {
+                    Xunit.Assert.False(
+                        window.GetVisualDescendants().OfType<Control>().Single(control => AutomationProperties.GetName(control) == emptyTimelineActionName).IsEnabled);
+                }
                 var showSourcePreview = window.GetVisualDescendants()
                     .OfType<CheckBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Show original timeline source frame");

@@ -201,6 +201,20 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             _exportQueue);
         ColorInspector = colorInspector ?? new ColorGradeInspectorViewModel();
         TimelineEditor = timelineEditor ?? new TimelineEditorViewModel();
+        TimelineEditor.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(TimelineEditorViewModel.TrackRows))
+            {
+                if (LastRoughCutPlan is not null)
+                {
+                    LastRoughCutPlan = null;
+                    OnPropertyChanged(nameof(LastRoughCutPlan));
+                    OnPropertyChanged(nameof(CanApplyRoughCut));
+                }
+
+                OnPropertyChanged(nameof(CanPrepareRoughCut));
+            }
+        };
         GeminiSettings = geminiSettings ?? new GeminiSettingsViewModel(new GeminiConfigurationService(new OperatingSystemSecretStore()));
         if (PhotoEditor is { } photoEditorViewModel)
         {
@@ -529,6 +543,18 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public RoughCutPlan? LastRoughCutPlan { get; private set; }
 
+    public bool CanPrepareRoughCut
+    {
+        get
+        {
+            var videoTrack = TimelineEditor.TrackRows.SingleOrDefault(track => track.Kind == TimelineTrackKind.Video);
+            return videoTrack?.Clips.Count >= 2 && videoTrack.Clips.All(clip =>
+                _analysisAssets.Keys.Any(mediaId => string.Equals(mediaId.Value, clip.MediaId, StringComparison.Ordinal)));
+        }
+    }
+
+    public bool CanApplyRoughCut => LastRoughCutPlan is not null;
+
     public string RoughCutStatusText
     {
         get => _roughCutStatusText;
@@ -570,6 +596,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }).ToArray();
             LastRoughCutPlan = RoughCutPlanner.Create(sources);
             OnPropertyChanged(nameof(LastRoughCutPlan));
+            OnPropertyChanged(nameof(CanApplyRoughCut));
             RoughCutStatusText = LastRoughCutPlan.Summary + " Review before applying.";
             return true;
         }
@@ -592,6 +619,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         try
         {
             TimelineEditor.ApplyRoughCut(LastRoughCutPlan);
+            LastRoughCutPlan = null;
+            OnPropertyChanged(nameof(LastRoughCutPlan));
+            OnPropertyChanged(nameof(CanApplyRoughCut));
             RoughCutStatusText = "Applied the reviewed rough cut as one undoable timeline change.";
             return true;
         }
@@ -1014,6 +1044,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(ImportedMediaSummary));
             OnPropertyChanged(nameof(CanPrepareLocalAnalysis));
             OnPropertyChanged(nameof(CanAnalyzeColorReference));
+            OnPropertyChanged(nameof(CanPrepareRoughCut));
             MediaImportStatusText = $"Media import canceled; imported {newlyImported} file(s); {imported.Count} file(s) available.";
             return;
         }
@@ -1023,6 +1054,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(ImportedMediaSummary));
         OnPropertyChanged(nameof(CanPrepareLocalAnalysis));
         OnPropertyChanged(nameof(CanAnalyzeColorReference));
+        OnPropertyChanged(nameof(CanPrepareRoughCut));
         MediaImportStatusText = newlyImported == 0 && failures.Count == 0
             ? "No local media files were dropped."
             : $"Imported {newlyImported} file(s); {imported.Count} file(s) available." + (failures.Count == 0 ? string.Empty : $" Failed: {string.Join(", ", failures)}");
@@ -1445,6 +1477,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(ImportedMedia));
             OnPropertyChanged(nameof(ImportedMediaSummary));
             OnPropertyChanged(nameof(CanAnalyzeColorReference));
+            OnPropertyChanged(nameof(CanPrepareRoughCut));
             var video = imported.Select(item => item.Media.Metadata).FirstOrDefault(metadata => metadata.Kind == MediaKind.Video);
             _videoWidth = video?.Width ?? 0;
             _videoHeight = video?.Height ?? 0;

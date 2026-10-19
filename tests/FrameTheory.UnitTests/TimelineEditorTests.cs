@@ -22,6 +22,9 @@ public sealed class TimelineEditorTests
         Xunit.Assert.Equal(29, seek.TimelineFrame);
         Xunit.Assert.Equal(150, editor.TotalFrames);
         Xunit.Assert.Equal(2, editor.TrackRows.Count);
+        Xunit.Assert.True(editor.HasVideoTrack);
+        Xunit.Assert.True(editor.HasAudioTrack);
+        Xunit.Assert.True(editor.HasTimelineContent);
         Xunit.Assert.True(editor.TrackRows.Single(row => row.Id == "Video 1").Clips.First().IsSelected);
         Xunit.Assert.Contains("Selected Video clip", editor.SelectionContextText, StringComparison.Ordinal);
         Xunit.Assert.Equal(TimelineTrackKind.Video, editor.SelectedTrackKind);

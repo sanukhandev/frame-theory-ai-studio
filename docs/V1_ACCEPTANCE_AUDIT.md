@@ -1,5 +1,7 @@
 # V1 Acceptance Audit
 
+Machine audit checkpoint: the empty Video workspace now disables transport, selection, rough-cut, title, caption-export, caption-font and watermark actions until their required media state exists; rough-cut apply is consumed after application and invalidated by timeline changes. Focused shell/timeline coverage passes 90 tests; the full local Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native visual/keyboard acceptance remains required.
+
 Machine audit checkpoint: the Photo workspace now disables source-dependent project, layer, mask, retouch, grade and export actions until a local photo is loaded while retaining import/open actions. Focused desktop coverage passes 79 tests; the full local Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native visual/HiDPI and screen-reader acceptance remains required.
 
 Machine audit checkpoint: Color reference actions now reflect actual local state: two visual previews are required before analysis, and apply is enabled only for a pending reviewed grade; a replacement request clears stale grade state. Focused color/reference coverage and the full local Release gate pass; live-provider/manual acceptance remains required.
