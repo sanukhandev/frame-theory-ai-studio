@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Transition-boundary checkpoint: timeline layers reject incoming transitions longer than the preceding clip, preventing negative compositor `xfade` offsets; focused coverage passes locally. Native transition export acceptance remains open.
+
 - Motion-frame bound checkpoint: motion-analysis frames enforce the 64M-pixel bound before byte-length validation or tracking; focused coverage passes locally. Manual stabilization quality acceptance remains open.
 
 - Photo-resize checkpoint: raster resizing uses 64-bit coordinate products before division, preserving valid tall/wide images beyond 32-bit intermediate limits; focused coverage passes locally. Native large-image export acceptance remains open.

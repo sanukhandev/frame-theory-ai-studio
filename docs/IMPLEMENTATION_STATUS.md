@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Transition-boundary checkpoint (2026-10-19):** Timeline layers now reject incoming transitions longer than the preceding clip, preventing negative compositor `xfade` offsets; focused compositor coverage passes. Native transition export acceptance remains open.
+
 **Motion-frame bound checkpoint (2026-10-19):** Motion-analysis frames now enforce the 64M-pixel bound before byte-length validation or tracking, preventing oversized CPU/memory work; focused motion coverage passes. Manual stabilization quality acceptance remains open.
 
 **Photo-resize checkpoint (2026-10-19):** Raster resizing now uses 64-bit coordinate products before division, preserving valid tall/wide images beyond 32-bit intermediate limits; focused photo coverage passes. Native large-image export acceptance remains open.
