@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**AI keyframe schema checkpoint (2026-10-19):** AI validation now checks keyframe fields, finite transform bounds, easing values and duplicate frame positions before approval; focused malformed-animation coverage passes. Gemini execution remains allowlisted and six P0 gates remain partial.
+
 **AI action range checkpoint (2026-10-19):** AI validation now rejects negative starts and non-positive durations even when a plan is constructed in memory without the JSON parser; focused validator coverage passes. Gemini execution remains allowlisted and six P0 gates remain partial.
 
 **Timeline ruler bound checkpoint (2026-10-19):** Ruler generation now clamps extreme viewport math and caps tick materialization at 4096 entries, preventing pathological zoom/viewport requests from overflowing or allocating unbounded UI state; focused timeline coverage passes. Native HiDPI acceptance remains open.

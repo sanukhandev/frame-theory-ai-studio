@@ -2,6 +2,7 @@ using System.Collections.Frozen;
 using System.Collections.ObjectModel;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using FrameTheory.Domain;
 
 namespace FrameTheory.AI;
 
@@ -412,6 +413,10 @@ public static class AiEditPlanValidator
                 {
                     errors.Add($"Action '{action.Id}' requires 1..100 keyframes.");
                 }
+                else
+                {
+                    ValidateKeyframes(action, keyframes, errors);
+                }
 
                 break;
             case "audio.gain":
@@ -461,6 +466,34 @@ public static class AiEditPlanValidator
         if (!action.Params.TryGetValue(name, out var value) || value.ValueKind != JsonValueKind.String || value.GetString() is not { Length: > 0 and <= 128 } identifier || !Regex.IsMatch(identifier, "^[a-zA-Z0-9._-]+$", RegexOptions.CultureInvariant))
         {
             errors.Add($"Action '{action.Id}' parameter '{name}' must be a safe local identifier.");
+        }
+    }
+
+    private static void ValidateKeyframes(AiEditAction action, JsonElement keyframes, ICollection<string> errors)
+    {
+        var frames = new HashSet<long>();
+        var index = 0;
+        foreach (var keyframe in keyframes.EnumerateArray())
+        {
+            var valid = keyframe.ValueKind == JsonValueKind.Object &&
+                keyframe.TryGetProperty("frame", out var frameValue) && frameValue.TryGetInt64(out var frame) && frame >= 0 && frames.Add(frame) &&
+                keyframe.TryGetProperty("opacity", out var opacityValue) && opacityValue.TryGetDouble(out var opacity) && double.IsFinite(opacity) && opacity is >= 0 and <= 1 &&
+                keyframe.TryGetProperty("scale", out var scaleValue) && scaleValue.TryGetDouble(out var scale) && double.IsFinite(scale) && scale > 0 &&
+                keyframe.TryGetProperty("offsetX", out var offsetXValue) && offsetXValue.TryGetInt32(out var offsetX) && offsetX >= 0 &&
+                keyframe.TryGetProperty("offsetY", out var offsetYValue) && offsetYValue.TryGetInt32(out var offsetY) && offsetY >= 0;
+            if (valid && keyframe.TryGetProperty("easing", out var easingValue))
+            {
+                valid = easingValue.ValueKind == JsonValueKind.String &&
+                    Enum.TryParse<TimelineEasing>(easingValue.GetString(), ignoreCase: true, out var easing) &&
+                    Enum.IsDefined(easing);
+            }
+
+            if (!valid)
+            {
+                errors.Add($"Action '{action.Id}' keyframe {index} is invalid or duplicated.");
+            }
+
+            index++;
         }
     }
 

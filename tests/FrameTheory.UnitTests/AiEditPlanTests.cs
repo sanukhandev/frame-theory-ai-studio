@@ -152,6 +152,23 @@ public sealed class AiEditPlanTests
     }
 
     [Xunit.Fact]
+    public void ValidatorRejectsMalformedAnimationKeyframesBeforeExecution()
+    {
+        var plan = AiEditPlanParser.Parse("""
+            {"schemaVersion":"1.0","planId":"p","projectId":"project-1","intent":"animate","actions":[
+              {"id":"motion","type":"animation.keyframes","targetId":"clip-1","startFrame":0,"durationFrames":10,
+               "params":{"property":"transform","keyframes":[{"frame":0,"opacity":1}]}}]}
+            """);
+
+        var result = AiEditPlanValidator.Validate(
+            plan,
+            new AiPlanValidationContext("project-1", new HashSet<string>(["clip-1"]), 30));
+
+        Xunit.Assert.False(result.IsValid);
+        Xunit.Assert.Contains(result.Errors, error => error.Contains("keyframe 0", StringComparison.Ordinal));
+    }
+
+    [Xunit.Fact]
     public void ValidationContextSnapshotsTargetIds()
     {
         var targetIds = new HashSet<string>(["clip-1"], StringComparer.Ordinal);
