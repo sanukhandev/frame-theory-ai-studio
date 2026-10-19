@@ -1365,6 +1365,22 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Render the current photo edit to the selected image format and dimensions.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Export photo image")));
+                foreach (var photoActionName in new[]
+                {
+                    "Save photo project",
+                    "Rotate photo 90 degrees clockwise",
+                    "Import photo overlay",
+                    "Clear photo overlays",
+                    "Apply photo clone retouch",
+                    "Add photo exposure grade",
+                    "Export photo image"
+                })
+                {
+                    Xunit.Assert.False(
+                        window.GetVisualDescendants().OfType<Control>().Single(control => AutomationProperties.GetName(control) == photoActionName).IsEnabled);
+                }
+                Xunit.Assert.True(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Open image").IsEnabled);
+                Xunit.Assert.True(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Open photo project").IsEnabled);
 
                 viewModel.SelectedWorkspaceIndex = 2;
                 Dispatcher.UIThread.RunJobs();

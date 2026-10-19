@@ -1721,6 +1721,52 @@ public sealed class MainWindow : Window
                 await editor.ExportAsync(path, jpeg ? PhotoExportFormat.Jpeg : PhotoExportFormat.Png, (int)Math.Round(quality.Value), CancellationToken.None, selectedPreset);
             }
         };
+        void RefreshPhotoEditorCommands()
+        {
+            var hasPhoto = editor.HasPhoto;
+            foreach (var control in new Control[]
+            {
+                saveProject,
+                rotate,
+                overlayOpacity,
+                overlayBlend,
+                importOverlay,
+                clearOverlays,
+                maskX,
+                maskY,
+                maskRadius,
+                maskStrength,
+                applyMask,
+                clearMask,
+                retouchX,
+                retouchY,
+                retouchRadius,
+                retouchOffsetX,
+                retouchOffsetY,
+                retouchStrength,
+                applyRetouch,
+                clearRetouch,
+                gradeExposure,
+                addGrade,
+                maskGrade,
+                clearGradeMask,
+                format,
+                quality,
+                socialPreset,
+                export
+            })
+            {
+                control.IsEnabled = hasPhoto;
+            }
+        }
+        RefreshPhotoEditorCommands();
+        editor.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(PhotoEditorViewModel.HasPhoto))
+            {
+                RefreshPhotoEditorCommands();
+            }
+        };
         var photoPreviewCard = new Border
         {
             Padding = new Thickness(12),

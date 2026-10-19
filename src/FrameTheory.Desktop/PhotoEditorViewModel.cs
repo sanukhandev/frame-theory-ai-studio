@@ -36,6 +36,8 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
 
     public PhotoEditState? Current => _history?.Current;
 
+    public bool HasPhoto => Current is not null;
+
     public bool CanUndo => _history?.CanUndo == true;
 
     public bool CanRedo => _history?.CanRedo == true;
@@ -472,6 +474,7 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
     private void NotifyDocumentChanged()
     {
         OnPropertyChanged(nameof(Current));
+        OnPropertyChanged(nameof(HasPhoto));
         OnPropertyChanged(nameof(OriginalPreviewPpm));
         OnPropertyChanged(nameof(PreviewPpm));
         OnPropertyChanged(nameof(CanUndo));
