@@ -58,6 +58,7 @@ public sealed class MotionAnalysisTests
         Xunit.Assert.Equal("maximumCompensation", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => StabilizationPlanner.Plan([], maximumCompensation: 4097)).ParamName);
         Xunit.Assert.Equal("width", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new MotionFrame(0, 0, 1, new byte[] { 0, 0, 0 })).ParamName);
         Xunit.Assert.Equal("height", Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new MotionFrame(0, 1, 0, new byte[] { 0, 0, 0 })).ParamName);
+        Xunit.Assert.Throws<ArgumentException>(() => new StabilizationPlan([null!]));
     }
 
     [Xunit.Fact]

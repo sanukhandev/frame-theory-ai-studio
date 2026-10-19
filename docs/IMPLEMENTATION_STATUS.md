@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Motion-plan checkpoint (2026-10-19):** Stabilization plans now reject null transforms before motion data reaches compositor generation; focused motion coverage passes. Manual stabilization quality acceptance remains open.
+
 **Recovery containment checkpoint (2026-10-19):** Contained recovery paths now reject blank project-directory and relative-media inputs consistently on Unix-like platforms; hosted Linux/macOS recovery-test failure is fixed locally and focused coverage is pending rerun.
 
 **AI history checkpoint (2026-10-19):** Gemini usage-history reads now cap requested entries at 1000 to keep local diagnostics memory-bounded; focused history coverage passes. Live provider acceptance remains open.

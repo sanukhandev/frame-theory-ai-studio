@@ -79,6 +79,11 @@ public sealed class StabilizationPlan
     public StabilizationPlan(IReadOnlyList<StabilizationTransform> transforms)
     {
         ArgumentNullException.ThrowIfNull(transforms);
+        if (transforms.Any(transform => transform is null))
+        {
+            throw new ArgumentException("Stabilization transforms cannot contain null entries.", nameof(transforms));
+        }
+
         Transforms = Array.AsReadOnly(transforms.ToArray());
     }
 
