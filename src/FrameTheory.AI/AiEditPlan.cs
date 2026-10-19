@@ -86,6 +86,11 @@ public sealed record AiOperationDescriptor
     public AiOperationDescriptor(string type, string targetKind, string description, IReadOnlyList<string> parameters)
     {
         ArgumentNullException.ThrowIfNull(parameters);
+        if (parameters.Any(parameter => string.IsNullOrWhiteSpace(parameter) || parameter.Length > 64))
+        {
+            throw new ArgumentException("Operation parameters must be bounded non-empty names.", nameof(parameters));
+        }
+
         Type = type;
         TargetKind = targetKind;
         Description = description;

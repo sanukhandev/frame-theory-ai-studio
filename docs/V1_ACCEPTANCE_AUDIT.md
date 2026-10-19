@@ -76,6 +76,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Audio-fade checkpoint: audio segments reject combined fade-in/fade-out ranges longer than the segment before filter-graph construction; focused audio-timeline coverage passes locally. Native audio acceptance remains open.
 
+- AI catalog checkpoint: AI operation descriptors reject null, blank or oversized parameter names before allowlist publication; focused AI-plan coverage passes locally. Gemini acceptance remains open.
+
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
 - Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.
