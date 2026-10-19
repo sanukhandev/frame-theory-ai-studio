@@ -827,10 +827,10 @@ public sealed class PpmRaster
         var alpha = _alphaBytes is null ? null : new byte[checked(width * height)];
         for (var targetY = 0; targetY < height; targetY++)
         {
-            var sourceY = targetY * Height / height;
+            var sourceY = (int)((long)targetY * Height / height);
             for (var targetX = 0; targetX < width; targetX++)
             {
-                var sourceX = targetX * Width / width;
+                var sourceX = (int)((long)targetX * Width / width);
                 var sourceOffset = (sourceY * Width + sourceX) * 3;
                 var targetOffset = (targetY * width + targetX) * 3;
                 _rgbBytes.AsSpan(sourceOffset, 3).CopyTo(output.AsSpan(targetOffset, 3));

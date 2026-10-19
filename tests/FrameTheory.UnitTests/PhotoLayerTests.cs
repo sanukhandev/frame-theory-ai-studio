@@ -159,6 +159,17 @@ public sealed class PhotoLayerTests
         Xunit.Assert.Equal([10, 20, 30], raster.RgbBytes);
     }
 
+    [Xunit.Fact]
+    public void PpmRasterResizeUsesSafeCoordinateMathForTallImages()
+    {
+        var pixels = new byte[50_000 * 3];
+        var raster = PpmRaster.Parse([.. "P6\n1 50000\n255\n"u8, .. pixels]);
+
+        var resized = raster.Resize(1, 50_000);
+
+        Xunit.Assert.Equal(pixels, resized.RgbBytes);
+    }
+
     private static PhotoDocument Document(Uri source, byte[] pixels) => new(
         source,
         new MediaSourceMetadata(MediaId.Create(source, "photo-layer-test"), source, MediaKind.Image, 2, 1, null, 0),
