@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Render-duration checkpoint (2026-10-19):** Timeline render plans now reject clips, titles or captions that extend beyond the requested duration, preventing out-of-range filter stages and export drift; focused compositor coverage passes. Native export acceptance remains open.
+
 **Render-source checkpoint (2026-10-19):** Timeline render plans now reject video/audio clips whose media IDs are absent from the source map, converting corrupted plans into clear validation failures before filter-graph generation; focused compositor coverage passes. Native export acceptance remains open.
 
 **Transition-boundary checkpoint (2026-10-19):** Timeline layers now reject incoming transitions longer than the preceding clip, preventing negative compositor `xfade` offsets; focused compositor coverage passes. Native transition export acceptance remains open.
