@@ -145,6 +145,10 @@ public sealed class TimelineCompositorTests
 
         Xunit.Assert.Single(graph.Inputs);
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<Uri>>(graph.Inputs).IsReadOnly);
+        Xunit.Assert.Throws<ArgumentException>(() => new TimelineFilterGraph(string.Empty, inputs, "outv", null));
+        Xunit.Assert.Throws<ArgumentException>(() => new TimelineFilterGraph("null", inputs, string.Empty, null));
+        Xunit.Assert.Throws<ArgumentException>(() => new TimelineFilterGraph("null", [new Uri("https://example.com/source.mp4")], "outv", null));
+        Xunit.Assert.Throws<ArgumentException>(() => new TimelineFilterGraph("null", inputs, "outv", " "));
     }
 
     [Xunit.Fact]

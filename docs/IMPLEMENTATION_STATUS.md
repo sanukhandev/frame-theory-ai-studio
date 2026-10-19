@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Filter-graph boundary checkpoint (2026-10-19):** Timeline filter graphs now require nonblank video expressions/labels, local file inputs and nonblank optional audio labels before FFmpeg argument construction; focused compositor coverage passes. Native preview/export acceptance remains open.
+
 **Timeline exporter dependency checkpoint (2026-10-19):** Timeline video exporters now reject missing process-runner and media-probe services at construction instead of failing during export; focused compositor coverage passes. Native timeline export acceptance remains open.
 
 **Recovery input checkpoint (2026-10-19):** Missing-media discovery and relink now reject null project snapshots explicitly before path or media traversal; focused recovery coverage passes. Native recovery workflow acceptance remains open.

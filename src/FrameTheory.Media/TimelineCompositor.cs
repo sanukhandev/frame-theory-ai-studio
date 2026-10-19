@@ -137,8 +137,29 @@ public sealed record TimelineFilterGraph
 {
     public TimelineFilterGraph(string FilterComplex, IReadOnlyList<Uri> Inputs, string OutputLabel, string? AudioOutputLabel)
     {
+        if (string.IsNullOrWhiteSpace(FilterComplex))
+        {
+            throw new ArgumentException("A filter graph expression is required.", nameof(FilterComplex));
+        }
+
+        if (string.IsNullOrWhiteSpace(OutputLabel))
+        {
+            throw new ArgumentException("A video output label is required.", nameof(OutputLabel));
+        }
+
         this.FilterComplex = FilterComplex;
-        this.Inputs = Array.AsReadOnly((Inputs ?? throw new ArgumentNullException(nameof(Inputs))).ToArray());
+        var inputs = (Inputs ?? throw new ArgumentNullException(nameof(Inputs))).ToArray();
+        if (inputs.Any(input => input is null || !input.IsFile))
+        {
+            throw new ArgumentException("Filter-graph inputs must be local file URIs.", nameof(Inputs));
+        }
+
+        if (AudioOutputLabel is not null && string.IsNullOrWhiteSpace(AudioOutputLabel))
+        {
+            throw new ArgumentException("The audio output label cannot be blank.", nameof(AudioOutputLabel));
+        }
+
+        this.Inputs = Array.AsReadOnly(inputs);
         this.OutputLabel = OutputLabel;
         this.AudioOutputLabel = AudioOutputLabel;
     }

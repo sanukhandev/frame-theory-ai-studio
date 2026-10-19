@@ -12,6 +12,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Current exporter increment: timeline video exporters reject missing process-runner and probe services at construction; focused compositor coverage remains green. Native timeline export acceptance remains open.
 
+- Current filter-graph increment: graph contracts reject blank expressions/labels, non-local inputs and blank audio labels before FFmpeg construction; focused compositor coverage remains green. Native preview/export acceptance remains open.
+
 - Current render-plan increment: null layers and invalid source-map IDs/URIs fail at plan construction instead of during filter-graph building; focused compositor coverage remains green. Native export acceptance remains open.
 
 - Current media-metadata increment: image/video records require positive dimensions while audio remains dimensionless; focused domain coverage and the local 380-unit/2-golden gate remain green. Native media-probe acceptance remains open.
