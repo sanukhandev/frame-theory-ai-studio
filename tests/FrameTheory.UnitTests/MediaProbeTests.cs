@@ -12,6 +12,12 @@ public sealed class MediaProbeTests
     }
 
     [Xunit.Fact]
+    public void FfprobeAdapterRequiresExecutable()
+    {
+        Xunit.Assert.Throws<ArgumentException>(() => new FfprobeMediaProbe(new StubProcessRunner("{}"), " "));
+    }
+
+    [Xunit.Fact]
     public async Task FfprobeAdapterRejectsUnsupportedTemporalMetadataClearly()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-probe-invalid-");

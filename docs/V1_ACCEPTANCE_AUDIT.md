@@ -6,6 +6,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Preview-proxy dependency checkpoint: `FfmpegPreviewProxyService` rejects a missing process runner at construction; focused coverage passes locally. Native proxy acceptance remains open.
 
+- Probe executable checkpoint: `FfprobeMediaProbe` rejects a blank executable name at construction; focused coverage passes locally. Native probe acceptance remains open.
+
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
 - Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.

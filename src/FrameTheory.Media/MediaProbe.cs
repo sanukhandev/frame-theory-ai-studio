@@ -29,7 +29,9 @@ public sealed class FfprobeMediaProbe : IMediaProbe
     public FfprobeMediaProbe(IMediaProcessRunner processRunner, string executable = "ffprobe")
     {
         _processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
-        _executable = executable;
+        _executable = string.IsNullOrWhiteSpace(executable)
+            ? throw new ArgumentException("The probe executable is required.", nameof(executable))
+            : executable;
     }
 
     public async Task<MediaSourceMetadata> ProbeAsync(Uri file, CancellationToken cancellationToken)
