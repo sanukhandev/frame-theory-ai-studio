@@ -131,7 +131,7 @@ public sealed class FfmpegMediaImporter : IMediaImporter
             }
 
             var bytes = await File.ReadAllBytesAsync(outputPath, cancellationToken);
-            if (bytes.Length == 0 || bytes.Length > MaximumWaveformBytes)
+            if (bytes.Length == 0 || bytes.Length > MaximumWaveformBytes || bytes.Length % sizeof(short) != 0)
             {
                 throw new MediaImportException("The extracted waveform is empty or exceeds the supported size.");
             }

@@ -95,6 +95,36 @@ public sealed class MediaImportTests
     }
 
     [Xunit.Fact]
+    public async Task ImportRejectsMalformedWaveformOutput()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-import-malformed-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "clip.wav");
+            await File.WriteAllTextAsync(path, "source");
+            var metadata = new MediaSourceMetadata(
+                MediaId.Parse(new string('7', 64)),
+                new Uri(path),
+                MediaKind.Audio,
+                0,
+                0,
+                null,
+                0,
+                hasAudio: true);
+            var importer = new FfmpegMediaImporter(
+                new StubProbe(metadata),
+                new StubDecoder(),
+                new StubProcessRunner(oddOutput: true));
+
+            await Xunit.Assert.ThrowsAsync<MediaImportException>(() => importer.ImportAsync(new Uri(path), CancellationToken.None));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task ImportFailureCleansWaveformOutput()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-import-failure-");
@@ -219,12 +249,18 @@ public sealed class MediaImportTests
         }
     }
 
-    private sealed class StubProcessRunner(bool writeOutput = true, int exitCode = 0) : IMediaProcessRunner
+    private sealed class StubProcessRunner(bool writeOutput = true, int exitCode = 0, bool oddOutput = false) : IMediaProcessRunner
     {
         public Task<MediaProcessResult> RunAsync(string executable, IReadOnlyList<string> arguments, CancellationToken cancellationToken)
         {
             if (writeOutput)
             {
+                if (oddOutput)
+                {
+                    File.WriteAllBytes(arguments[^1], [0]);
+                    return Task.FromResult(new MediaProcessResult(exitCode, string.Empty, string.Empty));
+                }
+
                 var samples = new short[] { 0, 32767, -32768, 16384 };
                 var bytes = new byte[samples.Length * sizeof(short)];
                 for (var index = 0; index < samples.Length; index++)
