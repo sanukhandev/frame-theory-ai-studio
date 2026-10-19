@@ -62,6 +62,18 @@ public sealed class MotionAnalysisTests
     }
 
     [Xunit.Fact]
+    public void MotionFramesRejectOversizedDimensionsBeforeReadingPixels()
+    {
+        var exception = Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new MotionFrame(
+            0,
+            8193,
+            8193,
+            ReadOnlyMemory<byte>.Empty));
+
+        Xunit.Assert.Equal("width", exception.ParamName);
+    }
+
+    [Xunit.Fact]
     public void PixelSnapshotCannotMutateMotionFrame()
     {
         var frame = new MotionFrame(0, 1, 1, new byte[] { 10, 20, 30 });

@@ -2,6 +2,7 @@ namespace FrameTheory.Media;
 
 public sealed record MotionFrame
 {
+    private const long MaximumPixels = 64 * 1024 * 1024;
     private readonly byte[] _rgbBytes;
 
     public MotionFrame(int frameIndex, int width, int height, ReadOnlyMemory<byte> rgbBytes)
@@ -19,6 +20,11 @@ public sealed record MotionFrame
         if (height <= 0)
         {
             throw new ArgumentOutOfRangeException(nameof(height));
+        }
+
+        if ((long)width * height > MaximumPixels)
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), "Motion-frame dimensions exceed the bounded analysis size.");
         }
 
         if (rgbBytes.Length != checked(width * height * 3))
