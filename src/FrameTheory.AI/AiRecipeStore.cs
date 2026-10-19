@@ -32,6 +32,12 @@ public sealed class AiRecipeStore
 
         EnsureRegularPath(fullPath, directory);
 
+        var payload = JsonSerializer.SerializeToUtf8Bytes(new RecipeFile(CurrentSchemaVersion, name.Trim(), planJson), Options);
+        if (payload.LongLength > MaximumRecipeBytes)
+        {
+            throw new InvalidDataException("The AI recipe exceeds the supported size limit.");
+        }
+
         var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
         try
         {
@@ -43,7 +49,7 @@ public sealed class AiRecipeStore
                 Options = FileOptions.Asynchronous | FileOptions.WriteThrough
             }))
             {
-                await JsonSerializer.SerializeAsync(stream, new RecipeFile(CurrentSchemaVersion, name.Trim(), planJson), Options, cancellationToken);
+                await stream.WriteAsync(payload, cancellationToken);
                 await stream.FlushAsync(cancellationToken);
                 stream.Flush(flushToDisk: true);
             }

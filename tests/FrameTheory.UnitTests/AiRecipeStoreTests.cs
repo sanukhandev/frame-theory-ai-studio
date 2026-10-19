@@ -74,6 +74,31 @@ public sealed class AiRecipeStoreTests
     }
 
     [Xunit.Fact]
+    public async Task RecipeStoreRejectsSerializedPayloadsThatCannotReopen()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-recipe-size-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "recipe.json");
+            var validPlan = "{\"schemaVersion\":\"1.0\",\"planId\":\"p\",\"projectId\":\"p\",\"intent\":\"x\",\"actions\":[]}";
+            var plan = new string(' ', 1_048_400) + validPlan;
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => new AiRecipeStore().SaveAtomicAsync(
+                path,
+                "Recipe",
+                plan,
+                CancellationToken.None));
+
+            Xunit.Assert.False(File.Exists(path));
+            Xunit.Assert.Empty(Directory.EnumerateFiles(directory.FullName, "*.tmp"));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task RecipeStoreRejectsReparsePointFiles()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-ai-recipe-boundary-");
