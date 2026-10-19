@@ -12,6 +12,22 @@ public sealed class RecoveryTests
     }
 
     [Xunit.Fact]
+    public async Task RecoveryRejectsNullSnapshots()
+    {
+        var recovery = new ProjectRecoveryService(new JsonProjectRepository());
+        var projectPath = Path.Combine(Path.GetTempPath(), "frame-theory-null-snapshot.ftstudio");
+
+        Xunit.Assert.Throws<ArgumentNullException>(() => recovery.FindMissingMedia(projectPath, null!));
+        await Xunit.Assert.ThrowsAsync<ArgumentNullException>(() => recovery.FindMissingMediaAsync(projectPath, null!, CancellationToken.None));
+        await Xunit.Assert.ThrowsAsync<ArgumentNullException>(() => recovery.RelinkMediaAsync(
+            projectPath,
+            null!,
+            default,
+            Path.Combine(Path.GetTempPath(), "replacement.mov"),
+            CancellationToken.None));
+    }
+
+    [Xunit.Fact]
     public async Task AutosaveRecoveryAndRelinkDoNotChangeTheOriginalSource()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-recovery-");

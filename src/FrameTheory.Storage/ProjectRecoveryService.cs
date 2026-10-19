@@ -58,6 +58,7 @@ public sealed class ProjectRecoveryService
 
     public IReadOnlyList<MediaReference> FindMissingMedia(string projectPath, ProjectSnapshot snapshot)
     {
+        ArgumentNullException.ThrowIfNull(snapshot);
         var projectDirectory = GetProjectDirectory(projectPath);
         return snapshot.MediaReferences
             .Where(reference => !File.Exists(ResolveContainedPath(projectDirectory, reference.RelativePath)))
@@ -69,6 +70,7 @@ public sealed class ProjectRecoveryService
         ProjectSnapshot snapshot,
         CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(snapshot);
         var projectDirectory = GetProjectDirectory(projectPath);
         var missing = new List<MediaReference>();
         foreach (var reference in snapshot.MediaReferences)
@@ -91,6 +93,7 @@ public sealed class ProjectRecoveryService
         string replacementPath,
         CancellationToken cancellationToken)
     {
+        ArgumentNullException.ThrowIfNull(snapshot);
         var projectDirectory = GetProjectDirectory(projectPath);
         var replacementFullPath = Path.GetFullPath(replacementPath);
         if (LocalPathSecurity.ContainsReparsePoint(replacementFullPath))

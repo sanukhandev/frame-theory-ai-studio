@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Recovery input checkpoint (2026-10-19):** Missing-media discovery and relink now reject null project snapshots explicitly before path or media traversal; focused recovery coverage passes. Native recovery workflow acceptance remains open.
+
 **Cache-index integrity checkpoint (2026-10-19):** Cache-index loads now reject duplicate keys instead of silently overwriting earlier entries; focused recovery persistence coverage passes. Native cache-recovery acceptance remains open.
 
 **Preset persistence checkpoint (2026-10-19):** Preset saves now reject null collection entries before name grouping or serialization; focused color-preset persistence coverage passes. Native preset workflow acceptance remains open.
