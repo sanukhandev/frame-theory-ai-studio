@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Native bundle packaging checkpoint (2026-10-19):** Windows, macOS and Linux package scripts now fail closed on nested native-bundle directories instead of silently omitting them; existing linked-entry and required-tool guards remain active. Shell syntax and focused packaging guard validation remain required before hosted release evidence.
+
 **Cross-platform containment checkpoint (2026-10-19):** Project media containment now uses Windows-only case folding and ordinal comparison elsewhere, preventing a case-variant sibling escape on Linux; the Linux regression is covered. Storage/relink acceptance remains open on native platforms.
 
 **Capability probe cleanup checkpoint (2026-10-19):** Temporary storage-probe cleanup now ignores filesystem delete failures so a capability report is not replaced by a secondary cleanup exception. Existing detector coverage remains green; native capability acceptance remains open.

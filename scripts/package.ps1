@@ -27,7 +27,10 @@ if (-not [string]::IsNullOrWhiteSpace($FfmpegDirectory)) {
             throw "FfmpegDirectory must contain $toolName."
         }
     }
-    foreach ($bundleFile in Get-ChildItem -LiteralPath $toolRoot -File) {
+    foreach ($bundleFile in Get-ChildItem -LiteralPath $toolRoot -Force) {
+        if ($bundleFile.PSIsContainer) {
+            throw "FfmpegDirectory cannot contain nested directories: $($bundleFile.Name)."
+        }
         if ($bundleFile.Attributes -band [IO.FileAttributes]::ReparsePoint) {
             throw "FfmpegDirectory cannot contain reparse-point files: $($bundleFile.Name)."
         }

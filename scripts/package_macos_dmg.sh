@@ -66,6 +66,10 @@ if [ -n "$ffmpeg_directory" ]; then
       printf 'FFmpeg directory cannot contain a symlink: %s\n' "$(basename "$bundle_file")" >&2
       exit 1
     fi
+    if [ -d "$bundle_file" ]; then
+      printf 'FFmpeg directory cannot contain nested directories: %s\n' "$(basename "$bundle_file")" >&2
+      exit 1
+    fi
     if [ -f "$bundle_file" ]; then
       cp "$bundle_file" "$app/Contents/MacOS/$(basename "$bundle_file")"
     fi
