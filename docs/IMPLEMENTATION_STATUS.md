@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Cache-index integrity checkpoint (2026-10-19):** Cache-index loads now reject duplicate keys instead of silently overwriting earlier entries; focused recovery persistence coverage passes. Native cache-recovery acceptance remains open.
+
 **Preset persistence checkpoint (2026-10-19):** Preset saves now reject null collection entries before name grouping or serialization; focused color-preset persistence coverage passes. Native preset workflow acceptance remains open.
 
 **Frame-rate validity checkpoint (2026-10-19):** Default `0/0` frame rates now fail at shared metadata, timeline graph/clip, render-plan and export-preset boundaries instead of surfacing as late divide-by-zero timing failures; focused domain/media coverage passes. Native timing/export acceptance remains open.

@@ -136,11 +136,17 @@ public sealed class JsonCacheIndexStore
         {
             var entries = await JsonSerializer.DeserializeAsync<CacheIndexEntry[]>(stream, JsonOptions, cancellationToken) ?? [];
             var index = new CacheIndex();
+            var keys = new HashSet<string>(StringComparer.Ordinal);
             foreach (var entry in entries)
             {
                 if (entry is null)
                 {
                     throw new InvalidDataException("The cache index contains a null entry.");
+                }
+
+                if (!keys.Add(entry.Key))
+                {
+                    throw new InvalidDataException("The cache index contains duplicate keys.");
                 }
 
                 try

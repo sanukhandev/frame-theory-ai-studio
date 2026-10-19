@@ -167,6 +167,9 @@ public sealed class RecoveryTests
             await File.WriteAllTextAsync(path, "[{\"key\":\"escape\",\"relativePath\":\"../outside.bin\",\"sizeBytes\":1,\"lastAccessUtc\":\"2026-01-01T00:00:00Z\"}]");
 
             await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => new JsonCacheIndexStore().LoadAsync(path, CancellationToken.None));
+            await File.WriteAllTextAsync(path, "[{\"key\":\"same\",\"relativePath\":\"cache/a.bin\",\"sizeBytes\":1,\"lastAccessUtc\":\"2026-01-01T00:00:00Z\"},{\"key\":\"same\",\"relativePath\":\"cache/b.bin\",\"sizeBytes\":1,\"lastAccessUtc\":\"2026-01-01T00:00:00Z\"}]");
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() => new JsonCacheIndexStore().LoadAsync(path, CancellationToken.None));
         }
         finally
         {
