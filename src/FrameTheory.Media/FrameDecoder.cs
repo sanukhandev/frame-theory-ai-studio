@@ -85,6 +85,11 @@ public sealed class FfmpegFrameDecoder : IPreviewFrameDecoder, IRgbaPreviewFrame
             throw new ArgumentOutOfRangeException(nameof(frameIndex));
         }
 
+        if (!frameRate.IsValid)
+        {
+            throw new ArgumentException("A valid preview frame rate is required.", nameof(frameRate));
+        }
+
         var path = Path.GetFullPath(file.LocalPath);
         if (LocalPathSecurity.ContainsReparsePoint(path))
         {

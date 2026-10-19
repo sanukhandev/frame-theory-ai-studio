@@ -49,6 +49,8 @@ public sealed class FrameDecoderTests
             decoder.DecodeFrameAsync(new Uri("https://example.test/clip.mp4"), new RationalFrameRate(30, 1), 0, CancellationToken.None));
         await Xunit.Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
             decoder.DecodeFrameAsync(new Uri("file:///missing.mp4"), new RationalFrameRate(30, 1), -1, CancellationToken.None));
+        await Xunit.Assert.ThrowsAsync<ArgumentException>(() =>
+            decoder.DecodeFrameAsync(new Uri("file:///missing.mp4"), default, 0, CancellationToken.None));
 
         using var cancellation = new CancellationTokenSource();
         cancellation.Cancel();
