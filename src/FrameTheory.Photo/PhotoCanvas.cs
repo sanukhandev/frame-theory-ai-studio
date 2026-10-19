@@ -342,10 +342,28 @@ public sealed class PhotoEditState
         IEnumerable<PhotoRetouchStroke>? retouchStrokes = null)
     {
         Source = source ?? throw new ArgumentNullException(nameof(source));
-        _operations = Array.AsReadOnly(operations?.ToArray() ?? []);
+        var operationSnapshot = operations?.ToArray() ?? [];
+        if (operationSnapshot.Any(operation => operation is null))
+        {
+            throw new ArgumentException("Photo operations cannot contain null entries.", nameof(operations));
+        }
+
+        var compositeSnapshot = compositeLayers?.ToArray() ?? [];
+        if (compositeSnapshot.Any(layer => layer is null))
+        {
+            throw new ArgumentException("Composite layers cannot contain null entries.", nameof(compositeLayers));
+        }
+
+        var retouchSnapshot = retouchStrokes?.ToArray() ?? [];
+        if (retouchSnapshot.Any(stroke => stroke is null))
+        {
+            throw new ArgumentException("Retouch strokes cannot contain null entries.", nameof(retouchStrokes));
+        }
+
+        _operations = Array.AsReadOnly(operationSnapshot);
         Layers = layers ?? new PhotoLayerStack();
-        CompositeLayers = Array.AsReadOnly(compositeLayers?.ToArray() ?? []);
-        RetouchStrokes = Array.AsReadOnly(retouchStrokes?.ToArray() ?? []);
+        CompositeLayers = Array.AsReadOnly(compositeSnapshot);
+        RetouchStrokes = Array.AsReadOnly(retouchSnapshot);
         if (CompositeLayers.GroupBy(layer => layer.SourceMediaId).Any(group => group.Count() > 1))
         {
             throw new ArgumentException("Composite layer sources must be unique.", nameof(compositeLayers));

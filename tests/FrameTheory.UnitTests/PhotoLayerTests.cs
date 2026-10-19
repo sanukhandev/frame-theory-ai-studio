@@ -71,6 +71,15 @@ public sealed class PhotoLayerTests
     }
 
     [Xunit.Fact]
+    public void PhotoStateRejectsNullRestoredCollections()
+    {
+        var source = Document(new Uri("file:///state.png"), [1, 2, 3, 4, 5, 6]);
+        Xunit.Assert.Throws<ArgumentException>(() => new PhotoEditState(source, operations: [null!]));
+        Xunit.Assert.Throws<ArgumentException>(() => new PhotoEditState(source, compositeLayers: [null!]));
+        Xunit.Assert.Throws<ArgumentException>(() => new PhotoEditState(source, retouchStrokes: [null!]));
+    }
+
+    [Xunit.Fact]
     public void CompositeLayerSurvivesSubsequentEditOperations()
     {
         var baseDocument = Document(new Uri("file:///base.png"), [100, 100, 100, 20, 40, 60]);
