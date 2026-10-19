@@ -122,7 +122,10 @@ public sealed class ProjectRecoveryService
     {
         var projectRoot = Path.GetFullPath(projectDirectory).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
         var candidate = Path.GetFullPath(Path.Combine(projectDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar)));
-        if (!candidate.StartsWith(projectRoot, StringComparison.OrdinalIgnoreCase))
+        var comparison = OperatingSystem.IsWindows()
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
+        if (!candidate.StartsWith(projectRoot, comparison))
         {
             throw new InvalidDataException("A media path escapes the project directory.");
         }

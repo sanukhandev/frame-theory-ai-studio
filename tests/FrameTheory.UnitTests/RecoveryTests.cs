@@ -257,6 +257,31 @@ public sealed class RecoveryTests
     }
 
     [Xunit.Fact]
+    public void RecoveryDoesNotTreatLinuxCaseVariantSiblingAsContained()
+    {
+        if (!OperatingSystem.IsLinux())
+        {
+            return;
+        }
+
+        var directory = Directory.CreateTempSubdirectory("frame-theory-recovery-case-");
+        var siblingPath = Path.Combine(directory.Parent!.FullName, directory.Name.ToUpperInvariant());
+        try
+        {
+            Directory.CreateDirectory(siblingPath);
+            var relativePath = Path.Combine("..", Path.GetFileName(siblingPath), "escape.mov");
+
+            Xunit.Assert.Throws<InvalidDataException>(() =>
+                ProjectRecoveryService.ResolveContainedPath(directory.FullName, relativePath));
+        }
+        finally
+        {
+            Directory.Delete(siblingPath, recursive: true);
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task CanceledRelinkDoesNotChangeTheSnapshot()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-recovery-cancel-");

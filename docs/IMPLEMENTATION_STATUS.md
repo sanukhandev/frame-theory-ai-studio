@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Cross-platform containment checkpoint (2026-10-19):** Project media containment now uses Windows-only case folding and ordinal comparison elsewhere, preventing a case-variant sibling escape on Linux; the Linux regression is covered. Storage/relink acceptance remains open on native platforms.
+
 **Capability probe cleanup checkpoint (2026-10-19):** Temporary storage-probe cleanup now ignores filesystem delete failures so a capability report is not replaced by a secondary cleanup exception. Existing detector coverage remains green; native capability acceptance remains open.
 
 **Timeline caption-history checkpoint (2026-10-19):** Manual undo/redo snapshots now preserve the persisted `KineticCaptions` setting when caption or transcript imports toggle it; a regression confirms undo restores both caption data and the setting. Timeline-focused coverage remains green; native caption acceptance remains open.
