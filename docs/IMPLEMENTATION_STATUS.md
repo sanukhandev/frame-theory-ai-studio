@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Waveform-input checkpoint (2026-10-19):** Imported media now rejects non-finite or out-of-range waveform peaks before beat detection, rough-cut scoring or AI metadata serialization; focused media-import coverage passes. Native import acceptance remains open.
+
 **Motion-plan checkpoint (2026-10-19):** Stabilization plans now reject null transforms before motion data reaches compositor generation; focused motion coverage passes. Manual stabilization quality acceptance remains open.
 
 **Recovery containment checkpoint (2026-10-19):** Contained recovery paths now reject blank project-directory and relative-media inputs consistently on Unix-like platforms; hosted Linux/macOS recovery-test failure is fixed locally and focused coverage is pending rerun.

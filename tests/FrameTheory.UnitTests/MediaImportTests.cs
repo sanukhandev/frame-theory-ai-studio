@@ -14,6 +14,16 @@ public sealed class MediaImportTests
     }
 
     [Xunit.Fact]
+    public void ImportedMediaRejectsInvalidWaveformPeaks()
+    {
+        var metadata = new MediaSourceMetadata(
+            MediaId.Parse(new string('b', 64)), new Uri("file:///clip.wav"), MediaKind.Audio, 0, 0, null, 0);
+
+        Xunit.Assert.Throws<ArgumentException>(() => new ImportedMedia(metadata, null, [float.NaN]));
+        Xunit.Assert.Throws<ArgumentException>(() => new ImportedMedia(metadata, null, [1.1f]));
+    }
+
+    [Xunit.Fact]
     public void ImportedMediaExposesImmutableAnalysisSnapshots()
     {
         var metadata = new MediaSourceMetadata(

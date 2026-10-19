@@ -9,6 +9,11 @@ public sealed record ImportedMedia
     {
         ArgumentNullException.ThrowIfNull(metadata);
         ArgumentNullException.ThrowIfNull(waveformPeaks);
+        if (waveformPeaks.Any(peak => float.IsNaN(peak) || float.IsInfinity(peak) || peak < 0 || peak > 1))
+        {
+            throw new ArgumentException("Waveform peaks must be finite values from zero through one.", nameof(waveformPeaks));
+        }
+
         Metadata = metadata;
         _thumbnailPpm = thumbnailPpm?.ToArray();
         WaveformPeaks = Array.AsReadOnly(waveformPeaks.ToArray());
