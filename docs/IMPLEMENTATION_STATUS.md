@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Video navigation-state checkpoint (2026-10-19):** Timeline navigation, zoom, snap and output-framing controls now disable until the Video workspace contains real timeline content; media import/open actions remain available. Focused Foundation coverage passes 33 tests; the full Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native keyboard/visual acceptance remains open.
+
 **Photo layer-action checkpoint (2026-10-19):** Photo clear, mask, retouch and grade-mask controls now require the corresponding editable layer state; a loaded base photo alone no longer advertises unavailable layer actions. Focused photo/shell coverage passes 48 tests; the full Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native photo interaction remains open.
 
 **Theme-state checkpoint (2026-10-19):** Shared Avalonia styles now give disabled buttons, primary actions, text inputs, combo boxes, sliders and checkboxes a consistent muted surface/border/foreground, preventing disabled controls from retaining an actionable accent treatment. Foundation coverage passes 33 tests; the full Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native visual/HiDPI acceptance remains open.

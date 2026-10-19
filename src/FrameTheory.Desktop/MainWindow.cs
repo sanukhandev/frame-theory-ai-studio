@@ -4536,6 +4536,10 @@ public sealed class MainWindow : Window
             back.IsEnabled = hasTimeline;
             forward.IsEnabled = hasTimeline;
             playhead.IsEnabled = hasTimeline;
+            resetTimelineView.IsEnabled = hasTimeline;
+            snap.IsEnabled = hasTimeline;
+            zoom.IsEnabled = hasTimeline;
+            aspectRatio.IsEnabled = hasVideo;
             select.IsEnabled = hasVideo;
             selectAudio.IsEnabled = hasAudio;
             addTitle.IsEnabled = hasVideo;
@@ -4615,6 +4619,21 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(scrollForward, "Scroll timeline forward");
         ToolTip.SetTip(scrollForward, "Scroll the timeline viewport forward by 30 frames.");
         scrollForward.Click += (_, _) => timeline.ScrollBy(30);
+        void RefreshTimelineScrollAvailability()
+        {
+            var hasTimeline = timeline.HasTimelineContent;
+            scrollBack.IsEnabled = hasTimeline;
+            scrollForward.IsEnabled = hasTimeline;
+        }
+
+        timeline.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(TimelineEditorViewModel.HasTimelineContent) or nameof(TimelineEditorViewModel.TrackRows))
+            {
+                RefreshTimelineScrollAvailability();
+            }
+        };
+        RefreshTimelineScrollAvailability();
         var analysisSection = CreateInspectorExpander(
             "Analysis and rough cut",
             CreateSectionContent(

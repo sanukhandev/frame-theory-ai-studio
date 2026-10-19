@@ -715,6 +715,9 @@ public sealed class FoundationTests
                 {
                     "Previous timeline frame",
                     "Next timeline frame",
+                    "Reset timeline view",
+                    "Scroll timeline backward",
+                    "Scroll timeline forward",
                     "Select video clip at playhead",
                     "Select audio clip at playhead",
                     "Plan waveform activity rough cut",
@@ -730,6 +733,22 @@ public sealed class FoundationTests
                     Xunit.Assert.False(
                         window.GetVisualDescendants().OfType<Control>().Single(control => AutomationProperties.GetName(control) == emptyTimelineActionName).IsEnabled);
                 }
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Slider>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline zoom")
+                    .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Slider>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline playhead frame")
+                    .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<CheckBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Snap timeline edits to clip boundaries")
+                    .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<ComboBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Video export aspect ratio")
+                    .IsEnabled);
                 var showSourcePreview = window.GetVisualDescendants()
                     .OfType<CheckBox>()
                     .Single(control => AutomationProperties.GetName(control) == "Show original timeline source frame");
