@@ -1,5 +1,9 @@
 # Implementation Status — Resume Checkpoint
 
+**Paused resume checkpoint (2026-10-19):** Work is intentionally paused at 41 local commits ahead of `origin/main`; no push was made because the configured batch threshold is exactly 50 commits. The project-save size-bound fix is committed as `e05f9d8`, and `ProjectRepositoryTests` passed 8/8 locally; the formatter was interrupted when the pause request arrived. Resume by running `dotnet format FrameTheory.sln --verify-no-changes --no-restore`, then continue the persistence-boundary audit from the next unblocked issue, keeping the six tracked P0 gates open and pushing only at exactly 50 commits.
+
+**Project-save checkpoint (2026-10-19):** Project serialization now enforces the 10 MB UTF-8 bound before creating a temporary file, preventing saves that cannot be reopened; focused project persistence coverage passes. Native project save/reopen acceptance remains open.
+
 **Color-preset save checkpoint (2026-10-19):** Color-preset serialization now enforces the 5 MB UTF-8 bound before creating a temporary file and cleans up interrupted writes without masking the original error; focused preset persistence coverage passes. Native preset workflow acceptance remains open.
 
 **AI-recipe save checkpoint (2026-10-19):** AI recipe serialization now enforces the 1 MB UTF-8 bound before creating a temporary file, preventing saves that cannot be reopened; focused recipe persistence coverage passes. Native AI recipe acceptance remains open.

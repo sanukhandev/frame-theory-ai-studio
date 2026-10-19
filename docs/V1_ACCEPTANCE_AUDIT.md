@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Project-save checkpoint: project serialization enforces the 10 MB UTF-8 bound before creating a temporary file, preventing saves that cannot be reopened; focused coverage passes locally. Native project save/reopen acceptance remains open.
+
 - Color-preset save checkpoint: color-preset serialization enforces the 5 MB UTF-8 bound before creating a temporary file and cleans up interrupted writes without masking the original error; focused coverage passes locally. Native preset workflow acceptance remains open.
 
 - AI-recipe save checkpoint: AI recipe serialization enforces the 1 MB UTF-8 bound before creating a temporary file, preventing saves that cannot be reopened; focused coverage passes locally. Native AI recipe acceptance remains open.
