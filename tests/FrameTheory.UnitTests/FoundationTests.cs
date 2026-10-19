@@ -1672,6 +1672,32 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public void VideoUndoAndRedoShortcutsUseManualTimelineHistory()
+    {
+        var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
+            new FrameTheory.Desktop.WorkspaceCatalog(),
+            new TestCapabilityDetector());
+        var source = new Uri("file:///shortcut-history.mp4");
+        viewModel.TimelineEditor.AddMedia(new MediaSourceMetadata(
+            MediaId.Create(source, "shortcut-history"),
+            source,
+            MediaKind.Video,
+            1920,
+            1080,
+            new RationalFrameRate(30, 1),
+            90,
+            TimeSpan.FromSeconds(3),
+            hasAudio: false));
+        viewModel.TimelineEditor.SelectAt(0, "Video 1");
+        viewModel.TimelineEditor.ExecuteUndoable(() => viewModel.TimelineEditor.SplitSelectedAt(30));
+
+        Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.UndoCurrentEdit));
+        Xunit.Assert.Single(viewModel.TimelineEditor.TrackRows.Single().Clips);
+        Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.RedoCurrentEdit));
+        Xunit.Assert.Equal(2, viewModel.TimelineEditor.TrackRows.Single().Clips.Count);
+    }
+
+    [Xunit.Fact]
     public void DesktopKeyboardShortcutsCoverEveryWorkspace()
     {
         var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
