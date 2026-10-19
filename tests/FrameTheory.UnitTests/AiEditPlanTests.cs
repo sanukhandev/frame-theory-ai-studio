@@ -184,5 +184,6 @@ public sealed class AiEditPlanTests
         targetIds.Clear();
 
         Xunit.Assert.Contains("clip-1", context.TargetIds);
+        Xunit.Assert.Throws<ArgumentException>(() => new AiPlanValidationContext("project-1", new HashSet<string> { " " }, 30));
     }
 }

@@ -297,7 +297,12 @@ public sealed record AiPlanValidationContext
             throw new ArgumentException("A project ID, target set and positive project duration are required.");
         }
 
-        ProjectId = projectId;
+        if (targetIds.Any(targetId => string.IsNullOrWhiteSpace(targetId) || targetId.Length > 128))
+        {
+            throw new ArgumentException("Target IDs must be bounded non-empty values.", nameof(targetIds));
+        }
+
+        ProjectId = projectId.Trim();
         TargetIds = targetIds.ToFrozenSet(StringComparer.Ordinal);
         ProjectDurationFrames = projectDurationFrames;
         HasVerifiedTranscript = hasVerifiedTranscript;
