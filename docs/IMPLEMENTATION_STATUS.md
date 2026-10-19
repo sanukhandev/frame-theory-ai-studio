@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**AI action-identity checkpoint (2026-10-19):** Programmatic AI actions now reject blank IDs, operation types and target IDs before semantic validation or execution; focused plan coverage passes. Gemini execution acceptance remains open.
+
 **Batch-progress checkpoint (2026-10-19):** Batch-export progress now rejects blank targets, null nested progress and impossible completed/total counts; focused batch-export coverage passes. Native queue/progress acceptance remains open.
 
 **AI input-shape checkpoint (2026-10-19):** Gemini plan requests now require a pure text prompt, reject text/image field smuggling, and continue to block malformed media before network use; focused interaction coverage passes. Live provider acceptance remains open.

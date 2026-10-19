@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- AI action-identity checkpoint: programmatic AI actions reject blank IDs, operation types and target IDs before semantic validation or execution; focused coverage passes locally. Gemini execution acceptance remains open.
+
 - Batch-progress checkpoint: batch-export progress rejects blank targets, null nested progress and impossible completed/total counts; focused coverage passes locally. Native queue/progress acceptance remains open.
 
 - AI input-shape checkpoint: Gemini plan requests require a pure text prompt, reject text/image field smuggling, and block malformed media before network use; focused coverage passes locally. Live provider acceptance remains open.
