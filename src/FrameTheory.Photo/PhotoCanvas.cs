@@ -535,7 +535,13 @@ public sealed class PhotoLayerStack
 
     public PhotoLayerStack(IEnumerable<PhotoAdjustmentLayer>? layers = null)
     {
-        _layers = Array.AsReadOnly(layers?.ToArray() ?? []);
+        var layerSnapshot = layers?.ToArray() ?? [];
+        if (layerSnapshot.Any(layer => layer is null))
+        {
+            throw new ArgumentException("Adjustment layers cannot contain null entries.", nameof(layers));
+        }
+
+        _layers = Array.AsReadOnly(layerSnapshot);
         if (_layers.GroupBy(layer => layer.Name, StringComparer.OrdinalIgnoreCase).Any(group => group.Count() > 1))
         {
             throw new ArgumentException("Adjustment layer names must be unique.", nameof(layers));

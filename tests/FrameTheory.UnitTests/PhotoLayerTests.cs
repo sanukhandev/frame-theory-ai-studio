@@ -27,6 +27,7 @@ public sealed class PhotoLayerTests
         Xunit.Assert.Equal(baseState.RenderPreview(), history.Current.RenderPreview());
         Xunit.Assert.True(history.Redo());
         Xunit.Assert.Equal(edited.Layers.InspectorRows, history.Current.Layers.InspectorRows);
+        Xunit.Assert.Throws<ArgumentException>(() => new PhotoLayerStack([null!]));
     }
 
     [Xunit.Fact]
