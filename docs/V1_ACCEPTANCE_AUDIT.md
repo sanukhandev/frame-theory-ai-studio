@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Workspace-state checkpoint: workspace selection state rejects files larger than 1 KB before JSON allocation; focused coverage passes locally. Native startup acceptance remains open.
+
 - Cache-index save checkpoint: cache-index serialization enforces the 5 MB bound before creating a temporary file, preventing index saves that cannot be reopened; focused coverage passes locally. Native cache recovery acceptance remains open.
 
 - Project-save checkpoint: project serialization enforces the 10 MB UTF-8 bound before creating a temporary file, preventing saves that cannot be reopened; focused coverage passes locally. Native project save/reopen acceptance remains open.
