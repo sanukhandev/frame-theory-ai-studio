@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Current timeline integrity increment: null keyframe entries fail explicitly before sorting rather than producing a null-reference crash; focused keyframe coverage remains green. Native timeline persistence acceptance remains open.
+
 - Current AI keyframe increment: malformed fields, non-finite/out-of-bound transforms, invalid easing and duplicate keyframe positions are rejected before approval; focused validator coverage remains green. Gemini execution and six tracked P0 gates remain partial.
 
 - Current AI validation increment: in-memory actions with negative starts or non-positive durations are rejected by the same range gate as parsed plans; focused validator coverage remains green. Gemini execution and six tracked P0 gates remain partial.

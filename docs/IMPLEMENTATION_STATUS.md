@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline keyframe integrity checkpoint (2026-10-19):** Keyframe collections now reject null entries before sorting, converting corrupted input into a clear argument failure instead of a null-reference crash; focused keyframe coverage passes. Native timeline persistence acceptance remains open.
+
 **AI keyframe schema checkpoint (2026-10-19):** AI validation now checks keyframe fields, finite transform bounds, easing values and duplicate frame positions before approval; focused malformed-animation coverage passes. Gemini execution remains allowlisted and six P0 gates remain partial.
 
 **AI action range checkpoint (2026-10-19):** AI validation now rejects negative starts and non-positive durations even when a plan is constructed in memory without the JSON parser; focused validator coverage passes. Gemini execution remains allowlisted and six P0 gates remain partial.

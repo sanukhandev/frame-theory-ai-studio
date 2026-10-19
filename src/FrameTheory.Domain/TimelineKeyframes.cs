@@ -45,7 +45,13 @@ public sealed class TimelineTransformKeyframes
     public TimelineTransformKeyframes(IEnumerable<TimelineTransformKeyframe> keyframes)
     {
         ArgumentNullException.ThrowIfNull(keyframes);
-        var ordered = keyframes.OrderBy(keyframe => keyframe.Frame).ToArray();
+        var source = keyframes.ToArray();
+        if (source.Any(keyframe => keyframe is null))
+        {
+            throw new ArgumentException("Keyframes cannot contain null entries.", nameof(keyframes));
+        }
+
+        var ordered = source.OrderBy(keyframe => keyframe.Frame).ToArray();
         if (ordered.Length == 0 || ordered.Select(keyframe => keyframe.Frame).Distinct().Count() != ordered.Length)
         {
             throw new ArgumentException("At least one keyframe with unique frame positions is required.", nameof(keyframes));

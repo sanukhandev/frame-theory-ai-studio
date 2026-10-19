@@ -47,4 +47,12 @@ public sealed class TimelineKeyframeTests
         Xunit.Assert.Single(animation.Keyframes);
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineTransformKeyframe>>(animation.Keyframes).IsReadOnly);
     }
+
+    [Xunit.Fact]
+    public void KeyframesRejectNullEntries()
+    {
+        Xunit.Assert.Throws<ArgumentException>(() => new TimelineTransformKeyframes([
+            null!,
+            new TimelineTransformKeyframe(2, new TimelineVideoTransform())]));
+    }
 }
