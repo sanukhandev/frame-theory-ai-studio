@@ -21,7 +21,17 @@ public sealed record ColorProfile
             throw new ArgumentException("A color profile name is required.", nameof(name));
         }
 
-        Name = name;
+        if (!Enum.IsDefined(primaries))
+        {
+            throw new ArgumentOutOfRangeException(nameof(primaries));
+        }
+
+        if (!Enum.IsDefined(transfer))
+        {
+            throw new ArgumentOutOfRangeException(nameof(transfer));
+        }
+
+        Name = name.Trim();
         Primaries = primaries;
         Transfer = transfer;
     }

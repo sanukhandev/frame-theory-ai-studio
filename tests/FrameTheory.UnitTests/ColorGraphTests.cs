@@ -32,6 +32,8 @@ public sealed class ColorGraphTests
     public void GraphRequiresLinearWorkingProfileAndBoundedChannels()
     {
         Xunit.Assert.Throws<ArgumentException>(() => new ColorGraph(ColorProfiles.SRgb, ColorProfiles.SRgb, ColorProfiles.SRgb));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ColorProfile("invalid", (ColorPrimaries)99, ColorTransfer.SRgb));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ColorProfile("invalid", ColorPrimaries.Rec709, (ColorTransfer)99));
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new RgbColor(-0.01f, 0, 0));
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new RgbColor(0, 0, float.NaN));
     }

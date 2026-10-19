@@ -38,6 +38,8 @@
 
 **Social preset checkpoint (2026-10-19):** Video and photo social presets now reject undefined aspect ratios and non-positive dimensions at construction; focused export-preset coverage passes. Native social export acceptance remains open.
 
+**Color-profile checkpoint (2026-10-19):** Color profiles now reject undefined primaries/transfers and normalize names before entering the shared color graph; focused color coverage passes. Native color-export acceptance remains open.
+
 **Audio-preparation dependency checkpoint (2026-10-19):** Audio source preparation now rejects a missing media process runner at construction instead of failing during extraction; focused audio coverage passes. Native audio acceptance remains open.
 
 **Media-import dependency checkpoint (2026-10-19):** FFmpeg media importers now reject missing probe, preview-decoder and process-runner services at construction; focused import coverage passes. Native import acceptance remains open.
