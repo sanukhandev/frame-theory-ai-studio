@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Motion-frame bound checkpoint (2026-10-19):** Motion-analysis frames now enforce the 64M-pixel bound before byte-length validation or tracking, preventing oversized CPU/memory work; focused motion coverage passes. Manual stabilization quality acceptance remains open.
+
 **Photo-resize checkpoint (2026-10-19):** Raster resizing now uses 64-bit coordinate products before division, preserving valid tall/wide images beyond 32-bit intermediate limits; focused photo coverage passes. Native large-image export acceptance remains open.
 
 **AI action-identity checkpoint (2026-10-19):** Programmatic AI actions now reject blank IDs, operation types and target IDs before semantic validation or execution; focused plan coverage passes. Gemini execution acceptance remains open.
