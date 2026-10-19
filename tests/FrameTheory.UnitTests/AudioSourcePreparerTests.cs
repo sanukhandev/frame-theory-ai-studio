@@ -5,6 +5,12 @@ namespace FrameTheory.UnitTests;
 public sealed class AudioSourcePreparerTests
 {
     [Xunit.Fact]
+    public void AudioSourcePreparerRequiresProcessRunner()
+    {
+        Xunit.Assert.Throws<ArgumentNullException>(() => new FfmpegAudioSourcePreparer(null!));
+    }
+
+    [Xunit.Fact]
     public void PreparedAudioSourceRejectsRemoteUri()
     {
         Xunit.Assert.Throws<ArgumentException>(() => new PreparedAudioSource(new Uri("https://example.test/audio.wav"), null));

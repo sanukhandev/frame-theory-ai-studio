@@ -64,7 +64,8 @@ public sealed class FfmpegAudioSourcePreparer : IAudioSourcePreparer
     };
     private readonly IMediaProcessRunner _processRunner;
 
-    public FfmpegAudioSourcePreparer(IMediaProcessRunner processRunner) => _processRunner = processRunner;
+    public FfmpegAudioSourcePreparer(IMediaProcessRunner processRunner) =>
+        _processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
 
     public async Task<PreparedAudioSource> PrepareAsync(Uri source, CancellationToken cancellationToken)
     {

@@ -10,6 +10,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Current import increment: FFmpeg media importers reject missing probe, preview-decoder and process-runner services at construction; focused import coverage remains green. Native import acceptance remains open.
 
+- Current audio increment: audio source preparation rejects a missing media process runner at construction; focused audio coverage remains green. Native audio acceptance remains open.
+
 - Current timing increment: default `0/0` frame rates fail at metadata, timeline, render-plan and export-preset boundaries; focused domain/media coverage remains green. Native timing/export acceptance remains open.
 
 - Current preset increment: preset saves reject null collection entries before serialization; focused color-preset persistence coverage remains green. Native preset workflow acceptance remains open.
