@@ -1475,6 +1475,30 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Undo the last successful AI edit transaction without changing source media.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Undo last AI apply")));
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Validate AI proposal")
+                    .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Ask Gemini to revise proposal")
+                    .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Save validated AI recipe")
+                    .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Apply approved AI actions")
+                    .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Undo last AI apply")
+                    .IsEnabled);
+                Xunit.Assert.True(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Load AI recipe")
+                    .IsEnabled);
 
                 foreach (var requiredName in new[]
                 {

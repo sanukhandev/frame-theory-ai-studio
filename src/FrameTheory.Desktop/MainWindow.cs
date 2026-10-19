@@ -2163,6 +2163,7 @@ public sealed class MainWindow : Window
             }
         }
         RefreshActions();
+        Action? refreshAiActionAvailability = null;
 
         var status = new TextBox
         {
@@ -2204,6 +2205,11 @@ public sealed class MainWindow : Window
             if (args.PropertyName == nameof(AiProposalViewModel.ValidatedJson) && viewModel.AiProposal.ValidatedJson is not null)
             {
                 planJson.Text = viewModel.AiProposal.ValidatedJson;
+            }
+
+            if (args.PropertyName is nameof(AiProposalViewModel.Actions) or nameof(AiProposalViewModel.ValidatedJson))
+            {
+                refreshAiActionAvailability?.Invoke();
             }
         };
         var validate = new Button { Content = "Validate proposal" };
@@ -2331,6 +2337,25 @@ public sealed class MainWindow : Window
                 await viewModel.LoadAiRecipeAsync(path, CancellationToken.None);
             }
         };
+        void RefreshAiActionAvailability()
+        {
+            validate.IsEnabled = !string.IsNullOrWhiteSpace(planJson.Text);
+            requestRevision.IsEnabled = viewModel.GeminiSettings.HasStoredApiKey && !string.IsNullOrWhiteSpace(revisionInstruction.Text);
+            saveRecipe.IsEnabled = viewModel.AiProposal.ValidatedJson is not null && !string.IsNullOrWhiteSpace(recipeName.Text);
+        }
+
+        planJson.TextChanged += (_, _) => RefreshAiActionAvailability();
+        revisionInstruction.TextChanged += (_, _) => RefreshAiActionAvailability();
+        recipeName.TextChanged += (_, _) => RefreshAiActionAvailability();
+        viewModel.GeminiSettings.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(GeminiSettingsViewModel.HasStoredApiKey))
+            {
+                RefreshAiActionAvailability();
+            }
+        };
+        refreshAiActionAvailability = RefreshAiActionAvailability;
+        RefreshAiActionAvailability();
         var recipeStatus = new TextBox
         {
             IsReadOnly = true,
