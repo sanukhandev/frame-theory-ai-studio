@@ -12,6 +12,12 @@ public sealed class CommandHistoryTests
     }
 
     [Xunit.Fact]
+    public void CommandGroupsRejectNullCommands()
+    {
+        Xunit.Assert.Throws<ArgumentException>(() => new EditCommandGroup("invalid", [null!]));
+    }
+
+    [Xunit.Fact]
     public void NamedGroupUndoRedoRestoresExactProjectSnapshots()
     {
         var sourceUri = new Uri("file:///media/clip.mov");

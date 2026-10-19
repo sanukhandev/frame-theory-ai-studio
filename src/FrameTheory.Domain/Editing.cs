@@ -97,6 +97,11 @@ public sealed class EditCommandGroup : IEditCommand
             throw new ArgumentException("A command group must contain a command.", nameof(commands));
         }
 
+        if (_commands.Any(command => command is null))
+        {
+            throw new ArgumentException("A command group cannot contain null commands.", nameof(commands));
+        }
+
         Name = name.Trim();
     }
 
