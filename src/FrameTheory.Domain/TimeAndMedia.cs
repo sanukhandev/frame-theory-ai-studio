@@ -172,6 +172,11 @@ public sealed record MediaSourceMetadata
             throw new ArgumentException("The source URI must be absolute.", nameof(sourceUri));
         }
 
+        if (string.IsNullOrWhiteSpace(id.Value))
+        {
+            throw new ArgumentException("A valid media ID is required.", nameof(id));
+        }
+
         if (width < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(width), "Media dimensions cannot be negative.");

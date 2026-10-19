@@ -66,6 +66,18 @@ public sealed class ProjectRepositoryTests
             Xunit.Assert.Equal(new RationalFrameRate(24, 1), loaded.FrameRate);
             Xunit.Assert.Throws<ArgumentException>(() => new MediaReference(
                 MediaId.Parse(new string('a', 64)), "../outside.mov", "sha256:unsafe"));
+            Xunit.Assert.Throws<ArgumentException>(() => new MediaReference(
+                default,
+                "media/clip.mov",
+                "sha256:unsafe"));
+            Xunit.Assert.Throws<ArgumentException>(() => new MediaSourceMetadata(
+                default,
+                new Uri("file:///clip.mov"),
+                MediaKind.Video,
+                640,
+                480,
+                new RationalFrameRate(24, 1),
+                1));
         }
         finally
         {

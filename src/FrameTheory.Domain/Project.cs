@@ -4,6 +4,11 @@ public sealed record MediaReference
 {
     public MediaReference(MediaId id, string relativePath, string contentFingerprint)
     {
+        if (string.IsNullOrWhiteSpace(id.Value))
+        {
+            throw new ArgumentException("A valid media ID is required.", nameof(id));
+        }
+
         if (string.IsNullOrWhiteSpace(relativePath))
         {
             throw new ArgumentException("A relative media path is required.", nameof(relativePath));

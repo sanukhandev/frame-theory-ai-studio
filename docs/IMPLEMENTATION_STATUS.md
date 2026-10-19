@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Media identity boundary checkpoint (2026-10-19):** Media references and source metadata now reject the default empty `MediaId` value, preventing invalid identity records from entering project persistence or timeline state; focused repository/domain coverage passes. Native relink acceptance remains open.
+
 **Timeline domain collection checkpoint (2026-10-19):** Timeline tracks, graphs and speed ramps now reject null entries before ordering or dereferencing; focused domain validation coverage passes. Native timeline persistence acceptance remains open.
 
 **Timeline layer integrity checkpoint (2026-10-19):** Video and audio layer constructors now reject null segment entries before ordering them, preventing corrupted state from surfacing as null-reference failures; focused compositor/audio coverage passes. Native timeline persistence acceptance remains open.
