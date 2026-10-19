@@ -42,6 +42,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Color-profile checkpoint: color profiles reject undefined primaries/transfers and normalize names before entering the shared color graph; focused color coverage passes locally. Native color-export acceptance remains open.
 
+- Photo blend checkpoint: composite photo layers reject undefined blend modes before raster composition; focused photo-layer coverage passes locally. Native photo compositing acceptance remains open.
+
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
 - Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.

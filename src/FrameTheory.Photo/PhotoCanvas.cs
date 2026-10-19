@@ -252,6 +252,11 @@ public sealed class PhotoCompositeLayer
             throw new ArgumentOutOfRangeException(nameof(opacity));
         }
 
+        if (!Enum.IsDefined(blendMode))
+        {
+            throw new ArgumentOutOfRangeException(nameof(blendMode));
+        }
+
         OffsetX = offsetX;
         OffsetY = offsetY;
         Opacity = opacity;
