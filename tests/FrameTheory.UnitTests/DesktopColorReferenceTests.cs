@@ -43,6 +43,8 @@ public sealed class DesktopColorReferenceTests
 
             await viewModel.ImportFilesAsync(["source.png", "reference.png"], CancellationToken.None);
             Xunit.Assert.Equal(2, viewModel.ImportedMedia.Count);
+            Xunit.Assert.True(viewModel.CanAnalyzeColorReference);
+            Xunit.Assert.False(viewModel.CanApplyPendingReferenceGrade);
             Xunit.Assert.False(await viewModel.AnalyzeColorReferenceAsync(
                 viewModel.ImportedMedia[0],
                 viewModel.ImportedMedia[1],
@@ -58,9 +60,11 @@ public sealed class DesktopColorReferenceTests
             Xunit.Assert.Contains("ready for review", viewModel.ReferenceAnalysisStatusText, StringComparison.OrdinalIgnoreCase);
             Xunit.Assert.Contains("input=12, output=8, total=20", viewModel.GeminiUsageStatusText, StringComparison.Ordinal);
             Xunit.Assert.Equal(0, viewModel.ColorInspector.Grade.ExposureEV);
+            Xunit.Assert.True(viewModel.CanApplyPendingReferenceGrade);
 
             Xunit.Assert.True(viewModel.ApplyPendingReferenceGrade());
             Xunit.Assert.Equal(0.5f, viewModel.ColorInspector.Grade.ExposureEV);
+            Xunit.Assert.False(viewModel.CanApplyPendingReferenceGrade);
             Xunit.Assert.Contains("Applied", viewModel.ReferenceAnalysisStatusText, StringComparison.Ordinal);
             Xunit.Assert.DoesNotContain("reference-secret", await File.ReadAllTextAsync(historyPath));
         }

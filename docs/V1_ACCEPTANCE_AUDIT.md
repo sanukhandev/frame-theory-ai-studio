@@ -1,5 +1,7 @@
 # V1 Acceptance Audit
 
+Machine audit checkpoint: Color reference actions now reflect actual local state: two visual previews are required before analysis, and apply is enabled only for a pending reviewed grade; a replacement request clears stale grade state. Focused color/reference coverage and the full local Release gate pass; live-provider/manual acceptance remains required.
+
 Machine audit checkpoint: optional Gemini actions now expose honest prerequisites in the UI: local sample preparation requires imported analyzable media and provider submission requires a consented prepared report. Focused shell coverage and the full local Release gate pass; live-provider/manual acceptance remains required.
 
 Machine audit checkpoint: project recovery and export controls now reflect observable state: relink requires a selected missing reference, cancel requires an active export, and retry requires a failed/canceled export job. Focused shell coverage and the full local Release gate pass; native recovery/queue acceptance remains required.

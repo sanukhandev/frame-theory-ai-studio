@@ -523,6 +523,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
     public bool CanRequestAiAnalysis => LastLocalAnalysisReport?.UploadConsent == true;
 
+    public bool CanAnalyzeColorReference => ImportedMedia.Count(item => item.ThumbnailPpm is not null) >= 2;
+
+    public bool CanApplyPendingReferenceGrade => _pendingReferenceGrade is not null;
+
     public RoughCutPlan? LastRoughCutPlan { get; private set; }
 
     public string RoughCutStatusText
@@ -1009,6 +1013,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             OnPropertyChanged(nameof(ImportedMedia));
             OnPropertyChanged(nameof(ImportedMediaSummary));
             OnPropertyChanged(nameof(CanPrepareLocalAnalysis));
+            OnPropertyChanged(nameof(CanAnalyzeColorReference));
             MediaImportStatusText = $"Media import canceled; imported {newlyImported} file(s); {imported.Count} file(s) available.";
             return;
         }
@@ -1017,6 +1022,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(ImportedMedia));
         OnPropertyChanged(nameof(ImportedMediaSummary));
         OnPropertyChanged(nameof(CanPrepareLocalAnalysis));
+        OnPropertyChanged(nameof(CanAnalyzeColorReference));
         MediaImportStatusText = newlyImported == 0 && failures.Count == 0
             ? "No local media files were dropped."
             : $"Imported {newlyImported} file(s); {imported.Count} file(s) available." + (failures.Count == 0 ? string.Empty : $" Failed: {string.Join(", ", failures)}");
@@ -1438,6 +1444,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             ImportedMedia = Array.AsReadOnly(importedViewModels.ToArray());
             OnPropertyChanged(nameof(ImportedMedia));
             OnPropertyChanged(nameof(ImportedMediaSummary));
+            OnPropertyChanged(nameof(CanAnalyzeColorReference));
             var video = imported.Select(item => item.Media.Metadata).FirstOrDefault(metadata => metadata.Kind == MediaKind.Video);
             _videoWidth = video?.Width ?? 0;
             _videoHeight = video?.Height ?? 0;
@@ -1643,6 +1650,8 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
 
         ColorInspector.SetSource(source.Payload);
+        _pendingReferenceGrade = null;
+        OnPropertyChanged(nameof(CanApplyPendingReferenceGrade));
         try
         {
             var apiKey = await GeminiSettings.ReadApiKeyAsync(cancellationToken);
@@ -1657,13 +1666,13 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 new GeminiClientOptions(apiKey, GeminiSettings.SelectedModelId, TimeSpan.FromMinutes(2), 3, TimeSpan.FromSeconds(1)),
                 _geminiInteractionHistory,
                 _diagnosticsLog);
-            _pendingReferenceGrade = null;
             ReferenceAnalysisStatusText = $"Uploading only {sourceItem!.Name} and {referenceItem!.Name} to Gemini after consent...";
             var result = await client.AnalyzeAsync(
                 new GeminiReferenceAnalysisRequest([source], [reference], uploadConsent: true),
                 new Progress<LocalAnalysisProgress>(update => ReferenceAnalysisStatusText = $"{update.Stage} ({update.Fraction:P0})"),
                 cancellationToken);
             _pendingReferenceGrade = result.Grade;
+            OnPropertyChanged(nameof(CanApplyPendingReferenceGrade));
             GeminiUsageStatusText = FormatGeminiUsage(result.Usage, result.Attempts, 2);
             RefreshGeminiActivityLog();
             ReferenceAnalysisStatusText = "Reference grade ready for review; apply it only after checking the before/after preview.";
@@ -1694,6 +1703,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         ColorInspector.ApplyGrade(grade);
         _pendingReferenceGrade = null;
+        OnPropertyChanged(nameof(CanApplyPendingReferenceGrade));
         ReferenceAnalysisStatusText = "Applied the reviewed Gemini reference grade; the change remains editable through the color controls.";
         return true;
     }

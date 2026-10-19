@@ -2729,6 +2729,21 @@ public sealed class MainWindow : Window
             referenceConsent.IsChecked == true,
             CancellationToken.None);
         applyReference.Click += (_, _) => viewModel.ApplyPendingReferenceGrade();
+        void RefreshReferenceActions()
+        {
+            analyzeReference.IsEnabled = viewModel.CanAnalyzeColorReference;
+            applyReference.IsEnabled = viewModel.CanApplyPendingReferenceGrade;
+        }
+
+        viewModel.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(MainWindowViewModel.CanAnalyzeColorReference)
+                or nameof(MainWindowViewModel.CanApplyPendingReferenceGrade))
+            {
+                RefreshReferenceActions();
+            }
+        };
+        RefreshReferenceActions();
         var beforePane = new Border
         {
             MinWidth = 160,

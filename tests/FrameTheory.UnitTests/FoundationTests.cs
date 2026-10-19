@@ -1380,6 +1380,14 @@ public sealed class FoundationTests
                         window.GetVisualDescendants().OfType<Button>(),
                         button => AutomationProperties.GetName(button) == primaryActionName && button.Classes.Contains("primary"));
                 }
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Analyze approved visual reference")
+                    .IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Apply reviewed reference grade")
+                    .IsEnabled);
                 Xunit.Assert.Equal(
                     "Apply the selected reusable style to the local color preview.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Apply loaded color style")));

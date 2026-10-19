@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Color reference-action checkpoint (2026-10-19):** The Color workspace now enables reference analysis only when two local visual previews exist and enables grade application only while a reviewed grade is pending; starting a replacement request clears any stale pending grade. Focused color/reference coverage and the full Release gate pass 428 unit tests and 2 golden tests; live-provider/manual acceptance remains open.
+
 **Gemini action-availability checkpoint (2026-10-19):** The optional Gemini workspace now disables local sample preparation until analyzable media exists and disables provider submission until a consented local analysis report is ready. Focused production-shell coverage and the full Release gate pass 428 unit tests and 2 golden tests; live-provider/manual acceptance remains open.
 
 **Timeline project-action checkpoint (2026-10-19):** The Video project rail now enables `Relink`, `Cancel export` and `Retry last export` only when the view model has the corresponding missing-media or export-queue state. Focused production-shell coverage and the full Release gate pass 428 unit tests and 2 golden tests; native queue/recovery acceptance remains open.
