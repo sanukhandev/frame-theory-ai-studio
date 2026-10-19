@@ -52,6 +52,11 @@ public sealed record TimelineVideoSegment
             throw new ArgumentException("A visual segment must contain a video clip.", nameof(clip));
         }
 
+        if (transition is { } transitionValue && !Enum.IsDefined(transitionValue))
+        {
+            throw new ArgumentOutOfRangeException(nameof(transition));
+        }
+
         if (transition is null && transitionDurationFrames != 0)
         {
             throw new ArgumentException("A transition duration requires a transition.", nameof(transitionDurationFrames));
