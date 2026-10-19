@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline edit-preview checkpoint (2026-10-19):** Successful manual edits, reviewed rough-cut application, undo and redo now request a fresh monitor preview through the existing local compositor/source path, preventing stale pixels after an editable timeline mutation. Native edit/preview acceptance remains open.
+
 **Timeline seek-sync checkpoint (2026-10-19):** Manual playhead, ruler and frame-step navigation now refreshes an existing timeline preview (or an enabled source comparison) through the local decoder/compositor path, preventing stale monitor pixels after a seek. Focused seek/preview coverage passes; native interaction acceptance remains open.
 
 **Timeline keyboard-stop checkpoint (2026-10-19):** Escape now routes through the Video workspace shortcut contract to cancel active local timeline preview playback; the blocking-decoder regression verifies cancellation and the header advertises the shortcut. Focused playback and shell coverage passes; native keyboard acceptance remains open.

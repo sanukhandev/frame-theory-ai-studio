@@ -1,5 +1,7 @@
 # V1 Acceptance Audit
 
+Machine audit checkpoint: successful manual timeline edits, reviewed rough-cut application, undo and redo now trigger the existing local preview refresh path, preserving monitor parity with editable timeline state. Native edit/preview acceptance remains required.
+
 Machine audit checkpoint: manual Video playhead, ruler and frame-step navigation now requests a fresh local preview when a monitor preview is active or source comparison is enabled, keeping the monitor synchronized with the selected frame. Focused coverage passes; native interaction acceptance remains required.
 
 Machine audit checkpoint: Escape now cancels active local timeline preview playback through the same shortcut path advertised by the production shell; blocking-decoder and shell tooltip coverage pass. Native keyboard acceptance remains required.

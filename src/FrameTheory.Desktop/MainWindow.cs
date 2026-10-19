@@ -3507,7 +3507,13 @@ public sealed class MainWindow : Window
         applyRoughCut.Classes.Add("primary");
         AutomationProperties.SetName(applyRoughCut, "Apply reviewed rough cut");
         ToolTip.SetTip(applyRoughCut, "Apply the reviewed waveform rough cut as editable timeline operations.");
-        applyRoughCut.Click += (_, _) => viewModel.ApplyRoughCutPlan();
+        applyRoughCut.Click += (_, _) =>
+        {
+            if (viewModel.ApplyRoughCutPlan())
+            {
+                viewModel.RefreshTimelinePreviewAfterSeek();
+            }
+        };
         var roughCutStatus = new TextBox
         {
             IsReadOnly = true,
@@ -3601,6 +3607,7 @@ public sealed class MainWindow : Window
             {
                 timeline.ExecuteUndoable(action);
                 operationStatus.Text = string.Empty;
+                viewModel.RefreshTimelinePreviewAfterSeek();
             }
             catch (ArgumentException exception)
             {
@@ -3617,16 +3624,26 @@ public sealed class MainWindow : Window
         ToolTip.SetTip(undoTimeline, "Undo the latest manual or approved AI timeline edit without changing source media.");
         undoTimeline.Click += (_, _) =>
         {
-            operationStatus.Text = timeline.CanUndo
-                ? timeline.Undo() ? "Undid the last timeline edit." : "Nothing to undo."
-                : viewModel.UndoLastAiEdit() ? "Undid the last AI timeline edit." : "Nothing to undo.";
+            var changed = timeline.CanUndo
+                ? timeline.Undo()
+                : viewModel.UndoLastAiEdit();
+            operationStatus.Text = changed ? "Undid the last timeline edit." : "Nothing to undo.";
+            if (changed)
+            {
+                viewModel.RefreshTimelinePreviewAfterSeek();
+            }
         };
         var redoTimeline = new Button { Content = "Redo" };
         AutomationProperties.SetName(redoTimeline, "Redo timeline edit");
         ToolTip.SetTip(redoTimeline, "Redo the latest manual timeline edit that was undone.");
         redoTimeline.Click += (_, _) =>
         {
-            operationStatus.Text = timeline.Redo() ? "Redid the timeline edit." : "Nothing to redo.";
+            var changed = timeline.Redo();
+            operationStatus.Text = changed ? "Redid the timeline edit." : "Nothing to redo.";
+            if (changed)
+            {
+                viewModel.RefreshTimelinePreviewAfterSeek();
+            }
         };
         void RefreshTimelineHistoryCommands()
         {
