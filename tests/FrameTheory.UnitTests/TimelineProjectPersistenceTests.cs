@@ -31,6 +31,7 @@ public sealed class TimelineProjectPersistenceTests
         editor.AddCaptionAt("Verified caption", CaptionProvenance.AuthoredCaption, 2, 5, "licensed-font.ttf");
         editor.ApplyBeforeAfterStyle(TimelineRevealStyle.Wipe);
         editor.SeekFrame(5);
+        editor.ScrollBy(10);
 
         var json = TimelineProjectStateJson.Serialize(editor.CaptureProjectState());
         var restored = new TimelineEditorViewModel();
@@ -40,6 +41,7 @@ public sealed class TimelineProjectPersistenceTests
 
         Xunit.Assert.Equal(30, restored.TotalFrames);
         Xunit.Assert.Equal(5, restored.CurrentFrame);
+        Xunit.Assert.Equal(10, restored.ScrollFrame);
         Xunit.Assert.Equal(remappedId.Value, restored.TrackRows.Single(row => row.Kind == TimelineTrackKind.Video).Clips.Single().MediaId);
         Xunit.Assert.Equal("Verified caption", restored.Captions.Single().Text);
         Xunit.Assert.Equal(TimelineRevealStyle.Wipe, restored.CaptureProjectState().BeforeAfterStyle);

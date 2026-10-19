@@ -647,7 +647,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(CanUndo));
         OnPropertyChanged(nameof(CanRedo));
         Refresh();
-        _scrollFrame = Math.Clamp(state.ScrollFrame, 0, Math.Max(0, TotalFrames - 1));
+        ScrollFrame = Math.Clamp(state.ScrollFrame, 0, Math.Max(0, TotalFrames - 1));
         SeekFrame(state.CurrentFrame);
         OnPropertyChanged(nameof(BeatMarkers));
         OnPropertyChanged(nameof(BeatMarkersText));

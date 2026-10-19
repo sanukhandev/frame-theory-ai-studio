@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline scroll persistence checkpoint (2026-10-19):** Reopened timeline projects now restore `ScrollFrame` through its notifying property setter, keeping the bound timeline viewport synchronized with the persisted horizontal position; round-trip coverage passes. Native reopen/visual acceptance remains open.
+
 **Native bundle packaging checkpoint (2026-10-19):** Windows, macOS and Linux package scripts now fail closed on nested native-bundle directories instead of silently omitting them; existing linked-entry and required-tool guards remain active. Shell syntax and focused packaging guard validation remain required before hosted release evidence.
 
 **Cross-platform containment checkpoint (2026-10-19):** Project media containment now uses Windows-only case folding and ordinal comparison elsewhere, preventing a case-variant sibling escape on Linux; the Linux regression is covered. Storage/relink acceptance remains open on native platforms.
