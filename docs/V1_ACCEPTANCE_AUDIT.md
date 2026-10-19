@@ -4,6 +4,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Current timing increment: default `0/0` frame rates fail at metadata, timeline, render-plan and export-preset boundaries; focused domain/media coverage remains green. Native timing/export acceptance remains open.
 
+- Current preset increment: preset saves reject null collection entries before serialization; focused color-preset persistence coverage remains green. Native preset workflow acceptance remains open.
+
 - Current render-plan increment: null layers and invalid source-map IDs/URIs fail at plan construction instead of during filter-graph building; focused compositor coverage remains green. Native export acceptance remains open.
 
 - Current media-metadata increment: image/video records require positive dimensions while audio remains dimensionless; focused domain coverage and the local 380-unit/2-golden gate remain green. Native media-probe acceptance remains open.

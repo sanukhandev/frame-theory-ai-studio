@@ -49,6 +49,11 @@ public sealed class JsonColorPresetStore
     {
         ArgumentNullException.ThrowIfNull(presets);
         var presetArray = presets.ToArray();
+        if (presetArray.Any(preset => preset is null))
+        {
+            throw new ArgumentException("Preset collections cannot contain null entries.", nameof(presets));
+        }
+
         if (presetArray.GroupBy(preset => preset.Name, StringComparer.OrdinalIgnoreCase).Any(group => group.Count() > 1))
         {
             throw new ArgumentException("Preset names must be unique.", nameof(presets));
