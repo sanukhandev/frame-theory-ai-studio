@@ -6,6 +6,12 @@ namespace FrameTheory.UnitTests;
 public sealed class FrameDecoderTests
 {
     [Xunit.Fact]
+    public void DecoderRequiresProcessRunner()
+    {
+        Xunit.Assert.Throws<ArgumentNullException>(() => new FfmpegFrameDecoder(null!));
+    }
+
+    [Xunit.Fact]
     public async Task DecoderCachesFramesAndEvictsOldestEntries()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-decode-");

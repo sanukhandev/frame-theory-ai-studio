@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Decoder dependency checkpoint (2026-10-19):** `FfmpegFrameDecoder` now rejects a missing media process runner at construction; focused decoder coverage passes. Native preview acceptance remains open.
+
 **Audio-preparation dependency checkpoint (2026-10-19):** Audio source preparation now rejects a missing media process runner at construction instead of failing during extraction; focused audio coverage passes. Native audio acceptance remains open.
 
 **Media-import dependency checkpoint (2026-10-19):** FFmpeg media importers now reject missing probe, preview-decoder and process-runner services at construction; focused import coverage passes. Native import acceptance remains open.

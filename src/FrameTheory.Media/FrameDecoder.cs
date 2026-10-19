@@ -30,6 +30,7 @@ public sealed class FfmpegFrameDecoder : IPreviewFrameDecoder, IRgbaPreviewFrame
 
     public FfmpegFrameDecoder(IMediaProcessRunner processRunner, int maximumCacheEntries = 8)
     {
+        ArgumentNullException.ThrowIfNull(processRunner);
         _processRunner = processRunner;
         if (maximumCacheEntries <= 0)
         {
