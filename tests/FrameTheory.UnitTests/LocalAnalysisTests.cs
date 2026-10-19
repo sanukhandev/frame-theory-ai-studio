@@ -88,7 +88,11 @@ public sealed class LocalAnalysisTests
         Xunit.Assert.Throws<ArgumentException>(() => new LocalMediaAnalysisReport([null!], GeminiAnalysisScope.PhotoPreview, false, 1, "local"));
         Xunit.Assert.Throws<ArgumentException>(() => new LocalMediaAnalysisReport([sample], GeminiAnalysisScope.None, false, 1, "local"));
         Xunit.Assert.Throws<ArgumentException>(() => new LocalMediaAnalysisReport([sample], GeminiAnalysisScope.PhotoPreview, false, -1, "local"));
+        Xunit.Assert.Throws<ArgumentException>(() => new GeminiAnalysisRequest([null!], GeminiAnalysisScope.PhotoPreview, false));
+        Xunit.Assert.Throws<ArgumentException>(() => new GeminiAnalysisRequest([requestAsset()], (GeminiAnalysisScope)8, false));
     }
+
+    private static ImportedMedia requestAsset() => Imported(new Uri("file:///sample.png"), MediaKind.Image, null, 0, TimeSpan.Zero);
 
     private static ImportedMedia Imported(
         Uri source,

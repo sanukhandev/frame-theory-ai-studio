@@ -18,9 +18,10 @@ public sealed record GeminiAnalysisRequest
     public GeminiAnalysisRequest(IReadOnlyList<ImportedMedia> assets, GeminiAnalysisScope scopes, bool uploadConsent)
     {
         ArgumentNullException.ThrowIfNull(assets);
-        if (assets.Count == 0 || scopes == GeminiAnalysisScope.None)
+        const GeminiAnalysisScope supportedScopes = GeminiAnalysisScope.VideoFrames | GeminiAnalysisScope.AudioWaveform | GeminiAnalysisScope.PhotoPreview;
+        if (assets.Count == 0 || assets.Any(asset => asset is null) || scopes == GeminiAnalysisScope.None || (scopes & ~supportedScopes) != 0)
         {
-            throw new ArgumentException("At least one local asset and one analysis scope are required.");
+            throw new ArgumentException("At least one local asset and one supported analysis scope are required.");
         }
 
         Assets = Array.AsReadOnly(assets.ToArray());

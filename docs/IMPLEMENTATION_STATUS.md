@@ -54,6 +54,8 @@
 
 **AI analysis contract checkpoint (2026-10-19):** Local Gemini-analysis samples and reports now validate local sources, bounded metadata, timing, payloads, scopes, byte estimates and disclosure before any provider call; focused analysis coverage passes. Gemini acceptance remains open.
 
+**AI request checkpoint (2026-10-19):** Gemini analysis requests now reject null assets and unsupported scope flags before local sampling; focused analysis coverage passes. Gemini acceptance remains open.
+
 **Audio-preparation dependency checkpoint (2026-10-19):** Audio source preparation now rejects a missing media process runner at construction instead of failing during extraction; focused audio coverage passes. Native audio acceptance remains open.
 
 **Media-import dependency checkpoint (2026-10-19):** FFmpeg media importers now reject missing probe, preview-decoder and process-runner services at construction; focused import coverage passes. Native import acceptance remains open.
