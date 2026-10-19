@@ -9,10 +9,11 @@ public sealed record CacheIndexEntry(string Key, string RelativePath, long SizeB
 public sealed class CacheIndex
 {
     private readonly Dictionary<string, CacheIndexEntry> _entries = new(StringComparer.Ordinal);
+    private long _totalSizeBytes;
 
     public IReadOnlyCollection<CacheIndexEntry> Entries => Array.AsReadOnly(_entries.Values.ToArray());
 
-    public long TotalSizeBytes => _entries.Values.Sum(entry => entry.SizeBytes);
+    public long TotalSizeBytes => _totalSizeBytes;
 
     public void Register(string key, string relativePath, long sizeBytes, DateTimeOffset lastAccessUtc)
     {
@@ -28,7 +29,15 @@ public sealed class CacheIndex
             throw new ArgumentOutOfRangeException(nameof(sizeBytes));
         }
 
+        var previousSize = _entries.TryGetValue(key, out var previous) ? previous.SizeBytes : 0;
+        var sizeWithoutPrevious = _totalSizeBytes - previousSize;
+        if (sizeBytes > long.MaxValue - sizeWithoutPrevious)
+        {
+            throw new ArgumentOutOfRangeException(nameof(sizeBytes), "The cache index size exceeds the supported range.");
+        }
+
         _entries[key] = new CacheIndexEntry(key, normalizedPath, sizeBytes, lastAccessUtc);
+        _totalSizeBytes = sizeWithoutPrevious + sizeBytes;
     }
 
     public bool TryGet(string key, out CacheIndexEntry? entry) => _entries.TryGetValue(key, out entry);
@@ -49,6 +58,7 @@ public sealed class CacheIndex
             }
 
             _entries.Remove(entry.Key);
+            _totalSizeBytes -= entry.SizeBytes;
             evicted.Add(entry);
         }
 

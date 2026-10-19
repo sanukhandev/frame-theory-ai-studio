@@ -120,6 +120,23 @@ public sealed class RecoveryTests
     }
 
     [Xunit.Fact]
+    public void CacheIndexRejectsTotalSizeOverflowWithoutMutatingEntries()
+    {
+        var index = new CacheIndex();
+        index.Register("first", "cache/first.bin", long.MaxValue, DateTimeOffset.UtcNow);
+
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => index.Register(
+            "second",
+            "cache/second.bin",
+            1,
+            DateTimeOffset.UtcNow));
+
+        Xunit.Assert.Equal(long.MaxValue, index.TotalSizeBytes);
+        Xunit.Assert.True(index.TryGet("first", out _));
+        Xunit.Assert.False(index.TryGet("second", out _));
+    }
+
+    [Xunit.Fact]
     public async Task CacheIndexStoreDoesNotReplaceExistingFileWhenCanceled()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-cache-cancel-");
