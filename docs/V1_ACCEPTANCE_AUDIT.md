@@ -48,6 +48,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Photo-mask checkpoint: adjustment layers reject null mask strokes before rendering or persistence; focused photo-layer coverage passes locally. Native photo editing acceptance remains open.
 
+- Composite-mask checkpoint: composite layers reject null mask strokes before raster composition or persistence; focused photo-layer coverage passes locally. Native photo editing acceptance remains open.
+
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
 - Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.

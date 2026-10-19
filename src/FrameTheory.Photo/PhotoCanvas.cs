@@ -285,7 +285,13 @@ public sealed class PhotoCompositeLayer
         OffsetY = offsetY;
         Opacity = opacity;
         BlendMode = blendMode;
-        MaskStrokes = Array.AsReadOnly(maskStrokes?.ToArray() ?? []);
+        var strokes = maskStrokes?.ToArray() ?? [];
+        if (strokes.Any(stroke => stroke is null))
+        {
+            throw new ArgumentException("Composite masks cannot contain null strokes.", nameof(maskStrokes));
+        }
+
+        MaskStrokes = Array.AsReadOnly(strokes);
     }
 
     public PhotoDocument Source { get; }

@@ -58,6 +58,8 @@ public sealed class PhotoLayerTests
         Xunit.Assert.Equal([222, 100, 131, 255, 255, 60], PpmRaster.Parse(screen.RenderPreview()).RgbBytes);
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new PhotoCompositeLayer(
             overlayDocument, blendMode: (PhotoBlendMode)99));
+        Xunit.Assert.Throws<ArgumentException>(() => new PhotoCompositeLayer(
+            overlayDocument, maskStrokes: [null!]));
     }
 
     [Xunit.Fact]
