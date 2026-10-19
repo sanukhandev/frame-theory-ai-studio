@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- AI input checkpoint: Gemini interaction factories reject missing text, empty inline images, and incomplete image URI metadata before request construction; focused coverage passes locally. Live provider acceptance remains open.
+
 - Clip-sampling checkpoint: timeline video and audio sampling reject an uninitialized project frame rate before source arithmetic; focused coverage passes locally. Native playback acceptance remains open.
 
 - Title-placement checkpoint: timeline titles reject undefined placement values before drawtext coordinate generation; focused coverage passes locally. Native caption/title acceptance remains open.

@@ -9,6 +9,16 @@ namespace FrameTheory.UnitTests;
 public sealed class GeminiInteractionsTests
 {
     [Xunit.Fact]
+    public void InteractionInputFactoriesRejectMissingPayloads()
+    {
+        Xunit.Assert.Throws<ArgumentNullException>(() => GeminiInteractionInput.CreateText(null!));
+        Xunit.Assert.Throws<ArgumentNullException>(() => GeminiInteractionInput.CreateImage(null!));
+        Xunit.Assert.Throws<ArgumentException>(() => GeminiInteractionInput.CreateImage([]));
+        Xunit.Assert.Throws<ArgumentException>(() => GeminiInteractionInput.CreateImageUri(" ", "image/png"));
+        Xunit.Assert.Throws<ArgumentException>(() => GeminiInteractionInput.CreateImageUri("https://example.test/image.png", " "));
+    }
+
+    [Xunit.Fact]
     public void ClientOptionsUseSafeDefaultsWhenOptionalValuesAreOmitted()
     {
         var options = new GeminiClientOptions("test-secret", "gemini-test");

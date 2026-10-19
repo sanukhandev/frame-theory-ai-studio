@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**AI input checkpoint (2026-10-19):** Gemini interaction factories now reject missing text, empty inline images, and incomplete image URI metadata before request construction; focused AI coverage passes. Live provider acceptance remains open.
+
 **Clip-sampling checkpoint (2026-10-19):** Timeline video and audio clip sampling now rejects an uninitialized project frame rate before source arithmetic; focused timeline coverage passes. Native playback acceptance remains open.
 
 **Title-placement checkpoint (2026-10-19):** Timeline titles now reject undefined placement values before drawtext coordinate generation; focused title-contract coverage passes. Native caption/title acceptance remains open.

@@ -112,11 +112,37 @@ public sealed record GeminiInteractionInput(
     [property: JsonPropertyName("mime_type")]
     [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] string? MimeType)
 {
-    public static GeminiInteractionInput CreateText(string text) => new("text", text, null, null, null);
+    public static GeminiInteractionInput CreateText(string text)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        return new GeminiInteractionInput("text", text, null, null, null);
+    }
 
-    public static GeminiInteractionInput CreateImage(byte[] png) => new("image", null, Convert.ToBase64String(png), null, "image/png");
+    public static GeminiInteractionInput CreateImage(byte[] png)
+    {
+        ArgumentNullException.ThrowIfNull(png);
+        if (png.Length == 0)
+        {
+            throw new ArgumentException("An inline image payload is required.", nameof(png));
+        }
 
-    public static GeminiInteractionInput CreateImageUri(string uri, string mimeType) => new("image", null, null, uri, mimeType);
+        return new GeminiInteractionInput("image", null, Convert.ToBase64String(png), null, "image/png");
+    }
+
+    public static GeminiInteractionInput CreateImageUri(string uri, string mimeType)
+    {
+        if (string.IsNullOrWhiteSpace(uri))
+        {
+            throw new ArgumentException("An image URI is required.", nameof(uri));
+        }
+
+        if (string.IsNullOrWhiteSpace(mimeType))
+        {
+            throw new ArgumentException("An image MIME type is required.", nameof(mimeType));
+        }
+
+        return new GeminiInteractionInput("image", null, null, uri, mimeType);
+    }
 }
 
 internal sealed record GeminiUploadedFile(string Name, string Uri, string MimeType);
