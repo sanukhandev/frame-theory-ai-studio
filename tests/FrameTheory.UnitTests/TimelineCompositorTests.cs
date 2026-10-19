@@ -1,4 +1,5 @@
 using FrameTheory.Domain;
+using FrameTheory.Color;
 using FrameTheory.Media;
 
 namespace FrameTheory.UnitTests;
@@ -81,6 +82,14 @@ public sealed class TimelineCompositorTests
             30,
             new Dictionary<MediaId, Uri> { [default] = null! },
             []));
+        Xunit.Assert.Throws<ArgumentException>(() => new TimelineVideoRenderPlan(
+            frameRate,
+            16,
+            8,
+            30,
+            sources,
+            [],
+            colorGrades: new Dictionary<MediaId, ColorGrade> { [default] = null! }));
     }
 
     [Xunit.Fact]

@@ -81,6 +81,17 @@ public sealed record TimelineVideoRenderPlan
             throw new ArgumentException("Render-plan captions cannot contain null entries.", nameof(captions));
         }
 
+        var gradeMap = new Dictionary<MediaId, ColorGrade>();
+        foreach (var grade in colorGrades ?? new Dictionary<MediaId, ColorGrade>())
+        {
+            if (string.IsNullOrWhiteSpace(grade.Key.Value) || grade.Value is null)
+            {
+                throw new ArgumentException("Render-plan color grades require valid media IDs and grades.", nameof(colorGrades));
+            }
+
+            gradeMap.Add(grade.Key, grade.Value);
+        }
+
         FrameRate = frameRate;
         Width = width;
         Height = height;
@@ -91,9 +102,7 @@ public sealed record TimelineVideoRenderPlan
         Titles = Array.AsReadOnly(titleArray.OrderBy(title => title.Order).ToArray());
         Captions = Array.AsReadOnly(captionArray.OrderBy(caption => caption.Start).ToArray());
         CaptionStyle = captionStyle;
-        ColorGrades = new ReadOnlyDictionary<MediaId, ColorGrade>(colorGrades is null
-            ? new Dictionary<MediaId, ColorGrade>()
-            : new Dictionary<MediaId, ColorGrade>(colorGrades));
+        ColorGrades = new ReadOnlyDictionary<MediaId, ColorGrade>(gradeMap);
         if (beforeAfterStyle is not null && (beforeAfterRevealFrame < 0 || beforeAfterRevealFrame >= durationFrames))
         {
             throw new ArgumentOutOfRangeException(nameof(beforeAfterRevealFrame));

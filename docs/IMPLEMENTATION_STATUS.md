@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Render-grade integrity checkpoint (2026-10-19):** Timeline render plans now reject null color grades and default media IDs before storing the immutable grade map; focused compositor coverage passes. Native color-export acceptance remains open.
+
 **Filter-graph boundary checkpoint (2026-10-19):** Timeline filter graphs now require nonblank video expressions/labels, local file inputs and nonblank optional audio labels before FFmpeg argument construction; focused compositor coverage passes. Native preview/export acceptance remains open.
 
 **Timeline exporter dependency checkpoint (2026-10-19):** Timeline video exporters now reject missing process-runner and media-probe services at construction instead of failing during export; focused compositor coverage passes. Native timeline export acceptance remains open.
