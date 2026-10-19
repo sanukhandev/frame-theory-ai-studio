@@ -365,6 +365,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             _useTimelinePreviewProxy = value;
             OnPropertyChanged();
+            if (value && _showTimelineSourcePreview)
+            {
+                _showTimelineSourcePreview = false;
+                OnPropertyChanged(nameof(ShowTimelineSourcePreview));
+            }
         }
     }
 
@@ -380,6 +385,11 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             _showTimelineSourcePreview = value;
             OnPropertyChanged();
+            if (value && _useTimelinePreviewProxy)
+            {
+                _useTimelinePreviewProxy = false;
+                OnPropertyChanged(nameof(UseTimelinePreviewProxy));
+            }
         }
     }
 

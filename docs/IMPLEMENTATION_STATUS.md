@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline preview-mode checkpoint (2026-10-19):** Bounded proxy preview and original-source comparison are now mutually exclusive through the view-model property contract, preventing status text from claiming source pixels while decoding a proxy. Focused desktop coverage passes; the full local Release gate remains required before the next 50-commit push. Native preview acceptance remains open.
+
 **Timeline source-preview UX checkpoint (2026-10-19):** The original-source comparison toggle now refreshes the current monitor frame immediately when clicked and remains disabled until a video track exists; focused shell/source-preview coverage passes 2/2. The full local Release gate passes 422 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native visual and cross-platform manual acceptance remain open.
 
 **Prior pause checkpoint (2026-10-19):** The previous pause was recorded at commit `8f563d6` on `main` with `2` verified local commits ahead of `origin/main`; execution has since resumed and completed the source-preview UX follow-up above. The exact 50-commit push policy remains active, and the six tracked partial P0 gates remain open: `FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005` and `FT-1006`; manual native visual/HiDPI/screen-reader, legal redistribution, signing/clean-host and final-audit evidence are still required.

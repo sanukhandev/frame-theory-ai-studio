@@ -729,6 +729,26 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public void TimelinePreviewModesCannotRemainContradictory()
+    {
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new VideoImporter());
+
+        viewModel.UseTimelinePreviewProxy = true;
+        viewModel.ShowTimelineSourcePreview = true;
+
+        Xunit.Assert.True(viewModel.ShowTimelineSourcePreview);
+        Xunit.Assert.False(viewModel.UseTimelinePreviewProxy);
+
+        viewModel.UseTimelinePreviewProxy = true;
+
+        Xunit.Assert.False(viewModel.ShowTimelineSourcePreview);
+        Xunit.Assert.True(viewModel.UseTimelinePreviewProxy);
+    }
+
+    [Xunit.Fact]
     public async Task TimelineCompositorArgumentFailureIsReportedWithoutEscapingTheUi()
     {
         var viewModel = new MainWindowViewModel(
