@@ -225,6 +225,9 @@ public sealed class OperatingSystemSecretStore : ISecretStore
         catch (Win32Exception)
         {
         }
+        catch (NotSupportedException)
+        {
+        }
     }
 
     private sealed record UnixResult(int ExitCode, string Output);

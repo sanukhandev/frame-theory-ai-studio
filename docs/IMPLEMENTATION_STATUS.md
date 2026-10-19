@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Credential cancellation checkpoint (2026-10-19):** Unix credential-store process cleanup now ignores unsupported kill failures so canceled key operations preserve their cancellation result; secret names and OS-backed storage behavior remain unchanged. Existing platform-secret coverage remains green.
+
 **Process cancellation checkpoint (2026-10-19):** FFmpeg and local Whisper cancellation cleanup now ignores platform kill failures, preserving the original cancellation result instead of leaking a secondary termination exception. Existing media/caption cancellation coverage remains green; native interruption acceptance remains open.
 
 **Timeline beat-mode persistence checkpoint (2026-10-19):** Project and transactional timeline restores now notify the bound `BeatDetectionMode` property after loading its persisted value, keeping the waveform-analysis selector synchronized; round-trip coverage passes. Native timeline UI acceptance remains open.
