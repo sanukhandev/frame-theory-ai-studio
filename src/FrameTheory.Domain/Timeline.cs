@@ -135,6 +135,11 @@ public sealed record TimelineClip
     public long SourceFrameAt(long timelineFrame, RationalFrameRate projectFrameRate)
     {
         EnsureContains(timelineFrame);
+        if (!projectFrameRate.IsValid)
+        {
+            throw new ArgumentException("A valid project frame rate is required.", nameof(projectFrameRate));
+        }
+
         var sourceFrameRate = SourceFrameRate ?? throw new InvalidOperationException("The clip is not video.");
         var relativeTimelineFrame = timelineFrame - TimelineRange.StartFrame;
         var sourceOffset = (Int128)relativeTimelineFrame * sourceFrameRate.Numerator * projectFrameRate.Denominator /
@@ -145,6 +150,11 @@ public sealed record TimelineClip
     public long SourceSampleAt(long timelineFrame, RationalFrameRate projectFrameRate)
     {
         EnsureContains(timelineFrame);
+        if (!projectFrameRate.IsValid)
+        {
+            throw new ArgumentException("A valid project frame rate is required.", nameof(projectFrameRate));
+        }
+
         if (!IsAudio)
         {
             throw new InvalidOperationException("The clip is not audio.");

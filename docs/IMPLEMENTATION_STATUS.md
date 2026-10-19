@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Clip-sampling checkpoint (2026-10-19):** Timeline video and audio clip sampling now rejects an uninitialized project frame rate before source arithmetic; focused timeline coverage passes. Native playback acceptance remains open.
+
 **Title-placement checkpoint (2026-10-19):** Timeline titles now reject undefined placement values before drawtext coordinate generation; focused title-contract coverage passes. Native caption/title acceptance remains open.
 
 **Reveal-style checkpoint (2026-10-19):** Timeline render plans now reject undefined before/after reveal styles before compositor dispatch; focused render-plan coverage passes. Native reel acceptance remains open.

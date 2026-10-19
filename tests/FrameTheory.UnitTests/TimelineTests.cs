@@ -48,6 +48,10 @@ public sealed class TimelineTests
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => graph.Seek(-1));
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => TimelineClip.Video(
             mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1)).SourceFrameAt(30, new RationalFrameRate(30, 1)));
+        Xunit.Assert.Throws<ArgumentException>(() => TimelineClip.Video(
+            mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1)).SourceFrameAt(0, default));
+        Xunit.Assert.Throws<ArgumentException>(() => TimelineClip.Audio(
+            mediaId, 0, 48000, 0, 30, 48000).SourceSampleAt(0, default));
         Xunit.Assert.Throws<ArgumentException>(() => new TimelineTrack("video", TimelineTrackKind.Video, [null!]));
         Xunit.Assert.Throws<ArgumentException>(() => new TimelineGraph(new RationalFrameRate(30, 1), [null!]));
         Xunit.Assert.Throws<ArgumentException>(() => new TimelineSpeedRamp([null!, new TimelineSpeedPoint(1, 1)]));
