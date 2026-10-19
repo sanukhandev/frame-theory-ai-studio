@@ -12,6 +12,7 @@ public sealed class GeminiInteractionsTests
     public void InteractionInputFactoriesRejectMissingPayloads()
     {
         Xunit.Assert.Throws<ArgumentNullException>(() => GeminiInteractionInput.CreateText(null!));
+        Xunit.Assert.Throws<ArgumentException>(() => GeminiInteractionInput.CreateText(" "));
         Xunit.Assert.Throws<ArgumentNullException>(() => GeminiInteractionInput.CreateImage(null!));
         Xunit.Assert.Throws<ArgumentException>(() => GeminiInteractionInput.CreateImage([]));
         Xunit.Assert.Throws<ArgumentException>(() => GeminiInteractionInput.CreateImageUri(" ", "image/png"));

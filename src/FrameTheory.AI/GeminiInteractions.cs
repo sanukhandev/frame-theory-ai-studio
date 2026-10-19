@@ -115,6 +115,11 @@ public sealed record GeminiInteractionInput(
     public static GeminiInteractionInput CreateText(string text)
     {
         ArgumentNullException.ThrowIfNull(text);
+        if (string.IsNullOrWhiteSpace(text))
+        {
+            throw new ArgumentException("Text input cannot be empty.", nameof(text));
+        }
+
         return new GeminiInteractionInput("text", text, null, null, null);
     }
 
