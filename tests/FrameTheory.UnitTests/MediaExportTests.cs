@@ -24,6 +24,18 @@ public sealed class MediaExportTests
     }
 
     [Xunit.Fact]
+    public void ExportProgressRejectsInvalidStageAndFraction()
+    {
+        Xunit.Assert.Throws<ArgumentException>(() => new ExportProgress(" ", 0));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ExportProgress("Encoding", double.PositiveInfinity));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new ExportProgress("Encoding", -0.1));
+
+        var progress = new ExportProgress(" Encoding ", 0.5);
+        Xunit.Assert.Equal("Encoding", progress.Stage);
+        Xunit.Assert.Equal(0.5, progress.Fraction);
+    }
+
+    [Xunit.Fact]
     public async Task ExportRejectsBlankDestinationPath()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-export-path-");

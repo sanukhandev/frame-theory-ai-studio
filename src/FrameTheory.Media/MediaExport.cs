@@ -36,7 +36,28 @@ public sealed class ExportPreset
     public bool IncludeAudio { get; }
 }
 
-public sealed record ExportProgress(string Stage, double Fraction);
+public sealed record ExportProgress
+{
+    public ExportProgress(string stage, double fraction)
+    {
+        if (string.IsNullOrWhiteSpace(stage))
+        {
+            throw new ArgumentException("An export progress stage is required.", nameof(stage));
+        }
+
+        if (double.IsNaN(fraction) || double.IsInfinity(fraction) || fraction is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(fraction));
+        }
+
+        Stage = stage.Trim();
+        Fraction = fraction;
+    }
+
+    public string Stage { get; }
+
+    public double Fraction { get; }
+}
 
 public sealed record ExportReceipt(
     Guid JobId,

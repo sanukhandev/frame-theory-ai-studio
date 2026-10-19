@@ -36,7 +36,28 @@ public sealed record GeminiAnalysisRequest
     public bool UploadConsent { get; }
 }
 
-public sealed record LocalAnalysisProgress(string Stage, double Fraction);
+public sealed record LocalAnalysisProgress
+{
+    public LocalAnalysisProgress(string stage, double fraction)
+    {
+        if (string.IsNullOrWhiteSpace(stage))
+        {
+            throw new ArgumentException("An analysis progress stage is required.", nameof(stage));
+        }
+
+        if (double.IsNaN(fraction) || double.IsInfinity(fraction) || fraction is < 0 or > 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(fraction));
+        }
+
+        Stage = stage.Trim();
+        Fraction = fraction;
+    }
+
+    public string Stage { get; }
+
+    public double Fraction { get; }
+}
 
 public sealed record LocalAnalysisSample
 {

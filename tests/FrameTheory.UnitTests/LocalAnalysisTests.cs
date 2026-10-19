@@ -92,6 +92,18 @@ public sealed class LocalAnalysisTests
         Xunit.Assert.Throws<ArgumentException>(() => new GeminiAnalysisRequest([requestAsset()], (GeminiAnalysisScope)8, false));
     }
 
+    [Xunit.Fact]
+    public void AnalysisProgressRejectsInvalidStageAndFraction()
+    {
+        Xunit.Assert.Throws<ArgumentException>(() => new LocalAnalysisProgress(" ", 0));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new LocalAnalysisProgress("Preparing", double.NaN));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new LocalAnalysisProgress("Preparing", 1.1));
+
+        var progress = new LocalAnalysisProgress(" Preparing ", 0.5);
+        Xunit.Assert.Equal("Preparing", progress.Stage);
+        Xunit.Assert.Equal(0.5, progress.Fraction);
+    }
+
     private static ImportedMedia requestAsset() => Imported(new Uri("file:///sample.png"), MediaKind.Image, null, 0, TimeSpan.Zero);
 
     private static ImportedMedia Imported(
