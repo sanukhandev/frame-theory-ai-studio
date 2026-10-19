@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Current FT-901 composition increment: desktop shell construction rejects a missing capability detector at startup instead of deferring the failure to asynchronous refresh; focused constructor coverage remains green. Native workspace acceptance remains open.
+
 - Current FT-901/FT-902 navigation increment: Home/End seek through the Video transport path and post-snap clamping keeps the playhead inside the valid frame range; focused Foundation coverage passes 29 tests and timeline coverage passes 21 tests. Native keyboard, visual and HiDPI acceptance remain open.
 
 - Current FT-901 startup increment: workspace-state read failures now fall back to Video and record diagnostics, complementing write-failure handling; focused startup coverage remains green. Native workspace acceptance remains open.

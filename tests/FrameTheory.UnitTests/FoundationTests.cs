@@ -137,6 +137,14 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public void DesktopShellRequiresCapabilityDetector()
+    {
+        Xunit.Assert.Throws<ArgumentNullException>(() => new FrameTheory.Desktop.MainWindowViewModel(
+            new FrameTheory.Desktop.WorkspaceCatalog(),
+            null!));
+    }
+
+    [Xunit.Fact]
     public async Task MainWindowBuildsAccessibleAdaptiveWorkspaceShell()
     {
         using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));

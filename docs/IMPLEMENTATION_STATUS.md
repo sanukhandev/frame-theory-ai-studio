@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Workspace dependency validation checkpoint (2026-10-19):** Desktop shell construction now rejects a missing capability detector at the composition boundary instead of failing later during an asynchronous refresh; focused constructor coverage passes. Native workspace acceptance remains open.
+
 **Workspace startup resilience checkpoint (2026-10-19):** A workspace-state read failure now falls back to Video and records diagnostics instead of preventing shell construction; focused startup coverage complements the existing write-failure regression. Native workspace acceptance remains open.
 
 **Case-sensitive export checkpoint (2026-10-19):** Media and photo overwrite guards now use Windows-only case folding, allowing distinct case-variant output names on Linux without weakening same-path protection; focused exporter coverage includes both paths. Native export acceptance remains open.

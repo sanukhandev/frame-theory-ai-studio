@@ -165,6 +165,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         IWorkspaceStateStore? workspaceStateStore = null)
     {
         ArgumentNullException.ThrowIfNull(workspaceCatalog);
+        ArgumentNullException.ThrowIfNull(capabilityDetector);
         Workspaces = Array.AsReadOnly((workspaceCatalog.GetWorkspaces() ?? throw new InvalidOperationException("Workspace catalog returned no workspaces.")).ToArray());
         _workspaceStateStore = workspaceStateStore ?? new NoopWorkspaceStateStore();
         _diagnosticsLog = diagnosticsLog ?? new FileDiagnosticsLog();
