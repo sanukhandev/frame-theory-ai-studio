@@ -5,6 +5,12 @@ namespace FrameTheory.UnitTests;
 public sealed class PreviewProxyTests
 {
     [Xunit.Fact]
+    public void PreviewProxyRequiresProcessRunner()
+    {
+        Xunit.Assert.Throws<ArgumentNullException>(() => new FfmpegPreviewProxyService(null!, Path.GetTempPath()));
+    }
+
+    [Xunit.Fact]
     public async Task CreatesAndReusesBoundedProxy()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-proxy-");
