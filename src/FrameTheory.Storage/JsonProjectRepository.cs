@@ -29,6 +29,12 @@ public sealed class JsonProjectRepository : IProjectRepository
 
         EnsureRegularProjectPath(fullPath, directory);
 
+        var payload = JsonSerializer.SerializeToUtf8Bytes(ProjectFile.FromSnapshot(snapshot), JsonOptions);
+        if (payload.LongLength > MaximumProjectBytes)
+        {
+            throw new InvalidDataException("The project file exceeds the supported size limit.");
+        }
+
         var temporaryPath = Path.Combine(directory, $".{Path.GetFileName(fullPath)}.{Guid.NewGuid():N}.tmp");
         try
         {
@@ -40,7 +46,7 @@ public sealed class JsonProjectRepository : IProjectRepository
                 Options = FileOptions.Asynchronous | FileOptions.WriteThrough
             }))
             {
-                await JsonSerializer.SerializeAsync(stream, ProjectFile.FromSnapshot(snapshot), JsonOptions, cancellationToken);
+                await stream.WriteAsync(payload, cancellationToken);
                 await stream.FlushAsync(cancellationToken);
                 stream.Flush(flushToDisk: true);
             }

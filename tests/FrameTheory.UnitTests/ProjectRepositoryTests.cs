@@ -151,6 +151,32 @@ public sealed class ProjectRepositoryTests
     }
 
     [Xunit.Fact]
+    public async Task ProjectRepositoryRejectsSerializedPayloadsThatCannotReopen()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-project-size-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "project.ftstudio");
+            var snapshot = new ProjectSnapshot(
+                new string('p', 10 * 1024 * 1024),
+                new RationalFrameRate(24, 1),
+                640,
+                480,
+                "sRGB");
+
+            await Xunit.Assert.ThrowsAsync<InvalidDataException>(() =>
+                new JsonProjectRepository().SaveAtomicAsync(path, snapshot, CancellationToken.None));
+
+            Xunit.Assert.False(File.Exists(path));
+            Xunit.Assert.Empty(directory.EnumerateFiles("*.tmp"));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task ProjectRepositoryRejectsNullAndDuplicateMediaEntries()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-project-media-boundary-");
