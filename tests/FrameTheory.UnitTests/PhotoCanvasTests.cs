@@ -29,6 +29,9 @@ public sealed class PhotoCanvasTests
         Xunit.Assert.Equal(1, canvas.Zoom);
         canvas.SetZoom(100, viewport);
         Xunit.Assert.Equal(32, canvas.Zoom);
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => canvas.Fit(default));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => canvas.Set100Percent(default));
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => canvas.SetZoom(1, default));
         canvas.Pan(12, -8);
         Xunit.Assert.Equal(-12588, canvas.OffsetX, 6);
         Xunit.Assert.Equal(-6208, canvas.OffsetY, 6);

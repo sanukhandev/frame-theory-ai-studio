@@ -111,6 +111,7 @@ public sealed class PhotoCanvasState
 
     public void Fit(PhotoViewport viewport)
     {
+        ValidateViewport(viewport);
         Zoom = Math.Min(
             (double)viewport.Width / _document.Metadata.Width,
             (double)viewport.Height / _document.Metadata.Height);
@@ -120,6 +121,7 @@ public sealed class PhotoCanvasState
 
     public void Set100Percent(PhotoViewport viewport)
     {
+        ValidateViewport(viewport);
         Zoom = 1;
         OffsetX = (viewport.Width - _document.Metadata.Width) / 2;
         OffsetY = (viewport.Height - _document.Metadata.Height) / 2;
@@ -127,6 +129,7 @@ public sealed class PhotoCanvasState
 
     public void SetZoom(double zoom, PhotoViewport viewport)
     {
+        ValidateViewport(viewport);
         if (double.IsNaN(zoom) || double.IsInfinity(zoom))
         {
             throw new ArgumentOutOfRangeException(nameof(zoom));
@@ -135,6 +138,14 @@ public sealed class PhotoCanvasState
         Zoom = Math.Clamp(zoom, MinimumZoom, MaximumZoom);
         OffsetX = (viewport.Width - _document.Metadata.Width * Zoom) / 2;
         OffsetY = (viewport.Height - _document.Metadata.Height * Zoom) / 2;
+    }
+
+    private static void ValidateViewport(PhotoViewport viewport)
+    {
+        if (viewport.Width <= 0 || viewport.Height <= 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(viewport));
+        }
     }
 
     public void Pan(double deltaX, double deltaY)
