@@ -24,6 +24,15 @@ public sealed class TimelineCompositorTests
             "video-1",
             0,
             [new TimelineVideoSegment(first, transition: TimelineTransitionKind.CrossDissolve, transitionDurationFrames: 5)]));
+        var shortFirst = TimelineClip.Video(mediaId, 0, 4, 0, 4, new RationalFrameRate(30, 1));
+        var longTransition = TimelineClip.Video(mediaId, 4, 30, 4, 30, new RationalFrameRate(30, 1));
+        Xunit.Assert.Throws<ArgumentException>(() => new TimelineVideoLayer(
+            "video-1",
+            0,
+            [
+                new TimelineVideoSegment(shortFirst),
+                new TimelineVideoSegment(longTransition, transition: TimelineTransitionKind.CrossDissolve, transitionDurationFrames: 5)
+            ]));
         var layer = new TimelineVideoLayer(
             "video-1",
             0,

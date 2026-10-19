@@ -129,6 +129,11 @@ public sealed record TimelineVideoLayer
                 throw new ArgumentException("Visual segments on one layer cannot overlap.", nameof(segments));
             }
 
+            if (index > 0 && orderedSegments[index].TransitionDurationFrames > orderedSegments[index - 1].Clip.TimelineRange.Length)
+            {
+                throw new ArgumentException("A transition cannot be longer than the preceding visual segment.", nameof(segments));
+            }
+
             if (index == 0 && orderedSegments[index].Transition is not null)
             {
                 throw new ArgumentException("The first visual segment cannot have an incoming transition.", nameof(segments));
