@@ -94,6 +94,17 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void TimelineRulerBoundsExtremeViewportRequests()
+    {
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(Metadata(new Uri("file:///ruler-boundary.mp4"), "ruler-boundary", 1_000_000, hasAudio: false));
+
+        var ticks = editor.BuildRulerTicks(double.MaxValue);
+
+        Xunit.Assert.InRange(ticks.Count, 1, 4096);
+    }
+
+    [Xunit.Fact]
     public void TimelineEditorSupportsCopyPasteSplitTrimRippleDeleteAndOverlapProtection()
     {
         var mediaId = MediaId.Parse(new string('d', 64));

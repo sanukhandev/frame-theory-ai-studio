@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline ruler bound checkpoint (2026-10-19):** Ruler generation now clamps extreme viewport math and caps tick materialization at 4096 entries, preventing pathological zoom/viewport requests from overflowing or allocating unbounded UI state; focused timeline coverage passes. Native HiDPI acceptance remains open.
+
 **Timeline numeric-boundary checkpoint (2026-10-19):** Timeline scroll deltas now clamp instead of wrapping, and snap-distance ordering uses `Int128` so extreme frame positions cannot overflow; focused timeline coverage passes. Native transport acceptance remains open.
 
 **Timeline caption bounds checkpoint (2026-10-19):** Caption range validation now uses checked frame arithmetic, preventing large frame inputs from wrapping into an apparently valid range; focused timeline coverage passes. Native caption acceptance remains open.

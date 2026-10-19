@@ -59,6 +59,7 @@ public enum BeatDetectionMode
 public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 {
     private const int AudioSampleRate = 48000;
+    private const int MaximumRulerTicks = 4096;
     private readonly RationalFrameRate _projectFrameRate;
     private readonly List<TimelineClip> _videoClips = [];
     private readonly List<TimelineClip> _audioClips = [];
@@ -1497,8 +1498,13 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         }
 
         var interval = Math.Max(1, (long)Math.Ceiling(100 * FramesPerPixel));
-        var end = Math.Min(TotalFrames, ScrollFrame + (long)Math.Ceiling(viewportPixels * FramesPerPixel));
-        return Enumerable.Range(0, checked((int)Math.Max(0, (end - ScrollFrame + interval - 1) / interval)))
+        var visibleFrameCount = viewportPixels > long.MaxValue / FramesPerPixel
+            ? long.MaxValue
+            : (long)Math.Ceiling(viewportPixels * FramesPerPixel);
+        var end = Math.Min(TotalFrames, AddClamped(ScrollFrame, visibleFrameCount));
+        var span = Math.Max(0, end - ScrollFrame);
+        var tickCount = span / interval + (span % interval == 0 ? 0 : 1);
+        return Enumerable.Range(0, (int)Math.Min(MaximumRulerTicks, tickCount))
             .Select(index => ScrollFrame + index * interval)
             .Select(frame => new TimelineRulerTick(frame, _projectFrameRate.TimeAtFrame(frame)))
             .ToArray();
