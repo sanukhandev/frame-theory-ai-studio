@@ -523,7 +523,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         try
         {
-            TimelineEditor.ApplyRoughCut(LastRoughCutPlan);
+            TimelineEditor.ExecuteUndoable(() => TimelineEditor.ApplyRoughCut(LastRoughCutPlan));
             RoughCutStatusText = "Applied the reviewed rough cut as one undoable timeline change.";
             return true;
         }
@@ -686,11 +686,17 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     public bool UndoCurrentEdit() => SelectedWorkspace.Name switch
     {
         "Photo" => PhotoEditor?.Undo() == true,
-        "Video" or "AI" => UndoLastAiEdit(),
+        "Video" => TimelineEditor.Undo() || UndoLastAiEdit(),
+        "AI" => UndoLastAiEdit(),
         _ => false
     };
 
-    public bool RedoCurrentEdit() => SelectedWorkspace.Name == "Photo" && PhotoEditor?.Redo() == true;
+    public bool RedoCurrentEdit() => SelectedWorkspace.Name switch
+    {
+        "Photo" => PhotoEditor?.Redo() == true,
+        "Video" => TimelineEditor.Redo(),
+        _ => false
+    };
 
     public int SelectedWorkspaceIndex
     {
@@ -1693,7 +1699,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             var content = await File.ReadAllTextAsync(fullPath, cancellationToken);
-            TimelineEditor.ImportCaptions(content);
+            TimelineEditor.ExecuteUndoable(() => TimelineEditor.ImportCaptions(content));
             CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} caption cue(s).";
             return true;
         }
@@ -1742,7 +1748,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             {
                 progressActive = false;
             }
-            TimelineEditor.ImportTranscript(result);
+            TimelineEditor.ExecuteUndoable(() => TimelineEditor.ImportTranscript(result));
             CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} verified transcript caption cue(s) from {Path.GetFileName(fullTranscriptPath)}.";
             return true;
         }
@@ -1794,7 +1800,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             {
                 progressActive = false;
             }
-            TimelineEditor.ImportTranscript(result);
+            TimelineEditor.ExecuteUndoable(() => TimelineEditor.ImportTranscript(result));
             CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} verified local Whisper caption cue(s).";
             return true;
         }
@@ -1900,10 +1906,10 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
                 throw new InvalidDataException("The selected media changed while transcription was in progress.");
             }
 
-            TimelineEditor.ImportTranscript(new TranscriptResult(
+            TimelineEditor.ExecuteUndoable(() => TimelineEditor.ImportTranscript(new TranscriptResult(
                 originalSource,
                 originalFingerprint,
-                result.Words));
+                result.Words)));
             CaptionStatusText = $"Imported {TimelineEditor.Captions.Count} verified transcript caption cue(s) from {Path.GetFileName(fullPath)}.";
             return true;
         }

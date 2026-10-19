@@ -89,6 +89,8 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     private BeatDetectionMode _beatDetectionMode;
     private bool _kineticCaptions;
     private readonly Stack<TimelineEditorState> _aiUndo = [];
+    private readonly Stack<TimelineEditorState> _editUndo = [];
+    private readonly Stack<TimelineEditorState> _editRedo = [];
     private TimelineWatermark? _watermark;
 
     public TimelineEditorViewModel(RationalFrameRate? projectFrameRate = null)
@@ -204,6 +206,10 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
     public TimelineWatermark? Watermark => _watermark;
 
     public bool CanUndoAiEdit => _aiUndo.Count > 0;
+
+    public bool CanUndo => _editUndo.Count > 0;
+
+    public bool CanRedo => _editRedo.Count > 0;
 
     public string WatermarkStatusText => _watermark is null
         ? "No watermark selected; approved brand assets are opt-in."
@@ -635,7 +641,11 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         SnapEnabled = state.SnapEnabled;
         SetZoom(state.FramesPerPixel);
         _aiUndo.Clear();
+        _editUndo.Clear();
+        _editRedo.Clear();
         OnPropertyChanged(nameof(CanUndoAiEdit));
+        OnPropertyChanged(nameof(CanUndo));
+        OnPropertyChanged(nameof(CanRedo));
         Refresh();
         _scrollFrame = Math.Clamp(state.ScrollFrame, 0, Math.Max(0, TotalFrames - 1));
         SeekFrame(state.CurrentFrame);
@@ -982,6 +992,25 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     internal void RestoreAiStateForAi(TimelineEditorState state) => RestoreAiState(state);
 
+    public void ExecuteUndoable(Action action)
+    {
+        ArgumentNullException.ThrowIfNull(action);
+        var before = CaptureAiState();
+        try
+        {
+            action();
+            _editUndo.Push(before);
+            _editRedo.Clear();
+            OnPropertyChanged(nameof(CanUndo));
+            OnPropertyChanged(nameof(CanRedo));
+        }
+        catch
+        {
+            RestoreAiState(before);
+            throw;
+        }
+    }
+
     private void RestoreAiState(TimelineEditorState state)
     {
         _videoClips.Clear();
@@ -1066,6 +1095,38 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
         RestoreAiState(_aiUndo.Pop());
         OnPropertyChanged(nameof(CanUndoAiEdit));
+        return true;
+    }
+
+    public bool Undo()
+    {
+        if (_editUndo.Count == 0)
+        {
+            return false;
+        }
+
+        var beforeUndo = CaptureAiState();
+        var target = _editUndo.Pop();
+        RestoreAiState(target);
+        _editRedo.Push(beforeUndo);
+        OnPropertyChanged(nameof(CanUndo));
+        OnPropertyChanged(nameof(CanRedo));
+        return true;
+    }
+
+    public bool Redo()
+    {
+        if (_editRedo.Count == 0)
+        {
+            return false;
+        }
+
+        var beforeRedo = CaptureAiState();
+        var target = _editRedo.Pop();
+        RestoreAiState(target);
+        _editUndo.Push(beforeRedo);
+        OnPropertyChanged(nameof(CanUndo));
+        OnPropertyChanged(nameof(CanRedo));
         return true;
     }
 

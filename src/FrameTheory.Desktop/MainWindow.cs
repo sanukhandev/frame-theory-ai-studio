@@ -3569,7 +3569,7 @@ public sealed class MainWindow : Window
         {
             try
             {
-                action();
+                timeline.ExecuteUndoable(action);
                 operationStatus.Text = string.Empty;
             }
             catch (ArgumentException exception)
@@ -3581,6 +3581,35 @@ public sealed class MainWindow : Window
                 operationStatus.Text = exception.Message;
             }
         }
+
+        var undoTimeline = new Button { Content = "Undo" };
+        AutomationProperties.SetName(undoTimeline, "Undo timeline edit");
+        ToolTip.SetTip(undoTimeline, "Undo the latest manual timeline edit without changing source media.");
+        undoTimeline.Click += (_, _) =>
+        {
+            operationStatus.Text = timeline.Undo() ? "Undid the last timeline edit." : "Nothing to undo.";
+        };
+        var redoTimeline = new Button { Content = "Redo" };
+        AutomationProperties.SetName(redoTimeline, "Redo timeline edit");
+        ToolTip.SetTip(redoTimeline, "Redo the latest manual timeline edit that was undone.");
+        redoTimeline.Click += (_, _) =>
+        {
+            operationStatus.Text = timeline.Redo() ? "Redid the timeline edit." : "Nothing to redo.";
+        };
+        void RefreshTimelineHistoryCommands()
+        {
+            undoTimeline.IsEnabled = timeline.CanUndo;
+            redoTimeline.IsEnabled = timeline.CanRedo;
+        }
+
+        timeline.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(TimelineEditorViewModel.CanUndo) or nameof(TimelineEditorViewModel.CanRedo))
+            {
+                RefreshTimelineHistoryCommands();
+            }
+        };
+        RefreshTimelineHistoryCommands();
 
         TimelineClipboard? clipboard = null;
         var copy = new Button { Content = "Copy" };
@@ -4267,7 +4296,7 @@ public sealed class MainWindow : Window
         var clearWatermark = new Button { Content = "Clear watermark" };
         AutomationProperties.SetName(clearWatermark, "Clear watermark");
         ToolTip.SetTip(clearWatermark, "Remove the watermark from the current timeline export settings.");
-        clearWatermark.Click += (_, _) => timeline.ClearWatermark();
+        clearWatermark.Click += (_, _) => RunTimelineAction(timeline.ClearWatermark);
         var scrollBack = new Button { Content = "Scroll ◀" };
         AutomationProperties.SetName(scrollBack, "Scroll timeline backward");
         ToolTip.SetTip(scrollBack, "Scroll the timeline viewport backward by 30 frames.");
@@ -4287,6 +4316,7 @@ public sealed class MainWindow : Window
             "Clip editing",
             CreateSectionContent(
                 CreateFlow(back, forward, select, selectAudio, scrollBack, scrollForward),
+                CreateFlow(undoTimeline, redoTimeline),
                 CreateFlow(copy, paste, split, trim, move, rippleDelete),
                 operationStatus),
             expanded: true);

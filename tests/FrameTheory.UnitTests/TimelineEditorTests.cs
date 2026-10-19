@@ -93,6 +93,44 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void TimelineManualHistoryRestoresEditsAndSupportsRedo()
+    {
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(Metadata(new Uri("file:///history.mp4"), "history", 90, hasAudio: false));
+        editor.SelectAt(0, "Video 1");
+
+        editor.ExecuteUndoable(() => editor.SplitSelectedAt(30));
+
+        Xunit.Assert.True(editor.CanUndo);
+        Xunit.Assert.False(editor.CanRedo);
+        Xunit.Assert.Equal(2, editor.TrackRows.Single().Clips.Count);
+        Xunit.Assert.True(editor.Undo());
+        Xunit.Assert.Single(editor.TrackRows.Single().Clips);
+        Xunit.Assert.False(editor.CanUndo);
+        Xunit.Assert.True(editor.CanRedo);
+        Xunit.Assert.True(editor.Redo());
+        Xunit.Assert.Equal(2, editor.TrackRows.Single().Clips.Count);
+    }
+
+    [Xunit.Fact]
+    public void FailedTimelineManualEditRollsBackWithoutCreatingHistory()
+    {
+        var editor = new TimelineEditorViewModel();
+        editor.AddMedia(Metadata(new Uri("file:///history-failure.mp4"), "history-failure", 90, hasAudio: false));
+        editor.SelectAt(0, "Video 1");
+
+        Xunit.Assert.Throws<InvalidOperationException>(() => editor.ExecuteUndoable(() =>
+        {
+            editor.SplitSelectedAt(30);
+            throw new InvalidOperationException("synthetic edit failure");
+        }));
+
+        Xunit.Assert.Single(editor.TrackRows.Single().Clips);
+        Xunit.Assert.False(editor.CanUndo);
+        Xunit.Assert.False(editor.CanRedo);
+    }
+
+    [Xunit.Fact]
     public void TimelineEditorAppliesEditableRoughCutAndUndoKeepsAudioAndMarkersSynchronized()
     {
         var first = Metadata(new Uri("file:///rough-a.mp4"), "rough-a", 30);

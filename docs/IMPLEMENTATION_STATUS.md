@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline undo/redo checkpoint (2026-10-19):** Video workspace edits now run through the existing full timeline snapshot transaction boundary, with visible Undo/Redo controls, `Ctrl+Z`/`Ctrl+Y` routing, rollback on failed operations, and history coverage for rough cuts, captions, watermark changes and inspector actions. Timeline-focused coverage passes 20 tests and Foundation UI coverage passes 27 tests; native manual acceptance remains open.
+
 **Timeline transport shortcut checkpoint (2026-10-19):** Video workspace Space-key handling now starts or stops the existing local timeline preview path, while text inputs remain protected; the shell advertises the shortcut beside existing workspace and undo keys. Focused Foundation coverage passes 27 tests; native keyboard and HiDPI acceptance remains open.
 
 **Workspace-state resilience checkpoint (2026-10-19):** A local workspace-state write failure no longer interrupts workspace navigation; the failure is recorded through diagnostics while the selected workspace and active status continue to update. Focused Foundation coverage passes 26 tests; native UX acceptance remains open.

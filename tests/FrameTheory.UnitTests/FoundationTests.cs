@@ -1287,6 +1287,8 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Apply the reviewed waveform rough cut as editable timeline operations.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Apply reviewed rough cut")));
+                Xunit.Assert.False(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Undo timeline edit").IsEnabled);
+                Xunit.Assert.False(window.GetVisualDescendants().OfType<Button>().Single(control => AutomationProperties.GetName(control) == "Redo timeline edit").IsEnabled);
 
                 tabs.SelectedIndex = 1;
                 Dispatcher.UIThread.RunJobs();
@@ -1379,6 +1381,8 @@ public sealed class FoundationTests
                     "Media bin empty state",
                     "Active workspace status",
                     "Timeline preview status",
+                    "Undo timeline edit",
+                    "Redo timeline edit",
                     "Timeline program monitor",
                     "Timeline monitor controls",
                     "Timeline navigation controls",
