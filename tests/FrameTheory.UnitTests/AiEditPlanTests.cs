@@ -9,6 +9,9 @@ public sealed class AiEditPlanTests
     public void EditPlansRejectNullActions()
     {
         Xunit.Assert.Throws<ArgumentException>(() => new AiEditPlan("1.0", "plan-1", "project-1", "test", [null!]));
+        Xunit.Assert.Throws<ArgumentException>(() => new AiEditAction(" ", "clip.split", "clip-1", 0, 1, new Dictionary<string, JsonElement>()));
+        Xunit.Assert.Throws<ArgumentException>(() => new AiEditAction("action-1", " ", "clip-1", 0, 1, new Dictionary<string, JsonElement>()));
+        Xunit.Assert.Throws<ArgumentException>(() => new AiEditAction("action-1", "clip.split", " ", 0, 1, new Dictionary<string, JsonElement>()));
         Xunit.Assert.Throws<ArgumentException>(() => new AiOperationDescriptor("type", "target", "description", [null!]));
     }
 

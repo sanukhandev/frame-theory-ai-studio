@@ -16,6 +16,9 @@ public sealed record AiEditAction
         long durationFrames,
         IReadOnlyDictionary<string, JsonElement> parameters)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(type);
+        ArgumentException.ThrowIfNullOrWhiteSpace(targetId);
         ArgumentNullException.ThrowIfNull(parameters);
         Id = id;
         Type = type;
