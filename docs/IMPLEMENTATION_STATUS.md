@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Visual metadata dimension checkpoint (2026-10-19):** Image and video metadata now require positive dimensions while audio metadata may remain dimensionless; focused domain coverage and the full local gate pass. Native media-probe acceptance remains open.
+
 **Media identity boundary checkpoint (2026-10-19):** Media references and source metadata now reject the default empty `MediaId` value, preventing invalid identity records from entering project persistence or timeline state; focused repository/domain coverage passes. Native relink acceptance remains open.
 
 **Timeline domain collection checkpoint (2026-10-19):** Timeline tracks, graphs and speed ramps now reject null entries before ordering or dereferencing; focused domain validation coverage passes. Native timeline persistence acceptance remains open.

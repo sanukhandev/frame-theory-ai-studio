@@ -187,6 +187,11 @@ public sealed record MediaSourceMetadata
             throw new ArgumentOutOfRangeException(nameof(height), "Media dimensions cannot be negative.");
         }
 
+        if (kind is MediaKind.Image or MediaKind.Video && (width == 0 || height == 0))
+        {
+            throw new ArgumentOutOfRangeException(nameof(width), "Visual media dimensions must be positive.");
+        }
+
         if (durationFrames < 0)
         {
             throw new ArgumentOutOfRangeException(nameof(durationFrames));
