@@ -1694,6 +1694,22 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public void WorkspaceStateWriteFailureDoesNotInterruptNavigation()
+    {
+        var diagnostics = new RecordingDiagnostics();
+        var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
+            new FrameTheory.Desktop.WorkspaceCatalog(),
+            new TestCapabilityDetector(),
+            diagnosticsLog: diagnostics,
+            workspaceStateStore: new ThrowingWorkspaceStateStore());
+
+        viewModel.SelectedWorkspaceIndex = 2;
+
+        Xunit.Assert.Equal("Color", viewModel.SelectedWorkspace.Name);
+        Xunit.Assert.Equal("workspace-state-save-failed", diagnostics.EventName);
+    }
+
+    [Xunit.Fact]
     public async Task FileWorkspaceStateStoreRoundTripsAtomically()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-workspace-state-");
@@ -1935,6 +1951,13 @@ public sealed class FoundationTests
         public int LoadSelectedWorkspaceIndex() => _selectedWorkspaceIndex;
 
         public void SaveSelectedWorkspaceIndex(int index) => _selectedWorkspaceIndex = index;
+    }
+
+    private sealed class ThrowingWorkspaceStateStore : FrameTheory.Desktop.IWorkspaceStateStore
+    {
+        public int LoadSelectedWorkspaceIndex() => 0;
+
+        public void SaveSelectedWorkspaceIndex(int index) => throw new IOException("synthetic workspace state failure");
     }
 
     private sealed class ThrowingCapabilityDetector : ICapabilityDetector

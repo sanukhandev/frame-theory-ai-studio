@@ -702,7 +702,15 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             _selectedWorkspaceIndex = value;
-            _workspaceStateStore.SaveSelectedWorkspaceIndex(value);
+            try
+            {
+                _workspaceStateStore.SaveSelectedWorkspaceIndex(value);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException)
+            {
+                _diagnosticsLog.Record("workspace-state-save-failed", exception);
+            }
+
             OnPropertyChanged();
             OnPropertyChanged(nameof(SelectedWorkspace));
             OnPropertyChanged(nameof(ActiveWorkspaceStatusText));

@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Current FT-901 workspace-state increment: an inaccessible local workspace-state destination is now diagnostic-only, so changing workspaces remains available and persisted selection state is not allowed to crash the shell; focused Foundation coverage passes 26 tests. Native visual, HiDPI and screen-reader acceptance remain open.
+
 - Current AI-recipe increment: inaccessible local recipe destinations are reported without escaping the AI workspace; focused recipe coverage remains green. Native recipe and release acceptance remain open.
 
 - Current caption-permission increment: caption and transcription access failures remain ordinary status results with no mutation; focused transcription coverage remains green. Native caption and live-provider acceptance remain open.

@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Workspace-state resilience checkpoint (2026-10-19):** A local workspace-state write failure no longer interrupts workspace navigation; the failure is recorded through diagnostics while the selected workspace and active status continue to update. Focused Foundation coverage passes 26 tests; native UX acceptance remains open.
+
 **AI-recipe permission checkpoint (2026-10-19):** AI recipe save/load now report permission-denied paths through the AI workspace status boundary instead of escaping local recipe commands. Focused revision/recipe coverage passes.
 
 **Caption-permission checkpoint (2026-10-19):** Caption import, verified transcript import, local Whisper and optional Gemini transcription now report permission failures through the Caption workspace status boundary. Focused transcription coverage passes; no caption mutation occurs on failure.
