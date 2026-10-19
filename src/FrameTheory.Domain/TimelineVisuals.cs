@@ -20,11 +20,6 @@ public sealed record TimelineVideoTransform
             throw new ArgumentOutOfRangeException(nameof(scale));
         }
 
-        if (offsetX < 0 || offsetY < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(offsetX));
-        }
-
         Opacity = opacity;
         Scale = scale;
         OffsetX = offsetX;

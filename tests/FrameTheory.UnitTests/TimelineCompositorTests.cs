@@ -32,6 +32,8 @@ public sealed class TimelineCompositorTests
                 new TimelineVideoSegment(second, transition: TimelineTransitionKind.CrossDissolve, transitionDurationFrames: 5)
             ]);
         Xunit.Assert.Equal(2, layer.Segments.Count);
+        var translated = new TimelineVideoTransform(offsetX: -2, offsetY: -3);
+        Xunit.Assert.Equal((-2, -3), (translated.OffsetX, translated.OffsetY));
         Xunit.Assert.Throws<ArgumentException>(() => new TimelineVideoLayer("video-1", 0, [null!]));
     }
 
