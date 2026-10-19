@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Color-preset save checkpoint (2026-10-19):** Color-preset serialization now enforces the 5 MB UTF-8 bound before creating a temporary file and cleans up interrupted writes without masking the original error; focused preset persistence coverage passes. Native preset workflow acceptance remains open.
+
 **AI-recipe save checkpoint (2026-10-19):** AI recipe serialization now enforces the 1 MB UTF-8 bound before creating a temporary file, preventing saves that cannot be reopened; focused recipe persistence coverage passes. Native AI recipe acceptance remains open.
 
 **Photo-state save checkpoint (2026-10-19):** Photo edit-state serialization now applies the same 1 MB UTF-8 bound as deserialization, preventing saves that cannot be reopened; focused photo persistence coverage passes. Native photo save/reopen acceptance remains open.
