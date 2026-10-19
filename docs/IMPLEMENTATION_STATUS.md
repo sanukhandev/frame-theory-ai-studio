@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline caption-history checkpoint (2026-10-19):** Manual undo/redo snapshots now preserve the persisted `KineticCaptions` setting when caption or transcript imports toggle it; a regression confirms undo restores both caption data and the setting. Timeline-focused coverage remains green; native caption acceptance remains open.
+
 **Native manifest generation checkpoint (2026-10-19):** Manifest generation now rejects blank or path-bearing FFmpeg/ffprobe names before resolving them, matching verifier containment rules. Local valid generation and invalid-path rejection pass; FT-1003 legal/license, CVE, codec and redistribution approval remains open.
 
 **Native manifest path checkpoint (2026-10-19):** Native-media manifest verification now requires `ffmpeg` and `ffprobe` names to match exact staged-file records, preventing a manifest path from resolving outside the bundle; Windows hosted validation adds a traversal regression beside version-tampering coverage. FT-1003 remains open for legal/license, CVE, codec and redistribution approval.

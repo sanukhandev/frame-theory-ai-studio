@@ -143,6 +143,21 @@ public sealed class TimelineEditorTests
     }
 
     [Xunit.Fact]
+    public void TimelineCaptionUndoRestoresKineticCaptionSetting()
+    {
+        var editor = new TimelineEditorViewModel
+        {
+            KineticCaptions = true
+        };
+
+        editor.ExecuteUndoable(() => editor.ImportCaptions("1\n00:00:00,000 --> 00:00:00,500\nNew words\n"));
+
+        Xunit.Assert.False(editor.KineticCaptions);
+        Xunit.Assert.True(editor.Undo());
+        Xunit.Assert.True(editor.KineticCaptions);
+    }
+
+    [Xunit.Fact]
     public void TimelineEditorAppliesEditableRoughCutAndUndoKeepsAudioAndMarkersSynchronized()
     {
         var first = Metadata(new Uri("file:///rough-a.mp4"), "rough-a", 30);

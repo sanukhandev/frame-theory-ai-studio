@@ -973,6 +973,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _watermark,
         _titles.ToArray(),
         _captions.ToArray(),
+        _kineticCaptions,
         _transcriptSourceFingerprint,
         _captionFontPath,
         _mediaIds.ToHashSet(),
@@ -1065,6 +1066,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         _titles.Clear();
         _titles.AddRange(state.Titles);
         _captions = Array.AsReadOnly(state.Captions.ToArray());
+        _kineticCaptions = state.KineticCaptions;
         _transcriptSourceFingerprint = state.TranscriptSourceFingerprint;
         _captionFontPath = state.CaptionFontPath;
         _mediaIds.Clear();
@@ -1081,6 +1083,7 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(Watermark));
         OnPropertyChanged(nameof(WatermarkStatusText));
         OnPropertyChanged(nameof(Captions));
+        OnPropertyChanged(nameof(KineticCaptions));
         OnPropertyChanged(nameof(TranscriptSourceFingerprint));
         OnPropertyChanged(nameof(BeatMarkers));
         OnPropertyChanged(nameof(BeatMarkersText));
@@ -1791,6 +1794,7 @@ internal sealed record TimelineEditorState(
     TimelineWatermark? Watermark,
     IReadOnlyList<TimelineTitle> Titles,
     IReadOnlyList<TimedCaption> Captions,
+    bool KineticCaptions,
     string? TranscriptSourceFingerprint,
     string? CaptionFontPath,
     IReadOnlySet<MediaId> MediaIds,
