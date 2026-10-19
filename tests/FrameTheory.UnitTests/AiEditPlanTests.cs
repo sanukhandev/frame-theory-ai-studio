@@ -132,6 +132,26 @@ public sealed class AiEditPlanTests
     }
 
     [Xunit.Fact]
+    public void ValidatorRejectsConstructedActionsOutsidePositiveFrameRanges()
+    {
+        var action = new AiEditAction(
+            "invalid-range",
+            "clip.split",
+            "clip-1",
+            -1,
+            0,
+            new Dictionary<string, JsonElement>());
+        var plan = new AiEditPlan("1.0", "plan-1", "project-1", "split", [action]);
+
+        var result = AiEditPlanValidator.Validate(
+            plan,
+            new AiPlanValidationContext("project-1", new HashSet<string>(["clip-1"]), 30));
+
+        Xunit.Assert.False(result.IsValid);
+        Xunit.Assert.Contains(result.Errors, error => error.Contains("frame range", StringComparison.Ordinal));
+    }
+
+    [Xunit.Fact]
     public void ValidationContextSnapshotsTargetIds()
     {
         var targetIds = new HashSet<string>(["clip-1"], StringComparer.Ordinal);

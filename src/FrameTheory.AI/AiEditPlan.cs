@@ -339,7 +339,9 @@ public static class AiEditPlanValidator
                 errors.Add($"Action '{action.Id}' targets an unknown object.");
             }
 
-            if (action.StartFrame > context.ProjectDurationFrames || action.DurationFrames > context.ProjectDurationFrames - action.StartFrame)
+            if (action.StartFrame < 0 || action.DurationFrames <= 0 ||
+                action.StartFrame > context.ProjectDurationFrames ||
+                action.DurationFrames > context.ProjectDurationFrames - action.StartFrame)
             {
                 errors.Add($"Action '{action.Id}' exceeds the project frame range.");
             }

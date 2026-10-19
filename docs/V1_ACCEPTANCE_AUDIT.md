@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Current AI validation increment: in-memory actions with negative starts or non-positive durations are rejected by the same range gate as parsed plans; focused validator coverage remains green. Gemini execution and six tracked P0 gates remain partial.
+
 - Current ruler increment: extreme viewport math is clamped and tick materialization is bounded at 4096 entries; focused timeline coverage remains green. Native HiDPI acceptance remains open.
 
 - Current timeline numeric increment: extreme scroll deltas clamp without wrapping and snap distances use `Int128`; focused timeline coverage remains green. Native transport acceptance remains open.
