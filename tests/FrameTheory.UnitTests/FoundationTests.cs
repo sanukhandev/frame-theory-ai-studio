@@ -1861,6 +1861,23 @@ public sealed class FoundationTests
     }
 
     [Xunit.Fact]
+    public async Task FileWorkspaceStateStoreRejectsOversizedStateFiles()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-workspace-size-");
+        try
+        {
+            var path = Path.Combine(directory.FullName, "state.json");
+            await File.WriteAllTextAsync(path, new string(' ', 1025));
+
+            Xunit.Assert.Equal(0, new FrameTheory.Desktop.FileWorkspaceStateStore(path).LoadSelectedWorkspaceIndex());
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public void CapabilitySummaryProvidesActionableMediaDependencyGuidance()
     {
         var report = new CapabilityReport("Test", "x64",

@@ -12,6 +12,7 @@ public interface IWorkspaceStateStore
 
 public sealed class FileWorkspaceStateStore : IWorkspaceStateStore
 {
+    private const long MaximumStateBytes = 1024;
     private readonly string _path;
 
     public FileWorkspaceStateStore(string? path = null)
@@ -32,6 +33,11 @@ public sealed class FileWorkspaceStateStore : IWorkspaceStateStore
             }
 
             if (!File.Exists(_path))
+            {
+                return 0;
+            }
+
+            if (new FileInfo(_path).Length > MaximumStateBytes)
             {
                 return 0;
             }
