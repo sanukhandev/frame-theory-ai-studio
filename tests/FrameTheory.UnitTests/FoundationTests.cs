@@ -262,7 +262,7 @@ public sealed class FoundationTests
                     new[] { "Video workspace", "Photo workspace", "Color workspace", "AI workspace" },
                     tabItems.Select(AutomationProperties.GetName));
                 Xunit.Assert.Equal(
-                    "Use Ctrl+1 through Ctrl+4 to switch between Video, Photo, Color and AI workspaces.",
+                    "Use Ctrl+1 through Ctrl+4 for workspaces, Space to play or stop the Video timeline, and Ctrl+Z to undo.",
                     ToolTip.GetTip(window.GetVisualDescendants().OfType<TextBlock>().Single(control => AutomationProperties.GetName(control) == "Workspace keyboard shortcuts")));
                 var activeIndicators = window.GetVisualDescendants()
                     .OfType<Border>()
@@ -1653,6 +1653,18 @@ public sealed class FoundationTests
         Xunit.Assert.Equal(0, viewModel.TimelineEditor.CurrentFrame);
         Xunit.Assert.False(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.UndoAiEdit));
         Xunit.Assert.False(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.UndoCurrentEdit));
+    }
+
+    [Xunit.Fact]
+    public void SpaceShortcutReportsMissingVideoWithoutEscaping()
+    {
+        var viewModel = new FrameTheory.Desktop.MainWindowViewModel(
+            new FrameTheory.Desktop.WorkspaceCatalog(),
+            new TestCapabilityDetector());
+
+        Xunit.Assert.True(viewModel.HandleShortcut(FrameTheory.Desktop.EditorShortcut.ToggleTimelinePreview));
+        Xunit.Assert.Contains("Import a video", viewModel.TimelinePreviewStatusText, StringComparison.Ordinal);
+        Xunit.Assert.False(viewModel.IsTimelinePreviewPlaying);
     }
 
     [Xunit.Fact]

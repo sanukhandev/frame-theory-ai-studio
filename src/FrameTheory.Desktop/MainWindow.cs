@@ -148,7 +148,7 @@ public sealed class MainWindow : Window
         });
         var shortcutHint = new TextBlock
         {
-            Text = "Ctrl+1 Video  ·  Ctrl+2 Photo  ·  Ctrl+3 Color  ·  Ctrl+4 AI",
+            Text = "Ctrl+1–4 Workspaces  ·  Space Play/stop  ·  Ctrl+Z Undo",
             FontSize = 10,
             Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(122, 130, 145)),
             TextTrimming = TextTrimming.CharacterEllipsis,
@@ -156,7 +156,7 @@ public sealed class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Center
         };
         AutomationProperties.SetName(shortcutHint, "Workspace keyboard shortcuts");
-        ToolTip.SetTip(shortcutHint, "Use Ctrl+1 through Ctrl+4 to switch between Video, Photo, Color and AI workspaces.");
+        ToolTip.SetTip(shortcutHint, "Use Ctrl+1 through Ctrl+4 for workspaces, Space to play or stop the Video timeline, and Ctrl+Z to undo.");
         var projectTitle = new TextBlock
         {
             FontSize = 12,
@@ -288,6 +288,7 @@ public sealed class MainWindow : Window
             : viewModel.SelectedWorkspaceIndex == 0
                 ? args.Key switch
                 {
+                    Key.Space => EditorShortcut.ToggleTimelinePreview,
                     Key.Left => EditorShortcut.PreviousFrame,
                     Key.Right => EditorShortcut.NextFrame,
                     _ => (EditorShortcut?)null

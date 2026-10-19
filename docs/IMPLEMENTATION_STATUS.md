@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline transport shortcut checkpoint (2026-10-19):** Video workspace Space-key handling now starts or stops the existing local timeline preview path, while text inputs remain protected; the shell advertises the shortcut beside existing workspace and undo keys. Focused Foundation coverage passes 27 tests; native keyboard and HiDPI acceptance remains open.
+
 **Workspace-state resilience checkpoint (2026-10-19):** A local workspace-state write failure no longer interrupts workspace navigation; the failure is recorded through diagnostics while the selected workspace and active status continue to update. Focused Foundation coverage passes 26 tests; native UX acceptance remains open.
 
 **AI-recipe permission checkpoint (2026-10-19):** AI recipe save/load now report permission-denied paths through the AI workspace status boundary instead of escaping local recipe commands. Focused revision/recipe coverage passes.
