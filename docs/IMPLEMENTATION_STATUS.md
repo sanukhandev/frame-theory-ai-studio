@@ -1,6 +1,8 @@
 # Implementation Status — Resume Checkpoint
 
-**Paused resume checkpoint (2026-10-19):** Work is intentionally paused at 41 local commits ahead of `origin/main`; no push was made because the configured batch threshold is exactly 50 commits. The project-save size-bound fix is committed as `e05f9d8`, and `ProjectRepositoryTests` passed 8/8 locally; the formatter was interrupted when the pause request arrived. Resume by running `dotnet format FrameTheory.sln --verify-no-changes --no-restore`, then continue the persistence-boundary audit from the next unblocked issue, keeping the six tracked P0 gates open and pushing only at exactly 50 commits.
+**Cache-index save checkpoint (2026-10-19):** Cache-index serialization now enforces the 5 MB bound before creating a temporary file, preventing index saves that cannot be reopened; focused recovery coverage passes. Native cache recovery acceptance remains open.
+
+**Paused resume checkpoint (2026-10-19):** Work is currently at 43 local commits ahead of `origin/main`; no push was made because the configured batch threshold is exactly 50 commits. The project-save fix is `e05f9d8`, the cache-index fix is `340ae8b`, `ProjectRepositoryTests` passed 8/8, `RecoveryTests` passed 15/15, and formatting passed after resume. Continue the persistence-boundary audit, keeping the six tracked P0 gates open and pushing only at exactly 50 commits.
 
 **Project-save checkpoint (2026-10-19):** Project serialization now enforces the 10 MB UTF-8 bound before creating a temporary file, preventing saves that cannot be reopened; focused project persistence coverage passes. Native project save/reopen acceptance remains open.
 
