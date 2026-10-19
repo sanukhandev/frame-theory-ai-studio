@@ -21,6 +21,25 @@ public sealed class PhotoExportTests
     }
 
     [Xunit.Fact]
+    public async Task PhotoExportRejectsBlankDestinationPath()
+    {
+        var directory = Directory.CreateTempSubdirectory("frame-theory-photo-export-path-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.png");
+            await File.WriteAllTextAsync(sourcePath, "source");
+            var exporter = new PhotoExporter(new StubProcessRunner(), new StubProbe(new Uri(sourcePath)));
+
+            await Xunit.Assert.ThrowsAsync<ArgumentException>(() => exporter.ExportAsync(
+                new PhotoEditState(Document(new Uri(sourcePath))), " ", new PhotoExportOptions(PhotoExportFormat.Png), null, CancellationToken.None));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
+    }
+
+    [Xunit.Fact]
     public async Task ExportRendersEditsVerifiesImageAndAtomicallyReplacesDestination()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-photo-export-");

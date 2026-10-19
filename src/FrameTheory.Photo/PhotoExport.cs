@@ -103,6 +103,11 @@ public sealed class PhotoExporter
     {
         ArgumentNullException.ThrowIfNull(state);
         ArgumentNullException.ThrowIfNull(options);
+        if (string.IsNullOrWhiteSpace(destinationPath))
+        {
+            throw new ArgumentException("A photo export destination is required.", nameof(destinationPath));
+        }
+
         var sourcePath = GetLocalPath(state.Source.SourceUri, "Photo source");
         EnsureNotReparsePoint(sourcePath, "Photo source");
         if (!File.Exists(sourcePath))
