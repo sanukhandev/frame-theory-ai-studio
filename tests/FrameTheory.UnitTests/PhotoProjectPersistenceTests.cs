@@ -109,6 +109,15 @@ public sealed class PhotoProjectPersistenceTests
     }
 
     [Xunit.Fact]
+    public void PhotoProjectStateBoundsEncodedUtf8Size()
+    {
+        var source = Document(new Uri("file:///photo.png"));
+        var oversized = "{" + new string('\u0800', 360_000) + "}";
+
+        Xunit.Assert.Throws<InvalidDataException>(() => PhotoProjectStateJson.Deserialize(oversized, source));
+    }
+
+    [Xunit.Fact]
     public async Task PhotoProjectOpenFailureLeavesCurrentPhotoLoaded()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-photo-project-");

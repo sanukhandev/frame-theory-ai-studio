@@ -82,7 +82,7 @@ public static class PhotoProjectStateJson
     {
         ArgumentNullException.ThrowIfNull(json);
         ArgumentNullException.ThrowIfNull(source);
-        if (json.Length > MaximumBytes)
+        if (System.Text.Encoding.UTF8.GetByteCount(json) > MaximumBytes)
         {
             throw new InvalidDataException("The photo edit state exceeds the supported size limit.");
         }
