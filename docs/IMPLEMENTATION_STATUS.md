@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline track-kind checkpoint (2026-10-19):** Timeline selection and insertion now reject undefined track kinds instead of silently treating them as audio; focused timeline coverage passes. Native timeline acceptance remains open.
+
 **AI-key accessibility checkpoint (2026-10-19):** The secure Gemini API-key textbox now exposes a stable automation name and matching secret-store tooltip in the production panel; focused headless shell coverage passes. Native screen-reader acceptance remains open.
 
 **Scope-size checkpoint (2026-10-19):** Color-scope construction now enforces the same 64M-pixel bound as analysis, preventing `PixelCount` overflow and unbounded inspector allocations; focused scope coverage passes. Native scope acceptance remains open.
