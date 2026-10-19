@@ -24,6 +24,10 @@ public sealed class TimelineEditorTests
         Xunit.Assert.Equal(2, editor.TrackRows.Count);
         Xunit.Assert.True(editor.TrackRows.Single(row => row.Id == "Video 1").Clips.First().IsSelected);
         Xunit.Assert.Contains("Selected Video clip", editor.SelectionContextText, StringComparison.Ordinal);
+        Xunit.Assert.Equal(TimelineTrackKind.Video, editor.SelectedTrackKind);
+        Xunit.Assert.True(editor.HasSelectedClip);
+        Xunit.Assert.True(editor.HasSelectedVideoClip);
+        Xunit.Assert.False(editor.HasSelectedAudioClip);
         Xunit.Assert.Equal(TimeSpan.FromSeconds(29d / 30), editor.CurrentPosition);
         Xunit.Assert.Equal("00:00:00.966 · F29", editor.CurrentTimecode);
     }

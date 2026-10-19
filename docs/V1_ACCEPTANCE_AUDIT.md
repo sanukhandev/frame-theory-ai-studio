@@ -1,5 +1,7 @@
 # V1 Acceptance Audit
 
+Machine audit checkpoint: timeline inspector actions now follow the selected track kind, disabling destructive clip controls without a selection and enabling only video or audio-compatible operations after selection. Focused UI/domain coverage passes 27 tests; native interaction and visual acceptance remain required.
+
 Machine audit checkpoint: empty Video workspaces now disable both bounded-proxy and original-source comparison controls until a real video track exists; production-shell coverage verifies the guard. Native visual acceptance remains required.
 
 Machine audit checkpoint: the Video monitor now exposes a read-only accessible pixel-source readout tied to the actual compositor/proxy/source comparison mode. Focused shell coverage passes; native visual acceptance remains required.

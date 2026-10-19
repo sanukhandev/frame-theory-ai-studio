@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Interactivity;
@@ -169,6 +170,86 @@ public sealed class DesktopImportTests
                 Xunit.Assert.Equal(
                     Avalonia.Media.Color.FromRgb(49, 67, 111),
                     Xunit.Assert.IsType<Avalonia.Media.SolidColorBrush>(mediaCard.Background).Color);
+            }
+            finally
+            {
+                window.Close();
+            }
+        }, CancellationToken.None);
+    }
+
+    [Xunit.Fact]
+    public async Task TimelineInspectorEnablesOnlyActionsForTheSelectedTrackKind()
+    {
+        using var session = HeadlessUnitTestSession.StartNew(typeof(HeadlessTestApplication));
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector());
+
+        await session.Dispatch(() =>
+        {
+            var window = new MainWindow(viewModel);
+            try
+            {
+                window.Show();
+                var clipEdit = window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Split selected timeline clip");
+                var motionSection = window.GetVisualDescendants()
+                    .OfType<Expander>()
+                    .Single(control => AutomationProperties.GetName(control) == "Motion and speed section");
+                var audioSection = window.GetVisualDescendants()
+                    .OfType<Expander>()
+                    .Single(control => AutomationProperties.GetName(control) == "Audio section");
+                motionSection.IsExpanded = true;
+                audioSection.IsExpanded = true;
+                Dispatcher.UIThread.RunJobs();
+                var videoAnimation = window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Apply fade-in animation preset");
+                var audioMute = window.GetVisualDescendants()
+                    .OfType<Button>()
+                    .Single(control => AutomationProperties.GetName(control) == "Mute selected audio");
+
+                Xunit.Assert.False(clipEdit.IsEnabled);
+                Xunit.Assert.False(videoAnimation.IsEnabled);
+                Xunit.Assert.False(audioMute.IsEnabled);
+
+                var video = new MediaSourceMetadata(
+                    MediaId.Create(new Uri("file:///inspector-video.mp4"), "inspector-video"),
+                    new Uri("file:///inspector-video.mp4"),
+                    MediaKind.Video,
+                    1920,
+                    1080,
+                    new RationalFrameRate(30, 1),
+                    30,
+                    TimeSpan.FromSeconds(1),
+                    hasAudio: false);
+                var audio = new MediaSourceMetadata(
+                    MediaId.Create(new Uri("file:///inspector-audio.wav"), "inspector-audio"),
+                    new Uri("file:///inspector-audio.wav"),
+                    MediaKind.Audio,
+                    1,
+                    1,
+                    new RationalFrameRate(30, 1),
+                    30,
+                    TimeSpan.FromSeconds(1),
+                    hasAudio: true);
+                viewModel.TimelineEditor.AddMedia(video);
+                viewModel.TimelineEditor.AddMedia(audio);
+                viewModel.TimelineEditor.SelectAt(0, "Video 1");
+                Dispatcher.UIThread.RunJobs();
+
+                Xunit.Assert.True(clipEdit.IsEnabled);
+                Xunit.Assert.True(videoAnimation.IsEnabled);
+                Xunit.Assert.False(audioMute.IsEnabled);
+
+                viewModel.TimelineEditor.SelectAt(30, "Audio 1");
+                Dispatcher.UIThread.RunJobs();
+
+                Xunit.Assert.True(clipEdit.IsEnabled);
+                Xunit.Assert.False(videoAnimation.IsEnabled);
+                Xunit.Assert.True(audioMute.IsEnabled);
             }
             finally
             {

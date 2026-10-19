@@ -229,6 +229,14 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
 
     public string? SelectedMediaId => FindSelected()?.Clip.MediaId.Value;
 
+    public TimelineTrackKind? SelectedTrackKind => FindSelected()?.Kind;
+
+    public bool HasSelectedClip => FindSelected() is not null;
+
+    public bool HasSelectedVideoClip => FindSelected()?.Kind == TimelineTrackKind.Video;
+
+    public bool HasSelectedAudioClip => FindSelected()?.Kind == TimelineTrackKind.Audio;
+
     public string RulerText => string.Join("  |  ", BuildRulerTicks(640).Select(tick => tick.ToString()));
 
     public void AddMedia(MediaSourceMetadata metadata)
@@ -1589,6 +1597,10 @@ public sealed class TimelineEditorViewModel : INotifyPropertyChanged
         OnPropertyChanged(nameof(TrackRows));
         OnPropertyChanged(nameof(SelectionContextText));
         OnPropertyChanged(nameof(SelectedMediaId));
+        OnPropertyChanged(nameof(SelectedTrackKind));
+        OnPropertyChanged(nameof(HasSelectedClip));
+        OnPropertyChanged(nameof(HasSelectedVideoClip));
+        OnPropertyChanged(nameof(HasSelectedAudioClip));
         OnPropertyChanged(nameof(RulerText));
     }
 

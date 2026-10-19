@@ -3678,6 +3678,7 @@ public sealed class MainWindow : Window
         RefreshTimelineHistoryCommands();
 
         TimelineClipboard? clipboard = null;
+        Action? refreshClipActionAvailability = null;
         var copy = new Button { Content = "Copy" };
         AutomationProperties.SetName(copy, "Copy selected timeline clip");
         ToolTip.SetTip(copy, "Copy selected timeline clip");
@@ -3685,6 +3686,7 @@ public sealed class MainWindow : Window
         {
             clipboard = timeline.CopySelected();
             operationStatus.Text = clipboard is null ? "Select a clip before copying." : "Clip copied.";
+            refreshClipActionAvailability?.Invoke();
         };
         var paste = new Button { Content = "Paste at playhead" };
         AutomationProperties.SetName(paste, "Paste timeline clip at playhead");
@@ -4363,6 +4365,44 @@ public sealed class MainWindow : Window
         AutomationProperties.SetName(clearWatermark, "Clear watermark");
         ToolTip.SetTip(clearWatermark, "Remove the watermark from the current timeline export settings.");
         clearWatermark.Click += (_, _) => RunTimelineAction(timeline.ClearWatermark);
+        void RefreshClipActionAvailability()
+        {
+            var hasSelection = timeline.HasSelectedClip;
+            var hasVideoSelection = timeline.HasSelectedVideoClip;
+            var hasAudioSelection = timeline.HasSelectedAudioClip;
+            copy.IsEnabled = hasSelection;
+            paste.IsEnabled = clipboard is not null;
+            split.IsEnabled = hasSelection;
+            trim.IsEnabled = hasSelection;
+            move.IsEnabled = hasSelection;
+            rippleDelete.IsEnabled = hasSelection;
+            fadeIn.IsEnabled = hasVideoSelection;
+            pushIn.IsEnabled = hasVideoSelection;
+            clearAnimation.IsEnabled = hasVideoSelection;
+            applySpeedRamp.IsEnabled = hasVideoSelection;
+            clearSpeedRamp.IsEnabled = hasVideoSelection;
+            applyStabilization.IsEnabled = hasVideoSelection;
+            clearStabilization.IsEnabled = hasVideoSelection;
+            muteAudio.IsEnabled = hasAudioSelection;
+            gainAudio.IsEnabled = hasAudioSelection;
+            fadeAudio.IsEnabled = hasAudioSelection;
+            duckAudio.IsEnabled = hasAudioSelection;
+            clearDucking.IsEnabled = hasAudioSelection;
+            clearAudio.IsEnabled = hasAudioSelection;
+        }
+
+        timeline.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName is nameof(TimelineEditorViewModel.HasSelectedClip)
+                or nameof(TimelineEditorViewModel.HasSelectedVideoClip)
+                or nameof(TimelineEditorViewModel.HasSelectedAudioClip)
+                or nameof(TimelineEditorViewModel.TrackRows))
+            {
+                RefreshClipActionAvailability();
+            }
+        };
+        refreshClipActionAvailability = RefreshClipActionAvailability;
+        RefreshClipActionAvailability();
         var scrollBack = new Button { Content = "Scroll ◀" };
         AutomationProperties.SetName(scrollBack, "Scroll timeline backward");
         ToolTip.SetTip(scrollBack, "Scroll the timeline viewport backward by 30 frames.");
