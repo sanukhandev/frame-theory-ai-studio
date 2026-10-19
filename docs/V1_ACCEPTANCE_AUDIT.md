@@ -1,5 +1,7 @@
 # V1 Acceptance Audit
 
+Machine audit checkpoint: Photo clear, mask, retouch and grade-mask controls now require the corresponding editable layer state; a loaded base photo alone no longer advertises unavailable layer actions. Focused photo/shell coverage passes 48 tests; the full local Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native photo interaction remains required.
+
 Machine audit checkpoint: shared Avalonia styles now give disabled buttons, primary actions, text inputs, combo boxes, sliders and checkboxes a consistent muted surface/border/foreground, preventing disabled controls from retaining an actionable accent treatment. Foundation coverage passes 33 tests; the full local Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native visual/HiDPI acceptance remains required.
 
 Machine audit checkpoint: timeline title animation actions now follow actual title presence rather than caption count, with `HasTitle` notifications across title creation, undo and project restore. Focused timeline/shell coverage passes 72 tests; the full local Release gate passes 428 unit tests, 2 golden tests, formatting, a warning-free build, repository validation and `git diff --check`. Native title interaction remains required.

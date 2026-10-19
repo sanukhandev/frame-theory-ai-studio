@@ -36,6 +36,9 @@ public sealed class PhotoEditorExportTests
             Xunit.Assert.False(editor.HasPhoto);
             await editor.OpenAsync(sourcePath, CancellationToken.None);
             Xunit.Assert.True(editor.HasPhoto);
+            Xunit.Assert.False(editor.HasOverlay);
+            Xunit.Assert.False(editor.HasRetouch);
+            Xunit.Assert.False(editor.HasAdjustmentLayer);
             var export = editor.ExportAsync(outputPath, PhotoExportFormat.Png, 95, CancellationToken.None);
             await started.Task;
             editor.RotateRight();

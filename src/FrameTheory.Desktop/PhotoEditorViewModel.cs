@@ -38,6 +38,12 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
 
     public bool HasPhoto => Current is not null;
 
+    public bool HasOverlay => Current?.CompositeLayers.Count > 0;
+
+    public bool HasRetouch => Current?.RetouchStrokes.Count > 0;
+
+    public bool HasAdjustmentLayer => Current?.Layers.Layers.Count > 0;
+
     public bool CanUndo => _history?.CanUndo == true;
 
     public bool CanRedo => _history?.CanRedo == true;
@@ -475,6 +481,9 @@ public sealed class PhotoEditorViewModel : INotifyPropertyChanged
     {
         OnPropertyChanged(nameof(Current));
         OnPropertyChanged(nameof(HasPhoto));
+        OnPropertyChanged(nameof(HasOverlay));
+        OnPropertyChanged(nameof(HasRetouch));
+        OnPropertyChanged(nameof(HasAdjustmentLayer));
         OnPropertyChanged(nameof(OriginalPreviewPpm));
         OnPropertyChanged(nameof(PreviewPpm));
         OnPropertyChanged(nameof(CanUndo));

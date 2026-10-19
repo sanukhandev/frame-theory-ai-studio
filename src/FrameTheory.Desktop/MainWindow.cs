@@ -1769,11 +1769,21 @@ public sealed class MainWindow : Window
             {
                 control.IsEnabled = hasPhoto;
             }
+
+            clearOverlays.IsEnabled = editor.HasOverlay;
+            applyMask.IsEnabled = editor.HasOverlay;
+            clearMask.IsEnabled = editor.HasOverlay;
+            clearRetouch.IsEnabled = editor.HasRetouch;
+            maskGrade.IsEnabled = editor.HasAdjustmentLayer;
+            clearGradeMask.IsEnabled = editor.HasAdjustmentLayer;
         }
         RefreshPhotoEditorCommands();
         editor.PropertyChanged += (_, args) =>
         {
-            if (args.PropertyName == nameof(PhotoEditorViewModel.HasPhoto))
+            if (args.PropertyName is nameof(PhotoEditorViewModel.HasPhoto)
+                or nameof(PhotoEditorViewModel.HasOverlay)
+                or nameof(PhotoEditorViewModel.HasRetouch)
+                or nameof(PhotoEditorViewModel.HasAdjustmentLayer))
             {
                 RefreshPhotoEditorCommands();
             }

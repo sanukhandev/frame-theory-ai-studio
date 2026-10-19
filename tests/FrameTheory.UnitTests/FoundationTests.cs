@@ -1395,7 +1395,12 @@ public sealed class FoundationTests
                     "Import photo overlay",
                     "Clear photo overlays",
                     "Apply photo clone retouch",
+                    "Mask last photo overlay",
+                    "Clear last photo overlay mask",
+                    "Clear photo clone retouch",
                     "Add photo exposure grade",
+                    "Mask last photo grade",
+                    "Clear last photo grade mask",
                     "Export photo image"
                 })
                 {
