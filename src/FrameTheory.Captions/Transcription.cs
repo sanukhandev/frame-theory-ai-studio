@@ -41,7 +41,13 @@ public sealed record TranscriptResult
         }
 
         ArgumentNullException.ThrowIfNull(words);
-        var orderedWords = words.Take(MaximumWords + 1).OrderBy(word => word.Start).ToArray();
+        var wordSnapshot = words.Take(MaximumWords + 1).ToArray();
+        if (wordSnapshot.Any(word => word is null))
+        {
+            throw new ArgumentException("Transcript words cannot contain null entries.", nameof(words));
+        }
+
+        var orderedWords = wordSnapshot.OrderBy(word => word.Start).ToArray();
         if (orderedWords.Length == 0 || orderedWords.Length > MaximumWords || orderedWords.Zip(orderedWords.Skip(1), (previous, current) => previous.End <= current.Start).Any(isValid => !isValid))
         {
             throw new ArgumentException("Transcript words must be non-empty, non-overlapping and within the supported limit.", nameof(words));

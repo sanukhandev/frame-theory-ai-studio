@@ -168,6 +168,8 @@ public sealed class TranscriptionTests
             new Uri("file:///spoken.wav"),
             "sha256:spoken",
             words));
+        Xunit.Assert.Throws<ArgumentException>(() => new TranscriptResult(
+            new Uri("file:///spoken.wav"), "sha256:spoken", [null!]));
     }
 
     [Xunit.Fact]
