@@ -2,6 +2,8 @@
 
 **Hosted release-gate checkpoint (2026-10-19):** Quality Gates run `39198275961` passed documentation/schema validation plus Windows, Linux and macOS restore/build/test, native media smoke, formatting, headless shell/UI automation, portable archives, installer/DMG/DEB validation, packaged relaunch and checksums for commit `1d2799d`. The six tracked P0 gates remain open because manual visual/HiDPI/screen-reader, legal redistribution, signing/clean-host and final-audit evidence are still required.
 
+**Timeline source-preview checkpoint (2026-10-19):** The Video monitor now exposes an accessible `Show original timeline source frame` toggle that decodes the selected source frame instead of invoking the compositor, enabling a real before/after comparison without mutating the timeline. Focused source-preview and production-shell tests pass; the complete local Release gate passes 422 unit tests, 2 golden tests and formatting. Native visual and cross-platform manual acceptance remain open.
+
 **Waveform-input checkpoint (2026-10-19):** PCM waveform extraction now rejects odd-byte output before sample decoding, preventing malformed FFmpeg output from silently producing empty peaks; focused media-import coverage passes. Native audio import acceptance remains open.
 
 **Waveform checkpoint (2026-10-19):** PCM waveform peak extraction now clamps signed 16-bit amplitudes to the `[0,1]` contract, so full-scale negative samples no longer make valid audio imports fail; focused media-import coverage passes. Native audio import acceptance remains open.

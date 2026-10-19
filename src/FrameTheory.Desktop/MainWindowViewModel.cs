@@ -140,6 +140,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
     private CancellationTokenSource? _timelinePlaybackCancellation;
     private bool _isTimelinePreviewPlaying;
     private bool _useTimelinePreviewProxy;
+    private bool _showTimelineSourcePreview;
     private readonly Queue<double> _timelineDecodeMilliseconds = [];
     private string _timelinePerformanceStatusText = "No timeline performance samples recorded.";
 
@@ -363,6 +364,21 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             _useTimelinePreviewProxy = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public bool ShowTimelineSourcePreview
+    {
+        get => _showTimelineSourcePreview;
+        set
+        {
+            if (value == _showTimelineSourcePreview)
+            {
+                return;
+            }
+
+            _showTimelineSourcePreview = value;
             OnPropertyChanged();
         }
     }
@@ -983,7 +999,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             }
 
             var timelinePreviewRenderer = _timelinePreviewRenderer;
-            var usesTimelineCompositor = timelinePreviewRenderer is not null && !UseTimelinePreviewProxy;
+            var usesTimelineCompositor = timelinePreviewRenderer is not null && !UseTimelinePreviewProxy && !ShowTimelineSourcePreview;
             TimelinePreviewStatusText = usesTimelineCompositor
                 ? $"Rendering timeline frame {TimelineEditor.CurrentFrame} with compositor..."
                 : $"Decoding frame {sourceFrame}{proxyDescription}...";
@@ -1001,7 +1017,9 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
             RecordTimelinePreviewPerformance(Stopwatch.GetElapsedTime(decodeStarted).TotalMilliseconds);
             var modeDescription = usesTimelineCompositor
                 ? " using timeline compositor"
-                : proxyDescription;
+                : ShowTimelineSourcePreview
+                    ? $" using original source frame{proxyDescription}"
+                    : proxyDescription;
             TimelinePreviewStatusText = $"Previewed frame {sourceFrame} from {Path.GetFileName(source.LocalPath)}{modeDescription}.";
             return true;
         }

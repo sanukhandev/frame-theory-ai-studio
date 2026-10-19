@@ -3023,6 +3023,13 @@ public sealed class MainWindow : Window
         });
         AutomationProperties.SetName(usePreviewProxy, "Use bounded timeline preview proxy");
         ToolTip.SetTip(usePreviewProxy, "Limit preview decoding to a bounded local proxy for responsive playback.");
+        var showSourcePreview = new CheckBox { Content = "Show original source frame" };
+        showSourcePreview.Bind(ToggleButton.IsCheckedProperty, new Binding(nameof(MainWindowViewModel.ShowTimelineSourcePreview))
+        {
+            Mode = BindingMode.TwoWay
+        });
+        AutomationProperties.SetName(showSourcePreview, "Show original timeline source frame");
+        ToolTip.SetTip(showSourcePreview, "Compare the uncomposited source frame with the rendered timeline preview without changing the project.");
         var playhead = new Slider { Minimum = 0, Maximum = Math.Max(1, timeline.TotalFrames - 1), Value = timeline.CurrentFrame };
         AutomationProperties.SetName(playhead, "Timeline playhead frame");
         ToolTip.SetTip(playhead, "Scrub to an exact timeline frame.");
@@ -4403,6 +4410,7 @@ public sealed class MainWindow : Window
                 CreateFlow(CreateLabeledField("Output framing", aspectRatio), quickSaveProject, quickExport),
                 quickActionStatus,
                 usePreviewProxy,
+                showSourcePreview,
                 analyzeMotion,
                 timelinePreviewStatus,
                 timelinePerformanceStatus,

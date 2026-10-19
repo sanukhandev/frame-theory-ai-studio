@@ -1396,6 +1396,7 @@ public sealed class FoundationTests
                     "Media bin empty state",
                     "Active workspace status",
                     "Timeline preview status",
+                    "Show original timeline source frame",
                     "Undo timeline edit",
                     "Redo timeline edit",
                     "Timeline program monitor",

@@ -707,6 +707,28 @@ public sealed class DesktopImportTests
     }
 
     [Xunit.Fact]
+    public async Task TimelineSourcePreviewUsesOriginalDecoderInsteadOfCompositor()
+    {
+        var decoder = new StubPreviewDecoder();
+        var renderer = new SuccessfulTimelinePreviewRenderer();
+        var viewModel = new MainWindowViewModel(
+            new WorkspaceCatalog(),
+            new StubCapabilityDetector(),
+            new VideoImporter(),
+            timelinePreviewDecoder: decoder,
+            timelinePreviewRenderer: renderer);
+
+        await viewModel.ImportFilesAsync(["preview-source.mp4"], CancellationToken.None);
+        viewModel.TimelineEditor.SeekFrame(4);
+        viewModel.ShowTimelineSourcePreview = true;
+
+        Xunit.Assert.True(await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None));
+        Xunit.Assert.Equal(4, decoder.FrameIndex);
+        Xunit.Assert.Equal(0, renderer.FrameIndex);
+        Xunit.Assert.Contains("original source frame", viewModel.TimelinePreviewStatusText, StringComparison.Ordinal);
+    }
+
+    [Xunit.Fact]
     public async Task TimelineCompositorArgumentFailureIsReportedWithoutEscapingTheUi()
     {
         var viewModel = new MainWindowViewModel(

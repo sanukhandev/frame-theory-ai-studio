@@ -2,6 +2,8 @@
 
 Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-19 and detected six partial P0 tasks (`FT-901`, `FT-902`, `FT-1002`, `FT-1003`, `FT-1005`, `FT-1006`) with matching blocker evidence; the audit still fails closed against any unsupported V1-complete claim.
 
+- Current FT-902 source-preview increment: the Video monitor can switch between the rendered timeline compositor and the original decoded source frame without changing editable project state; focused coverage and the full 422-unit/2-golden local Release gate pass. Manual native visual, HiDPI and cross-platform review remain required.
+
 - Hosted release-gate checkpoint: Quality Gates run `39198275961` passed documentation/schema validation plus Windows, Linux and macOS restore/build/test, native media smoke, formatting, headless shell/UI automation, portable archives, installer/DMG/DEB validation, packaged relaunch and checksums for commit `1d2799d`. The six tracked P0 gates remain open because manual visual/HiDPI/screen-reader, legal redistribution, signing/clean-host and final-audit evidence are still required.
 
 - Waveform-input checkpoint: PCM waveform extraction rejects odd-byte output before sample decoding; focused coverage passes locally. Native audio import acceptance remains open.
