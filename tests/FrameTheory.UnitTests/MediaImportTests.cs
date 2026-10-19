@@ -66,6 +66,7 @@ public sealed class MediaImportTests
             Xunit.Assert.Equal("P6", System.Text.Encoding.ASCII.GetString(imported.ThumbnailPpm!, 0, 2));
             Xunit.Assert.Equal(128, imported.WaveformPeaks.Count);
             Xunit.Assert.Contains(imported.WaveformPeaks, peak => peak > 0.9f);
+            Xunit.Assert.All(imported.WaveformPeaks, peak => Xunit.Assert.InRange(peak, 0, 1));
             Xunit.Assert.Equal(before, await File.ReadAllBytesAsync(path));
             Xunit.Assert.Empty(Directory.EnumerateFiles(Path.GetTempPath(), "frame-theory-waveform-*.pcm"));
         }

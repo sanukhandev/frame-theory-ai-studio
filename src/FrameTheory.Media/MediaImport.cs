@@ -178,7 +178,7 @@ public sealed class FfmpegMediaImporter : IMediaImporter
             for (var sampleIndex = start; sampleIndex < end; sampleIndex++)
             {
                 var sample = BinaryPrimitives.ReadInt16LittleEndian(bytes.AsSpan(checked((int)(sampleIndex * sizeof(short))), sizeof(short)));
-                peaks[peakIndex] = Math.Max(peaks[peakIndex], Math.Abs((int)sample) / (float)short.MaxValue);
+                peaks[peakIndex] = Math.Max(peaks[peakIndex], Math.Min(1f, Math.Abs((int)sample) / (float)short.MaxValue));
             }
         }
 
