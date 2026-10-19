@@ -4,6 +4,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Current FT-901/FT-902 navigation increment: Home/End seek through the Video transport path and post-snap clamping keeps the playhead inside the valid frame range; focused Foundation coverage passes 29 tests and timeline coverage passes 21 tests. Native keyboard, visual and HiDPI acceptance remain open.
 
+- Current foundation resilience increment: temporary capability-probe cleanup failures no longer replace the underlying storage result; existing detector coverage remains green. Native capability acceptance remains open.
+
 - Current FT-902 caption-history increment: manual timeline snapshots now retain the persisted `KineticCaptions` setting across caption/transcript undo, with focused regression coverage. Native caption acceptance remains open.
 
 - Current FT-1003 generator increment: native-media manifest generation rejects blank or path-bearing FFmpeg/ffprobe names before resolving them; local valid generation and invalid-path rejection pass. Legal/license, CVE, codec and redistribution approval remain open.

@@ -251,7 +251,16 @@ public sealed class SystemCapabilityDetector : ICapabilityDetector
         }
         finally
         {
-            File.Delete(path);
+            try
+            {
+                File.Delete(path);
+            }
+            catch (IOException)
+            {
+            }
+            catch (UnauthorizedAccessException)
+            {
+            }
         }
     }
 
