@@ -523,7 +523,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
         try
         {
-            TimelineEditor.ExecuteUndoable(() => TimelineEditor.ApplyRoughCut(LastRoughCutPlan));
+            TimelineEditor.ApplyRoughCut(LastRoughCutPlan);
             RoughCutStatusText = "Applied the reviewed rough cut as one undoable timeline change.";
             return true;
         }
