@@ -52,18 +52,28 @@ public sealed class TimelineCaptionTests
     [Xunit.Fact]
     public void CaptionExportRejectsMissingRenderFontInsteadOfFakingOutput()
     {
-        var mediaId = MediaId.Parse(new string('b', 64));
-        var clip = TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1));
-        var plan = new TimelineVideoRenderPlan(
-            new RationalFrameRate(30, 1),
-            16,
-            8,
-            30,
-            new Dictionary<MediaId, Uri>(),
-            [new TimelineVideoLayer("video", 0, [new TimelineVideoSegment(clip)])],
-            captions: [new TimedCaption(1, TimeSpan.Zero, TimeSpan.FromSeconds(1), "caption")]);
+        var directory = Directory.CreateTempSubdirectory("frame-theory-caption-missing-font-");
+        try
+        {
+            var sourcePath = Path.Combine(directory.FullName, "source.mp4");
+            File.WriteAllText(sourcePath, "source");
+            var mediaId = MediaId.Parse(new string('b', 64));
+            var clip = TimelineClip.Video(mediaId, 0, 30, 0, 30, new RationalFrameRate(30, 1));
+            var plan = new TimelineVideoRenderPlan(
+                new RationalFrameRate(30, 1),
+                16,
+                8,
+                30,
+                new Dictionary<MediaId, Uri> { [mediaId] = new Uri(sourcePath) },
+                [new TimelineVideoLayer("video", 0, [new TimelineVideoSegment(clip)])],
+                captions: [new TimedCaption(1, TimeSpan.Zero, TimeSpan.FromSeconds(1), "caption")]);
 
-        Xunit.Assert.Throws<MediaExportException>(() => new TimelineFilterGraphBuilder().Build(plan));
+            Xunit.Assert.Throws<MediaExportException>(() => new TimelineFilterGraphBuilder().Build(plan));
+        }
+        finally
+        {
+            directory.Delete(true);
+        }
     }
 
     [Xunit.Fact]
