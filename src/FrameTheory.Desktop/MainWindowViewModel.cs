@@ -262,6 +262,12 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
         }
     }
 
+    public string TimelinePreviewModeText => ShowTimelineSourcePreview
+        ? "Original source frame (comparison)"
+        : UseTimelinePreviewProxy
+            ? "Bounded preview proxy"
+            : "Timeline compositor";
+
     public string TimelinePerformanceStatusText
     {
         get => _timelinePerformanceStatusText;
@@ -367,6 +373,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             _useTimelinePreviewProxy = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(TimelinePreviewModeText));
             if (value && _showTimelineSourcePreview)
             {
                 _showTimelineSourcePreview = false;
@@ -387,6 +394,7 @@ public sealed class MainWindowViewModel : INotifyPropertyChanged
 
             _showTimelineSourcePreview = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(TimelinePreviewModeText));
             if (value && _useTimelinePreviewProxy)
             {
                 _useTimelinePreviewProxy = false;

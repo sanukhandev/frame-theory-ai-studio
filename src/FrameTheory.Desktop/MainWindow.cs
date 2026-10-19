@@ -3033,6 +3033,21 @@ public sealed class MainWindow : Window
         ToolTip.SetTip(showSourcePreview, "Compare the uncomposited source frame with the rendered timeline preview without changing the project.");
         showSourcePreview.IsEnabled = timeline.TrackRows.Any(row => row.Kind == TimelineTrackKind.Video);
         showSourcePreview.Click += async (_, _) => await viewModel.PreviewCurrentTimelineFrameAsync(CancellationToken.None);
+        var previewMode = new TextBox
+        {
+            IsReadOnly = true,
+            FontSize = 11,
+            Foreground = new SolidColorBrush(Avalonia.Media.Color.FromRgb(159, 166, 181)),
+            TextWrapping = TextWrapping.NoWrap,
+            Background = Brushes.Transparent,
+            BorderBrush = Brushes.Transparent,
+            BorderThickness = new Thickness(0),
+            Padding = new Thickness(0),
+            MinHeight = 0
+        };
+        AutomationProperties.SetName(previewMode, "Timeline preview mode");
+        ToolTip.SetTip(previewMode, "Pixel source used by the next local timeline preview.");
+        previewMode.Bind(TextBox.TextProperty, new Binding(nameof(MainWindowViewModel.TimelinePreviewModeText)));
         var playhead = new Slider { Minimum = 0, Maximum = Math.Max(1, timeline.TotalFrames - 1), Value = timeline.CurrentFrame };
         AutomationProperties.SetName(playhead, "Timeline playhead frame");
         ToolTip.SetTip(playhead, "Scrub to an exact timeline frame.");
@@ -4448,6 +4463,7 @@ public sealed class MainWindow : Window
                 quickActionStatus,
                 usePreviewProxy,
                 showSourcePreview,
+                previewMode,
                 analyzeMotion,
                 timelinePreviewStatus,
                 timelinePerformanceStatus,

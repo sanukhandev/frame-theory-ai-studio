@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline preview-mode readout checkpoint (2026-10-19):** The Video monitor action rail now exposes a read-only accessible mode readout for `Timeline compositor`, `Bounded preview proxy` or `Original source frame (comparison)`, bound to the actual mutually-exclusive view-model state. Focused shell coverage passes; native visual acceptance remains open.
+
 **Timeline shell-sync checkpoint (2026-10-19):** Headless production-shell coverage now clicks the real `Next timeline frame` control and verifies that the monitor decoder receives the new frame under source comparison. The UI-to-preview path is executable; native interaction acceptance remains open.
 
 **Timeline preview ordering checkpoint (2026-10-19):** Preview requests now carry a monotonic generation guard, so an older, slower decoder/compositor result cannot overwrite the newest playhead frame after rapid seeking. Deterministic out-of-order coverage passes; native seek stress acceptance remains open.

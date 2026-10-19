@@ -1,5 +1,7 @@
 # V1 Acceptance Audit
 
+Machine audit checkpoint: the Video monitor now exposes a read-only accessible pixel-source readout tied to the actual compositor/proxy/source comparison mode. Focused shell coverage passes; native visual acceptance remains required.
+
 Machine audit checkpoint: the production-shell `Next timeline frame` control is now covered end-to-end in headless Avalonia: click, seek, local decode and updated preview status. Native interaction acceptance remains required.
 
 Machine audit checkpoint: a monotonic preview-request generation now rejects stale out-of-order decoder/compositor results, preserving newest-frame monitor parity during rapid seeking. Deterministic coverage passes; native seek stress acceptance remains required.

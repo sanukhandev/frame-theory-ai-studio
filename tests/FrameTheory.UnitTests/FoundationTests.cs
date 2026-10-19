@@ -706,6 +706,14 @@ public sealed class FoundationTests
                 Xunit.Assert.Equal(
                     "Compare the uncomposited source frame with the rendered timeline preview without changing the project.",
                     ToolTip.GetTip(showSourcePreview));
+                var previewMode = window.GetVisualDescendants()
+                    .OfType<TextBox>()
+                    .Single(control => AutomationProperties.GetName(control) == "Timeline preview mode");
+                Xunit.Assert.Equal("Timeline compositor", previewMode.Text);
+                Xunit.Assert.True(previewMode.IsReadOnly);
+                Xunit.Assert.Equal(
+                    "Pixel source used by the next local timeline preview.",
+                    ToolTip.GetTip(previewMode));
                 var outputLabel = window.GetVisualDescendants()
                     .OfType<TextBlock>()
                     .Single(control => control.Text == "OUTPUT");
@@ -1403,6 +1411,7 @@ public sealed class FoundationTests
                     "Media bin empty state",
                     "Active workspace status",
                     "Timeline preview status",
+                    "Timeline preview mode",
                     "Show original timeline source frame",
                     "Undo timeline edit",
                     "Redo timeline edit",
