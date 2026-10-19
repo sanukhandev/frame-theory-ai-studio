@@ -94,6 +94,11 @@ public sealed class ProjectRecoveryService
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(snapshot);
+        if (string.IsNullOrWhiteSpace(replacementPath))
+        {
+            throw new ArgumentException("A replacement media path is required.", nameof(replacementPath));
+        }
+
         var projectDirectory = GetProjectDirectory(projectPath);
         var replacementFullPath = Path.GetFullPath(replacementPath);
         if (LocalPathSecurity.ContainsReparsePoint(replacementFullPath))
@@ -117,12 +122,26 @@ public sealed class ProjectRecoveryService
         return snapshot.WithMediaReferences(updated);
     }
 
-    public static string GetAutosavePath(string projectPath) =>
-        Path.GetFullPath(projectPath) + ".ftstudio.autosave";
+    public static string GetAutosavePath(string projectPath)
+    {
+        EnsureProjectPath(projectPath);
+        return Path.GetFullPath(projectPath) + ".ftstudio.autosave";
+    }
 
-    private static string GetProjectDirectory(string projectPath) =>
-        Path.GetDirectoryName(Path.GetFullPath(projectPath))
-        ?? throw new ArgumentException("A project directory is required.", nameof(projectPath));
+    private static string GetProjectDirectory(string projectPath)
+    {
+        EnsureProjectPath(projectPath);
+        return Path.GetDirectoryName(Path.GetFullPath(projectPath))
+            ?? throw new ArgumentException("A project directory is required.", nameof(projectPath));
+    }
+
+    private static void EnsureProjectPath(string projectPath)
+    {
+        if (string.IsNullOrWhiteSpace(projectPath))
+        {
+            throw new ArgumentException("A project path is required.", nameof(projectPath));
+        }
+    }
 
     public static string ResolveContainedPath(string projectDirectory, string relativePath)
     {

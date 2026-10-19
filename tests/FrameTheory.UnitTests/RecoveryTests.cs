@@ -28,6 +28,21 @@ public sealed class RecoveryTests
     }
 
     [Xunit.Fact]
+    public void RecoveryRejectsBlankProjectAndReplacementPaths()
+    {
+        Xunit.Assert.Throws<ArgumentException>(() => ProjectRecoveryService.GetAutosavePath(" "));
+        Xunit.Assert.Throws<ArgumentException>(() => ProjectRecoveryService.ResolveContainedPath(" ", "media/file.mov"));
+    }
+
+    [Xunit.Fact]
+    public async Task RecoveryRejectsBlankReplacementPath()
+    {
+        var snapshot = new ProjectSnapshot("project", new RationalFrameRate(30, 1), 8, 4, "sRGB");
+        await Xunit.Assert.ThrowsAsync<ArgumentException>(() => new ProjectRecoveryService(new JsonProjectRepository()).RelinkMediaAsync(
+            "project.ftstudio", snapshot, default, " ", CancellationToken.None));
+    }
+
+    [Xunit.Fact]
     public async Task AutosaveRecoveryAndRelinkDoNotChangeTheOriginalSource()
     {
         var directory = Directory.CreateTempSubdirectory("frame-theory-recovery-");
