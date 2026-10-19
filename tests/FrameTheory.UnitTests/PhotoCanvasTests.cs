@@ -36,7 +36,7 @@ public sealed class PhotoCanvasTests
             new Uri("file:///video.mp4"),
             new MediaSourceMetadata(imageId, new Uri("file:///video.mp4"), MediaKind.Video, 1, 1, new RationalFrameRate(30, 1), 1),
             [1]));
-        Xunit.Assert.Throws<ArgumentException>(() => new PhotoDocument(
+        Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new PhotoDocument(
             new Uri("file:///empty.png"),
             new MediaSourceMetadata(imageId, new Uri("file:///empty.png"), MediaKind.Image, 0, 1, null, 0),
             [1]));

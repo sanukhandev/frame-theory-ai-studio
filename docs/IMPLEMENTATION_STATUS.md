@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**50-commit release checkpoint (2026-10-19):** Full local gate passes after aligning the photo-document dimension test with the stricter visual metadata guard: Release build has 0 warnings/0 errors, 383 unit tests pass, 2 golden tests pass, `dotnet format --verify-no-changes` passes, repository validation passes, and `git diff --check` is clean. Hosted/native UI, packaging and real-media export evidence remain tracked separately; six P0 gates remain partial.
+
 **AI plan integrity checkpoint (2026-10-19):** Programmatically constructed edit plans now reject null actions before schema validation, approval or execution; focused AI-plan coverage passes. Gemini/network acceptance remains open.
 
 **Render-grade integrity checkpoint (2026-10-19):** Timeline render plans now reject null color grades and default media IDs before storing the immutable grade map; focused compositor coverage passes. Native color-export acceptance remains open.
