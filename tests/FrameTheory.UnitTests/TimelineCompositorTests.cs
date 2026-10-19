@@ -66,6 +66,14 @@ public sealed class TimelineCompositorTests
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IDictionary<MediaId, Uri>>(plan.Sources).IsReadOnly);
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineVideoLayer>>(plan.Layers).IsReadOnly);
         Xunit.Assert.True(Xunit.Assert.IsAssignableFrom<IList<TimelineVideoSegment>>(layer.Segments).IsReadOnly);
+        Xunit.Assert.Throws<ArgumentException>(() => new TimelineVideoRenderPlan(frameRate, 16, 8, 30, sources, [null!]));
+        Xunit.Assert.Throws<ArgumentException>(() => new TimelineVideoRenderPlan(
+            frameRate,
+            16,
+            8,
+            30,
+            new Dictionary<MediaId, Uri> { [default] = null! },
+            []));
     }
 
     [Xunit.Fact]

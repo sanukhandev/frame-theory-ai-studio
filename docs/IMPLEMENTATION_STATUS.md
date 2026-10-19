@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Render-plan boundary checkpoint (2026-10-19):** Timeline render plans now reject null layers and invalid media-ID/URI source entries before filter-graph construction; focused compositor coverage passes. Native export acceptance remains open.
+
 **Visual metadata dimension checkpoint (2026-10-19):** Image and video metadata now require positive dimensions while audio metadata may remain dimensionless; focused domain coverage and the full local gate pass. Native media-probe acceptance remains open.
 
 **Media identity boundary checkpoint (2026-10-19):** Media references and source metadata now reject the default empty `MediaId` value, preventing invalid identity records from entering project persistence or timeline state; focused repository/domain coverage passes. Native relink acceptance remains open.

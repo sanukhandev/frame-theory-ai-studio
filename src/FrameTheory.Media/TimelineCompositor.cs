@@ -41,15 +41,50 @@ public sealed record TimelineVideoRenderPlan
 
         ArgumentNullException.ThrowIfNull(sources);
         ArgumentNullException.ThrowIfNull(layers);
+        var sourceMap = new Dictionary<MediaId, Uri>();
+        foreach (var source in sources)
+        {
+            if (string.IsNullOrWhiteSpace(source.Key.Value) || source.Value is null)
+            {
+                throw new ArgumentException("Render-plan sources require valid media IDs and URIs.", nameof(sources));
+            }
+
+            sourceMap.Add(source.Key, source.Value);
+        }
+
+        var videoLayers = layers.ToArray();
+        if (videoLayers.Any(layer => layer is null))
+        {
+            throw new ArgumentException("Render-plan video layers cannot contain null entries.", nameof(layers));
+        }
+
+        var audioLayerArray = (audioLayers ?? []).ToArray();
+        if (audioLayerArray.Any(layer => layer is null))
+        {
+            throw new ArgumentException("Render-plan audio layers cannot contain null entries.", nameof(audioLayers));
+        }
+
+        var titleArray = (titles ?? []).ToArray();
+        if (titleArray.Any(title => title is null))
+        {
+            throw new ArgumentException("Render-plan titles cannot contain null entries.", nameof(titles));
+        }
+
+        var captionArray = (captions ?? []).ToArray();
+        if (captionArray.Any(caption => caption is null))
+        {
+            throw new ArgumentException("Render-plan captions cannot contain null entries.", nameof(captions));
+        }
+
         FrameRate = frameRate;
         Width = width;
         Height = height;
         DurationFrames = durationFrames;
-        Sources = new ReadOnlyDictionary<MediaId, Uri>(new Dictionary<MediaId, Uri>(sources));
-        Layers = Array.AsReadOnly(layers.OrderBy(layer => layer.Order).ToArray());
-        AudioLayers = Array.AsReadOnly((audioLayers ?? []).OrderBy(layer => layer.Order).ToArray());
-        Titles = Array.AsReadOnly((titles ?? []).OrderBy(title => title.Order).ToArray());
-        Captions = Array.AsReadOnly((captions ?? []).OrderBy(caption => caption.Start).ToArray());
+        Sources = new ReadOnlyDictionary<MediaId, Uri>(sourceMap);
+        Layers = Array.AsReadOnly(videoLayers.OrderBy(layer => layer.Order).ToArray());
+        AudioLayers = Array.AsReadOnly(audioLayerArray.OrderBy(layer => layer.Order).ToArray());
+        Titles = Array.AsReadOnly(titleArray.OrderBy(title => title.Order).ToArray());
+        Captions = Array.AsReadOnly(captionArray.OrderBy(caption => caption.Start).ToArray());
         CaptionStyle = captionStyle;
         ColorGrades = new ReadOnlyDictionary<MediaId, ColorGrade>(colorGrades is null
             ? new Dictionary<MediaId, ColorGrade>()
