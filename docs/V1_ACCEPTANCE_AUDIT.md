@@ -64,6 +64,8 @@ Machine audit checkpoint: `py scripts/validate_repository.py` passed on 2026-10-
 
 - Caption-word checkpoint: timed captions reject null word entries before sorting or timing validation; focused caption coverage passes locally. Native caption acceptance remains open.
 
+- Caption-export checkpoint: SRT export rejects null caption entries before ordering or serialization; focused caption coverage passes locally. Native caption acceptance remains open.
+
 - Local 50-commit release checkpoint: Release build `0` warnings/`0` errors, `383` unit tests, `2` golden tests, format verification, repository validation and diff checks pass. Hosted/native UI, packaging and real-media export evidence remain unverified here; six P0 gates remain partial.
 
 - Hosted Linux correction: case-variant export fixtures now align requested audio and image dimensions with their stub metadata; the next hosted run must reverify Linux export behavior.

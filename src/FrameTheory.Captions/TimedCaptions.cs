@@ -152,7 +152,13 @@ public static partial class SrtCaptionFile
     public static string Export(IEnumerable<TimedCaption> captions)
     {
         ArgumentNullException.ThrowIfNull(captions);
-        var ordered = captions.OrderBy(caption => caption.Start).ToArray();
+        var snapshot = captions.ToArray();
+        if (snapshot.Any(caption => caption is null))
+        {
+            throw new ArgumentException("Caption collections cannot contain null entries.", nameof(captions));
+        }
+
+        var ordered = snapshot.OrderBy(caption => caption.Start).ToArray();
         if (ordered.Length > MaximumCues)
         {
             throw new InvalidDataException("The caption collection contains too many cues.");

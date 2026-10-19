@@ -67,5 +67,6 @@ public sealed class TimedCaptionTests
             TimeSpan.FromSeconds(1),
             "caption",
             (CaptionProvenance)99));
+        Xunit.Assert.Throws<ArgumentException>(() => SrtCaptionFile.Export([null!]));
     }
 }
