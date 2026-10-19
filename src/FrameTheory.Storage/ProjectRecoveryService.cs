@@ -145,6 +145,12 @@ public sealed class ProjectRecoveryService
 
     public static string ResolveContainedPath(string projectDirectory, string relativePath)
     {
+        EnsureProjectPath(projectDirectory);
+        if (string.IsNullOrWhiteSpace(relativePath))
+        {
+            throw new ArgumentException("A relative media path is required.", nameof(relativePath));
+        }
+
         var projectRoot = Path.GetFullPath(projectDirectory).TrimEnd(Path.DirectorySeparatorChar) + Path.DirectorySeparatorChar;
         var candidate = Path.GetFullPath(Path.Combine(projectDirectory, relativePath.Replace('/', Path.DirectorySeparatorChar)));
         var comparison = OperatingSystem.IsWindows()

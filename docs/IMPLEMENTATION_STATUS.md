@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Recovery containment checkpoint (2026-10-19):** Contained recovery paths now reject blank project-directory and relative-media inputs consistently on Unix-like platforms; hosted Linux/macOS recovery-test failure is fixed locally and focused coverage is pending rerun.
+
 **AI history checkpoint (2026-10-19):** Gemini usage-history reads now cap requested entries at 1000 to keep local diagnostics memory-bounded; focused history coverage passes. Live provider acceptance remains open.
 
 **AI input checkpoint (2026-10-19):** Gemini interaction factories now reject missing text, empty inline images, and incomplete image URI metadata before request construction; focused AI coverage passes. Live provider acceptance remains open.
