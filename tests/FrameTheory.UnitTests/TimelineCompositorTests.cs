@@ -6,6 +6,13 @@ namespace FrameTheory.UnitTests;
 public sealed class TimelineCompositorTests
 {
     [Xunit.Fact]
+    public void TimelineExporterRequiresMediaServices()
+    {
+        Xunit.Assert.Throws<ArgumentNullException>(() => new FfmpegTimelineVideoExporter(null!, new StubProbe(null!)));
+        Xunit.Assert.Throws<ArgumentNullException>(() => new FfmpegTimelineVideoExporter(new StubProcessRunner(), null!));
+    }
+
+    [Xunit.Fact]
     public void VisualContractsValidateTransformsAndTransitions()
     {
         Xunit.Assert.Throws<ArgumentOutOfRangeException>(() => new TimelineVideoTransform(opacity: 2));

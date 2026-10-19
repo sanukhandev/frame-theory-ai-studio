@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Timeline exporter dependency checkpoint (2026-10-19):** Timeline video exporters now reject missing process-runner and media-probe services at construction instead of failing during export; focused compositor coverage passes. Native timeline export acceptance remains open.
+
 **Recovery input checkpoint (2026-10-19):** Missing-media discovery and relink now reject null project snapshots explicitly before path or media traversal; focused recovery coverage passes. Native recovery workflow acceptance remains open.
 
 **Cache-index integrity checkpoint (2026-10-19):** Cache-index loads now reject duplicate keys instead of silently overwriting earlier entries; focused recovery persistence coverage passes. Native cache-recovery acceptance remains open.

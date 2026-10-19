@@ -839,8 +839,8 @@ public sealed class FfmpegTimelineVideoExporter : ITimelineVideoExporter
 
     public FfmpegTimelineVideoExporter(IMediaProcessRunner processRunner, IMediaProbe probe, TimelineFilterGraphBuilder? graphBuilder = null)
     {
-        _processRunner = processRunner;
-        _probe = probe;
+        _processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
+        _probe = probe ?? throw new ArgumentNullException(nameof(probe));
         _graphBuilder = graphBuilder ?? new TimelineFilterGraphBuilder();
     }
 
