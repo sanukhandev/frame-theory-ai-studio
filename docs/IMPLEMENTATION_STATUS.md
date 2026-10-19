@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Batch export path checkpoint (2026-10-19):** Social batch-export destination uniqueness now follows platform path semantics, allowing case-variant filenames on Linux while retaining Windows case-insensitive protection; a Linux regression covers the distinction. Native batch export acceptance remains open.
+
 **Credential cancellation checkpoint (2026-10-19):** Unix credential-store process cleanup now ignores unsupported kill failures so canceled key operations preserve their cancellation result; secret names and OS-backed storage behavior remain unchanged. Existing platform-secret coverage remains green.
 
 **Process cancellation checkpoint (2026-10-19):** FFmpeg and local Whisper cancellation cleanup now ignores platform kill failures, preserving the original cancellation result instead of leaking a secondary termination exception. Existing media/caption cancellation coverage remains green; native interruption acceptance remains open.

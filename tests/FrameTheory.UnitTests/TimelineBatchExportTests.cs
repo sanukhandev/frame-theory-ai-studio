@@ -87,6 +87,28 @@ public sealed class TimelineBatchExportTests
         Xunit.Assert.Equal(new[] { "first.mp4", "second.mp4" }, exporter.Outputs.Select(Path.GetFileName));
     }
 
+    [Xunit.Fact]
+    public async Task LinuxBatchAllowsCaseVariantDestinationNames()
+    {
+        if (!OperatingSystem.IsLinux())
+        {
+            return;
+        }
+
+        var exporter = new RecordingTimelineExporter();
+        var plan = Plan(16, 9);
+        var targets = new[]
+        {
+            Target("lower", plan, "batch-case.mp4"),
+            Target("upper", plan, "BATCH-CASE.mp4")
+        };
+
+        var receipts = await new TimelineBatchExporter(exporter).ExportAsync(targets, null, CancellationToken.None);
+
+        Xunit.Assert.Equal(2, receipts.Count);
+        Xunit.Assert.Equal(new[] { "batch-case.mp4", "BATCH-CASE.mp4" }, exporter.Outputs.Select(Path.GetFileName));
+    }
+
     private static TimelineBatchExportTarget Target(string name, TimelineVideoRenderPlan plan, string path) =>
         new(name, plan, path, new ExportPreset(plan.Width, plan.Height, plan.FrameRate, includeAudio: false));
 

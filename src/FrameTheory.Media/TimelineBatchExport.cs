@@ -56,7 +56,7 @@ public sealed class TimelineBatchExporter
         }
 
         var targetSnapshot = targets.ToArray();
-        var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var paths = new HashSet<string>(OperatingSystem.IsWindows() ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);
         foreach (var target in targetSnapshot)
         {
             ArgumentNullException.ThrowIfNull(target);
