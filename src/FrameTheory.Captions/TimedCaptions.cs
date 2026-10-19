@@ -62,7 +62,13 @@ public sealed record TimedCaption
         End = end;
         Text = text.Replace("\r\n", "\n", StringComparison.Ordinal).Replace('\r', '\n');
         Provenance = provenance;
-        Words = Array.AsReadOnly((words ?? [])
+        var wordSnapshot = (words ?? []).ToArray();
+        if (wordSnapshot.Any(word => word is null))
+        {
+            throw new ArgumentException("Caption words cannot contain null entries.", nameof(words));
+        }
+
+        Words = Array.AsReadOnly(wordSnapshot
             .OrderBy(word => word.Start)
             .ToArray());
         if (Words.Any(word => word.Start < start || word.End > end) ||

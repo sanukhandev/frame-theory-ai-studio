@@ -54,6 +54,8 @@ public sealed class TimedCaptionTests
                 new TimedCaptionWord("one", TimeSpan.Zero, TimeSpan.FromMilliseconds(600)),
                 new TimedCaptionWord("two", TimeSpan.FromMilliseconds(500), TimeSpan.FromSeconds(1))
             ]));
+        Xunit.Assert.Throws<ArgumentException>(() => new TimedCaption(
+            1, TimeSpan.Zero, TimeSpan.FromSeconds(1), "caption", words: [null!]));
     }
 
     [Xunit.Fact]
