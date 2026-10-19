@@ -1,3 +1,4 @@
+using System.Globalization;
 using FrameTheory.Color;
 using FrameTheory.Domain;
 using FrameTheory.Media;
@@ -681,9 +682,9 @@ public sealed class PpmRaster
             return ParsePam(bytes);
         }
 
-        if (magic != "P6" || !int.TryParse(ReadToken(bytes, ref index), out var width) ||
-            !int.TryParse(ReadToken(bytes, ref index), out var height) ||
-            !int.TryParse(ReadToken(bytes, ref index), out var maximumValue) || maximumValue != 255)
+        if (magic != "P6" || !int.TryParse(ReadToken(bytes, ref index), NumberStyles.Integer, CultureInfo.InvariantCulture, out var width) ||
+            !int.TryParse(ReadToken(bytes, ref index), NumberStyles.Integer, CultureInfo.InvariantCulture, out var height) ||
+            !int.TryParse(ReadToken(bytes, ref index), NumberStyles.Integer, CultureInfo.InvariantCulture, out var maximumValue) || maximumValue != 255)
         {
             throw new InvalidDataException("Only 8-bit binary PPM (P6) previews are supported.");
         }
@@ -1082,12 +1083,18 @@ public sealed class PpmRaster
         ConsumeBinarySeparator(bytes, ref dataStart);
 
         var header = System.Text.Encoding.ASCII.GetString(bytes, 0, dataStart);
-        var values = header.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
-            .Select(line => line.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries))
-            .Where(parts => parts.Length == 2)
-            .ToDictionary(parts => parts[0], parts => parts[1], StringComparer.Ordinal);
-        if (!int.TryParse(values.GetValueOrDefault("WIDTH"), out var width) ||
-            !int.TryParse(values.GetValueOrDefault("HEIGHT"), out var height) ||
+        var values = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var line in header.Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries))
+        {
+            var parts = line.Split(' ', 2, StringSplitOptions.RemoveEmptyEntries);
+            if (parts.Length == 2 && !values.TryAdd(parts[0], parts[1]))
+            {
+                throw new InvalidDataException("The PAM header contains duplicate fields.");
+            }
+        }
+
+        if (!int.TryParse(values.GetValueOrDefault("WIDTH"), NumberStyles.Integer, CultureInfo.InvariantCulture, out var width) ||
+            !int.TryParse(values.GetValueOrDefault("HEIGHT"), NumberStyles.Integer, CultureInfo.InvariantCulture, out var height) ||
             values.GetValueOrDefault("DEPTH") != "4" ||
             values.GetValueOrDefault("MAXVAL") != "255" ||
             values.GetValueOrDefault("TUPLTYPE") != "RGB_ALPHA" ||

@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Photo raster parser checkpoint (2026-10-19):** PPM numeric parsing is now culture-invariant and duplicate PAM header fields fail as `InvalidDataException` instead of leaking dictionary exceptions; focused alpha/parser coverage passes. Native photo export acceptance remains open.
+
 **Media adapter dependency checkpoint (2026-10-19):** Photo import/export, FFmpeg export, and ffprobe adapters now reject missing injected services during composition; focused constructor coverage passes. Native media-engine acceptance remains open.
 
 **Photo dimension boundary checkpoint (2026-10-19):** Photo documents now reject zero-dimension image metadata before canvas fit/zoom calculations can produce invalid coordinates; focused canvas coverage passes. Native photo rendering acceptance remains open.

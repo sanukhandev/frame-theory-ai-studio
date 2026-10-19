@@ -7,6 +7,14 @@ namespace FrameTheory.UnitTests;
 public sealed class PhotoAlphaTests
 {
     [Xunit.Fact]
+    public void RasterRejectsDuplicatePamHeaderFieldsAsInvalidData()
+    {
+        var pam = "P7\nWIDTH 1\nWIDTH 1\nHEIGHT 1\nDEPTH 4\nMAXVAL 255\nTUPLTYPE RGB_ALPHA\nENDHDR\n\0\0\0\xff"u8.ToArray();
+
+        Xunit.Assert.Throws<InvalidDataException>(() => PpmRaster.Parse(pam));
+    }
+
+    [Xunit.Fact]
     public async Task PhotoImportAndTransformsPreserveAlphaForPngExport()
     {
         var sourceUri = new Uri("file:///alpha.png");
