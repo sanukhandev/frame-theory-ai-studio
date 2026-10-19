@@ -1,5 +1,7 @@
 # Implementation Status — Resume Checkpoint
 
+**Photo-resize checkpoint (2026-10-19):** Raster resizing now uses 64-bit coordinate products before division, preserving valid tall/wide images beyond 32-bit intermediate limits; focused photo coverage passes. Native large-image export acceptance remains open.
+
 **AI action-identity checkpoint (2026-10-19):** Programmatic AI actions now reject blank IDs, operation types and target IDs before semantic validation or execution; focused plan coverage passes. Gemini execution acceptance remains open.
 
 **Batch-progress checkpoint (2026-10-19):** Batch-export progress now rejects blank targets, null nested progress and impossible completed/total counts; focused batch-export coverage passes. Native queue/progress acceptance remains open.
